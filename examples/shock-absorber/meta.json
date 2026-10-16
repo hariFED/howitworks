@@ -5,11 +5,36 @@
   "object": "Monotube gas-charged automotive damper (de Carbon type) in axial section",
   "idea": "Smoothing a noisy input: the suspension as a low-pass filter",
   "summary": "A quarter car drives over a speed hump on a rough road. The oil is forced through the piston ports and bends the shim stacks, which is why the force–velocity curve is steep at low speed and flattens past the knee; the nitrogen behind the floating piston takes up the rod's volume and keeps the oil from cavitating. With the valves bypassed the body keeps bouncing, so the two passes on the body chart show what the damper filters out.",
-  "usedFor": ["Vehicle dynamics teaching: quarter-car model, damping ratio, digressive valving", "Product documentation for dampers and suspension components", "Explaining low-pass filtering and exponential smoothing with a physical object"],
+  "usedFor": [
+    "Vehicle dynamics teaching: quarter-car model, damping ratio, digressive valving",
+    "Product documentation for dampers and suspension components",
+    "Explaining low-pass filtering and exponential smoothing with a physical object"
+  ],
   "domain": "Hydraulics",
   "parts": 25,
-  "views": ["Axial section 1:2", "Detail B piston valving 5:1", "Detail C rod guide 2:1", "Section A-A piston 2:1", "F–v diagram", "Body displacement–time diagram", "Quarter-car diagram"],
+  "views": [
+    "Axial section 1:2",
+    "Detail B piston valving 5:1",
+    "Detail C rod guide 2:1",
+    "Section A-A piston 2:1",
+    "F–v diagram",
+    "Body displacement–time diagram",
+    "Quarter-car diagram"
+  ],
   "controls": "Drag the rod eye · ↑ ↓ stroke · Space drives over a hump · D damping on/off · S slow motion",
   "checkTimes": "0,0.5,0.8,1.0,1.4,2,3.5,5.8,6.2,7,9,11,12.5",
-  "shotT": 0.86
+  "shotT": 0.86,
+  "has3d": true,
+  "shot3d": {
+    "view": "iso",
+    "cut": 1,
+    "zoom": 4.2,
+    "look": [
+      0,
+      158,
+      0
+    ],
+    "t": 0.66
+  },
+  "controls3d": "Drag to orbit · drag the rod or ↑ ↓ to stroke · Space drives over a hump · D damping on/off · E explode · C cut · 1–4 views · S slow motion"
 }

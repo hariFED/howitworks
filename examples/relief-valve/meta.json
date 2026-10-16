@@ -11,5 +11,8 @@
   "views": ["Axial section 1:2", "Detail B nozzle, disc and guide 2:1", "Detail C setting and lifting gear 1:1", "Diagram 1 lift against pressure", "Diagram 2 receiver pressure against time", "Diagram 3 discharge against lift"],
   "controls": "Drag up/down for vessel pressure · ↑ ↓ pressure · ← → adjusting screw · Space compressor · S slow motion",
   "checkTimes": "0,2,4,5.1,5.4,6,8,8.3,10,13,15.3,18.5,22,27",
-  "shotT": 27
+  "shotT": 27,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1, "look": null, "t": 5.3 },
+  "controls3d": "Drag to orbit · Drag the body or ↑ ↓ for vessel pressure · ← → adjusting screw · Space compressor · E explode · C cut · 1–4 views · S slow motion"
 }

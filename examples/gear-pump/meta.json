@@ -11,5 +11,8 @@
   "views": ["Section A-A across the shafts 2:1", "Section B-B along the shafts (stepped) 1:1", "Detail C the mesh 5:1", "Detail D shaft seal 5:1", "View F shaft end 2:1", "Diagram 1 flow and ηv against pressure", "Diagram 2 pressure in one tooth space"],
   "controls": "Drag the gears · ↑↓ pressure · ←→ speed · Space pauses · S slow motion",
   "checkTimes": "0,1,2.5,4,5.5,7,8.5,10,12,14,16,18,19.5,20,21",
-  "shotT": 9
+  "shotT": 9,
+  "has3d": true,
+  "shot3d": {"view": "iso", "cut": 1, "zoom": 1.25, "look": null, "t": 9},
+  "controls3d": "Drag a gear to turn it · ↑↓ pressure · ←→ speed · Space pauses · E explodes along the shafts · C cut · S slow motion"
 }

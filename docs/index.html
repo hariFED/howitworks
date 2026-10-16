@@ -183,31 +183,31 @@ footer a{color:var(--muted)}
 <a href="https://github.com/hariFED/blueprint">Source</a>
 <a href="#install">Install</a>
 </div>
-<div class="group toc"><a href="#cut" data-toc="cut">Sections, not diagrams</a><a href="#prompt" data-toc="prompt">Writing a prompt</a><a href="#does" data-toc="does">What Claude does</a><a href="#rules" data-toc="rules">Anatomy of a sheet</a><a href="#six" data-toc="six">Six sheets, up close</a><a href="#two" data-toc="two">Two big sheets</a><a href="#uses" data-toc="uses">Where it's useful</a><a href="#themes" data-toc="themes">Three themes</a><a href="#code" data-toc="code">In your code</a><a href="#install" data-toc="install">Install</a><a href="#limits" data-toc="limits">Limits</a><a href="#faq" data-toc="faq">Questions</a></div>
+<div class="group toc"><a href="#cut" data-toc="cut">Sections, not diagrams</a><a href="#prompt" data-toc="prompt">Writing a prompt</a><a href="#does" data-toc="does">What Claude does</a><a href="#rules" data-toc="rules">Anatomy of a sheet</a><a href="#flat" data-toc="flat">Flat and solid</a><a href="#six" data-toc="six">Six sheets, up close</a><a href="#two" data-toc="two">Two big sheets</a><a href="#uses" data-toc="uses">Where it's useful</a><a href="#themes" data-toc="themes">Four themes</a><a href="#code" data-toc="code">In your code</a><a href="#install" data-toc="install">Install</a><a href="#limits" data-toc="limits">Limits</a><a href="#faq" data-toc="faq">Questions</a></div>
 </aside>
 <main class="main">
 <div class="head"><div><b>Blueprint</b> <span>· a skill for Claude Code</span></div><div class="icons"><a href="https://github.com/hariFED/blueprint" aria-label="Source on GitHub">GitHub</a></div></div>
 <p class="tag">Name a mechanism, or an idea, and Claude drafts <em class="s">the drawing</em> that explains it.</p>
-<div class="minis"><a href="sheets/four-stroke.html" title="Four-stroke engine"><img class="" src="thumbs/four-stroke.png?v=mvapmtf7" alt="125 cc air-cooled DOHC single in section through the cylinder and valve axes" width="960" height="720" loading="lazy"></a><a href="sheets/governor.html" title="Porter governor"><img class="" src="thumbs/governor.png?v=mvapmtf7" alt="Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section" width="960" height="720" loading="lazy"></a><a href="sheets/pin-tumbler.html" title="Pin tumbler cylinder"><img class="" src="thumbs/pin-tumbler.png?v=mvapmtf7" alt="Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section" width="960" height="720" loading="lazy"></a><a href="sheets/centrifugal-pump.html" title="Centrifugal pump"><img class="" src="thumbs/centrifugal-pump.png?v=mvapmtf7" alt="ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute" width="960" height="720" loading="lazy"></a><a href="sheets/carburettor.html" title="Carburettor"><img class="" src="thumbs/carburettor.png?v=mvapmtf7" alt="Fixed-jet float-bowl carburettor, 26 mm bore, in axial section" width="960" height="720" loading="lazy"></a></div>
+<div class="minis"><a href="sheets/four-stroke.html" title="Four-stroke engine"><img class="" src="thumbs/four-stroke.png?v=mvaswi6m" alt="125 cc air-cooled DOHC single in section through the cylinder and valve axes" width="960" height="720" loading="lazy"></a><a href="sheets/governor.html" title="Porter governor"><img class="" src="thumbs/governor.png?v=mvaswi6m" alt="Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section" width="960" height="720" loading="lazy"></a><a href="sheets/pin-tumbler.html" title="Pin tumbler cylinder"><img class="" src="thumbs/pin-tumbler.png?v=mvaswi6m" alt="Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section" width="960" height="720" loading="lazy"></a><a href="sheets/centrifugal-pump.html" title="Centrifugal pump"><img class="" src="thumbs/centrifugal-pump.png?v=mvaswi6m" alt="ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute" width="960" height="720" loading="lazy"></a><a href="sheets/carburettor.html" title="Carburettor"><img class="" src="thumbs/carburettor.png?v=mvaswi6m" alt="Fixed-jet float-bowl carburettor, 26 mm bore, in axial section" width="960" height="720" loading="lazy"></a></div>
 <div class="meta"><span>/blueprint-drawings</span><i>·</i><a href="collection.html">21 sheets, all live</a><i>·</i><span>508 drawn parts</span><i>·</i><span>by hariFED</span><i>·</i><span>15 October 2026</span><i>·</i><a href="#install">Install ↓</a></div>
 
 <p>Most explanations of how something works are boxes and arrows. A drafting office never drew boxes. It drew <em class="s">the thing itself</em>, cut open along the plane where the mechanism lives, with every part named, measured and made of something.</p>
 <p>Blueprint is a skill for Claude Code that does this. You name a mechanism or an idea, Claude picks the real object whose working <em class="s">is</em> the idea, and drafts it as a live A2 engineering sheet: a section through the mechanism, details at larger scale, dimensions, balloons, a parts list and a title block. Then the parts move, and every number on the sheet comes from <a href="#rules">one physical model</a>.</p>
 
 <div class="wide side-by hero">
-<div class="frame bare" style="aspect-ratio:745/420"><iframe data-src="sheets/escapement.html?theme=white&amp;zoom=36,34,745,420&amp;mask=36,34,745,420" data-zoom="1" title="Live drawing: Swiss lever escapement, plan view at 20:1"></iframe></div>
+<div class="frame bare" style="aspect-ratio:16/9"><iframe data-src="3d/floor-pump.html?embed=1&amp;theme=white&amp;cut=1&amp;zoom=5.6&amp;look=55,55,0&amp;balloons=0" data-zoom="1" title="Live 3D cutaway: the base of a bicycle floor pump"></iframe></div>
 <div class="controls">
-<div><kbd>↻</kbd> drag the balance</div>
-<div><kbd>←</kbd><kbd>→</kbd> kick</div>
-<div><kbd>Space</kbd> pause</div>
-<div><kbd>S</kbd> slow</div>
-<p class="read">4 Hz · 28,800 vph · amplitude 279°</p>
+<div><kbd>↻</kbd> drag to turn</div>
+<div><kbd>Space</kbd> pump</div>
+<div><kbd>E</kbd> apart</div>
+<div><kbd>C</kbd> cut</div>
+<p class="read">Boyle's law · 2 bar → 6.8 bar · dead volume 10.1 cm³</p>
 </div>
 </div>
 
-<span class="sn"><b>1</b>Built and checked in one pass by the same agent, from one line.</span>
-<p>This is a Swiss lever escapement, the part of a mechanical watch that turns a wound spring into equal ticks. It came from one line, <code>/blueprint-drawings explain how a mechanical watch keeps time</code>.<span class="sn-ref">1</span></p>
-<p>The balance swings at four beats a second. Each time its jewel flicks the pallet fork, one tooth of the escape wheel slips past a ruby stone and gives the balance <em class="s">a little push</em> back. Press <kbd>S</kbd> to slow time and watch the lock, the impulse and the drop. On the <a href="sheets/escapement.html">full sheet</a> the same model drives a section through the balance staff, a 50:1 detail of the pallets, and a chart of the balance angle against time.</p>
+<span class="sn"><b>1</b>The 3D view and the 2D sheet run the same model file, so their numbers can't disagree.</span>
+<p>This is the base of a bicycle floor pump, cut in half. Press <kbd>Space</kbd> to pump: the air, stippled orange, thickens as the piston comes down, and the steel ball lifts off its seat the moment the chamber passes tyre pressure, because it is <em class="s">the outlet valve</em>. Drag to turn it; press <kbd>E</kbd> to take it apart.<span class="sn-ref">1</span></p>
+<p>Behind it is a full engineering drawing: an A2 sheet with the section at 1:2.5, two details, a gauge view, a P–s diagram, 21 balloons, a parts list and a title block, all live. Blueprint draws <a href="#flat">both</a>.</p>
 
 <section><h2 id="cut">Sections, not diagrams<span class="n">01</span></h2>
 <p>The skill rests on one rule, written at the top of its instructions above everything else:</p>
@@ -217,27 +217,27 @@ footer a{color:var(--muted)}
 <span class="sn"><b>2</b>Every sheet's model is pure functions with no DOM, so the build, the page and the check all agree.</span>
 <p>A sheet fails in two ways. <b>A diagram dressed as a drawing:</b> boxes with hatching and arrows with dimension heads. <b>A drawing that shows nothing:</b> the outside of a closed casing. The cure for both is the same: real parts, made of real materials, that touch and hold each other, cut open.<span class="sn-ref">2</span></p>
 <p>Some ideas map almost by themselves. A rate limiter is a cistern with a fixed refill jet. Debounce is a door closer: every push restarts the closing. A circuit breaker is, well, a circuit breaker, and its three states are the software pattern's three names.</p>
-<div class="grid"><a href="sheets/floor-pump.html"><img class="" src="thumbs/floor-pump.png?v=mvapmtf7" alt="Bicycle floor pump in axial section" width="960" height="720" loading="lazy"><b>Floor pump</b><span>Compression</span></a>
-<a href="sheets/four-stroke.html"><img class="" src="thumbs/four-stroke.png?v=mvapmtf7" alt="125 cc air-cooled DOHC single in section through the cylinder and valve axes" width="960" height="720" loading="lazy"><b>Four-stroke engine</b><span>Pipeline stages</span></a>
-<a href="sheets/governor.html"><img class="" src="thumbs/governor.png?v=mvapmtf7" alt="Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section" width="960" height="720" loading="lazy"><b>Flyball governor</b><span>Feedback control</span></a>
-<a href="sheets/escapement.html"><img class="" src="thumbs/escapement.png?v=mvapmtf7" alt="Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings" width="960" height="720" loading="lazy"><b>Lever escapement</b><span>Clock tick</span></a>
-<a href="sheets/bottle-jack.html"><img class="" src="thumbs/bottle-jack.png?v=mvapmtf7" alt="2-tonne hydraulic bottle jack in axial section" width="960" height="720" loading="lazy"><b>Bottle jack</b><span>Leverage</span></a>
-<a href="sheets/token-bucket.html"><img class="" src="thumbs/token-bucket.png?v=mvapmtf7" alt="Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section" width="960" height="720" loading="lazy"><b>WC cistern</b><span>Rate limiting</span></a>
-<a href="sheets/debounce.html"><img class="" src="thumbs/debounce.png?v=mvapmtf7" alt="Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section" width="960" height="720" loading="lazy"><b>Door closer</b><span>Debounce</span></a>
-<a href="sheets/pin-tumbler.html"><img class="" src="thumbs/pin-tumbler.png?v=mvapmtf7" alt="Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section" width="960" height="720" loading="lazy"><b>Pin tumbler lock</b><span>Authentication</span></a>
-<a href="sheets/circuit-breaker.html"><img class="" src="thumbs/circuit-breaker.png?v=mvapmtf7" alt="B16 miniature circuit breaker (EN 60898-1) cut on its centre plane" width="960" height="720" loading="lazy"><b>Circuit breaker</b><span>Circuit breaker</span></a>
-<a href="sheets/thermostat.html"><img class="" src="thumbs/thermostat.png?v=mvapmtf7" alt="Automotive wax-pellet coolant thermostat (opens at 88 °C) in section, in its housing between engine and radiator" width="960" height="720" loading="lazy"><b>Wax thermostat</b><span>Setpoint control</span></a>
-<a href="sheets/relief-valve.html"><img class="" src="thumbs/relief-valve.png?v=mvapmtf7" alt="DN25 spring-loaded safety relief valve in axial section" width="960" height="720" loading="lazy"><b>Relief valve</b><span>Back-pressure</span></a>
-<a href="sheets/differential.html"><img class="" src="thumbs/differential.png?v=mvapmtf7" alt="Rear-axle open bevel-gear differential in plan section, with the car in a turn" width="960" height="720" loading="lazy"><b>Differential</b><span>Load balancing</span></a>
-<a href="sheets/shock-absorber.html"><img class="" src="thumbs/shock-absorber.png?v=mvapmtf7" alt="Monotube gas-charged automotive damper (de Carbon type) in axial section" width="960" height="720" loading="lazy"><b>Shock absorber</b><span>Low-pass filter</span></a>
-<a href="sheets/click-pen.html"><img class="" src="thumbs/click-pen.png?v=mvapmtf7" alt="Retractable ballpoint pen in longitudinal section" width="960" height="720" loading="lazy"><b>Click pen</b><span>State machine</span></a>
-<a href="sheets/centrifugal-pump.html"><img class="" src="thumbs/centrifugal-pump.png?v=mvapmtf7" alt="ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute" width="960" height="720" loading="lazy"><b>Centrifugal pump</b><span>Operating point</span></a>
-<a href="sheets/gear-pump.html"><img class="" src="thumbs/gear-pump.png?v=mvapmtf7" alt="Group 2 external gear pump, 8 cm³/rev, cut across and along its shafts" width="960" height="720" loading="lazy"><b>Gear pump</b><span>Batching</span></a>
-<a href="sheets/carburettor.html"><img class="" src="thumbs/carburettor.png?v=mvapmtf7" alt="Fixed-jet float-bowl carburettor, 26 mm bore, in axial section" width="960" height="720" loading="lazy"><b>Carburettor</b><span>Bernoulli</span></a>
-<a href="sheets/pressure-cooker.html"><img class="" src="thumbs/pressure-cooker.png?v=mvapmtf7" alt="6 L stovetop pressure cooker (EN 12778) in axial section" width="960" height="720" loading="lazy"><b>Pressure cooker</b><span>Interlock</span></a>
-<a href="sheets/solenoid-valve.html"><img class="" src="thumbs/solenoid-valve.png?v=mvapmtf7" alt="2/2-way normally closed pilot-operated solenoid valve, G1/2, in axial section" width="960" height="720" loading="lazy"><b>Solenoid valve</b><span>Amplification</span></a>
-<a href="sheets/stirling.html"><img class="" src="thumbs/stirling.png?v=mvapmtf7" alt="Beta-type Stirling demonstrator with a rhombic drive, in axial section" width="960" height="720" loading="lazy"><b>Stirling engine</b><span>Heat engine</span></a>
-<a href="sheets/disc-brake.html"><img class="" src="thumbs/disc-brake.png?v=mvapmtf7" alt="Bicycle hydraulic disc brake: lever master cylinder and two-piston post-mount caliper in section" width="960" height="720" loading="lazy"><b>Disc brake</b><span>Replication</span></a></div>
+<div class="grid"><a href="sheets/floor-pump.html"><img class="" src="thumbs/floor-pump.png?v=mvaswi6m" alt="Bicycle floor pump in axial section" width="960" height="720" loading="lazy"><b>Floor pump</b><span>Compression · 3D</span></a>
+<a href="sheets/four-stroke.html"><img class="" src="thumbs/four-stroke.png?v=mvaswi6m" alt="125 cc air-cooled DOHC single in section through the cylinder and valve axes" width="960" height="720" loading="lazy"><b>Four-stroke engine</b><span>Pipeline stages</span></a>
+<a href="sheets/governor.html"><img class="" src="thumbs/governor.png?v=mvaswi6m" alt="Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section" width="960" height="720" loading="lazy"><b>Flyball governor</b><span>Feedback control</span></a>
+<a href="sheets/escapement.html"><img class="" src="thumbs/escapement.png?v=mvaswi6m" alt="Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings" width="960" height="720" loading="lazy"><b>Lever escapement</b><span>Clock tick</span></a>
+<a href="sheets/bottle-jack.html"><img class="" src="thumbs/bottle-jack.png?v=mvaswi6m" alt="2-tonne hydraulic bottle jack in axial section" width="960" height="720" loading="lazy"><b>Bottle jack</b><span>Leverage</span></a>
+<a href="sheets/token-bucket.html"><img class="" src="thumbs/token-bucket.png?v=mvaswi6m" alt="Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section" width="960" height="720" loading="lazy"><b>WC cistern</b><span>Rate limiting</span></a>
+<a href="sheets/debounce.html"><img class="" src="thumbs/debounce.png?v=mvaswi6m" alt="Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section" width="960" height="720" loading="lazy"><b>Door closer</b><span>Debounce</span></a>
+<a href="sheets/pin-tumbler.html"><img class="" src="thumbs/pin-tumbler.png?v=mvaswi6m" alt="Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section" width="960" height="720" loading="lazy"><b>Pin tumbler lock</b><span>Authentication</span></a>
+<a href="sheets/circuit-breaker.html"><img class="" src="thumbs/circuit-breaker.png?v=mvaswi6m" alt="B16 miniature circuit breaker (EN 60898-1) cut on its centre plane" width="960" height="720" loading="lazy"><b>Circuit breaker</b><span>Circuit breaker</span></a>
+<a href="sheets/thermostat.html"><img class="" src="thumbs/thermostat.png?v=mvaswi6m" alt="Automotive wax-pellet coolant thermostat (opens at 88 °C) in section, in its housing between engine and radiator" width="960" height="720" loading="lazy"><b>Wax thermostat</b><span>Setpoint control</span></a>
+<a href="sheets/relief-valve.html"><img class="" src="thumbs/relief-valve.png?v=mvaswi6m" alt="DN25 spring-loaded safety relief valve in axial section" width="960" height="720" loading="lazy"><b>Relief valve</b><span>Back-pressure</span></a>
+<a href="sheets/differential.html"><img class="" src="thumbs/differential.png?v=mvaswi6m" alt="Rear-axle open bevel-gear differential in plan section, with the car in a turn" width="960" height="720" loading="lazy"><b>Differential</b><span>Load balancing</span></a>
+<a href="sheets/shock-absorber.html"><img class="" src="thumbs/shock-absorber.png?v=mvaswi6m" alt="Monotube gas-charged automotive damper (de Carbon type) in axial section" width="960" height="720" loading="lazy"><b>Shock absorber</b><span>Low-pass filter</span></a>
+<a href="sheets/click-pen.html"><img class="" src="thumbs/click-pen.png?v=mvaswi6m" alt="Retractable ballpoint pen in longitudinal section" width="960" height="720" loading="lazy"><b>Click pen</b><span>State machine</span></a>
+<a href="sheets/centrifugal-pump.html"><img class="" src="thumbs/centrifugal-pump.png?v=mvaswi6m" alt="ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute" width="960" height="720" loading="lazy"><b>Centrifugal pump</b><span>Operating point</span></a>
+<a href="sheets/gear-pump.html"><img class="" src="thumbs/gear-pump.png?v=mvaswi6m" alt="Group 2 external gear pump, 8 cm³/rev, cut across and along its shafts" width="960" height="720" loading="lazy"><b>Gear pump</b><span>Batching</span></a>
+<a href="sheets/carburettor.html"><img class="" src="thumbs/carburettor.png?v=mvaswi6m" alt="Fixed-jet float-bowl carburettor, 26 mm bore, in axial section" width="960" height="720" loading="lazy"><b>Carburettor</b><span>Bernoulli</span></a>
+<a href="sheets/pressure-cooker.html"><img class="" src="thumbs/pressure-cooker.png?v=mvaswi6m" alt="6 L stovetop pressure cooker (EN 12778) in axial section" width="960" height="720" loading="lazy"><b>Pressure cooker</b><span>Interlock</span></a>
+<a href="sheets/solenoid-valve.html"><img class="" src="thumbs/solenoid-valve.png?v=mvaswi6m" alt="2/2-way normally closed pilot-operated solenoid valve, G1/2, in axial section" width="960" height="720" loading="lazy"><b>Solenoid valve</b><span>Amplification</span></a>
+<a href="sheets/stirling.html"><img class="" src="thumbs/stirling.png?v=mvaswi6m" alt="Beta-type Stirling demonstrator with a rhombic drive, in axial section" width="960" height="720" loading="lazy"><b>Stirling engine</b><span>Heat engine</span></a>
+<a href="sheets/disc-brake.html"><img class="" src="thumbs/disc-brake.png?v=mvaswi6m" alt="Bicycle hydraulic disc brake: lever master cylinder and two-piston post-mount caliper in section" width="960" height="720" loading="lazy"><b>Disc brake</b><span>Replication</span></a></div>
 <p>None of these were drawn by hand. Each one started from a single line naming the object or the idea. There are 21 so far, all live in <a href="collection.html">the collection</a>.</p>
 </section>
 
@@ -293,24 +293,31 @@ footer a{color:var(--muted)}
 <div class="wide"><div class="frame "><iframe data-src="sheets/floor-pump.html?theme=white" title="Live drawing: bicycle floor pump, the whole A2 sheet" loading="lazy"></iframe></div></div>
 </section>
 
-<section><h2 id="six">Six sheets, up close<span class="n">05</span></h2>
-<p>Six of the sheets that explain software ideas, each a real mechanism doing the same thing.</p>
-<div class="six"><a href="sheets/token-bucket.html"><img class="" src="thumbs/token-bucket.png?v=mvapmtf7" alt="Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section" width="960" height="720" loading="lazy"><b>Rate limiting</b><span>Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section</span><em>Token bucket rate limiting (API rate limits)</em></a>
-<a href="sheets/debounce.html"><img class="" src="thumbs/debounce.png?v=mvapmtf7" alt="Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section" width="960" height="720" loading="lazy"><b>Debounce</b><span>Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section</span><em>Debounce: act only once the input has stopped for long enough</em></a>
-<a href="sheets/circuit-breaker.html"><img class="" src="thumbs/circuit-breaker.png?v=mvapmtf7" alt="B16 miniature circuit breaker (EN 60898-1) cut on its centre plane" width="960" height="720" loading="lazy"><b>Circuit breaker</b><span>B16 miniature circuit breaker (EN 60898-1) cut on its centre plane</span><em>The circuit breaker pattern: closed, open, half-open</em></a>
-<a href="sheets/pin-tumbler.html"><img class="" src="thumbs/pin-tumbler.png?v=mvapmtf7" alt="Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section" width="960" height="720" loading="lazy"><b>Authentication</b><span>Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section</span><em>Authentication by matching a secret: every factor must match (AND)</em></a>
-<a href="sheets/escapement.html"><img class="" src="thumbs/escapement.png?v=mvapmtf7" alt="Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings" width="960" height="720" loading="lazy"><b>Clock tick</b><span>Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings</span><em>Turning stored energy into equal ticks: a clock-driven scheduler, a rate-limited event loop</em></a>
-<a href="sheets/differential.html"><img class="" src="thumbs/differential.png?v=mvapmtf7" alt="Rear-axle open bevel-gear differential in plan section, with the car in a turn" width="960" height="720" loading="lazy"><b>Load balancing</b><span>Rear-axle open bevel-gear differential in plan section, with the car in a turn</span><em>Splitting one input between two outputs that may run at different speeds: load balancing</em></a></div>
+<section><h2 id="flat">Flat and solid<span class="n">05</span></h2>
+<p>Every sheet is a flat drawing first, because a flat section is where dimensions, scales and standards live. Here is the same kind of mechanism, a watch escapement, drawn flat at 20:1 and still running:</p>
+<div class="wide"><div class="frame bare" style="aspect-ratio:745/420"><iframe data-src="sheets/escapement.html?theme=white&amp;zoom=36,34,745,420&amp;mask=36,34,745,420" data-zoom="1" title="Live drawing: Swiss lever escapement, plan view at 20:1"></iframe></div></div>
+<p>Then, where shape and assembly are the point, Claude builds a <em class="s">solid</em> view from the same numbers: turned with the mouse, cut along the drawing's own section plane with hatched faces, and pulled apart into an exploded view. Add <code>3d</code> to the request. One sheet has a 3D view so far: <a href="3d/floor-pump.html">Floor pump</a>.</p>
+
 </section>
 
-<section><h2 id="two">Two big sheets<span class="n">06</span></h2>
+<section><h2 id="six">Six sheets, up close<span class="n">06</span></h2>
+<p>Six of the sheets that explain software ideas, each a real mechanism doing the same thing.</p>
+<div class="six"><a href="sheets/token-bucket.html"><img class="" src="thumbs/token-bucket.png?v=mvaswi6m" alt="Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section" width="960" height="720" loading="lazy"><b>Rate limiting</b><span>Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section</span><em>Token bucket rate limiting (API rate limits)</em></a>
+<a href="sheets/debounce.html"><img class="" src="thumbs/debounce.png?v=mvaswi6m" alt="Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section" width="960" height="720" loading="lazy"><b>Debounce</b><span>Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section</span><em>Debounce: act only once the input has stopped for long enough</em></a>
+<a href="sheets/circuit-breaker.html"><img class="" src="thumbs/circuit-breaker.png?v=mvaswi6m" alt="B16 miniature circuit breaker (EN 60898-1) cut on its centre plane" width="960" height="720" loading="lazy"><b>Circuit breaker</b><span>B16 miniature circuit breaker (EN 60898-1) cut on its centre plane</span><em>The circuit breaker pattern: closed, open, half-open</em></a>
+<a href="sheets/pin-tumbler.html"><img class="" src="thumbs/pin-tumbler.png?v=mvaswi6m" alt="Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section" width="960" height="720" loading="lazy"><b>Authentication</b><span>Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section</span><em>Authentication by matching a secret: every factor must match (AND)</em></a>
+<a href="sheets/escapement.html"><img class="" src="thumbs/escapement.png?v=mvaswi6m" alt="Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings" width="960" height="720" loading="lazy"><b>Clock tick</b><span>Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings</span><em>Turning stored energy into equal ticks: a clock-driven scheduler, a rate-limited event loop</em></a>
+<a href="sheets/differential.html"><img class="" src="thumbs/differential.png?v=mvaswi6m" alt="Rear-axle open bevel-gear differential in plan section, with the car in a turn" width="960" height="720" loading="lazy"><b>Load balancing</b><span>Rear-axle open bevel-gear differential in plan section, with the car in a turn</span><em>Splitting one input between two outputs that may run at different speeds: load balancing</em></a></div>
+</section>
+
+<section><h2 id="two">Two big sheets<span class="n">07</span></h2>
 <p>Two of the densest sheets. The four-stroke engine runs an Otto cycle at 6000 rpm with valve timing from the cam profiles; the flame grows from the plug and the P–V loop traces live. Drag the crank, or press <kbd>Space</kbd>.</p>
 <div class="wide narrow"><div class="frame bare" style="aspect-ratio:474/757"><iframe data-src="sheets/four-stroke.html?theme=white&amp;zoom=64,64,474,757&amp;mask=69,71,465,743" data-zoom="1" title="Live drawing: four-stroke engine in section"></iframe></div></div>
 <p>The centrifugal pump is cut twice, through the shaft and through the volute. The duty point slides along the pump curve as the speed changes and the valve throttles; below 1674 rpm it can't lift the water and nothing flows.</p>
 <div class="wide"><div class="frame bare" style="aspect-ratio:548/327"><iframe data-src="sheets/centrifugal-pump.html?theme=white&amp;zoom=26,80,548,327&amp;mask=31,83,537,321" data-zoom="1" title="Live drawing: centrifugal pump, section through the shaft"></iframe></div></div>
 </section>
 
-<section><h2 id="uses">Where it's useful<span class="n">07</span></h2>
+<section><h2 id="uses">Where it's useful<span class="n">08</span></h2>
 <p>A live section is useful wherever someone needs to see inside something and trust what they see.</p>
 <div class="uses"><div><b>Explaining software ideas</b><p>Rate limits, debounce, circuit breakers, back-pressure and state machines were mechanisms long before they were code. Draw the machine and the abstraction stops being abstract.</p><div class="l"><a href="sheets/token-bucket.html">WC cistern</a> · <a href="sheets/debounce.html">Door closer</a> · <a href="sheets/circuit-breaker.html">Circuit breaker</a> · <a href="sheets/relief-valve.html">Relief valve</a> · <a href="sheets/pin-tumbler.html">Pin tumbler lock</a> · <a href="sheets/click-pen.html">Click pen</a> · <a href="sheets/differential.html">Differential</a> · <a href="sheets/shock-absorber.html">Shock absorber</a></div></div>
 <div><b>Teaching physics and engineering</b><p>A model you can push. Change one thing and watch the pressure, the curve and the numbers follow, from the same equations.</p><div class="l"><a href="sheets/floor-pump.html">Floor pump</a> · <a href="sheets/bottle-jack.html">Bottle jack</a> · <a href="sheets/stirling.html">Stirling engine</a> · <a href="sheets/four-stroke.html">Four-stroke engine</a> · <a href="sheets/pressure-cooker.html">Pressure cooker</a> · <a href="sheets/carburettor.html">Carburettor</a> · <a href="sheets/governor.html">Flyball governor</a></div></div>
@@ -318,7 +325,7 @@ footer a{color:var(--muted)}
 <div><b>Technician and apprentice training</b><p>Real part names, standard sizes, material grades and a parts list that matches a teardown.</p><div class="l"><a href="sheets/four-stroke.html">Four-stroke engine</a> · <a href="sheets/thermostat.html">Wax thermostat</a> · <a href="sheets/disc-brake.html">Disc brake</a> · <a href="sheets/centrifugal-pump.html">Centrifugal pump</a> · <a href="sheets/gear-pump.html">Gear pump</a> · <a href="sheets/relief-valve.html">Relief valve</a></div></div></div>
 </section>
 
-<section><h2 id="themes">Three themes<span class="n">08</span></h2>
+<section><h2 id="themes">Four themes<span class="n">09</span></h2>
 <p>Colours are tokens, never values, so every sheet comes in four themes: blueprint, paper, white and dark. Pick one in the sheet's bar, or add <code>?theme=</code> to its address.</p>
 <div class="themes">
 <figure><img src="thumbs/theme-blueprint.png" alt="Floor pump detail, blueprint theme" width="840" height="594" loading="lazy"><figcaption>blueprint</figcaption></figure>
@@ -328,7 +335,7 @@ footer a{color:var(--muted)}
 </div>
 </section>
 
-<section><h2 id="code">In your code<span class="n">09</span></h2>
+<section><h2 id="code">In your code<span class="n">10</span></h2>
 <p>A sheet is a single HTML file: inline SVG, inlined CSS and plain JavaScript. Embed one anywhere:</p>
 <pre>&lt;iframe src="floor-pump.html?theme=white" style="width:100%;aspect-ratio:1200/905;border:0"&gt;&lt;/iframe&gt;</pre>
 <p>The drafting kit is pure functions that return SVG strings, so it runs in Node and in the page:</p>
@@ -349,7 +356,7 @@ svg += K.dim(V, [-17.5, 384], [17.5, 384], { dir: "h", off: -24, prefix: "Ø" })
 </div>
 </section>
 
-<section><h2 id="install">Install<span class="n">10</span></h2>
+<section><h2 id="install">Install<span class="n">11</span></h2>
 <p>One command copies the skill into <code>~/.claude/skills/blueprint-drawings</code>:</p>
 <div class="install"><code id="cmd">npx @harifed/blueprint</code><button type="button" data-copy="cmd">Copy</button></div>
 <p>Add <code>--project</code> to install into this project's <code>.claude/skills</code>, or <code>--no-examples</code> for a smaller install. Or clone it:</p>
@@ -361,19 +368,19 @@ svg += K.dim(V, [-17.5, 384], [17.5, 384], { dir: "h", off: -24, prefix: "Ø" })
 /blueprint-drawings a section through a bicycle disc brake caliper</pre>
 </section>
 
-<section><h2 id="limits">Limits<span class="n">11</span></h2>
+<section><h2 id="limits">Limits<span class="n">12</span></h2>
 <p><b>It takes time.</b> A good sheet is about an hour of Claude's work, most of it in the second look: reading close-ups and fixing what a checker would mark down.</p>
 <p><b>Explanatory, not manufacturing.</b> Proportions, standard parts and materials are real and the physics is a genuine model, but nobody should machine a part from these sheets.</p>
-<p><b>Flat, for now.</b> Blueprint draws orthographic views and sections, deliberately. A 3D mode, with the same parts turnable, cut and exploded, is being prototyped.</p>
+<p><b>3D is a companion.</b> The 3D view turns, cuts and explodes, but dimensions, scales and the parts list live on the flat sheet. It needs WebGL and a connection to the three.js CDN.</p>
 <p><b>The first sheet is a draft.</b> Look at it, say what's wrong, and ask for another pass. The checker catches collisions; only you know whether the explanation lands.</p>
 </section>
 
-<section><h2 id="faq">Questions<span class="n">12</span></h2>
+<section><h2 id="faq">Questions<span class="n">13</span></h2>
 <details><summary>Do I need a framework?</summary><p>No. A sheet is one standalone HTML file with inline SVG and a few kilobytes of plain JavaScript. Open it from disk, host it anywhere, or put it in an iframe.</p></details>
 <details><summary>Can I edit a sheet afterwards?</summary><p>Yes. The model, the parts and the page are separate small files. Ask Claude to change a part, a dimension or the tour, then rebuild with <code>node build.mjs</code>.</p></details>
 <details><summary>Is it accessible?</summary><p>Every sheet has keyboard controls and a polite screen-reader readout of the live numbers. It shows a still, settled frame under reduced motion and pauses when off screen.</p></details>
 <details><summary>How accurate are the drawings?</summary><p>Proportions, standard parts and materials are real and the physics is a genuine model, but these are explanatory drawings, not manufacturing drawings.</p></details>
-<details><summary>Will there be 3D?</summary><p>It's being prototyped: the same model and parts in a turnable, sectioned and exploded 3D view. The flat drafted sheet stays the default.</p></details>
+<details><summary>Is the 3D view a separate model?</summary><p>No. It imports the same model file as the sheet and builds its solids from the same dimensions. It needs WebGL and loads three.js from a CDN; if either is missing it links to the 2D sheet.</p></details>
 <details><summary>How do I get the best results?</summary><p>Name the real object if you know one, say what you want to watch, and ask for one Sheet first. Then ask for a second look: most problems show up in the close-ups.</p></details>
 <details><summary>What licence?</summary><p>MIT, for the skill, the kit and every sheet.</p></details>
 </section>

@@ -2,7 +2,7 @@
 // Builds the website into docs/ (served by GitHub Pages): the landing page, the collection page,
 // every example sheet with a small site bar, and thumbnails rendered with headless Chrome.
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,7 +10,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "docs");
 const shots = !process.argv.includes("--no-shots");
 const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-for (const d of ["", "sheets", "thumbs"]) mkdirSync(join(out, d), { recursive: true });
+for (const d of ["", "sheets", "thumbs", "3d"]) mkdirSync(join(out, d), { recursive: true });
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const CMD = "/blueprint-drawings";
@@ -82,6 +82,14 @@ html.in-frame .bp-page{padding:8px 8px 10px}
 <script>try{if(window.top!==window)document.documentElement.classList.add("in-frame")}catch(e){document.documentElement.classList.add("in-frame")}</script>`;
   html = html.replace("<body>", `<body>\n${bar}`);
   writeFileSync(join(out, "sheets", `${m.slug}.html`), html);
+  const src3d = join(root, "examples", m.slug, `${m.slug}-3d.html`);
+  m.has3d = Boolean(m.has3d && existsSync(src3d));
+  if (m.has3d) {
+    // the 3D page links its 2D sheet by file name; point it at the site's copy
+    writeFileSync(join(out, "3d", `${m.slug}.html`), readFileSync(src3d, "utf8").split(`href="${m.slug}.html"`).join(`href="../sheets/${m.slug}.html"`));
+    const hero = join(root, "examples", m.slug, "shots3d", "hero.png");
+    if (existsSync(hero)) copyFileSync(hero, join(out, "thumbs", `${m.slug}-3d.png`));
+  }
   const thumb = join(out, "thumbs", `${m.slug}.png`);
   if (shots || !existsSync(thumb)) {
     shot(src, thumb, ["--zoom", pad(CROPS[m.slug] || [0, 0, 1200, 848], 0.06, 4 / 3).join(","), "--mask", pad(CROPS[m.slug] || [0, 0, 1200, 848], 0.025).join(","), "--width", "960", "--height", "720", "--t", String(m.shotT ?? 3), "--theme", "white"]);
@@ -105,6 +113,8 @@ const img = (slug, cls = "") =>
 const frame = (slug, title, cls = "") =>
   `<div class="frame ${cls}"><iframe data-src="sheets/${slug}.html?theme=white" title="${esc(title)}" loading="lazy"></iframe></div>`;
 // a live sheet zoomed to one view: no frame, no bar, just the object on the page
+const solid = (slug, title, q, aspect = "16/10") =>
+  `<div class="frame bare" style="aspect-ratio:${aspect}"><iframe data-src="3d/${slug}.html?embed=1&amp;theme=white${q ? "&amp;" + q : ""}" data-zoom="1" title="${esc(title)}"></iframe></div>`;
 const live = (slug, title, box, mask) =>
   `<div class="frame bare" style="aspect-ratio:${box[2]}/${box[3]}"><iframe data-src="sheets/${slug}.html?theme=white&amp;zoom=${box.join(",")}${mask ? "&amp;mask=" + mask.join(",") : ""}" data-zoom="1" title="${esc(title)}"></iframe></div>`;
 
@@ -278,8 +288,8 @@ const PTR = `<svg class="ptr" viewBox="0 0 16 20" aria-hidden="true"><path d="M1
 
 const TOC = [
   ["cut", "Sections, not diagrams"], ["prompt", "Writing a prompt"], ["does", "What Claude does"],
-  ["rules", "Anatomy of a sheet"], ["six", "Six sheets, up close"], ["two", "Two big sheets"],
-  ["uses", "Where it's useful"], ["themes", "Three themes"], ["code", "In your code"],
+  ["rules", "Anatomy of a sheet"], ["flat", "Flat and solid"], ["six", "Six sheets, up close"], ["two", "Two big sheets"],
+  ["uses", "Where it's useful"], ["themes", "Four themes"], ["code", "In your code"],
   ["install", "Install"], ["limits", "Limits"], ["faq", "Questions"],
 ];
 const H = Object.fromEntries(TOC.map(([id, t], i) => [id, `<h2 id="${id}">${t}<span class="n">${String(i + 1).padStart(2, "0")}</span></h2>`]));
@@ -371,7 +381,7 @@ ${FONTS}
 // ---- landing page content
 const mini = ["four-stroke", "governor", "pin-tumbler", "centrifugal-pump", "carburettor"]
   .filter((s) => bySlug[s]).map((s) => `<a href="sheets/${s}.html" title="${esc(bySlug[s].title)}">${img(s)}</a>`).join("");
-const grid = sheets.map((m) => { const [o, i] = short(m); return `<a href="sheets/${m.slug}.html">${img(m.slug)}<b>${esc(o)}</b><span>${esc(i)}</span></a>`; }).join("\n");
+const grid = sheets.map((m) => { const [o, i] = short(m); return `<a href="sheets/${m.slug}.html">${img(m.slug)}<b>${esc(o)}</b><span>${esc(i)}${m.has3d ? " · 3D" : ""}</span></a>`; }).join("\n");
 const SIX = ["token-bucket", "debounce", "circuit-breaker", "pin-tumbler", "escapement", "differential"].filter((s) => bySlug[s]);
 const six = SIX.map((s) => { const m = bySlug[s]; return `<a href="sheets/${s}.html">${img(s)}<b>${esc(short(m)[1])}</b><span>${esc(m.object)}</span><em>${esc(m.idea)}</em></a>`; }).join("\n");
 
@@ -412,7 +422,7 @@ const faqs = [
   ["Can I edit a sheet afterwards?", "Yes. The model, the parts and the page are separate small files. Ask Claude to change a part, a dimension or the tour, then rebuild with <code>node build.mjs</code>."],
   ["Is it accessible?", "Every sheet has keyboard controls and a polite screen-reader readout of the live numbers. It shows a still, settled frame under reduced motion and pauses when off screen."],
   ["How accurate are the drawings?", "Proportions, standard parts and materials are real and the physics is a genuine model, but these are explanatory drawings, not manufacturing drawings."],
-  ["Will there be 3D?", "It's being prototyped: the same model and parts in a turnable, sectioned and exploded 3D view. The flat drafted sheet stays the default."],
+  ["Is the 3D view a separate model?", "No. It imports the same model file as the sheet and builds its solids from the same dimensions. It needs WebGL and loads three.js from a CDN; if either is missing it links to the 2D sheet."],
   ["How do I get the best results?", "Name the real object if you know one, say what you want to watch, and ask for one Sheet first. Then ask for a second look: most problems show up in the close-ups."],
   ["What licence?", "MIT, for the skill, the kit and every sheet."],
 ].map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join("\n");
@@ -430,19 +440,19 @@ ${sidebar(true)}
 <p>Blueprint is a skill for Claude Code that does this. You name a mechanism or an idea, Claude picks the real object whose working <em class="s">is</em> the idea, and drafts it as a live A2 engineering sheet: a section through the mechanism, details at larger scale, dimensions, balloons, a parts list and a title block. Then the parts move, and every number on the sheet comes from <a href="#rules">one physical model</a>.</p>
 
 <div class="wide side-by hero">
-${live("escapement", "Live drawing: Swiss lever escapement, plan view at 20:1", [36, 34, 745, 420], [36, 34, 745, 420])}
+${solid("floor-pump", "Live 3D cutaway: the base of a bicycle floor pump", "cut=1&amp;zoom=5.6&amp;look=55,55,0&amp;balloons=0", "16/9")}
 <div class="controls">
-<div><kbd>↻</kbd> drag the balance</div>
-<div><kbd>←</kbd><kbd>→</kbd> kick</div>
-<div><kbd>Space</kbd> pause</div>
-<div><kbd>S</kbd> slow</div>
-<p class="read">4 Hz · 28,800 vph · amplitude 279°</p>
+<div><kbd>↻</kbd> drag to turn</div>
+<div><kbd>Space</kbd> pump</div>
+<div><kbd>E</kbd> apart</div>
+<div><kbd>C</kbd> cut</div>
+<p class="read">Boyle's law · 2 bar → 6.8 bar · dead volume 10.1 cm³</p>
 </div>
 </div>
 
-<span class="sn"><b>1</b>Built and checked in one pass by the same agent, from one line.</span>
-<p>This is a Swiss lever escapement, the part of a mechanical watch that turns a wound spring into equal ticks. It came from one line, <code>${CMD} explain how a mechanical watch keeps time</code>.<span class="sn-ref">1</span></p>
-<p>The balance swings at four beats a second. Each time its jewel flicks the pallet fork, one tooth of the escape wheel slips past a ruby stone and gives the balance <em class="s">a little push</em> back. Press <kbd>S</kbd> to slow time and watch the lock, the impulse and the drop. On the <a href="sheets/escapement.html">full sheet</a> the same model drives a section through the balance staff, a 50:1 detail of the pallets, and a chart of the balance angle against time.</p>
+<span class="sn"><b>1</b>The 3D view and the 2D sheet run the same model file, so their numbers can't disagree.</span>
+<p>This is the base of a bicycle floor pump, cut in half. Press <kbd>Space</kbd> to pump: the air, stippled orange, thickens as the piston comes down, and the steel ball lifts off its seat the moment the chamber passes tyre pressure, because it is <em class="s">the outlet valve</em>. Drag to turn it; press <kbd>E</kbd> to take it apart.<span class="sn-ref">1</span></p>
+<p>Behind it is a full engineering drawing: an A2 sheet with the section at 1:2.5, two details, a gauge view, a P–s diagram, 21 balloons, a parts list and a title block, all live. Blueprint draws <a href="#flat">both</a>.</p>
 
 <section>${H.cut}
 <p>The skill rests on one rule, written at the top of its instructions above everything else:</p>
@@ -489,6 +499,13 @@ ${live("escapement", "Live drawing: Swiss lever escapement, plan view at 20:1", 
 <div class="rules">${rules}</div>
 <p>Here they are on one whole sheet: a bicycle floor pump, drafted at 1:2.5 with two details, a gauge view, a P–s diagram, 21 balloons, a parts list and a title block whose readout is live. Drag the handle and the stroke dimension re-measures itself.</p>
 <div class="wide">${frame("floor-pump", "Live drawing: bicycle floor pump, the whole A2 sheet")}</div>
+</section>
+
+<section>${H.flat}
+<p>Every sheet is a flat drawing first, because a flat section is where dimensions, scales and standards live. Here is the same kind of mechanism, a watch escapement, drawn flat at 20:1 and still running:</p>
+<div class="wide">${live("escapement", "Live drawing: Swiss lever escapement, plan view at 20:1", [36, 34, 745, 420], [36, 34, 745, 420])}</div>
+<p>Then, where shape and assembly are the point, Claude builds a <em class="s">solid</em> view from the same numbers: turned with the mouse, cut along the drawing's own section plane with hatched faces, and pulled apart into an exploded view. Add <code>3d</code> to the request. ${(() => { const l = sheets.filter((m) => m.has3d); return l.length ? `${l.length === 1 ? "One sheet has" : l.length + " sheets have"} a 3D view so far: ${l.map((m) => `<a href="3d/${m.slug}.html">${esc(short(m)[0])}</a>`).join(", ")}.` : ""; })()}</p>
+${sheets.some((m) => m.has3d && m.slug !== "floor-pump") ? `<div class="six">${sheets.filter((m) => m.has3d && m.slug !== "floor-pump" && existsSync(join(out, "thumbs", m.slug + "-3d.png"))).slice(0, 6).map((m) => `<a href="3d/${m.slug}.html"><img src="thumbs/${m.slug}-3d.png?v=${BUILD}" alt="${esc(m.object)} in 3D" loading="lazy"><b>${esc(short(m)[0])}</b><span>${esc(short(m)[1])} · 3D</span></a>`).join("")}</div>` : ""}
 </section>
 
 <section>${H.six}
@@ -554,7 +571,7 @@ ${CMD} a section through a bicycle disc brake caliper</pre>
 <section>${H.limits}
 <p><b>It takes time.</b> A good sheet is about an hour of Claude's work, most of it in the second look: reading close-ups and fixing what a checker would mark down.</p>
 <p><b>Explanatory, not manufacturing.</b> Proportions, standard parts and materials are real and the physics is a genuine model, but nobody should machine a part from these sheets.</p>
-<p><b>Flat, for now.</b> Blueprint draws orthographic views and sections, deliberately. A 3D mode, with the same parts turnable, cut and exploded, is being prototyped.</p>
+<p><b>3D is a companion.</b> The 3D view turns, cuts and explodes, but dimensions, scales and the parts list live on the flat sheet. It needs WebGL and a connection to the three.js CDN.</p>
 <p><b>The first sheet is a draft.</b> Look at it, say what's wrong, and ask for another pass. The checker catches collisions; only you know whether the explanation lands.</p>
 </section>
 
@@ -580,6 +597,7 @@ const cards = sheets.map((m) => `<article id="${m.slug}">
 <p class="sum">${esc(m.summary)}</p>
 <ul class="used">${(m.usedFor || []).map((u) => `<li>${esc(u)}</li>`).join("")}</ul>
 <p class="facts">${m.parts} parts · ${m.views.length} views · ${esc(m.controls || "")}</p>
+${m.has3d ? `<p class="facts"><a href="3d/${m.slug}.html">Open the 3D view →</a></p>` : ""}
 </article>`).join("\n");
 
 const collection = `${head("Collection · Blueprint", `All ${total} Blueprint sheets: live engineering drawings that explain mechanisms and ideas.`)}
