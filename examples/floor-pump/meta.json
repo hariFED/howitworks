@@ -11,5 +11,7 @@
   "views": ["Axial section 1:2.5", "Detail B check valve 2:1", "Detail D piston 2:1", "View C gauge 1:1", "P–s diagram"],
   "controls": "Drag the handle · Space pumps · R lets the tyre down · S slow motion",
   "checkTimes": "0,0.4,0.8,1.2,1.6,2.4,3.3,5,7.5,10,13,16,20",
-  "shotT": 1.0
+  "shotT": 1.0,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1, "look": null, "t": 1.0 }
 }

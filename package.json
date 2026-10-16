@@ -16,6 +16,8 @@
     "./kit/page": "./kit/page.mjs",
     "./kit/selfcheck": "./kit/selfcheck.mjs",
     "./kit/sheet.css": "./kit/sheet.css",
+    "./kit/sheet3d.css": "./kit/sheet3d.css",
+    "./kit/solid3d": "./kit/solid3d.mjs",
     "./package.json": "./package.json"
   },
   "files": [
@@ -34,6 +36,7 @@
   "scripts": {
     "build": "node scripts/build-all.mjs",
     "check": "node scripts/check-all.mjs",
+    "check3d": "node scripts/check3d.mjs --all",
     "site": "node site/build.mjs"
   }
 }

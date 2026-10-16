@@ -99,3 +99,23 @@ L.announcer(el, seconds)                 // polite aria-live text, throttled
 writePage(out, { title, description, svg, bar, css, modules: [[kitPath("draft.mjs"), "K"], [here + "/model.mjs", "M"]], main })
 ```
 Modules are inlined in order as `const NAME = (() => { ... })()`; write each with `import * as NAME from ...` and the same names, and they work unchanged in node and in the page.
+
+## 3D view (`kit/solid3d.mjs`, `writePage3d`)
+
+A companion 3D page per example, from the same model. The full guide is `references/3d.md`; in brief:
+
+```js
+// scene3d.mjs (pure data)
+S.part(3, "BARREL", [S.tube({ r0: 16, r1: 17.5, from: 34, to: 430 })], { hatch: "solid", explode: [0, 112, 0], anchor: { cut: [-16.75, 250, 0] } })
+S.lathe(loop, { axis: "y", at })  S.extrude(shape, { along, from, to, holes, conform })  S.gear(...)  S.helix(...)
+S.bore(solid)  S.fluid(name, solid, { stretch })
+// live3d.js
+const V = S.create({ scene: SC.scene() });
+V.set(id, { pos, rot });  V.solid(id, "name").rotation.y = a;  V.fluid(name, { density, stretch });  V.frame([...poses]);
+V.drag(ids, { axis, length, start, move });  V.run({ step, render, overlay });
+// build3d.mjs
+writePage3d(out, { title, heading, titleText, dwg, parts, sheet2d, buttons, modules: [[K], [L], [S], [M], [P], [SC]], main })
+```
+
+`node scripts/check3d.mjs page-3d.html` and `node scripts/shot3d.mjs page-3d.html --view iso --cut 1` verify it.
+

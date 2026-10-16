@@ -21,7 +21,10 @@ Requires Node.js 20+, plus Chrome, Chromium or Edge for the checks. Restart Clau
 ```
 /blueprint-drawings explain how a pin tumbler lock opens
 /blueprint-drawings draw debounce as a real mechanism
+/blueprint-drawings explain a gear pump, in 3d
 ```
+
+Add `3d` to get a companion 3D page (orbit, cut, explode, drive it) next to the sheet; the sheet stays the authority for dimensions.
 
 ## The idea
 
@@ -30,9 +33,9 @@ Requires Node.js 20+, plus Chrome, Chromium or Edge for the checks. Restart Clau
 ## What's in the box
 
 - `SKILL.md`: the rules and the 11-step workflow Claude follows.
-- `kit/`: the drafting kit (pure SVG functions), the live runtime, the in-page check and the page builder.
-- `scripts/`: headless-Chrome screenshots and the layout check (`check.mjs`, `shot.mjs`, `build-all.mjs`, `check-all.mjs`).
-- `references/`: drafting conventions, the kit API and sheet planning.
+- `kit/`: the drafting kit (pure SVG functions), the live runtime, the in-page check, the page builder, and `solid3d.mjs`, the 3D mode: a live, sectioned, exploded isometric view of a sheet's object from the same model (three.js r170).
+- `scripts/`: headless-Chrome screenshots and the layout check (`check.mjs`, `shot.mjs`, `build-all.mjs`, `check-all.mjs`), and for 3D views `check3d.mjs` and `shot3d.mjs` (software WebGL).
+- `references/`: drafting conventions, the kit API, sheet planning and the 3D view (`3d.md`).
 - `examples/`: example sheets, each with a model, parts, a build script and its page code.
 - `site/`: the website generator (writes `docs/`).
 
@@ -51,6 +54,7 @@ const svg = K.section(V, tube, { mat: "alu", angle: 45 });
 ```
 npm run build     # build every example page
 npm run check     # layout check of every example at its tour times and phone width
+npm run check3d   # render and self-test every 3D view (examples/*/<slug>-3d.html)
 npm run site      # build the website into docs/
 ```
 

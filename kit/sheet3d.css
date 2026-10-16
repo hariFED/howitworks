@@ -1,0 +1,43 @@
+/* 3D mode page layout (writePage3d). Colours are the tokens of sheet.css, including --bp3-*. */
+html, body { height: 100%; overflow: hidden; }
+.v3 { display: flex; flex-direction: column; height: 100%; }
+.v3-bar { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 8px 16px; font-size: 12px; color: var(--bp-muted); letter-spacing: .03em; border-bottom: 1px solid var(--bp-ui); min-width: 0; }
+.v3-bar b { color: var(--bp-ink); font-weight: 600; letter-spacing: .08em; }
+.v3-bar a { color: var(--bp-muted); }
+.v3-grp { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.v3-bar button { font: inherit; color: var(--bp-muted); background: transparent; border: 1px solid var(--bp-ui); border-radius: 3px; padding: 3px 9px; cursor: pointer; }
+.v3-bar button[aria-pressed="true"] { color: var(--bp-ink); background: var(--bp-ui); }
+.v3-bar input[type="range"] { width: 92px; accent-color: var(--bp-accent); }
+.v3-stage { position: relative; flex: 1; min-height: 0; min-width: 0; overflow: hidden; outline: none; background-color: var(--bp-paper);
+  background-image: linear-gradient(var(--bp-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bp-grid) 1px, transparent 1px); background-size: 20px 20px; }
+.v3-stage:focus-visible { box-shadow: inset 0 0 0 2px var(--bp-accent); }
+.v3-stage::after { content: ""; position: absolute; inset: 10px; border: 1.2px solid var(--bp-ink); pointer-events: none; opacity: .85; }
+.v3-stage canvas { position: absolute; inset: 0; display: block; touch-action: none; cursor: grab; }
+.v3-stage canvas.v3-grab { cursor: grabbing; }
+#ov { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+#ov .thin, #ov .hid { fill: none; stroke: var(--bp-ink); stroke-width: .8px; }
+#ov .hid { stroke-dasharray: 4 2.6; }
+#ov .dot, #ov .head { fill: var(--bp-ink); }
+#ov .balloon { fill: var(--bp-paper); stroke: var(--bp-ink); stroke-width: .9px; }
+#ov .t { font-family: var(--bp-font); font-size: 10.5px; fill: var(--bp-ink); }
+.v3-title { position: absolute; right: 10px; bottom: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; width: min(420px, calc(100% - 20px)); border: 1.2px solid var(--bp-ink); border-right: 0; border-bottom: 0; background: var(--bp-paper); font-size: 10px; pointer-events: none; }
+.v3-title > div { border-right: .6px solid var(--bp-ink); border-bottom: .6px solid var(--bp-ink); padding: 3px 6px 4px; min-width: 0; }
+.v3-title i { display: block; font-style: normal; font-size: 7px; color: var(--bp-muted); letter-spacing: .08em; }
+.v3-title .w3 { grid-column: span 3; } .v3-title .w4 { grid-column: span 4; }
+.v3-title .lg { font-size: 12px; font-weight: 600; letter-spacing: .06em; }
+#readout { color: var(--bp-accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.v3-hint { position: absolute; left: 22px; bottom: 18px; font-size: 10.5px; color: var(--bp-muted); letter-spacing: .04em; max-width: 46%; pointer-events: none; }
+.v3-fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--bp-muted); background: var(--bp-paper); }
+.v3-fail a { color: var(--bp-ink); }
+@media (max-width: 640px) {
+  .v3-hint { display: none; }
+  .v3-bar { padding: 6px 10px; gap: 6px 10px; }
+  .v3-bar b { flex-basis: 100%; }
+  .v3-bar input[type="range"] { width: 70px; }
+  .v3-title > div:not(.w4) { display: none; }
+}
+/* ?embed=1: the object, its balloons and leaders only, on the page colour (an iframe hero) */
+.v3-embed .v3-bar, .v3-embed .v3-title, .v3-embed .v3-hint { display: none; }
+.v3-embed .v3-stage { background: var(--bp-page); }
+.v3-embed .v3-stage::after { display: none; }
+.v3-embed #ov .balloon { fill: var(--bp-page); }

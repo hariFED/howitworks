@@ -54,3 +54,82 @@ ${main}
   writeFileSync(out, html);
   return html.length;
 }
+
+// ---------------------------------------------------------------- 3D mode
+// The three.js build every 3D page loads, pinned. ES module through an import map: works from file://.
+export const THREE_URL = "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js";
+
+// One standalone 3D page (see references/3d.md). Modules are inlined into a module script after
+// `import * as THREE from "three"`, in dependency order, e.g. [[kitPath("draft.mjs"), "K"],
+// [kitPath("live.mjs"), "L"], [kitPath("solid3d.mjs"), "S"], [model, "M"], [parts, "P"], [scene3d, "SC"]].
+//   heading   the toolbar's title, e.g. "FLOOR PUMP · BP-001 · 3D"
+//   titleText the title block's title;  dwg the drawing number;  parts the part count
+//   sheet2d   the 2D sheet's file name, linked from the bar and the WebGL/CDN fallback
+//   buttons   extra toolbar HTML (the page's own controls);  hint, live: the hint line and readout label
+//   aria      the stage's description for screen readers;  theme: default theme (white)
+export function writePage3d(out, { title, description = "", heading, titleText, dwg = "", parts = "", units = "mm", sheet2d = "", buttons = "", hint = "", live = "LIVE", aria = "", css = "", modules = [], main = "", theme = "white" }) {
+  const scripts = modules.map(([file, name]) => inlineModule(file, name)).join("\n");
+  const themes = ["blueprint", "paper", "white", "dark"].map((t) => `<button type="button" data-theme-pick="${t}">${t}</button>`).join("");
+  const link2d = sheet2d ? `<a href="${esc(sheet2d)}">2D sheet</a>` : "";
+  const fallback2d = sheet2d ? ` The 2D sheet, <a href="${esc(sheet2d)}">${esc(sheet2d)}</a>, needs neither.` : "";
+  const html = `<!doctype html>
+<html lang="en" data-theme="${esc(theme)}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(description)}">
+<script>if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add("v3-embed");</script>
+<style>
+${readFileSync(kitPath("sheet.css"), "utf8")}
+${readFileSync(kitPath("sheet3d.css"), "utf8")}
+${css}
+</style>
+<script type="importmap">{ "imports": { "three": "${THREE_URL}" } }</script>
+</head>
+<body>
+<div class="v3">
+<div class="v3-bar" role="toolbar" aria-label="View controls">
+  <b>${esc(heading ?? title)}</b>
+  <span class="v3-grp" role="group" aria-label="View"><button type="button" data-view="iso">ISO</button><button type="button" data-view="front">FRONT</button><button type="button" data-view="side">SIDE</button><button type="button" data-view="top">TOP</button></span>
+  <span class="v3-grp"><button type="button" id="cut" aria-pressed="true">CUT</button><label>plane <input id="offset" type="range" min="-30" max="30" step="0.5" value="0" aria-label="Cutting plane offset, mm"></label></span>
+  <span class="v3-grp"><label>explode <input id="explode" type="range" min="0" max="1" step="0.01" value="0" aria-label="Explode"></label></span>
+  <span class="v3-grp"><button type="button" id="balloons" aria-pressed="true">BALLOONS</button>${buttons}</span>
+  <span class="bp-themes" role="group" aria-label="Theme">${themes}</span>
+  ${link2d}
+</div>
+<div id="stage" class="v3-stage" tabindex="0" role="img" aria-label="${esc(aria || description)}">
+  <canvas id="gl"></canvas>
+  <svg id="ov" aria-hidden="true"></svg>
+  <div class="v3-hint">${esc(hint || "DRAG TO ORBIT · WHEEL ZOOM · SHIFT-DRAG PAN · E EXPLODE · C CUT · B BALLOONS · 1–4 VIEWS")}</div>
+  <div class="v3-title">
+    <div class="w3 lg"><i>TITLE</i>${esc(titleText ?? title)}</div><div class="lg"><i>DWG NO</i>${esc(dwg)}</div>
+    <div><i>SCALE</i>NTS</div><div><i>PROJECTION</i>ISOMETRIC</div><div><i>UNITS</i>${esc(units)}</div><div><i>PARTS</i>${esc(parts)}</div>
+    <div class="w4"><i>${esc(live)}</i><span id="readout">&nbsp;</span></div>
+  </div>
+  <noscript><div class="v3-fail">This drawing needs JavaScript and WebGL.${fallback2d}</div></noscript>
+</div>
+<span id="sr" class="bp-sr" aria-live="polite"></span>
+</div>
+<script>
+window.addEventListener("error", (e) => { window.__v3err = String(e.message || e); });
+setTimeout(() => {
+  if (window.__v3ok) return;
+  const d = document.createElement("div");
+  d.className = "v3-fail";
+  d.id = "v3-fallback";
+  d.innerHTML = "The 3D view could not start (" + (window.__v3err || "three.js did not load: it needs WebGL and a connection to cdn.jsdelivr.net").replace(/</g, "&lt;") + ").${fallback2d.replace(/"/g, '\\"')}";
+  document.getElementById("stage").appendChild(d);
+}, 8000);
+</script>
+<script type="module">
+import * as THREE from "three";
+${scripts}
+${main}
+</script>
+</body>
+</html>
+`;
+  writeFileSync(out, html);
+  return html.length;
+}

@@ -89,18 +89,32 @@ Copy the example folder, rename it, and replace `model.mjs`, `parts.mjs`, `build
 - `kit/live.mjs`: the runtime (`run`, `follow`, `ease`, `dragY`, `announcer`, `setupPage`).
 - `kit/selfcheck.mjs`: the in-page layout check.
 - `kit/page.mjs`: inlines modules as namespaces and writes one standalone HTML page.
-- `kit/sheet.css`: the three themes as tokens. Every colour in a drawing is a token.
+- `kit/sheet.css`: the themes (blueprint, paper, white, dark) as tokens. Every colour in a drawing is a token.
+- `kit/solid3d.mjs`, `kit/sheet3d.css`: the 3D view (see below).
 
 Words in the request that change the output:
 
 - `paper` or `dark`: make that the sheet's default theme (`writePage(..., { theme: "paper" })`). The reader can still switch.
 - `set`: a Set, several sheets of one machine; propose the first sheet before starting.
 - `still`: no live layer. Draw the sheet at its most telling moment, with no tour, drag or keys; the model still sets every number.
+- `3d`: add the 3D view after the sheet passes its check (below).
 
 URL parameters every page supports: `?t=6.5` (render the tour at 6.5 s, deterministically), `?theme=paper`, `?zoom=x,y,w,h`, `?check=1`.
+
+## 3D view
+
+A sheet can have a companion 3D page: the same object as a live orthographic isometric half-section that the reader orbits, cuts, explodes and drives, with hatched cut faces, toon tones, outlines, balloons that follow the parts and the same readout. Add one when the request says `3d`, or when depth is the explanation: parts that overlap in the section (gears, a crank train, a valve train), an assembly order (exploded), or a hero picture. Build the sheet first; **the 2D sheet stays the authority** for dimensions, tolerances, scales, the parts list and the standards. The 3D view is NTS and carries one live dimension at most.
+
+- Files: `examples/<slug>/scene3d.mjs` (closed solids from the example's own `model.mjs`/`parts.mjs` numbers, built with `kit/solid3d.mjs`), `live3d.js` (runs the same model, poses the parts), `build3d.mjs` (`writePage3d`) → `<slug>-3d.html`; `"has3d": true` and `"shot3d"` in `meta.json`. Never fork the model.
+- The cutting plane is z = 0, the sheet's section plane, with u → x and v → y. Every solid is closed; parts touch but never overlap; passages are `S.bore` volumes; air and oil are `S.fluid` volumes stippled in the accent.
+- Verify: `node scripts/check3d.mjs <page>` must print `check3d passed`; then `scripts/shot3d.mjs` at iso/cut, front/cut (compare with the sheet's section), a close-up and exploded, and read every PNG.
+- Read `references/3d.md` before starting: the API, the closed-solid rule and its traps, castings without CSG, explode axes, balloons, the checks and the budget. `examples/floor-pump/` is the reference.
+
+3D pages support `?t ?view=iso|front|side|top ?cut ?offset ?explode ?zoom ?look=x,y,z ?theme ?balloons=0 ?embed=1`; their default theme is white.
 
 ## References
 
 - `references/conventions.md`: line types, hatching, sectioning, dimensioning, scales, balloons, title block. Read before drawing.
 - `references/kit.md`: the kit API with the patterns the example uses.
 - `references/layout.md`: planning a sheet and making moving parts and annotations coexist.
+- `references/3d.md`: the 3D view: `kit/solid3d.mjs`, its rules, checks and a worked example.
