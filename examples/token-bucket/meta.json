@@ -5,11 +5,35 @@
   "object": "Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section",
   "idea": "Token bucket rate limiting (API rate limits)",
   "summary": "The water is the tokens. A fixed Ø3.5 jet at mains pressure refills at 0.146 L/s whatever the level, which is a constant token rate, and the float shuts it at capacity. Each pull of the knob takes one 1.5 L dose; below one token the dose float rests on its stop and the pull is refused, and the overflow tube is the hard cap if the float is held down.",
-  "usedFor": ["Explaining API rate limits, bursts and HTTP 429 in a software-concepts course", "A physical analogy for token bucket and leaky bucket algorithms in system design teaching", "Plumbing training: diaphragm float valves, orifice flow and Torricelli drain"],
+  "usedFor": [
+    "Explaining API rate limits, bursts and HTTP 429 in a software-concepts course",
+    "A physical analogy for token bucket and leaky bucket algorithms in system design teaching",
+    "Plumbing training: diaphragm float valves, orifice flow and Torricelli drain"
+  ],
   "domain": "Hydraulics / software concepts",
   "parts": 26,
-  "views": ["Section A-A 1:2.5", "Detail B fill valve 2:1", "Detail D drop valve seat 1:1", "View C plan, lid removed 1:2.5", "Diagram 1 tokens against time", "Table 1 token bucket and cistern"],
+  "views": [
+    "Section A-A 1:2.5",
+    "Detail B fill valve 2:1",
+    "Detail D drop valve seat 1:1",
+    "View C plan, lid removed 1:2.5",
+    "Diagram 1 tokens against time",
+    "Table 1 token bucket and cistern"
+  ],
   "controls": "Pull (click or drag up) the knob or Space sends a request · H holds the float down (overflow) · R refills · S slow motion",
   "checkTimes": "0,1,1.6,2.1,2.6,3,5,8.1,11,15.7,16.4,20,25,29.9,30.4,34",
-  "shotT": 16.4
+  "shotT": 16.4,
+  "has3d": true,
+  "shot3d": {
+    "view": "iso",
+    "cut": 1,
+    "zoom": 1.15,
+    "look": [
+      20,
+      145,
+      0
+    ],
+    "t": 2.2
+  },
+  "controls3d": "Drag to orbit · pull (drag up or click) the knob, PULL or Space sends a request · H holds the float down · R refills · E explode · C cut · 1–4 views · S slow"
 }

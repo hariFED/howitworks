@@ -87,8 +87,24 @@ html.in-frame .bp-page{padding:8px 8px 10px}
   if (m.has3d) {
     // the 3D page links its 2D sheet by file name; point it at the site's copy
     writeFileSync(join(out, "3d", `${m.slug}.html`), readFileSync(src3d, "utf8").split(`href="${m.slug}.html"`).join(`href="../sheets/${m.slug}.html"`));
-    const hero = join(root, "examples", m.slug, "shots3d", "hero.png");
-    if (existsSync(hero)) copyFileSync(hero, join(out, "thumbs", `${m.slug}-3d.png`));
+    // a clean embed shot (no bar, title block or balloons) from the example's own hero settings
+    const png3d = join(out, "thumbs", `${m.slug}-3d.png`);
+    if (shots || !existsSync(png3d)) {
+      // overrides where the example's hero is a close-up that doesn't read as a thumbnail
+      const THUMB3D = { "click-pen": { view: "iso", cut: 1, zoom: 1.5, t: 0.5, explode: 0.6 }, "shock-absorber": { view: "iso", cut: 1, zoom: 1.6, look: [0, 230, 0], t: 0.66 } };
+      const h = THUMB3D[m.slug] || m.shot3d || {};
+      const args = ["--embed", "--balloons", "0", "--gpu", "--theme", "white", "--width", "960", "--height", "720"];
+      for (const k of ["view", "cut", "zoom", "t", "explode"]) if (h[k] != null) args.push("--" + k, String(h[k]));
+      if (Array.isArray(h.look)) args.push("--look", h.look.join(","));
+      try {
+        execFileSync(process.execPath, [join(root, "scripts", "shot3d.mjs"), src3d, "--out", png3d, ...args], { stdio: "pipe" });
+        console.log(`thumb  ${m.slug} 3d`);
+      } catch (e) {
+        const hero = join(root, "examples", m.slug, "shots3d", "hero.png");
+        if (existsSync(hero)) copyFileSync(hero, png3d);
+        console.log(`thumb  ${m.slug} 3d (fallback to hero.png)`);
+      }
+    }
   }
   const thumb = join(out, "thumbs", `${m.slug}.png`);
   if (shots || !existsSync(thumb)) {
@@ -188,6 +204,7 @@ h2 .n{order:2;font-family:var(--serif);font-style:italic;font-weight:400;color:v
 .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px 10px;margin:26px 0 22px;text-align:center}
 .grid a{text-decoration:none;display:block}
 .grid img{display:block;width:100%;height:auto;border-radius:3px;margin-bottom:6px}
+.g3d img{aspect-ratio:4/3}
 .grid b{display:block;font-weight:500;font-size:12px;line-height:15px}
 .grid span{display:block;color:var(--muted);font-size:11.5px;line-height:15px}
 .rows{display:grid;grid-template-columns:120px 1fr;column-gap:14px;margin:18px 0;border-top:1px solid var(--rule)}
@@ -380,7 +397,7 @@ ${FONTS}
 
 // ---- landing page content
 const mini = ["four-stroke", "governor", "pin-tumbler", "centrifugal-pump", "carburettor"]
-  .filter((s) => bySlug[s]).map((s) => `<a href="sheets/${s}.html" title="${esc(bySlug[s].title)}">${img(s)}</a>`).join("");
+  .filter((s) => bySlug[s]).map((s) => `<a href="${bySlug[s].has3d ? "3d" : "sheets"}/${s}.html" title="${esc(bySlug[s].title)}">${bySlug[s].has3d ? `<img src="thumbs/${s}-3d.png?v=${BUILD}" alt="" width="960" height="720">` : img(s)}</a>`).join("");
 const grid = sheets.map((m) => { const [o, i] = short(m); return `<a href="sheets/${m.slug}.html">${img(m.slug)}<b>${esc(o)}</b><span>${esc(i)}${m.has3d ? " · 3D" : ""}</span></a>`; }).join("\n");
 const SIX = ["token-bucket", "debounce", "circuit-breaker", "pin-tumbler", "escapement", "differential"].filter((s) => bySlug[s]);
 const six = SIX.map((s) => { const m = bySlug[s]; return `<a href="sheets/${s}.html">${img(s)}<b>${esc(short(m)[1])}</b><span>${esc(m.object)}</span><em>${esc(m.idea)}</em></a>`; }).join("\n");
@@ -504,8 +521,8 @@ ${solid("floor-pump", "Live 3D cutaway: the base of a bicycle floor pump", "cut=
 <section>${H.flat}
 <p>Every sheet is a flat drawing first, because a flat section is where dimensions, scales and standards live. Here is the same kind of mechanism, a watch escapement, drawn flat at 20:1 and still running:</p>
 <div class="wide">${live("escapement", "Live drawing: Swiss lever escapement, plan view at 20:1", [36, 34, 745, 420], [36, 34, 745, 420])}</div>
-<p>Then, where shape and assembly are the point, Claude builds a <em class="s">solid</em> view from the same numbers: turned with the mouse, cut along the drawing's own section plane with hatched faces, and pulled apart into an exploded view. Add <code>3d</code> to the request. ${(() => { const l = sheets.filter((m) => m.has3d); return l.length ? `${l.length === 1 ? "One sheet has" : l.length + " sheets have"} a 3D view so far: ${l.map((m) => `<a href="3d/${m.slug}.html">${esc(short(m)[0])}</a>`).join(", ")}.` : ""; })()}</p>
-${sheets.some((m) => m.has3d && m.slug !== "floor-pump") ? `<div class="six">${sheets.filter((m) => m.has3d && m.slug !== "floor-pump" && existsSync(join(out, "thumbs", m.slug + "-3d.png"))).slice(0, 6).map((m) => `<a href="3d/${m.slug}.html"><img src="thumbs/${m.slug}-3d.png?v=${BUILD}" alt="${esc(m.object)} in 3D" loading="lazy"><b>${esc(short(m)[0])}</b><span>${esc(short(m)[1])} · 3D</span></a>`).join("")}</div>` : ""}
+<p>Then, where shape and assembly are the point, Claude builds a <em class="s">solid</em> view from the same numbers: turned with the mouse, cut along the drawing's own section plane with hatched faces, and pulled apart into an exploded view. Add <code>3d</code> to the request. ${(() => { const l = sheets.filter((m) => m.has3d); return l.length === sheets.length ? "Every sheet in the collection has one; open any of them below, then drag to turn it, press E to take it apart." : l.length ? `${l.length} sheets have one so far.` : ""; })()}</p>
+${sheets.some((m) => m.has3d && m.slug !== "floor-pump") ? `<div class="grid g3d">${sheets.filter((m) => m.has3d && m.slug !== "floor-pump" && existsSync(join(out, "thumbs", m.slug + "-3d.png"))).map((m) => `<a href="3d/${m.slug}.html"><img src="thumbs/${m.slug}-3d.png?v=${BUILD}" alt="${esc(m.object)} in 3D" loading="lazy"><b>${esc(short(m)[0])}</b><span>${esc(short(m)[1])}</span></a>`).join("")}</div>` : ""}
 </section>
 
 <section>${H.six}

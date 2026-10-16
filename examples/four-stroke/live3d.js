@@ -113,13 +113,13 @@ function gas(f, s) {
   const burning = f >= M.SPARK || f < EVC;
   const flameOn = f >= M.SPARK && s.xb < 0.995;
   const d = density(s.p);
-  V.fluid("cyl", { offset: [0, drop, 0], stretch: -drop, density: d * (flameOn ? 0.7 : 1), wash: burning && !flameOn ? 0.16 : 0.03 });
+  V.fluid("cyl", { offset: [0, drop, 0], stretch: -drop, density: d * (flameOn ? 0.45 : 1), wash: burning && !flameOn ? 0.16 : 0.03 });
   const rf = flameOn ? 38 * Math.sqrt(s.xb) : 0;
   if (Math.abs(rf - flameShown) > 0.05) {
     setFlame(flameOn ? SC.flameLoop(rf, crown) : null);
     flameShown = rf;
   }
-  if (flameOn) V.fluid("flame", { density: Math.min(1, d + 0.25), wash: 0.42 });
+  if (flameOn) V.fluid("flame", { density: Math.min(1, d + 0.35), wash: 0.5 });
   const din = density(M.P_IN);
   const dex = density(M.P_EX);
   V.fluid("in-port", { density: din, wash: 0.03 });
@@ -147,7 +147,7 @@ const say = L.announcer($("sr"), 2);
 function overlay() {
   if (V.explode > 0.05) return "";
   const f = M.wrap(phi);
-  return V.dim([66, M.crownAtTDC, 0], [66, M.crown(f), 0], { text: `s=${M.travel(f).toFixed(1)}`, off: 20 });
+  return V.dim([92, M.crownAtTDC, 0], [92, M.crown(f), 0], { text: `s=${M.travel(f).toFixed(1)}`, off: 14 });
 }
 
 // ---------------------------------------------------------------- controls, as on the sheet

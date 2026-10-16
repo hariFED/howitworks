@@ -1,0 +1,3508 @@
+<!doctype html>
+<html lang="en" data-theme="white">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pin Tumbler 3D</title>
+<meta name="description" content="The BP-008 five-pin euro cylinder as a live isometric half-section through its pin stacks: the wrong key stops pin 3 a millimetre short of the shear line, the right key brings all five gaps onto it and the plug and cam turn, from the 2D sheet's own model.">
+<script>if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add("v3-embed");</script>
+<style>
+/* Blueprint sheet styles. Every colour a drawing uses is one of these tokens. */
+
+:root,
+[data-theme="blueprint"] {
+  --bp-page: #0a2747;
+  --bp-paper: #123b69;
+  --bp-ink: #e9f1ff;
+  --bp-hatch: rgba(214, 230, 255, 0.72);
+  --bp-muted: #95b3da;
+  --bp-grid: rgba(190, 215, 255, 0.07);
+  --bp-accent: #ffc94d;
+  --bp-accent-ink: #ffd77a;
+  --bp-ui: rgba(233, 241, 255, 0.12);
+  /* 3D mode (solid3d.mjs): uncut surfaces in three tones, lit, mid and shadow */
+  --bp3-lit: #2a5a93;
+  --bp3-mid: #1d4a7e;
+  --bp3-dark: #133864;
+}
+[data-theme="paper"] {
+  --bp-page: #e4dfd1;
+  --bp-paper: #f7f3e8;
+  --bp-ink: #1c2633;
+  --bp-hatch: rgba(28, 38, 51, 0.78);
+  --bp-muted: #616b78;
+  --bp-grid: rgba(28, 38, 51, 0.045);
+  --bp-accent: #d4472c;
+  --bp-accent-ink: #b8361e;
+  --bp-ui: rgba(28, 38, 51, 0.08);
+  --bp3-lit: #ece6d8;
+  --bp3-mid: #d9d0bc;
+  --bp3-dark: #bdb29b;
+}
+[data-theme="white"] {
+  --bp-page: #fafafa;
+  --bp-paper: #fafafa;
+  --bp-ink: #262626;
+  --bp-hatch: rgba(38, 38, 38, 0.42);
+  --bp-muted: #8f8f8f;
+  --bp-grid: rgba(0, 0, 0, 0);
+  --bp-accent: #e2552c;
+  --bp-accent-ink: #c8442b;
+  --bp-ui: rgba(0, 0, 0, 0.07);
+  --bp3-lit: #f1f1f0;
+  --bp3-mid: #e0e0de;
+  --bp3-dark: #c4c4c1;
+}
+[data-theme="dark"] {
+  --bp-page: #0d0f12;
+  --bp-paper: #15181c;
+  --bp-ink: #dde3ea;
+  --bp-hatch: rgba(221, 227, 234, 0.62);
+  --bp-muted: #86919d;
+  --bp-grid: rgba(221, 227, 234, 0.035);
+  --bp-accent: #f29f3d;
+  --bp-accent-ink: #f6b462;
+  --bp-ui: rgba(221, 227, 234, 0.08);
+  --bp3-lit: #353b43;
+  --bp3-mid: #272c32;
+  --bp3-dark: #1b1e22;
+}
+
+:root {
+  --bp-thick: 1.15px;
+  --bp-thin: 0.55px;
+  --bp-font: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bp-page);
+  color: var(--bp-ink);
+  font-family: var(--bp-font);
+}
+.bp-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  box-sizing: border-box;
+}
+.bp-figure {
+  margin: 0;
+}
+.bp-sheet {
+  display: block;
+  width: 100%;
+  height: auto;
+  outline: none;
+  border-radius: 2px;
+}
+.bp-sheet:focus-visible {
+  box-shadow: 0 0 0 2px var(--bp-accent);
+}
+.bp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--bp-muted);
+  letter-spacing: 0.03em;
+}
+.bp-bar kbd {
+  font: inherit;
+  color: var(--bp-ink);
+  border: 1px solid var(--bp-ui);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+.bp-themes {
+  display: flex;
+  gap: 4px;
+}
+.bp-themes button {
+  font: inherit;
+  color: var(--bp-muted);
+  background: transparent;
+  border: 1px solid var(--bp-ui);
+  border-radius: 3px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.bp-themes button[aria-pressed="true"] {
+  color: var(--bp-ink);
+  background: var(--bp-ui);
+}
+.bp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Zoom mode (?zoom=x,y,w,h): the region fills the window, for close-up checks. */
+body.bp-zoom .bp-page {
+  max-width: none;
+  padding: 0;
+}
+body.bp-zoom .bp-sheet {
+  width: 100vw;
+  height: 100vh;
+}
+body.bp-zoom .bp-bar {
+  display: none;
+}
+
+/* ---- the drawing */
+.bp-sheet .sheet-bg {
+  fill: var(--bp-paper);
+}
+.bp-sheet .grid {
+  fill: none;
+  stroke: var(--bp-grid);
+  stroke-width: 0.5px;
+}
+.bp-sheet .vis,
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  fill: none;
+  stroke: var(--bp-ink);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.bp-sheet .vis {
+  stroke-width: var(--bp-thick);
+}
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .hid {
+  stroke-dasharray: 4 2.2;
+  stroke-linecap: butt;
+}
+.bp-sheet .ctr {
+  stroke-dasharray: 15 2.6 2 2.6;
+  stroke-linecap: butt;
+}
+.bp-sheet .phan {
+  stroke-dasharray: 13 2.4 1.8 2.4 1.8 2.4;
+  stroke-linecap: butt;
+}
+.bp-sheet .vis.spring {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .paper,
+.bp-sheet .balloon {
+  fill: var(--bp-paper);
+}
+.bp-sheet .balloon {
+  stroke: var(--bp-ink);
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .solid,
+.bp-sheet .head,
+.bp-sheet .dot {
+  fill: var(--bp-ink);
+}
+.bp-sheet .hl {
+  fill: none;
+  stroke: var(--bp-hatch);
+  stroke-width: 0.5px;
+}
+.bp-sheet .hl-dash {
+  stroke-dasharray: 1.3 1.3;
+}
+.bp-sheet .hd {
+  fill: var(--bp-hatch);
+}
+.bp-sheet .tint {
+  fill: var(--bp-accent);
+}
+.bp-sheet .accent {
+  stroke: var(--bp-accent);
+}
+.bp-sheet .accent-fill {
+  fill: var(--bp-accent);
+}
+.bp-sheet .t {
+  font-family: var(--bp-font);
+  font-size: 9.5px;
+  fill: var(--bp-ink);
+  letter-spacing: 0.02em;
+}
+.bp-sheet .t-sm {
+  font-size: 7.6px;
+}
+.bp-sheet .t-lg {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-xl {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.bp-sheet .t-cap {
+  font-size: 6.2px;
+  fill: var(--bp-muted);
+  letter-spacing: 0.08em;
+}
+.bp-sheet .t-head {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-mute {
+  fill: var(--bp-muted);
+}
+.bp-sheet .t-accent {
+  fill: var(--bp-accent-ink);
+}
+.bp-sheet [data-drag] {
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+/* 3D mode page layout (writePage3d). Colours are the tokens of sheet.css, including --bp3-*. */
+html, body { height: 100%; overflow: hidden; }
+.v3 { display: flex; flex-direction: column; height: 100%; }
+.v3-bar { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 8px 16px; font-size: 12px; color: var(--bp-muted); letter-spacing: .03em; border-bottom: 1px solid var(--bp-ui); min-width: 0; }
+.v3-bar b { color: var(--bp-ink); font-weight: 600; letter-spacing: .08em; }
+.v3-bar a { color: var(--bp-muted); }
+.v3-grp { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.v3-bar button { font: inherit; color: var(--bp-muted); background: transparent; border: 1px solid var(--bp-ui); border-radius: 3px; padding: 3px 9px; cursor: pointer; }
+.v3-bar button[aria-pressed="true"] { color: var(--bp-ink); background: var(--bp-ui); }
+.v3-bar input[type="range"] { width: 92px; accent-color: var(--bp-accent); }
+.v3-stage { position: relative; flex: 1; min-height: 0; min-width: 0; overflow: hidden; outline: none; background-color: var(--bp-paper);
+  background-image: linear-gradient(var(--bp-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bp-grid) 1px, transparent 1px); background-size: 20px 20px; }
+.v3-stage:focus-visible { box-shadow: inset 0 0 0 2px var(--bp-accent); }
+.v3-stage::after { content: ""; position: absolute; inset: 10px; border: 1.2px solid var(--bp-ink); pointer-events: none; opacity: .85; }
+.v3-stage canvas { position: absolute; inset: 0; display: block; touch-action: none; cursor: grab; }
+.v3-stage canvas.v3-grab { cursor: grabbing; }
+#ov { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+#ov .thin, #ov .hid { fill: none; stroke: var(--bp-ink); stroke-width: .8px; }
+#ov .hid { stroke-dasharray: 4 2.6; }
+#ov .dot, #ov .head { fill: var(--bp-ink); }
+#ov .balloon { fill: var(--bp-paper); stroke: var(--bp-ink); stroke-width: .9px; }
+#ov .t { font-family: var(--bp-font); font-size: 10.5px; fill: var(--bp-ink); }
+.v3-title { position: absolute; right: 10px; bottom: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; width: min(420px, calc(100% - 20px)); border: 1.2px solid var(--bp-ink); border-right: 0; border-bottom: 0; background: var(--bp-paper); font-size: 10px; pointer-events: none; }
+.v3-title > div { border-right: .6px solid var(--bp-ink); border-bottom: .6px solid var(--bp-ink); padding: 3px 6px 4px; min-width: 0; }
+.v3-title i { display: block; font-style: normal; font-size: 7px; color: var(--bp-muted); letter-spacing: .08em; }
+.v3-title .w3 { grid-column: span 3; } .v3-title .w4 { grid-column: span 4; }
+.v3-title .lg { font-size: 12px; font-weight: 600; letter-spacing: .06em; }
+#readout { color: var(--bp-accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.v3-hint { position: absolute; left: 22px; bottom: 18px; font-size: 10.5px; color: var(--bp-muted); letter-spacing: .04em; max-width: 46%; pointer-events: none; }
+.v3-fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--bp-muted); background: var(--bp-paper); }
+.v3-fail a { color: var(--bp-ink); }
+@media (max-width: 640px) {
+  .v3-hint { display: none; }
+  .v3-bar { padding: 6px 10px; gap: 6px 10px; }
+  .v3-bar b { flex-basis: 100%; }
+  .v3-bar input[type="range"] { width: 70px; }
+  .v3-title > div:not(.w4) { display: none; }
+}
+/* ?embed=1: the object, its balloons and leaders only, on the page colour (an iframe hero) */
+.v3-embed .v3-bar, .v3-embed .v3-title, .v3-embed .v3-hint { display: none; }
+.v3-embed .v3-stage { background: var(--bp-page); }
+.v3-embed .v3-stage::after { display: none; }
+.v3-embed #ov .balloon { fill: var(--bp-page); }
+
+
+</style>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }</script>
+</head>
+<body>
+<div class="v3">
+<div class="v3-bar" role="toolbar" aria-label="View controls">
+  <b>PIN TUMBLER · BP-008 · 3D</b>
+  <span class="v3-grp" role="group" aria-label="View"><button type="button" data-view="iso">ISO</button><button type="button" data-view="front">FRONT</button><button type="button" data-view="side">SIDE</button><button type="button" data-view="top">TOP</button></span>
+  <span class="v3-grp"><button type="button" id="cut" aria-pressed="true">CUT</button><label>plane <input id="offset" type="range" min="-30" max="30" step="0.5" value="0" aria-label="Cutting plane offset, mm"></label></span>
+  <span class="v3-grp"><label>explode <input id="explode" type="range" min="0" max="1" step="0.01" value="0" aria-label="Explode"></label></span>
+  <span class="v3-grp"><button type="button" id="balloons" aria-pressed="true">BALLOONS</button><button type="button" id="tour" aria-pressed="false">TOUR</button></span>
+  <span class="bp-themes" role="group" aria-label="Theme"><button type="button" data-theme-pick="blueprint">blueprint</button><button type="button" data-theme-pick="paper">paper</button><button type="button" data-theme-pick="white">white</button><button type="button" data-theme-pick="dark">dark</button></span>
+  <a href="pin-tumbler.html">2D sheet</a>
+</div>
+<div id="stage" class="v3-stage" tabindex="0" role="img" aria-label="Isometric half-section of a five-pin euro cylinder and its key, cut through the pin stacks. Drag to orbit; drag the key or use the arrow keys to insert it and turn it, K swaps the key. The plug turns only when every key-pin crown sits on the shear line, from the same model as the 2D sheet.">
+  <canvas id="gl"></canvas>
+  <svg id="ov" aria-hidden="true"></svg>
+  <div class="v3-hint">DRAG TO ORBIT · DRAG THE KEY OR ← → TO INSERT · ↑ ↓ TURN · K OTHER KEY · SPACE TOUR · WHEEL ZOOM · SHIFT-DRAG PAN · E EXPLODE · C CUT · 1–4 VIEWS</div>
+  <div class="v3-title">
+    <div class="w3 lg"><i>TITLE</i>PIN TUMBLER · ISOMETRIC HALF-SECTION</div><div class="lg"><i>DWG NO</i>BP-008-3D</div>
+    <div><i>SCALE</i>NTS</div><div><i>PROJECTION</i>ISOMETRIC</div><div><i>UNITS</i>mm · deg</div><div><i>PARTS</i>16</div>
+    <div class="w4"><i>LIVE · SAME MODEL AS BP-008 · DRAG THE KEY · ↑ TURNS</i><span id="readout">&nbsp;</span></div>
+  </div>
+  <noscript><div class="v3-fail">This drawing needs JavaScript and WebGL. The 2D sheet, <a href="pin-tumbler.html">pin-tumbler.html</a>, needs neither.</div></noscript>
+</div>
+<span id="sr" class="bp-sr" aria-live="polite"></span>
+</div>
+<script>
+window.addEventListener("error", (e) => { window.__v3err = String(e.message || e); });
+setTimeout(() => {
+  if (window.__v3ok) return;
+  const d = document.createElement("div");
+  d.className = "v3-fail";
+  d.id = "v3-fallback";
+  d.innerHTML = "The 3D view could not start (" + (window.__v3err || "three.js did not load: it needs WebGL and a connection to cdn.jsdelivr.net").replace(/</g, "&lt;") + "). The 2D sheet, <a href=\"pin-tumbler.html\">pin-tumbler.html</a>, needs neither.";
+  document.getElementById("stage").appendChild(d);
+}, 8000);
+</script>
+<script type="module">
+import * as THREE from "three";
+const K = (() => {
+// Blueprint drafting kit: orthographic views, sections, hatching, dimensions and sheet furniture.
+// Every function here is pure and returns SVG markup strings, so the same code runs in the build
+// and, inlined, in the page (live dimensions, moving springs, needles).
+//
+// Units. World geometry is in millimetres of the real object: u to the right, v up (a front view),
+// or u right, v away from the viewer (a plan view). The sheet is an A2 drawing, 594 mm wide, drawn
+// 1200 units wide; a view maps world mm to sheet units through its drawing scale.
+
+const SHEET = { w: 1200, h: 848 };
+const PX_PER_MM = SHEET.w / 594;
+
+// ISO 128 line widths and ISO 3098 lettering, in sheet units (A2: 0.5 / 0.25 mm lines, 3.5 mm text).
+const THICK = 1.15;
+const THIN = 0.55;
+const TEXT = 9.5;
+const ARROW = 7;
+const GAP = 2.2; // extension lines start this far from the object
+const OVER = 3.5; // and run this far past the dimension line
+
+const r2 = (n) => Math.round(n * 100) / 100;
+
+function fmt(n, digits = 1) {
+  const near = Math.round(n);
+  if (Math.abs(n - near) < 0.05) return String(near);
+  return n.toFixed(digits);
+}
+
+// ---------------------------------------------------------------- views
+
+// A view is a window from world mm onto the sheet. scale is the drawing scale (1/2.5 for "1:2.5").
+function view({ x, y, scale, name = "" }) {
+  const k = scale * PX_PER_MM;
+  return { x, y, scale, k, name, p: ([u, v]) => [r2(x + u * k), r2(y - v * k)] };
+}
+
+const scaleLabel = (scale) => (scale >= 1 ? `${fmt(scale)}:1` : `1:${fmt(1 / scale)}`);
+
+function d(V, pts, closed = true) {
+  let out = "";
+  for (let i = 0; i < pts.length; i++) {
+    const [x, y] = V.p(pts[i]);
+    out += `${i ? "L" : "M"}${x} ${y}`;
+  }
+  return closed ? out + "Z" : out;
+}
+
+// ---------------------------------------------------------------- world geometry (point lists)
+
+const rect = (u0, v0, u1, v1) => [[u0, v0], [u1, v0], [u1, v1], [u0, v1]];
+
+function arc(cu, cv, r, a0, a1, steps) {
+  const n = steps ?? Math.max(3, Math.ceil(Math.abs(a1 - a0) / 7.5));
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const a = ((a0 + ((a1 - a0) * i) / n) * Math.PI) / 180;
+    out.push([cu + r * Math.cos(a), cv + r * Math.sin(a)]);
+  }
+  return out;
+}
+
+const circle = (cu, cv, r, steps = 48) => arc(cu, cv, r, 0, 360 - 360 / steps, steps - 1);
+
+// A rectangle with filleted corners.
+function rrect(u0, v0, u1, v1, r, steps = 4) {
+  const q = Math.min(r, (u1 - u0) / 2, (v1 - v0) / 2);
+  return [
+    ...arc(u1 - q, v0 + q, q, -90, 0, steps),
+    ...arc(u1 - q, v1 - q, q, 0, 90, steps),
+    ...arc(u0 + q, v1 - q, q, 90, 180, steps),
+    ...arc(u0 + q, v0 + q, q, 180, 270, steps),
+  ];
+}
+
+const move = (pts, du, dv) => pts.map(([u, v]) => [u + du, v + dv]);
+const flipU = (pts, about = 0) => pts.map(([u, v]) => [2 * about - u, v]).reverse();
+const flipV = (pts, about = 0) => pts.map(([u, v]) => [u, 2 * about - v]).reverse();
+
+function inside([u, v], poly) {
+  let hit = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ui, vi] = poly[i];
+    const [uj, vj] = poly[j];
+    if (vi > v !== vj > v && u < ((uj - ui) * (v - vi)) / (vj - vi) + ui) hit = !hit;
+  }
+  return hit;
+}
+
+// A body of revolution cut through its axis.
+// loop is the half-profile as [r, s] pairs: r >= 0 measured from the axis, s along the axis.
+// axis "v" is a vertical axis at u = at; axis "u" a horizontal axis at v = at.
+// Returns the cut faces (hatched) and the edges seen through the bore behind the cutting plane:
+// every circle on an inner surface shows edge-on as a straight line across the bore.
+function revolve(loop, { axis = "v", at = 0 } = {}) {
+  const place = axis === "v" ? (r, s) => [at + r, s] : (r, s) => [s, at + r];
+  const n = loop.length;
+  const onAxis = loop.findIndex(([r], i) => r === 0 && loop[(i + 1) % n][0] === 0);
+  let cuts;
+  if (onAxis >= 0) {
+    const chain = Array.from({ length: n }, (_, j) => loop[(onAxis + 1 + j) % n]);
+    const right = chain.map(([r, s]) => place(r, s));
+    const left = chain.slice(1, -1).reverse().map(([r, s]) => place(-r, s));
+    cuts = [[...right, ...left]];
+  } else {
+    cuts = [loop.map(([r, s]) => place(r, s)), loop.map(([r, s]) => place(-r, s)).reverse()];
+  }
+  const eps = 1e-3;
+  const across = new Map();
+  const clear = (r, s) => [0.02, 0.25, 0.5, 0.75, 0.98].every((t) => !inside([t * r, s], loop));
+  for (const [r, s] of loop) {
+    if (r <= 0) continue;
+    if (clear(r, s + eps) && clear(r, s - eps)) across.set(s, Math.max(across.get(s) ?? 0, r));
+  }
+  const edges = [...across].map(([s, r]) => [place(-r, s), place(r, s)]);
+  return { cuts, edges };
+}
+
+// ---------------------------------------------------------------- hatching
+
+// ANSI/ISO-style material hatches. Spacing is in sheet units and never scales with the view,
+// so a detail at 2:1 shows the same density as the main view, as on a real drawing.
+const MATERIALS = {
+  steel: { kind: "lines", gap: 3.4 },
+  iron: { kind: "lines", gap: 5.6 },
+  alu: { kind: "pairs", gap: 5.2, pair: 1.5 },
+  brass: { kind: "dashed", gap: 4.6 },
+  bronze: { kind: "dashed", gap: 3.6 },
+  rubber: { kind: "cross", gap: 3.2 },
+  plastic: { kind: "lines", gap: 2.3 },
+  foam: { kind: "dots", gap: 2.6 },
+  wood: { kind: "grain", gap: 4 },
+};
+const ANGLES = [45, 135, 30, 60];
+
+function hatchDefs() {
+  let out = "";
+  for (const [name, m] of Object.entries(MATERIALS)) {
+    for (const angle of ANGLES) {
+      const g = m.gap;
+      let body = "";
+      if (m.kind === "lines") body = `<path class="hl" d="M0 -1V${g + 1}"/>`;
+      if (m.kind === "pairs") body = `<path class="hl" d="M0 -1V${g + 1}M${m.pair} -1V${g + 1}"/>`;
+      if (m.kind === "dashed") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl hl-dash" d="M${g / 2} -1V${g + 1}"/>`;
+      if (m.kind === "cross") body = `<path class="hl" d="M0 -1V${g + 1}M-1 0H${g + 1}"/>`;
+      if (m.kind === "dots") body = `<circle class="hd" cx="${g / 2}" cy="${g / 2}" r="0.42"/>`;
+      if (m.kind === "grain") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl" d="M${g * 0.55} -1C${g * 0.75} ${g * 0.3} ${g * 0.35} ${g * 0.7} ${g * 0.55} ${g + 1}"/>`;
+      out += `<pattern id="h-${name}-${angle}" patternUnits="userSpaceOnUse" width="${g}" height="${g}" patternTransform="rotate(${angle})">${body}</pattern>`;
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- drawing parts
+
+// A cut face: paper underneath (it hides what is behind), the material hatch, a thick outline.
+// mat "solid" blacks the section in, the ISO convention for sections too thin to hatch.
+function cut(V, pts, { mat = "steel", angle = 45 } = {}) {
+  const dd = d(V, pts);
+  if (mat === "solid") return `<path class="solid" d="${dd}"/>`;
+  return `<path class="paper" d="${dd}"/><path fill="url(#h-${mat}-${angle})" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+// A body of revolution in section, with the edges behind the cut.
+function section(V, rev, opts) {
+  return rev.cuts.map((c) => cut(V, c, opts)).join("") + rev.edges.map((e) => line(V, e)).join("");
+}
+
+// An unsectioned solid (shafts, rods, pins, balls, nuts and ribs are never hatched in a section).
+function body(V, pts) {
+  const dd = d(V, pts);
+  return `<path class="paper" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+const line = (V, pts, cls = "vis", closed = false) => `<path class="${cls}" d="${d(V, pts, closed)}"/>`;
+const lines = (V, list, cls = "vis") => `<path class="${cls}" d="${list.map((pts) => d(V, pts, false)).join("")}"/>`;
+
+// A centre line, run a little past the outline at both ends.
+function centerline(V, a, b, over = 6) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  return `<path class="ctr" d="M${r2(ax - ux * over)} ${r2(ay - uy * over)}L${r2(bx + ux * over)} ${r2(by + uy * over)}"/>`;
+}
+
+// Centre mark for a circle in a view: two crossed centre lines.
+function centerMark(V, [cu, cv], r, over = 5) {
+  return centerline(V, [cu - r, cv], [cu + r, cv], over) + centerline(V, [cu, cv - r], [cu, cv + r], over);
+}
+
+// A compression spring cut along its axis: wire sections (blacked in) on both sides, half a pitch
+// apart, joined by the back half of each turn. from/to are positions along the axis.
+function springSection(V, { from, to, radius, wire, turns, axis = "u", at = 0 }) {
+  const place = axis === "u" ? (s, r) => [s, at + r] : (s, r) => [at + r, s];
+  const pitch = (to - from - wire) / turns;
+  const start = from + wire / 2;
+  const back = [];
+  let sections = "";
+  for (let i = 0; i <= turns; i++) {
+    const sTop = start + i * pitch;
+    sections += cut(V, circle(...place(sTop, radius), wire / 2, 12), { mat: "solid" });
+    if (i < turns) {
+      const sBot = sTop + pitch / 2;
+      sections += cut(V, circle(...place(sBot, -radius), wire / 2, 12), { mat: "solid" });
+      back.push([place(sTop, radius), place(sBot, -radius)]);
+    }
+  }
+  return lines(V, back, "vis spring") + sections;
+}
+
+// ---------------------------------------------------------------- annotation
+
+function arrowHead([x, y], [dx, dy]) {
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const bx = x - ux * ARROW;
+  const by = y - uy * ARROW;
+  const half = ARROW * 0.25;
+  return `M${r2(x)} ${r2(y)}L${r2(bx - uy * half)} ${r2(by + ux * half)}L${r2(bx + uy * half)} ${r2(by - ux * half)}Z`;
+}
+
+const textWidth = (s, size = TEXT) => String(s).length * size * 0.6;
+
+// A linear dimension between two world points, measured along dir ("h" or "v").
+// off is the sheet distance from point a to the dimension line (negative: up or left).
+// The value is measured from the geometry unless text is given, so a dimension cannot lie.
+function dim(V, a, b, { dir = "h", off = 18, text, prefix = "", suffix = "", id = "", cls = "" } = {}) {
+  const A = V.p(a);
+  const B = V.p(b);
+  const value = text ?? prefix + fmt(Math.abs(dir === "h" ? b[0] - a[0] : b[1] - a[1])) + suffix;
+  const h = dir === "h";
+  const main = h ? 0 : 1; // the axis the dimension measures along
+  const side = 1 - main;
+  const at = A[side] + off; // where the dimension line sits
+  const pt = (m, s) => (h ? [m, s] : [s, m]);
+  let ext = "";
+  for (const P of [A, B]) {
+    const gapTo = at - P[side];
+    if (Math.abs(gapTo) <= GAP) continue;
+    const sgn = Math.sign(gapTo);
+    const [x1, y1] = pt(P[main], P[side] + sgn * GAP);
+    const [x2, y2] = pt(P[main], at + sgn * OVER);
+    ext += `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+  }
+  const lo = Math.min(A[main], B[main]);
+  const hi = Math.max(A[main], B[main]);
+  const span = hi - lo;
+  const tw = textWidth(value);
+  const arrowsIn = span >= ARROW * 2 + 3;
+  const textIn = span >= tw + ARROW * 2 + 6;
+  let lineD;
+  let heads;
+  let tm; // text position along the measured axis
+  let anchor = "middle";
+  if (arrowsIn) {
+    const [x1, y1] = pt(lo, at);
+    const [x2, y2] = pt(hi, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(-1, 0)) + arrowHead(pt(hi, at), pt(1, 0));
+  } else {
+    const [x1, y1] = pt(lo - ARROW - 7, at);
+    const [x2, y2] = pt(hi + ARROW + 7, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(1, 0)) + arrowHead(pt(hi, at), pt(-1, 0));
+  }
+  if (textIn) tm = (lo + hi) / 2;
+  else {
+    tm = hi + ARROW + 10 + tw / 2;
+    const [x2, y2] = pt(tm + tw / 2, at);
+    lineD += `L${r2(x2)} ${r2(y2)}`;
+  }
+  // ISO: text sits just above a horizontal line and reads from the right on a vertical one.
+  const [tx, ty] = pt(tm, at - 3);
+  const textEl = h
+    ? `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}">${value}</text>`
+    : `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}" transform="rotate(-90 ${r2(tx)} ${r2(ty)})">${value}</text>`;
+  return `<g data-role="dim"${id ? ` id="${id}"` : ""}${cls ? ` class="${cls}"` : ""}><path class="thin" d="${ext}${lineD}"/><path class="head" d="${heads}"/>${textEl}</g>`;
+}
+
+// A part balloon: a dot on the part, a thin leader, a circled item number.
+function balloon(V, at, [bx, by], n, { target = "", r = 8.5 } = {}) {
+  const [ax, ay] = V.p(at);
+  const a = Math.atan2(ay - by, ax - bx);
+  const ex = r2(bx + r * Math.cos(a));
+  const ey = r2(by + r * Math.sin(a));
+  return (
+    `<g data-role="balloon" data-target="${target}" data-at="${ax} ${ay}">` +
+    `<path class="thin" d="M${ex} ${ey}L${ax} ${ay}"/><circle class="dot" cx="${ax}" cy="${ay}" r="1.5"/>` +
+    `<circle class="balloon" cx="${bx}" cy="${by}" r="${r}"/>` +
+    `<text class="t" x="${bx}" y="${r2(by + 3.3)}" text-anchor="middle">${n}</text></g>`
+  );
+}
+
+// A view title: SECTION A-A over its scale, centred under the view.
+function viewLabel(x, y, title, sub = "") {
+  return (
+    `<g data-role="label"><text class="t t-lg" x="${x}" y="${y}" text-anchor="middle">${title}</text>` +
+    (sub ? `<text class="t t-sm" x="${x}" y="${y + 12}" text-anchor="middle">${sub}</text>` : "") +
+    `</g>`
+  );
+}
+
+// The circle that marks a detail in its parent view, with its letter.
+function detailMark(V, [cu, cv], r, letter, angle = 45) {
+  const [x, y] = V.p([cu, cv]);
+  const R = r * V.k;
+  const a = (-angle * Math.PI) / 180;
+  const lx = r2(x + (R + 9) * Math.cos(a));
+  const ly = r2(y + (R + 9) * Math.sin(a) + 4);
+  return `<g data-role="label"><circle class="thin mark" cx="${x}" cy="${y}" r="${r2(R)}"/><text class="t t-lg" x="${lx}" y="${ly}" text-anchor="middle">${letter}</text></g>`;
+}
+
+// A viewing-direction arrow (VIEW C): a thick-tipped arrow pointing at the surface, with its letter.
+function viewArrow(V, at, [dx, dy], letter, len = 26) {
+  const [x, y] = V.p(at);
+  const n = Math.hypot(dx, dy) || 1;
+  const ux = dx / n;
+  const uy = dy / n;
+  const sx = r2(x - ux * len);
+  const sy = r2(y - uy * len);
+  return (
+    `<g data-role="label"><path class="vis" d="M${sx} ${sy}L${r2(x - ux * ARROW)} ${r2(y - uy * ARROW)}"/>` +
+    `<path class="head" d="${arrowHead([x, y], [ux, uy])}"/>` +
+    `<text class="t t-lg" x="${r2(sx - uy * 10)}" y="${r2(sy + ux * 10 + 4)}" text-anchor="middle">${letter}</text></g>`
+  );
+}
+
+// A long-break line across a part (thin, with one zigzag), for parts that run out of the view.
+function breakLine(V, a, b) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const mx = (ax + bx) / 2;
+  const my = (ay + by) / 2;
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  const z = 3.5;
+  const p = (t, s) => `${r2(mx + ux * t - uy * s)} ${r2(my + uy * t + ux * s)}`;
+  return `<path class="thin" d="M${r2(ax - ux * 4)} ${r2(ay - uy * 4)}L${p(-z, 0)}L${p(-z / 2, z * 1.6)}L${p(z / 2, -z * 1.6)}L${p(z, 0)}L${r2(bx + ux * 4)} ${r2(by + uy * 4)}"/>`;
+}
+
+// ---------------------------------------------------------------- sheet furniture
+
+// The drawing frame: trimmed edge, a thick border, zone references and centring marks.
+function frame({ w = SHEET.w, h = SHEET.h, trim = 8, m = 24, cols = 8, rows = 6 } = {}) {
+  let out = `<g data-role="frame"><rect class="thin" x="${trim}" y="${trim}" width="${w - trim * 2}" height="${h - trim * 2}"/>`;
+  out += `<rect class="vis" x="${m}" y="${m}" width="${w - m * 2}" height="${h - m * 2}"/>`;
+  const cw = (w - m * 2) / cols;
+  const rh = (h - m * 2) / rows;
+  let ticks = "";
+  let labels = "";
+  for (let i = 0; i <= cols; i++) {
+    const x = r2(m + i * cw);
+    if (i > 0 && i < cols) ticks += `M${x} ${trim}V${m}M${x} ${h - m}V${h - trim}`;
+    if (i < cols) {
+      const cx = r2(m + (i + 0.5) * cw);
+      labels += `<text class="t t-sm" x="${cx}" y="${r2((trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+      labels += `<text class="t t-sm" x="${cx}" y="${r2(h - (trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+    }
+  }
+  for (let j = 0; j <= rows; j++) {
+    const y = r2(m + j * rh);
+    if (j > 0 && j < rows) ticks += `M${trim} ${y}H${m}M${w - m} ${y}H${w - trim}`;
+    if (j < rows) {
+      const cy = r2(m + (j + 0.5) * rh + 3);
+      const letter = String.fromCharCode(65 + j);
+      labels += `<text class="t t-sm" x="${r2((trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+      labels += `<text class="t t-sm" x="${r2(w - (trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+    }
+  }
+  const cm = `M${w / 2} ${trim}V${m + 10}M${w / 2} ${h - trim}V${h - m - 10}M${trim} ${h / 2}H${m + 10}M${w - trim} ${h / 2}H${w - m - 10}`;
+  out += `<path class="thin" d="${ticks}"/><path class="vis" d="${cm}"/>${labels}</g>`;
+  return out;
+}
+
+// A ruled table (parts list). cols: [{ w, align, title }]. rows: arrays of cell strings.
+// Item numbers count up from the bottom, as a parts list sits on top of the title block.
+function table(x, y, cols, rows, { rowH = 16, role = "bom", headH = 18 } = {}) {
+  const w = cols.reduce((s, c) => s + c.w, 0);
+  const h = headH + rows.length * rowH;
+  let rules = "";
+  let text = "";
+  let cx = x;
+  for (const [i, c] of cols.entries()) {
+    if (i > 0) rules += `M${r2(cx)} ${y}V${y + h}`;
+    const tx = c.align === "center" ? cx + c.w / 2 : c.align === "right" ? cx + c.w - 4 : cx + 4;
+    const anchor = c.align === "center" ? "middle" : c.align === "right" ? "end" : "start";
+    text += `<text class="t t-sm t-head" x="${r2(tx)}" y="${y + h - 5.5}" text-anchor="${anchor}">${c.title}</text>`;
+    rows.forEach((row, j) => {
+      text += `<text class="t t-sm" x="${r2(tx)}" y="${r2(y + (rows.length - 1 - j) * rowH + rowH - 4.8)}" text-anchor="${anchor}">${row[i]}</text>`;
+    });
+    cx += c.w;
+  }
+  for (let j = 1; j <= rows.length; j++) rules += `M${x} ${r2(y + j * rowH)}H${x + w}`;
+  return `<g data-role="${role}"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/><path class="thin" d="${rules}"/><rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/>${text}</g>`;
+}
+
+// A title-block cell: a small caption over a value. size: "sm" | "md" | "lg".
+function cell({ x, y, w, h, label, value = "", size = "md", id = "" }) {
+  const cls = size === "lg" ? "t t-xl" : size === "sm" ? "t t-sm" : "t";
+  const vy = size === "lg" ? y + h - 7 : y + h - 5;
+  return (
+    `<rect class="thin" x="${x}" y="${y}" width="${w}" height="${h}"/>` +
+    `<text class="t t-cap" x="${x + 4}" y="${y + 9}">${label}</text>` +
+    `<text class="${cls}" x="${x + 4}" y="${vy}"${id ? ` id="${id}"` : ""}>${value}</text>`
+  );
+}
+
+function titleBlock(x, y, w, h, cells) {
+  return `<g data-role="title"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/>${cells.map((c) => cell({ ...c, x: x + c.x, y: y + c.y })).join("")}<rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/></g>`;
+}
+
+// A notes block: a heading and numbered lines.
+function notes(x, y, heading, items, lead = 13) {
+  let out = `<g data-role="notes"><text class="t t-head" x="${x}" y="${y}">${heading}</text>`;
+  items.forEach((s, i) => {
+    out += `<text class="t t-sm" x="${x}" y="${r2(y + lead * (i + 1) + 2)}">${i + 1}. ${s}</text>`;
+  });
+  return out + `</g>`;
+}
+
+return { SHEET, PX_PER_MM, THICK, THIN, TEXT, ARROW, GAP, OVER, r2, fmt, view, scaleLabel, d, rect, arc, circle, rrect, move, flipU, flipV, inside, revolve, MATERIALS, ANGLES, hatchDefs, cut, section, body, line, lines, centerline, centerMark, springSection, textWidth, dim, balloon, viewLabel, detailMark, viewArrow, breakLine, frame, table, cell, titleBlock, notes };
+})();
+
+const L = (() => {
+// Live runtime for a blueprint sheet: one time-based loop, an idle tour, input wake-ups,
+// offscreen and hidden-tab pauses, reduced motion, and deterministic frames for checks.
+//
+// URL parameters (all optional):
+//   ?t=6.5            render the tour at 6.5 s, deterministically, and stop (for screenshots)
+//   ?theme=paper      blueprint | paper | white | dark
+//   ?zoom=x,y,w,h     show only this sheet region, filling the window (for 4x close-ups)
+//   ?mask=x,y,w,h     blank everything outside this box, so one view stands alone
+//   ?check=1          run the layout self-check after the first frame (see selfcheck.mjs)
+
+function params() {
+  const q = new URLSearchParams(location.search);
+  return {
+    t: q.has("t") ? Number(q.get("t")) : null,
+    theme: q.get("theme"),
+    zoom: q.get("zoom"),
+    mask: q.get("mask"),
+    check: q.has("check"),
+  };
+}
+
+const THEMES = ["blueprint", "paper", "white", "dark"];
+
+function setupPage(svg) {
+  const q = params();
+  // the page's own default (writePage's `theme`), then a saved choice, then ?theme=, which wins but isn't saved
+  const fallback = document.documentElement.dataset.theme || "blueprint";
+  const pick = (name, save) => {
+    if (!THEMES.includes(name)) return;
+    document.documentElement.dataset.theme = name;
+    for (const b of document.querySelectorAll("[data-theme-pick]")) b.setAttribute("aria-pressed", String(b.dataset.themePick === name));
+    if (save) {
+      try {
+        localStorage.setItem("bp-theme", name);
+      } catch {}
+    }
+  };
+  let saved = null;
+  try {
+    saved = localStorage.getItem("bp-theme");
+  } catch {}
+  pick(q.theme ?? saved ?? fallback, false);
+  for (const b of document.querySelectorAll("[data-theme-pick]")) b.addEventListener("click", () => pick(b.dataset.themePick, true));
+  // ?mask=x,y,w,h paints the page colour over everything outside one box, so a view stands alone
+  if (q.mask) {
+    const [x, y, w, h] = q.mask.split(",").map(Number);
+    if ([x, y, w, h].every(Number.isFinite)) {
+      const m = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      m.setAttribute("d", `M-9999 -9999H9999V9999H-9999Z M${x} ${y}V${y + h}H${x + w}V${y}Z`);
+      m.setAttribute("fill-rule", "evenodd");
+      m.setAttribute("style", "fill:var(--bp-page);pointer-events:none");
+      m.dataset.role = "mask";
+      svg.appendChild(m);
+    }
+  }
+  if (q.zoom) {
+    const box = q.zoom.split(",").map(Number);
+    if (box.length === 4 && box.every(Number.isFinite)) {
+      svg.setAttribute("viewBox", box.join(" "));
+      document.body.classList.add("bp-zoom");
+    }
+  }
+  return q;
+}
+
+// Critically damped follow toward a target: calm, no overshoot, frame-rate independent.
+function follow(at, want, rate, dt) {
+  return want + (at - want) * Math.exp(-rate * dt);
+}
+
+const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, t)));
+
+// run({ root, step, render, idleAfter })
+//   step(dt, live) advances the model; live.touring says whether the idle tour drives it.
+//   It returns true while something is still settling, so a reduced-motion page can sleep.
+//   render(live) writes attributes; it never rebuilds static geometry.
+function run({ root, step, render, idleAfter = 4, onFrozen }) {
+  const q = params();
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const live = { clock: 0, slow: 1, lastInput: -Infinity, reduced, touring: !reduced, frozen: q.t != null };
+  live.input = () => {
+    live.lastInput = live.clock;
+    live.touring = false;
+    wake();
+  };
+
+  if (live.frozen) {
+    const dt = 1 / 240;
+    for (let t = 0; t < q.t; t += dt) {
+      live.clock = t;
+      live.touring = true;
+      step(dt, live);
+    }
+    render(live);
+    onFrozen?.(live);
+    return live;
+  }
+
+  let raf = 0;
+  let last = 0;
+  let visible = true;
+  function frame(now) {
+    raf = 0;
+    const real = last ? Math.min(0.05, (now - last) / 1000) : 0;
+    last = now;
+    live.clock += real;
+    live.touring = !reduced && live.clock - live.lastInput > idleAfter;
+    const busy = step(real * live.slow, live);
+    render(live);
+    if (visible && !document.hidden && (!reduced || busy)) raf = requestAnimationFrame(frame);
+    else last = 0;
+  }
+  function wake() {
+    if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame);
+  }
+  live.wake = wake;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) wake();
+    }).observe(root);
+  }
+  document.addEventListener("visibilitychange", wake);
+  render(live);
+  wake();
+  return live;
+}
+
+// Vertical drag on an element, reported as a sheet-unit delta since the press.
+function dragY(svg, el, { start, move, end }) {
+  let id = null;
+  let y0 = 0;
+  const toSheet = (e) => {
+    const m = svg.getScreenCTM();
+    return m ? (e.clientY - m.f) / m.d : e.clientY;
+  };
+  el.addEventListener("pointerdown", (e) => {
+    id = e.pointerId;
+    el.setPointerCapture(id);
+    y0 = toSheet(e);
+    start?.();
+    e.preventDefault();
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (e.pointerId === id) move(toSheet(e) - y0);
+  });
+  const stop = (e) => {
+    if (e.pointerId !== id) return;
+    id = null;
+    end?.();
+  };
+  el.addEventListener("pointerup", stop);
+  el.addEventListener("pointercancel", stop);
+}
+
+// Announce a readout to screen readers at most every `every` seconds.
+function announcer(el, every = 1.5) {
+  let lastAt = -Infinity;
+  let lastText = "";
+  return (text, clock) => {
+    if (text === lastText || clock - lastAt < every) return;
+    lastAt = clock;
+    lastText = text;
+    el.textContent = text;
+  };
+}
+
+return { params, THEMES, setupPage, follow, ease, run, dragY, announcer };
+})();
+
+const S = (() => {
+// 3D mode: a live, sectioned, exploded technical illustration of an example, from the same model
+// and the same profile numbers as its 2D sheet. See references/3d.md.
+//
+// Two halves in one module:
+//   SPECS (pure, Node-safe): lathe, cylinder, tube, extrude, box, sphere, torus, helix, gear, disc,
+//     part, fluid, bore. A scene is plain data: parts made of closed solids, in world mm (x right,
+//     y up, z toward the viewer; the 2D sheet's u is x and v is y, its cutting plane is z = 0).
+//   RUNTIME (browser): create(opts) builds the three.js scene from that data and returns a view
+//     with poses, explode, fluids, drag, balloons, live dimensions and the loop (kit/live.mjs).
+//
+// THREE is not imported here: the page's module script does `import * as THREE from "three"`
+// (writePage3d in kit/page.mjs) and this module is inlined after it, so the runtime half uses that
+// binding. Nothing at the top level touches THREE or the DOM, so Node can import the spec half.
+//
+// How the drawing is made, three passes a frame:
+//   1. ids: a part id and a "cut face" flag per pixel, plus depth, into a render target;
+//   2. colour: toon tones on surfaces. While the section is open every closed solid is drawn double
+//      sided; its back faces are only ever seen through the opening, so they are shaded as the cut
+//      face (paper and the part's hatch, computed where the view ray meets the plane). Creases come
+//      from EdgesGeometry and skip pixels that pass 1 marked as a cut face;
+//   3. outlines: thick lines where the id, the flag or the depth's second difference jumps.
+//
+// URL parameters every 3D page supports:
+//   ?t=1.0 deterministic frame of the tour   ?view=iso|front|side|top   ?cut=0|1   ?offset=mm
+//   ?explode=0..1   ?zoom=k   ?look=x,y,z (mm)   ?theme=blueprint|paper|white|dark   ?balloons=0
+//   ?embed=1 (no page chrome)   ?check=1 (render stats)   ?selftest=1 (drive the controls)
+//   ?bench=1 (time a frame)   ?dbg=1 (tint bores, fluids and outlines)
+
+
+
+// ================================================================ SPECS (pure)
+
+const AXIS = { y: "y", v: "y", x: "x", u: "x", z: "z" };
+const pair = (at) => (Array.isArray(at) ? [at[0] ?? 0, at[1] ?? 0] : [at ?? 0, 0]);
+
+// A body of revolution from a closed half-profile [[r, s], …] in mm: the same loops K.revolve takes.
+// axis "y" (or "v"): vertical, through x = at[0], z = at[1]. axis "x" (or "u"): through y = at[0],
+// z = at[1]. axis "z": through x = at[0], y = at[1]. A number `at` means [at, 0].
+// A solid profile touches the axis along one edge (two consecutive points with r = 0).
+function lathe(loop, { axis = "y", at = 0, ...o } = {}) {
+  return { kind: "lathe", loop, axis: AXIS[axis], at: pair(at), ...o };
+}
+function cylinder({ axis = "y", at = 0, r, from, to, ...o }) {
+  return lathe([[0, from], [r, from], [r, to], [0, to]], { axis, at, ...o });
+}
+function tube({ axis = "y", at = 0, r0, r1, from, to, ...o }) {
+  return lathe([[r0, from], [r1, from], [r1, to], [r0, to]], { axis, at, ...o });
+}
+
+// A prism: an outline [[a, b], …] (with optional holes) swept from `from` to `to` along an axis.
+//   along "z": a = x, b = y      along "y": a = x, b = z      along "x": a = z, b = y
+// bevel rounds the edges and grows the outline by itself, so give a bevelled outline inset by it.
+// conform { x, r }: vertices on the face x = conform.x move onto the cylinder of radius r round
+// the y axis, so a boss of a casting meets a turned body exactly (castings without CSG).
+function extrude(shape, { along = "z", from, to, holes = [], bevel = 0, conform = null, ...o }) {
+  return { kind: "extrude", shape, holes, along: AXIS[along], from, to, bevel, conform, ...o };
+}
+const box = (min, max, o = {}) => ({ kind: "box", min, max, ...o });
+const sphere = (c, r, o = {}) => ({ kind: "sphere", c, r, ...o });
+// A ring of tube radius r on a circle of radius R round an axis through c; arc [a0, a1] in degrees.
+const torus = (c, R, r, { axis = "y", arc = [0, 360], ...o } = {}) => ({ kind: "torus", c, R, r, axis: AXIS[axis], arc, ...o });
+// A coil spring of wire diameter `wire` from s = from to s = to along an axis, coil radius `radius`.
+const helix = ({ axis = "x", at = 0, from, to, radius, wire, turns, ...o }) => ({ kind: "helix", axis: AXIS[axis], at: pair(at), from, to, radius, wire, turns, ...o });
+// A flat disc facing +normal (a dial face, a hole mouth). texture(ctx, size, tokens) draws on it.
+const disc = (c, r, { normal = "y", ...o } = {}) => ({ kind: "disc", c, r, normal, ...o });
+
+// An involute spur gear outline round (cx, cy): `teeth`, `module` (mm), pressure angle in degrees.
+// phase (degrees) turns the teeth. Returns [[a, b], …] for extrude().
+function gearOutline({ teeth, module: m, pressure = 20, addendum = 1, dedendum = 1.25, steps = 5, cx = 0, cy = 0, phase = 0 }) {
+  const r = (m * teeth) / 2;
+  const rb = r * Math.cos((pressure * Math.PI) / 180);
+  const ra = r + addendum * m;
+  const rf = Math.max(0.1, r - dedendum * m);
+  const inv = (a) => Math.tan(a) - a;
+  const a0 = (pressure * Math.PI) / 180;
+  // half the tooth's angular thickness at radius ρ (involute flanks)
+  const half = (rho) => Math.PI / (2 * teeth) + inv(a0) - inv(Math.acos(Math.min(1, rb / rho)));
+  const lo = Math.max(rf, rb);
+  const out = [];
+  const at = (rho, ang) => out.push([cx + rho * Math.cos(ang), cy + rho * Math.sin(ang)]);
+  for (let k = 0; k < teeth; k++) {
+    const c = (2 * Math.PI * k) / teeth + (phase * Math.PI) / 180;
+    if (rf < rb) at(rf, c - half(rb));
+    for (let i = 0; i <= steps; i++) {
+      const rho = lo + ((ra - lo) * i) / steps;
+      at(rho, c - half(rho));
+    }
+    for (let i = steps; i >= 0; i--) {
+      const rho = lo + ((ra - lo) * i) / steps;
+      at(rho, c + half(rho));
+    }
+    if (rf < rb) at(rf, c + half(rb));
+    // root arc to the next tooth
+    const n = (2 * Math.PI * (k + 1)) / teeth + (phase * Math.PI) / 180;
+    const e0 = c + half(lo);
+    const e1 = n - half(lo);
+    for (let i = 1; i < 3; i++) at(rf, e0 + ((e1 - e0) * i) / 3);
+  }
+  return out;
+}
+// A spur gear: the outline extruded along its axis, with a bore. `at` is the gear centre in the
+// outline's plane (see extrude); give the part or the solid a pivot there to turn it.
+function gear({ teeth, module: m, along = "z", at = [0, 0], from, to, bore = 0, phase = 0, pressure = 20, ...o }) {
+  const [cx, cy] = pair(at);
+  const holes = bore > 0 ? [circle(cx, cy, bore, 48)] : [];
+  return extrude(gearOutline({ teeth, module: m, cx, cy, phase, pressure }), { along, from, to, holes, ...o });
+}
+
+// A part: one balloon number, one name, one or more closed solids that share its hatch.
+//   mat, angle: a kit material (K.MATERIALS) and angle (K.ANGLES), as the 2D sheet hatches it;
+//   hatch: "solid" (blacked in: thin walls, springs) or "none" (rods, nuts, balls: not hatched).
+//   explode: [dx, dy, dz] at explode = 1, or { to: [x, y, z] } (an absolute place from rest).
+//   anchor: { cut: [x, y, z] on its cut face, out: { c, r, axis: "y"|"x"|"z"|"box"|"sphere" } }
+//   pivot: [x, y, z] the part turns about when its pose has `rot`.
+//   layer: 1 for a part that runs through another part's bore and out behind it (a shaft through a
+//     gear pocket, a crank through its case, a bolt through a hole): its cut face must win there.
+// Each solid may override hatch, give role (bore, fluid, glass, decal, mouth, ink), own: true (its
+// own outline against the other solids of the part), explode (an extra offset of that solid),
+// pivot (to turn or scale that solid alone, see V.solid) and live (a name for V.solid).
+function part(id, name, solids, { mat, angle = 45, hatch, explode = null, anchor = null, pivot = null, layer } = {}) {
+  const h = hatch ?? (mat ? [mat, angle] : "none");
+  return { id, name, explode, anchor, pivot, solids: solids.map((s) => ({ hatch: h, ...(layer ? { layer } : {}), ...s })) };
+}
+// A bore or passage inside a solid of the same part: its far wall shows through the cut, and only
+// where the view ray crosses the plane inside it. Lathe or extrude only (it is tested in shape).
+const bore = (s) => ({ ...s, role: "void", hatch: "none" });
+// A fluid volume (air, oil, water): stippled in the accent, density set at run time. Lathe or
+// extrude only. stretch: { from } lets the vertices beyond s = from move with V.fluid(...).stretch.
+const fluid = (name, s, { stretch = null } = {}) => ({ ...s, role: "fluid", name, stretch });
+
+// Outline helpers in mm.
+function circle(cx, cy, r, n = 32) {
+  return Array.from({ length: n }, (_, i) => [cx + r * Math.cos((i / n) * 2 * Math.PI), cy + r * Math.sin((i / n) * 2 * Math.PI)]);
+}
+function polygon(n, R, cx = 0, cy = 0, rot = 0) {
+  return Array.from({ length: n }, (_, i) => [cx + R * Math.cos(rot + (i * 2 * Math.PI) / n), cy + R * Math.sin(rot + (i * 2 * Math.PI) / n)]);
+}
+// A hexagon across flats `af`, corners on the a axis (a nut seen along its axis).
+const hexagon = (af, cx = 0, cy = 0) => polygon(6, af / 2 / Math.cos(Math.PI / 6), cx, cy);
+const rrectAt = (cx, cy, hx, hy, r, steps = 4) => K.rrect(cx - hx, cy - hy, cx + hx, cy + hy, r, steps);
+// A block with a cylindrical cross bore that touches its bottom face: one simple outline (U shape).
+function saddle(a0, a1, b0, b1, bc, r) {
+  const arc = K.arc((a0 + a1) / 2, bc, r, -88, 268, 72);
+  return [[a1, b0], [a1, b1], [a0, b1], [a0, b0], ...arc.reverse()];
+}
+
+// ================================================================ RUNTIME (browser, needs THREE)
+
+const VIEWS = { iso: [45, 35.264], front: [0, 0], side: [90, 0], top: [0, 90] };
+const NEAR = 1;
+const FAR = 9000;
+const MATKIND = { lines: 1, pairs: 2, dashed: 3, cross: 4, dots: 5, grain: 1 };
+const ROLES = { solid: 0, void: 1, fluid: 2, glass: 3, decal: 4, mouth: 5, ink: 6 };
+const smooth = (t) => t * t * (3 - 2 * t);
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+
+const VERT = /* glsl */ `
+uniform float uLiftFrom, uLift; uniform vec3 uAxisP, uAxisD;
+varying vec3 vW; varying vec3 vN;
+#ifdef DECAL
+varying vec2 vUv;
+#endif
+void main() {
+  vec3 p = position;
+  if (dot(p - uAxisP, uAxisD) > uLiftFrom) p += uAxisD * uLift;
+  vec4 w = modelMatrix * vec4(p, 1.0);
+  vW = w.xyz;
+  vN = normalize(mat3(modelMatrix) * normal);
+#ifdef DECAL
+  vUv = uv;
+#endif
+  gl_Position = projectionMatrix * viewMatrix * w;
+}`;
+
+const FRAG = /* glsl */ `
+uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash, uLayer, uLayerBias;
+uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
+uniform vec2 uProf[64]; uniform int uProfN, uProfKind; uniform vec3 uAxisP, uAxisD, uPA, uPB; uniform vec2 uRange;
+uniform float uLiftFrom, uLift; uniform mat4 uInv; uniform vec3 uShift;
+uniform sampler2D tIds; uniform vec2 uRes;
+varying vec3 vW; varying vec3 vN;
+#ifdef DECAL
+uniform sampler2D uTex; varying vec2 vUv;
+#endif
+
+float lines(float f, float widthPx) {
+  float d = abs(fract(f + 0.5) - 0.5);
+  return clamp(0.5 * widthPx - d / max(fwidth(f), 1e-5) + 0.5, 0.0, 1.0);
+}
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+// Is the plane point h inside this volume, in the mesh's own rest frame? Bores and fluids are
+// volumes inside other solids, not holes in them, so their far walls may show only where the view
+// ray crosses the plane inside them; elsewhere the cut face in front of them is the truth.
+bool inside(vec3 hw) {
+  if (uProfKind == 0) return true;
+  vec3 h = (uInv * vec4(hw, 1.0)).xyz;
+  float s = dot(h - uAxisP, uAxisD);
+  if (s > uLiftFrom + uLift) s -= uLift; else if (s > uLiftFrom) s = uLiftFrom;
+  vec2 q;
+  if (uProfKind == 1) q = vec2(length((h - uAxisP) - uAxisD * dot(h - uAxisP, uAxisD)), s);
+  else {
+    if (s < uRange.x || s > uRange.y) return false;
+    q = vec2(dot(h, uPA), dot(h, uPB));
+  }
+  bool inn = false;
+  for (int i = 0; i < 64; i++) {
+    if (i >= uProfN) break;
+    vec2 a = uProf[i];
+    vec2 b = uProf[i + 1 < uProfN ? i + 1 : 0];
+    if ((a.y > q.y) != (b.y > q.y) && q.x < a.x + (q.y - a.y) / (b.y - a.y) * (b.x - a.x)) inn = !inn;
+  }
+  return inn;
+}
+
+void main() {
+  bool cutting = uCutOn > 0.5;
+  // the plane travels with the part's explode offset, so an exploded part keeps its own half-section
+  float side = dot(uCut.xyz, vW - uShift) - uCut.w;
+  if (cutting && side > 0.0) discard;
+  float dn = dot(uCut.xyz, uCamDir);
+  vec3 h = abs(dn) < 1e-4 ? vW - uCut.xyz * side : vW - uCamDir * (side / dn);
+  vec3 up = abs(uCut.y) > 0.9 ? vec3(0.0, 0.0, -1.0) : vec3(0.0, 1.0, 0.0);
+  vec3 e1 = normalize(cross(up, uCut.xyz));
+  vec3 e2 = cross(uCut.xyz, e1);
+  vec2 uv = vec2(dot(h - uShift, e1), dot(h - uShift, e2)) * uPx;
+
+  float a = radians(uAngle);
+  vec2 dir = vec2(sin(a), cos(a));
+  vec2 perp = vec2(cos(a), -sin(a));
+  float qx = dot(uv, perp), qy = dot(uv, dir);
+  float unit = 1.4 * uDpr;
+  float g = uGap * unit;
+  float lw = 0.8 * uDpr;
+  int kind = int(uKind + 0.5);
+  float hv = 0.0;
+  if (kind == 1) hv = lines(qx / g, lw);
+  else if (kind == 2) hv = max(lines(qx / g, lw), lines((qx - uPair * unit) / g, lw));
+  else if (kind == 3) hv = max(lines(qx / g, lw), step(0.5, fract(qy / (2.6 * unit))) * lines(qx / g - 0.5, lw));
+  else if (kind == 4) hv = max(lines(qx / g, lw), lines(qy / g, lw));
+  else if (kind == 5) { vec2 c = (fract(vec2(qx, qy) / g) - 0.5) * g; hv = clamp(0.62 * unit - length(c) + 0.5, 0.0, 1.0); }
+
+  vec2 cell = floor(uv / (3.2 * unit));
+  vec2 jit = vec2(hash(cell), hash(cell + 7.3)) * 0.5 + 0.25;
+  float dd = length((uv / (3.2 * unit) - cell - jit) * 3.2 * unit);
+  float stip = step(hash(cell + 3.1), uDensity) * clamp(0.8 * unit - dd + 0.5, 0.0, 1.0);
+
+  vec3 nv = normalize((viewMatrix * vec4(normalize(vN), 0.0)).xyz);
+  float k = dot(nv, uLight);
+  float aa = max(fwidth(k), 1e-4);
+
+  int role = int(uRole + 0.5);
+  bool front = gl_FrontFacing;
+  bool cap = false;
+  float alpha = 1.0;
+  vec3 col = uMid;
+  if (role == 0 || role == 6) {
+    if (!front) { if (!cutting) discard; cap = true; }
+  } else if (role == 1) {
+    if (front || !cutting || !inside(h)) discard;
+    k = -k;
+  } else if (role == 2) {
+    if (front || !cutting || uMode > 0.5 || !inside(h)) discard;
+    // a cut face is on the plane, in front of any fluid: fluid shows only where no solid is cut
+    if (texture2D(tIds, gl_FragCoord.xy / uRes).g > 0.5) discard;
+    alpha = max(stip, uWash);
+#ifdef DBG
+    alpha = 1.0;
+#endif
+    if (alpha < 0.01) discard;
+    col = uAccent;
+  } else if (role == 3) {
+    if (front || !cutting || !inside(h)) discard;
+    cap = true;
+  } else if (role == 4 || role == 5) {
+    if (!front) discard;
+  }
+
+  // a cut face is drawn just in front of its back face; a solid running through another part's bore
+  // (layer 1+) is pulled well forward, so its cut face wins over the bore and the part around it
+  float capZ = gl_FragCoord.z - uCapBias - uLayer * uLayerBias;
+  if (uMode > 0.5) {
+    gl_FragColor = vec4(uEdge / 255.0, cap ? 1.0 : 0.0, 0.0, 1.0);
+    gl_FragDepth = cap ? capZ : gl_FragCoord.z;
+    return;
+  }
+  if (cap) {
+    if (kind == 6) col = uInk;
+    else col = mix(uPaper, uHatch.rgb, hv * uHatch.a);
+  } else if (role == 2) {
+  } else if (role == 5) {
+    col = mix(uDark, uInk, 0.25);
+  } else if (role == 6) {
+    col = uInk;
+  } else {
+#ifdef DECAL
+    col = texture2D(uTex, vUv).rgb;
+#else
+    float t1 = smoothstep(0.1 - aa, 0.1 + aa, k);
+    float t2 = smoothstep(0.58 - aa, 0.58 + aa, k);
+    col = mix(mix(uDark, uMid, t1), uLit, t2);
+    if (role == 1) col = mix(col, uDark, 0.45);
+#ifdef DBG
+    if (role == 1) col = vec3(1.0, 0.0, 0.0);
+#endif
+#endif
+  }
+  gl_FragColor = vec4(col, alpha);
+  gl_FragDepth = cap ? capZ : gl_FragCoord.z - (role == 2 ? uCapBias : 0.0);
+}`;
+
+const LINE_VERT = /* glsl */ `
+uniform float uLineBias;
+attribute float dist;
+varying vec3 vW; varying float vDist;
+void main() {
+  vec4 w = modelMatrix * vec4(position, 1.0);
+  vW = w.xyz; vDist = dist;
+  gl_Position = projectionMatrix * viewMatrix * w;
+  gl_Position.z -= uLineBias * gl_Position.w;
+}`;
+const LINE_FRAG = /* glsl */ `
+uniform float uCutOn, uPx, uDpr, uDash, uAlpha, uCull; uniform vec4 uCut; uniform vec3 uInk, uShift;
+uniform sampler2D tIds; uniform vec2 uRes;
+varying vec3 vW; varying float vDist;
+void main() {
+  if (uCutOn > 0.5 && dot(uCut.xyz, vW - uShift) > uCut.w + 0.01) discard;
+  // a cut face lies on the plane, in front of anything left: creases never draw on one
+  if (uCull > 0.5 && texture2D(tIds, gl_FragCoord.xy / uRes).g > 0.5) discard;
+  if (uDash > 0.5) {
+    float u = mod(vDist * uPx / (1.4 * uDpr), 22.2); // ISO 128 long dash dot: 15 2.6 2 2.6
+    if ((u > 15.0 && u < 17.6) || u > 19.6) discard;
+  }
+  gl_FragColor = vec4(uInk, uAlpha);
+}`;
+
+const EDGE_FRAG = /* glsl */ `
+uniform sampler2D tId, tDepth; uniform vec2 uTexel; uniform vec3 uInk; uniform float uW, uRange, uThr;
+varying vec2 vUv;
+vec4 at(vec2 d) { return texture2D(tId, vUv + d * uTexel * uW); }
+bool same(vec4 a, vec4 b) { return abs(a.r - b.r) < 0.5 / 255.0 && abs(a.g - b.g) < 0.5; }
+// a pixel unlike all four neighbours is a pinhole (a ray slipping through a crack between triangles)
+bool speck(vec2 d) {
+  vec4 c = at(d);
+  return !same(c, at(d + vec2(1.0, 0.0))) && !same(c, at(d - vec2(1.0, 0.0))) && !same(c, at(d + vec2(0.0, 1.0))) && !same(c, at(d - vec2(0.0, 1.0)));
+}
+void main() {
+  vec4 c = at(vec2(0.0));
+  if (speck(vec2(0.0))) discard;
+  float e = 0.0;
+  vec2 o[4];
+  o[0] = vec2(1.0, 0.0); o[1] = vec2(-1.0, 0.0); o[2] = vec2(0.0, 1.0); o[3] = vec2(0.0, -1.0);
+  for (int i = 0; i < 4; i++) if (!same(at(o[i]), c) && !speck(o[i])) e = 1.0;
+  if (e < 0.5 && c.a > 0.5 && c.g < 0.5) {
+    float d0 = texture2D(tDepth, vUv).x;
+    for (int i = 0; i < 2; i++) {
+      vec2 st = o[2 * i] * uTexel * uW;
+      float dl = texture2D(tDepth, vUv - st).x, dr = texture2D(tDepth, vUv + st).x;
+      if (abs(dl + dr - 2.0 * d0) * uRange > uThr) e = 1.0;
+    }
+  }
+  if (e < 0.5) discard;
+  gl_FragColor = vec4(uInk, 1.0);
+#ifdef DBG
+  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
+}`;
+
+// ---------------------------------------------------------------- geometry from specs
+
+// A closed body of revolution round local Y, one strip per profile edge (every corner a crease),
+// wound outward whichever way the profile runs.
+function latheGeometry(loop, seg) {
+  const n = loop.length;
+  let area = 0;
+  for (let i = 0; i < n; i++) {
+    const [r0, s0] = loop[i];
+    const [r1, s1] = loop[(i + 1) % n];
+    area += r0 * s1 - r1 * s0;
+  }
+  const sign = area > 0 ? 1 : -1;
+  const pos = [];
+  const nor = [];
+  const idx = [];
+  const P3 = (i) => new THREE.Vector3(pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]);
+  for (let i = 0; i < n; i++) {
+    const [r0, s0] = loop[i];
+    const [r1, s1] = loop[(i + 1) % n];
+    if (r0 === 0 && r1 === 0) continue;
+    const dr = r1 - r0;
+    const ds = s1 - s0;
+    const len = Math.hypot(dr, ds);
+    if (len < 1e-9) continue;
+    const nr = (sign * ds) / len;
+    const ns = (-sign * dr) / len;
+    const base = pos.length / 3;
+    for (let j = 0; j <= seg; j++) {
+      const t = (j / seg) * Math.PI * 2;
+      const c = Math.cos(t);
+      const sn = Math.sin(t);
+      pos.push(r0 * c, s0, -r0 * sn, r1 * c, s1, -r1 * sn);
+      nor.push(nr * c, ns, -nr * sn, nr * c, ns, -nr * sn);
+    }
+    for (let j = 0; j < seg; j++) {
+      const a = base + 2 * j;
+      for (const [i0, i1, i2] of [[a, a + 1, a + 3], [a, a + 3, a + 2]]) {
+        const p0 = P3(i0);
+        const cr = P3(i1).sub(p0).cross(P3(i2).sub(p0));
+        if (cr.lengthSq() < 1e-12) continue;
+        const want = new THREE.Vector3(nor[3 * i0], nor[3 * i0 + 1], nor[3 * i0 + 2]);
+        if (cr.dot(want) >= 0) idx.push(i0, i1, i2);
+        else idx.push(i0, i2, i1);
+      }
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+  geo.setIndex(idx);
+  return geo;
+}
+
+// local Y → the spec's axis, through `at`
+function axisMatrix(axis, [a, b]) {
+  const m = new THREE.Matrix4();
+  if (axis === "x") m.makeRotationZ(-Math.PI / 2).setPosition(0, a, b);
+  else if (axis === "z") m.makeRotationX(Math.PI / 2).setPosition(a, b, 0);
+  else m.makeTranslation(a, 0, b);
+  return m;
+}
+const axisDir = (axis) => (axis === "x" ? [1, 0, 0] : axis === "z" ? [0, 0, 1] : [0, 1, 0]);
+const axisPoint = (axis, [a, b]) => (axis === "x" ? [0, a, b] : axis === "z" ? [a, b, 0] : [a, 0, b]);
+// extrude: outline (a, b) and sweep s, as world vectors
+const PRISM = {
+  z: { A: [1, 0, 0], B: [0, 1, 0], D: [0, 0, 1] },
+  y: { A: [1, 0, 0], B: [0, 0, 1], D: [0, 1, 0] },
+  x: { A: [0, 0, 1], B: [0, 1, 0], D: [1, 0, 0] },
+};
+
+function extrudeGeometry({ shape, holes = [], along, from, to, bevel = 0, conform }) {
+  // local (X, Y) is the outline, local Z the sweep; rotations below put them on (a, b, s)
+  const flip = along === "y" ? ([a, b]) => [a, -b] : along === "x" ? ([a, b]) => [-a, b] : (p) => p;
+  // three.js only fixes hole winding when it reverses the outline, so normalise both here, after the
+  // flip: outline clockwise, holes counter-clockwise. Any input winding then gives outward hole walls.
+  const area = (pts) => pts.reduce((s, [x0, y0], i) => { const [x1, y1] = pts[(i + 1) % pts.length]; return s + x0 * y1 - x1 * y0; }, 0);
+  const wind = (pts, cw) => ((area(pts) < 0) === cw ? pts : pts.slice().reverse());
+  const sh = new THREE.Shape(wind(shape.map(flip), true).map((p) => new THREE.Vector2(...p)));
+  for (const hole of holes) sh.holes.push(new THREE.Path(wind(hole.map(flip), false).map((p) => new THREE.Vector2(...p))));
+  const geo = new THREE.ExtrudeGeometry(sh, {
+    depth: to - from - 2 * bevel,
+    bevelEnabled: bevel > 0,
+    bevelThickness: bevel,
+    bevelSize: bevel,
+    bevelSegments: 3,
+    steps: conform ? 24 : 1,
+    curveSegments: 24,
+  });
+  geo.translate(0, 0, from + bevel);
+  if (along === "y") geo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+  if (along === "x") geo.applyMatrix4(new THREE.Matrix4().makeRotationY(Math.PI / 2));
+  if (conform) {
+    const p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      if (Math.abs(p.getX(i) - conform.x) < 1e-3) p.setX(i, Math.sign(conform.x) * Math.sqrt(Math.max(0, conform.r ** 2 - p.getZ(i) ** 2)));
+    }
+    geo.computeVertexNormals();
+  }
+  return geo;
+}
+
+function helixGeometry(s) {
+  class Helix extends THREE.Curve {
+    getPoint(t, out = new THREE.Vector3()) {
+      const a = 2 * Math.PI * s.turns * t;
+      // along local Y; axisMatrix turns it onto the spec's axis
+      return out.set(s.radius * Math.sin(a), s.from + s.wire / 2 + t * (s.to - s.from - s.wire), s.radius * Math.cos(a));
+    }
+  }
+  return new THREE.TubeGeometry(new Helix(), Math.max(80, Math.round(s.turns * 60)), s.wire / 2, 10, false).applyMatrix4(axisMatrix(s.axis, s.at));
+}
+
+function geometryOf(s) {
+  const seg = (r) => (r > 20 ? 144 : r > 6 ? 96 : 48);
+  if (s.kind === "lathe") return latheGeometry(s.loop, seg(Math.max(...s.loop.map(([r]) => r)))).applyMatrix4(axisMatrix(s.axis, s.at));
+  if (s.kind === "extrude") return extrudeGeometry(s);
+  if (s.kind === "sphere") return new THREE.SphereGeometry(s.r, 48, 32).translate(...s.c);
+  if (s.kind === "helix") return helixGeometry(s);
+  if (s.kind === "box") {
+    const size = s.max.map((v, i) => v - s.min[i]);
+    return new THREE.BoxGeometry(...size).translate(...s.min.map((v, i) => v + size[i] / 2));
+  }
+  if (s.kind === "torus") {
+    const [a0, a1] = s.arc;
+    const g = new THREE.TorusGeometry(s.R, s.r, 14, 120, ((a1 - a0) * Math.PI) / 180);
+    g.rotateZ((a0 * Math.PI) / 180);
+    // the torus lies in local XY round local Z: turn local Z onto the axis
+    if (s.axis === "y") g.rotateX(-Math.PI / 2);
+    if (s.axis === "x") g.rotateY(Math.PI / 2);
+    return g.translate(...s.c);
+  }
+  if (s.kind === "disc") {
+    const g = new THREE.CircleGeometry(s.r, 96);
+    if (s.normal === "y") g.rotateX(-Math.PI / 2);
+    if (s.normal === "x") g.rotateY(Math.PI / 2);
+    return g.translate(...s.c);
+  }
+  throw new Error("solid3d: unknown solid kind " + s.kind);
+}
+
+// the shape a bore, fluid or glass is tested against (see inside() in FRAG): at most 64 points, so a
+// longer outline (a fine circle) is resampled evenly round its perimeter
+const PROF_MAX = 64;
+function resample(loop) {
+  if (loop.length <= PROF_MAX) return loop;
+  const seg = loop.map((p, i) => Math.hypot(loop[(i + 1) % loop.length][0] - p[0], loop[(i + 1) % loop.length][1] - p[1]));
+  const total = seg.reduce((a, b) => a + b, 0);
+  const out = [];
+  let i = 0;
+  let acc = 0;
+  for (let k = 0; k < PROF_MAX; k++) {
+    const want = (k / PROF_MAX) * total;
+    while (acc + seg[i] < want) acc += seg[i++];
+    const t = seg[i] ? (want - acc) / seg[i] : 0;
+    const a = loop[i];
+    const b = loop[(i + 1) % loop.length];
+    out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+  }
+  return out;
+}
+function profileOf(s) {
+  if (s.kind === "lathe") return { kind: 1, loop: resample(s.loop), P: axisPoint(s.axis, s.at), D: axisDir(s.axis), A: [1, 0, 0], B: [0, 1, 0], range: [0, 0] };
+  if (s.kind === "extrude") {
+    const b = PRISM[s.along];
+    return { kind: 2, loop: resample(s.shape), P: [0, 0, 0], D: b.D, A: b.A, B: b.B, range: [s.from, s.to] };
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------- create
+
+// create({ scene: { parts, fluids, centres }, sheet2d, title }) → V. Call after the page's DOM (writePage3d).
+function create({ scene, title = "" } = {}) {
+  const $ = (id) => document.getElementById(id);
+  const host = $("stage");
+  const canvas = $("gl");
+  const overlay = $("ov");
+  const Qs = new URLSearchParams(location.search);
+  const num = (k, d) => (Qs.has(k) && Number.isFinite(Number(Qs.get(k))) ? Number(Qs.get(k)) : d);
+  const flag = (k, d) => (Qs.has(k) ? Qs.get(k) !== "0" : d);
+  const q = {
+    view: Qs.get("view"),
+    cut: flag("cut", true),
+    explode: clamp01(num("explode", 0)),
+    zoom: num("zoom", 1),
+    look: Qs.get("look") ? Qs.get("look").split(",").map(Number) : null,
+    balloons: flag("balloons", true),
+    offset: num("offset", 0),
+    embed: flag("embed", false),
+    check: Qs.has("check"),
+    selftest: Qs.has("selftest"),
+    bench: Qs.has("bench"),
+    dbg: Qs.has("dbg"),
+  };
+  if (q.embed) document.documentElement.classList.add("v3-embed");
+  L.setupPage(host);
+  THREE.ColorManagement.enabled = false; // the tokens are sRGB and the shaders write them unchanged
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: Qs.has("t") || q.bench || q.check });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.setClearColor(0x000000, 0);
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, NEAR, FAR);
+  const world = new THREE.Scene();
+  const root = new THREE.Group();
+  world.add(root);
+
+  const C = () => new THREE.Color();
+  const U = {
+    uMode: { value: 0 },
+    uCutOn: { value: q.cut ? 1 : 0 },
+    uCut: { value: new THREE.Vector4(0, 0, 1, q.offset) },
+    uCamDir: { value: new THREE.Vector3(0, 0, -1) },
+    uPx: { value: 1 },
+    uDpr: { value: 1 },
+    uLight: { value: new THREE.Vector3(-0.42, 0.72, 0.55).normalize() },
+    uLit: { value: C() },
+    uMid: { value: C() },
+    uDark: { value: C() },
+    uPaper: { value: C() },
+    uInk: { value: C() },
+    uHatch: { value: new THREE.Vector4() },
+    uAccent: { value: C() },
+    // depth bias of cut faces: must stay below the thinnest wall seen edge-on (0.25 mm)
+    uCapBias: { value: 0.25 / (FAR - NEAR) },
+    uLineBias: { value: (2 * 0.6) / (FAR - NEAR) },
+    // layer 1+ cut faces come this far forward, assembled only (exploded parts may sit in front)
+    uLayerBias: { value: 1000 / (FAR - NEAR) },
+    tIds: { value: null },
+    uRes: { value: new THREE.Vector2(1, 1) },
+  };
+  const dbg = q.dbg ? { DBG: 1 } : {};
+  const allMats = [];
+  const decals = [];
+
+  function material(s, edge) {
+    const role = s.role ?? "solid";
+    const hatch = s.hatch ?? (role === "ink" ? "solid" : "none");
+    let kind = 0;
+    let gap = 3;
+    let pairGap = 0;
+    let angle = 45;
+    if (hatch === "solid" || role === "ink") kind = 6;
+    else if (Array.isArray(hatch)) {
+      const m = K.MATERIALS[hatch[0]];
+      if (!m) throw new Error("solid3d: unknown material " + hatch[0]);
+      kind = MATKIND[m.kind];
+      gap = m.gap;
+      pairGap = m.pair ?? 0;
+      angle = hatch[1] ?? 45;
+    }
+    const prof = role === "void" || role === "fluid" || role === "glass" ? profileOf(s) : null;
+    let tex = null;
+    if (role === "decal") {
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = 1024;
+      tex = new THREE.CanvasTexture(cv);
+      tex.anisotropy = 4;
+      decals.push({ cv, tex, draw: s.texture });
+    }
+    const st = s.stretch && prof ? s.stretch.from : 1e9;
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        ...U,
+        uKind: { value: kind },
+        uGap: { value: gap },
+        uPair: { value: pairGap },
+        uAngle: { value: angle },
+        uRole: { value: ROLES[role] },
+        uEdge: { value: edge },
+        uDensity: { value: 0.3 },
+        uWash: { value: 0.08 },
+        uLiftFrom: { value: st },
+        uLift: { value: 0 },
+        uTex: { value: tex },
+        uInv: { value: new THREE.Matrix4() },
+        uShift: { value: new THREE.Vector3() },
+        uLayer: { value: s.layer ?? 0 },
+        uProf: { value: Array.from({ length: PROF_MAX }, (_, i) => new THREE.Vector2(...(prof?.loop[i] ?? [0, 0]))) },
+        uProfN: { value: prof ? prof.loop.length : 0 },
+        uProfKind: { value: prof ? prof.kind : 0 },
+        uAxisP: { value: new THREE.Vector3(...(prof?.P ?? [0, 0, 0])) },
+        uAxisD: { value: new THREE.Vector3(...(prof?.D ?? [0, 1, 0])) },
+        uPA: { value: new THREE.Vector3(...(prof?.A ?? [1, 0, 0])) },
+        uPB: { value: new THREE.Vector3(...(prof?.B ?? [0, 1, 0])) },
+        uRange: { value: new THREE.Vector2(...(prof?.range ?? [0, 0])) },
+      },
+      vertexShader: VERT,
+      fragmentShader: FRAG,
+      defines: { ...(tex ? { DECAL: 1 } : {}), ...dbg },
+      // never BackSide: three.js draws it by flipping the GL front face, which flips gl_FrontFacing too
+      side: role === "void" || role === "fluid" || role === "glass" ? THREE.DoubleSide : THREE.FrontSide,
+      transparent: role === "fluid",
+      depthWrite: role !== "fluid",
+    });
+    mat.userData.role = role;
+    allMats.push(mat);
+    return mat;
+  }
+  const lineMat = (dash, alpha = 1) =>
+    new THREE.ShaderMaterial({
+      uniforms: { ...U, uDash: { value: dash ? 1 : 0 }, uAlpha: { value: alpha }, uCull: { value: dash ? 0 : 1 }, uShift: { value: new THREE.Vector3() } },
+      vertexShader: LINE_VERT,
+      fragmentShader: LINE_FRAG,
+      transparent: alpha < 1,
+    });
+
+  // ---- build
+  const PARTS = new Map();
+  const FLUIDS = new Map();
+  let edgeSeq = 0;
+  const syncInv = (mesh) => {
+    mesh.onBeforeRender = () => mesh.material.uniforms.uInv.value.copy(mesh.matrixWorld).invert();
+  };
+  function addSolid(rec, s, k, shared) {
+    const role = s.role ?? "solid";
+    const holder = new THREE.Group();
+    const pivot = s.pivot ?? [0, 0, 0];
+    holder.position.set(...pivot);
+    const inner = new THREE.Group();
+    inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
+    holder.add(inner);
+    rec.inner.add(holder);
+    const edge = role === "mouth" || s.own || !shared ? ++edgeSeq : shared;
+    if (edge > 255) throw new Error("solid3d: more than 255 outlined solids");
+    rec.edges.add(edge);
+    const geo = geometryOf(s);
+    const mesh = new THREE.Mesh(geo, material(s, edge));
+    syncInv(mesh);
+    inner.add(mesh);
+    let lines = null;
+    if (role === "solid" || role === "void" || role === "glass" || role === "ink") {
+      lines = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 35), lineMat(false)); // own material: own uShift
+      lines.userData.crease = true;
+      inner.add(lines);
+    }
+    const h = { holder, inner, mesh, lines, spec: s, pivot, k };
+    rec.holders.push(h);
+    if (s.live) rec.live[s.live] = h;
+    return h;
+  }
+  for (const spec of scene.parts) {
+    const group = new THREE.Group();
+    const pivot = spec.pivot ?? [0, 0, 0];
+    const inner = new THREE.Group();
+    inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
+    group.add(inner);
+    root.add(group);
+    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
+    const shared = ++edgeSeq;
+    spec.solids.forEach((s, k) => addSolid(rec, s, k, shared));
+    PARTS.set(spec.id, rec);
+  }
+  const fluidGroup = new THREE.Group();
+  root.add(fluidGroup);
+  for (const f of scene.fluids ?? []) {
+    const mesh = new THREE.Mesh(geometryOf(f), material({ ...f, role: "fluid" }, 0));
+    mesh.renderOrder = 2;
+    mesh.frustumCulled = false; // the stretch moves vertices past the rest-pose bounding sphere
+    syncInv(mesh);
+    fluidGroup.add(mesh);
+    FLUIDS.set(f.name, mesh);
+  }
+  function centreLine([a, b], parent = root) {
+    const A = new THREE.Vector3(...a);
+    const B = new THREE.Vector3(...b);
+    const geo = new THREE.BufferGeometry().setFromPoints([A, B]);
+    geo.setAttribute("dist", new THREE.Float32BufferAttribute([0, A.distanceTo(B)], 1));
+    const l = new THREE.Line(geo, lineMat(true, 0.85));
+    l.userData.crease = true;
+    parent.add(l);
+    return l;
+  }
+  for (const c of scene.centres ?? []) {
+    const l = centreLine(c.line ?? c, c.part ? PARTS.get(c.part).inner : root);
+    if (c.part) PARTS.get(c.part).centres.push(l);
+  }
+
+  // ---- outline pass
+  const idTarget = new THREE.WebGLRenderTarget(4, 4, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthTexture: new THREE.DepthTexture(4, 4) });
+  U.tIds.value = idTarget.texture;
+  const edgeMat = new THREE.ShaderMaterial({
+    uniforms: { tId: { value: idTarget.texture }, tDepth: { value: idTarget.depthTexture }, uTexel: { value: new THREE.Vector2() }, uInk: U.uInk, uW: { value: 1 }, uRange: { value: FAR - NEAR }, uThr: { value: 2.0 } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    fragmentShader: EDGE_FRAG,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    defines: dbg,
+  });
+  const edgeScene = new THREE.Scene();
+  edgeScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), edgeMat));
+  const quadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+  // ---- theme
+  const token = (name) => {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const m = v.match(/rgba?\(([^)]+)\)/);
+    if (m) {
+      const [r, g, b, a = 1] = m[1].split(",").map(Number);
+      return { c: new THREE.Color(r / 255, g / 255, b / 255), a, css: v };
+    }
+    return { c: new THREE.Color(v || "#888"), a: 1, css: v };
+  };
+  function applyTheme() {
+    for (const [u, name] of [["uLit", "--bp3-lit"], ["uMid", "--bp3-mid"], ["uDark", "--bp3-dark"], ["uPaper", "--bp-paper"], ["uInk", "--bp-ink"], ["uAccent", "--bp-accent"]]) U[u].value.copy(token(name).c);
+    const h = token("--bp-hatch");
+    U.uHatch.value.set(h.c.r, h.c.g, h.c.b, h.a);
+    const tk = { paper: token("--bp-paper").css, ink: token("--bp-ink").css, muted: token("--bp-muted").css, accent: token("--bp-accent").css };
+    for (const d of decals) {
+      const g = d.cv.getContext("2d");
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.fillStyle = tk.paper;
+      g.fillRect(0, 0, d.cv.width, d.cv.height);
+      d.draw?.(g, d.cv.width, tk);
+      d.tex.needsUpdate = true;
+    }
+    redraw();
+  }
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // ---- view state
+  const start = VIEWS[q.view] ?? VIEWS.iso;
+  const cam = { az: start[0], el: start[1], azT: start[0], elT: start[1], zoom: q.zoom, pan: new THREE.Vector3() };
+  const st = { explode: q.explode, explodeT: q.explode, balloons: q.balloons };
+
+  // ---- poses: the page sets base poses, explode adds on top
+  function applyPoses() {
+    const e = st.explode;
+    for (const rec of PARTS.values()) {
+      const ex = rec.spec.explode;
+      const [bx, by, bz] = rec.base.pos;
+      let off = [0, 0, 0];
+      if (Array.isArray(ex)) off = ex.map((v) => v * e);
+      else if (ex?.to) off = [(ex.to[0] - bx) * e, (ex.to[1] - by) * e, (ex.to[2] - bz) * e];
+      rec.group.position.set(rec.pivot[0] + bx + off[0], rec.pivot[1] + by + off[1], rec.pivot[2] + bz + off[2]);
+      rec.group.rotation.set(...rec.base.rot);
+      for (const h of rec.holders) {
+        const sx = h.spec.explode ?? [0, 0, 0];
+        h.holder.position.set(h.pivot[0] + sx[0] * e, h.pivot[1] + sx[1] * e, h.pivot[2] + sx[2] * e);
+        const shift = [off[0] + sx[0] * e, off[1] + sx[1] * e, off[2] + sx[2] * e];
+        h.mesh.material.uniforms.uShift.value.set(...shift);
+        h.lines?.material.uniforms.uShift.value.set(...shift);
+      }
+      for (const l of rec.centres) l.material.uniforms.uShift.value.set(...off);
+    }
+    fluidGroup.visible = e < 0.01 && U.uCutOn.value > 0.5;
+  }
+
+  // ---- framing: the union of the page's envelope poses, assembled and exploded
+  let B0 = null;
+  let B1 = null;
+  function measure(poses, e) {
+    const keep = st.explode;
+    st.explode = e;
+    const box = new THREE.Box3();
+    for (const p of poses) {
+      p();
+      applyPoses();
+      root.updateMatrixWorld(true);
+      for (const rec of PARTS.values()) box.expandByObject(rec.group);
+    }
+    st.explode = keep;
+    return box;
+  }
+  let envelope = [() => {}];
+  function frame(poses) {
+    envelope = poses?.length ? poses : [() => {}];
+    B0 = measure(envelope, 0);
+    B1 = measure(envelope, 1);
+  }
+
+  let W = 1;
+  let H = 1;
+  let dpr = 1;
+  function resize() {
+    const r = host.getBoundingClientRect();
+    W = Math.max(1, Math.round(r.width));
+    H = Math.max(1, Math.round(r.height));
+    dpr = renderer.getPixelRatio();
+    renderer.setSize(W, H, false);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    idTarget.setSize(Math.round(W * dpr), Math.round(H * dpr));
+    edgeMat.uniforms.uTexel.value.set(1 / (W * dpr), 1 / (H * dpr));
+    edgeMat.uniforms.uW.value = Math.max(1, Math.round(dpr * 0.75));
+    U.uRes.value.set(Math.round(W * dpr), Math.round(H * dpr));
+    overlay.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    redraw();
+  }
+  const margin = () => {
+    const side = st.balloons ? Math.min(150, Math.round(W * 0.16)) : Math.min(40, Math.round(W * 0.05));
+    if (q.embed) return { l: side, r: side, t: 16, b: 16 };
+    return { l: side, r: side, t: 34, b: W < 640 ? 64 : 34 };
+  };
+  const lerpBox = () => {
+    const k = smooth(clamp01(st.explode));
+    return new THREE.Box3(B0.min.clone().lerp(B1.min, k), B0.max.clone().lerp(B1.max, k));
+  };
+  function placeCamera() {
+    const az = (cam.az * Math.PI) / 180;
+    const el = (Math.min(89.9, cam.el) * Math.PI) / 180;
+    const dir = new THREE.Vector3(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az));
+    const box = lerpBox();
+    const centre = q.look ? new THREE.Vector3(...q.look) : box.getCenter(new THREE.Vector3());
+    camera.position.copy(centre).addScaledVector(dir, FAR / 2);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(centre);
+    camera.updateMatrixWorld(true);
+    const inv = camera.matrixWorldInverse;
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (let i = 0; i < 8; i++) {
+      const p = new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).applyMatrix4(inv);
+      x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
+    }
+    const MG = margin();
+    const fit = Math.min((W - MG.l - MG.r) / Math.max(1, x1 - x0), (H - MG.t - MG.b) / Math.max(1, y1 - y0));
+    const zoom = fit * cam.zoom;
+    const off = q.look ? new THREE.Vector3() : new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 0).applyMatrix3(new THREE.Matrix3().setFromMatrix4(camera.matrixWorld));
+    camera.position.add(off).add(cam.pan);
+    camera.position.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1), -(MG.b - MG.t) / 2 / zoom);
+    camera.left = -W / 2 / zoom;
+    camera.right = W / 2 / zoom;
+    camera.top = H / 2 / zoom;
+    camera.bottom = -H / 2 / zoom;
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld(true);
+    U.uCamDir.value.copy(dir).negate();
+    U.uPx.value = zoom * dpr;
+    U.uDpr.value = dpr;
+  }
+  const project = (v) => {
+    const p = (Array.isArray(v) ? new THREE.Vector3(...v) : v.clone()).project(camera);
+    return [((p.x + 1) / 2) * W, ((1 - p.y) / 2) * H];
+  };
+
+  // ---- balloons
+  function anchorWorld(rec) {
+    const a = rec.spec.anchor;
+    let p;
+    if (U.uCutOn.value > 0.5 && a.cut) p = new THREE.Vector3(...a.cut);
+    else {
+      const o = a.out ?? { c: a.cut };
+      p = new THREE.Vector3(...o.c);
+      const d = U.uCamDir.value.clone().negate();
+      if (o.axis === "y") d.y = 0;
+      if (o.axis === "x") d.x = 0;
+      if (o.axis === "z") d.z = 0;
+      if (o.axis === "box") {
+        d.y = 0;
+        d.divideScalar(Math.max(Math.abs(d.x), Math.abs(d.z)) || 1);
+        p.addScaledVector(d, o.r);
+      } else if (o.r) p.addScaledVector(d.normalize(), o.r);
+    }
+    const holder = a.solid != null ? rec.holders[a.solid].inner : rec.inner;
+    return p.applyMatrix4(holder.matrixWorld);
+  }
+  const pix = new Uint8Array(4);
+  const seen = new Map();
+  let visFrame = 0;
+  function visibleAt(rec, sx, sy) {
+    if (sx < 0 || sy < 0 || sx >= W || sy >= H) return false;
+    renderer.readRenderTargetPixels(idTarget, Math.round(sx * dpr), Math.round((H - sy) * dpr), 1, 1, pix);
+    return rec.edges.has(pix[0]) || pix[0] === 0;
+  }
+  function balloons() {
+    const recs = [...PARTS.values()].filter((r) => r.spec.anchor);
+    if (!recs.length) return "";
+    const items = recs.map((rec) => {
+      const [ax, ay] = project(anchorWorld(rec));
+      return { rec, ax, ay };
+    });
+    const box = lerpBox();
+    const pts = [];
+    for (let i = 0; i < 8; i++) pts.push(project(new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z)));
+    const minX = Math.min(...pts.map((p) => p[0]));
+    const maxX = Math.max(...pts.map((p) => p[0]));
+    const c0 = project(box.getCenter(new THREE.Vector3()).setY(box.min.y));
+    const c1 = project(box.getCenter(new THREE.Vector3()).setY(box.max.y));
+    const axisX = (y) => c0[0] + ((y - c0[1]) / (c1[1] - c0[1] || 1)) * (c1[0] - c0[0]);
+    const R = W < 640 ? 8 : 10;
+    const cols = { l: Math.max(R + 14, minX - 46), r: Math.min(W - R - 14, maxX + 46) };
+    const refresh = visFrame++ % 3 === 0;
+    // each balloon to the column on its anchor's side of the model's centre line; the fuller column
+    // then gives its anchors nearest the line to the other, so neither holds much more than half
+    for (const it of items) {
+      it.d = it.ax - axisX(it.ay);
+      it.side = it.d < -0.5 ? "l" : "r";
+    }
+    for (;;) {
+      const nl = items.filter((it) => it.side === "l").length;
+      const nr = items.length - nl;
+      if (Math.abs(nl - nr) <= 3) break;
+      const from = nl > nr ? "l" : "r";
+      const pick = items.filter((it) => it.side === from).sort((a, b) => Math.abs(a.d) - Math.abs(b.d))[0];
+      pick.side = from === "l" ? "r" : "l";
+    }
+    let out = "";
+    for (const side of ["l", "r"]) {
+      const col = items.filter((it) => it.side === side).sort((a, b) => a.ay - b.ay);
+      const top = R + 18;
+      const lim = H - R - (q.embed ? 14 : 44); // clear of the hint line
+      const gap = Math.min(2 * R + 6, (lim - top) / Math.max(1, col.length - 1));
+      const ys = col.map((c) => Math.min(lim, Math.max(top, c.ay)));
+      for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i], ys[i - 1] + gap);
+      if (ys.length && ys[ys.length - 1] > lim) {
+        ys[ys.length - 1] = lim;
+        for (let i = ys.length - 2; i >= 0; i--) ys[i] = Math.min(ys[i], ys[i + 1] - gap);
+      }
+      col.forEach((c, i) => {
+        const bx = cols[side];
+        const by = ys[i];
+        const id = c.rec.id;
+        if (refresh || !seen.has(id)) seen.set(id, visibleAt(c.rec, c.ax, c.ay));
+        const vis = seen.get(id);
+        const dx = c.ax - bx;
+        const dy = c.ay - by;
+        const d = Math.hypot(dx, dy) || 1;
+        const f = (v) => v.toFixed(1);
+        out += `<path class="${vis ? "thin" : "hid"}" d="M${f(bx + (dx / d) * R)} ${f(by + (dy / d) * R)}L${f(c.ax)} ${f(c.ay)}"/>`;
+        out += `<circle class="${vis ? "dot" : "balloon"}" cx="${f(c.ax)}" cy="${f(c.ay)}" r="1.7"/>`;
+        out += `<g data-part="${id}"><title>${id} ${c.rec.name}</title><circle class="balloon" cx="${f(bx)}" cy="${f(by)}" r="${R}"/><text class="t" x="${f(bx)}" y="${f(by + 3.4)}" text-anchor="middle">${id}</text></g>`;
+      });
+    }
+    return out;
+  }
+
+  // A linear dimension between two world points, drawn on screen beside them: extension lines,
+  // a dimension line `off` px to the side, arrowheads when there is room, the text along it.
+  function dim(a, b, { text = "", off = 26 } = {}) {
+    const A = project(a);
+    const B = project(b);
+    const ax = [B[0] - A[0], B[1] - A[1]];
+    const len = Math.hypot(...ax);
+    const nrm = len > 0.5 ? [-ax[1] / len, ax[0] / len] : [1, 0];
+    const side = nrm[0] < 0 ? -1 : 1;
+    const o = off * side;
+    const a2 = [A[0] + nrm[0] * o, A[1] + nrm[1] * o];
+    const b2 = [B[0] + nrm[0] * o, B[1] + nrm[1] * o];
+    const f = (p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+    const ext = (p, p2) => `M${f([p[0] + nrm[0] * 4 * side, p[1] + nrm[1] * 4 * side])}L${f([p2[0] + nrm[0] * 5 * side, p2[1] + nrm[1] * 5 * side])}`;
+    let s = `<path class="thin" d="${ext(A, a2)}${len > 1 ? ext(B, b2) : ""}M${f(a2)}L${f(b2)}"/>`;
+    if (len > 16) {
+      const u = [ax[0] / len, ax[1] / len];
+      const head = (p, sg) => {
+        const t = [p[0] + u[0] * 7 * sg, p[1] + u[1] * 7 * sg];
+        return `M${f(p)}L${f([t[0] + nrm[0] * 1.6, t[1] + nrm[1] * 1.6])}L${f([t[0] - nrm[0] * 1.6, t[1] - nrm[1] * 1.6])}Z`;
+      };
+      s += `<path class="head" d="${head(a2, 1)}${head(b2, -1)}"/>`;
+    }
+    const mx = (a2[0] + b2[0]) / 2 + nrm[0] * 9 * side;
+    const my = (a2[1] + b2[1]) / 2 + nrm[1] * 9 * side;
+    const ang = (Math.atan2(ax[1], ax[0]) * 180) / Math.PI + (len > 0.5 ? 0 : 90);
+    const rot = ((ang + 360 + 90) % 180) - 90;
+    s += `<text class="t" x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)})">${text}</text>`;
+    return `<g data-role="dim">${s}</g>`;
+  }
+
+  // ---- draw
+  let overlayFn = null;
+  let pageRender = null;
+  function draw() {
+    applyPoses();
+    if (!B0) frame(envelope);
+    applyPoses();
+    const cutting = U.uCutOn.value > 0.5;
+    for (const m of allMats) if (m.userData.role === "solid" || m.userData.role === "ink") m.side = cutting ? THREE.DoubleSide : THREE.FrontSide;
+    placeCamera();
+    root.updateMatrixWorld(true);
+    U.uLayerBias.value = st.explode < 0.01 ? 1000 / (FAR - NEAR) : 0;
+    // 1: ids and depth, without lines or fluids (and not sampling the target it draws into)
+    U.uMode.value = 1;
+    U.tIds.value = null;
+    world.traverse((o) => o.userData.crease && (o.visible = false));
+    const fl = fluidGroup.visible;
+    fluidGroup.visible = false;
+    renderer.setRenderTarget(idTarget);
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear();
+    renderer.render(world, camera);
+    world.traverse((o) => o.userData.crease && (o.visible = true));
+    fluidGroup.visible = fl;
+    // 2: colour
+    U.uMode.value = 0;
+    U.tIds.value = idTarget.texture;
+    renderer.setRenderTarget(null);
+    renderer.render(world, camera);
+    // 3: outlines
+    renderer.autoClear = false;
+    renderer.render(edgeScene, quadCam);
+    renderer.autoClear = true;
+    let svg = st.balloons ? balloons() : "";
+    if (overlayFn) svg += overlayFn() ?? "";
+    overlay.innerHTML = svg;
+    syncControls();
+  }
+
+  // ---- controls (the ids writePage3d writes)
+  const ui = {
+    cut: $("cut"),
+    offset: $("offset"),
+    explode: $("explode"),
+    balloons: $("balloons"),
+    views: [...document.querySelectorAll("[data-view]")],
+  };
+  function syncControls() {
+    ui.cut?.setAttribute("aria-pressed", String(U.uCutOn.value > 0.5));
+    ui.balloons?.setAttribute("aria-pressed", String(st.balloons));
+    if (ui.explode && document.activeElement !== ui.explode) ui.explode.value = String(st.explodeT);
+    for (const b of ui.views) {
+      const [az, el] = VIEWS[b.dataset.view];
+      b.setAttribute("aria-pressed", String(Math.abs(cam.azT - az) < 0.01 && Math.abs(cam.elT - el) < 0.01));
+    }
+  }
+  let lv = null;
+  function redraw() {
+    if (!lv) return;
+    if (lv.frozen) render(lv);
+    else lv.wake?.();
+  }
+  function input() {
+    if (!lv) return;
+    if (lv.frozen) render(lv);
+    else lv.input();
+  }
+  function setView(name) {
+    const [az, el] = VIEWS[name];
+    cam.az = ((((cam.az - az) % 360) + 540) % 360) - 180 + az; // the short way round
+    cam.azT = az;
+    cam.elT = el;
+    cam.pan.set(0, 0, 0);
+    input();
+  }
+  const toggleCut = () => {
+    U.uCutOn.value = U.uCutOn.value > 0.5 ? 0 : 1;
+    input();
+  };
+  for (const b of ui.views) b.addEventListener("click", () => setView(b.dataset.view));
+  ui.cut?.addEventListener("click", toggleCut);
+  if (ui.offset) {
+    ui.offset.value = String(q.offset);
+    ui.offset.addEventListener("input", () => {
+      U.uCut.value.w = Number(ui.offset.value);
+      U.uCutOn.value = 1;
+      input();
+    });
+  }
+  ui.explode?.addEventListener("input", () => {
+    st.explodeT = Number(ui.explode.value);
+    input();
+  });
+  ui.balloons?.addEventListener("click", () => {
+    st.balloons = !st.balloons;
+    input();
+  });
+
+  // pointer: drag a registered part to drive it, drag elsewhere to orbit, shift or right drag to pan
+  const ray = new THREE.Raycaster();
+  const drags = [];
+  let drag = null;
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  canvas.addEventListener("pointerdown", (e) => {
+    const r = canvas.getBoundingClientRect();
+    const px = e.clientX - r.left;
+    const py = e.clientY - r.top;
+    ray.setFromCamera(new THREE.Vector2((px / W) * 2 - 1, 1 - (py / H) * 2), camera);
+    let hit = null;
+    if (st.explode < 0.05 && e.button === 0 && !e.shiftKey) {
+      let best = Infinity;
+      for (const d of drags) {
+        const h = ray.intersectObjects(d.meshes, false)[0];
+        if (h && h.distance < best) {
+          best = h.distance;
+          hit = d;
+        }
+      }
+    }
+    drag = { mode: hit ? "part" : e.button === 2 || e.shiftKey ? "pan" : "orbit", d: hit, px, py, az: cam.azT, el: cam.elT, pan: cam.pan.clone() };
+    if (hit) {
+      // the screen direction and length of the drag's full travel, from its start
+      const o = new THREE.Vector3();
+      hit.meshes[0].getWorldPosition(o);
+      const a = project(o);
+      const b = project(o.clone().addScaledVector(new THREE.Vector3(...hit.axis), hit.length));
+      drag.axis = [b[0] - a[0], b[1] - a[1]];
+      drag.v0 = hit.start?.() ?? 0;
+    }
+    try {
+      canvas.setPointerCapture(e.pointerId);
+    } catch {}
+    canvas.classList.add("v3-grab");
+    input();
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    const r = canvas.getBoundingClientRect();
+    const dx = e.clientX - r.left - drag.px;
+    const dy = e.clientY - r.top - drag.py;
+    if (drag.mode === "part") {
+      const [ax, ay] = drag.axis;
+      const l2 = ax * ax + ay * ay;
+      drag.d.move(drag.v0 + (l2 > 4 ? (dx * ax + dy * ay) / l2 : dy / 200));
+    } else if (drag.mode === "orbit") {
+      cam.azT = cam.az = drag.az - dx * 0.4;
+      cam.elT = cam.el = Math.min(90, Math.max(-60, drag.el + dy * 0.4));
+    } else {
+      const zoom = U.uPx.value / dpr;
+      const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+      const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+      cam.pan.copy(drag.pan).addScaledVector(right, -dx / zoom).addScaledVector(up, dy / zoom);
+    }
+    input();
+  });
+  const endDrag = () => {
+    if (!drag) return;
+    if (drag.mode === "part") drag.d.end?.();
+    drag = null;
+    canvas.classList.remove("v3-grab");
+    input();
+  };
+  canvas.addEventListener("pointerup", endDrag);
+  canvas.addEventListener("pointercancel", endDrag);
+  canvas.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      const r = canvas.getBoundingClientRect();
+      const sx = e.clientX - r.left - W / 2;
+      const sy = H / 2 - (e.clientY - r.top);
+      const z0 = U.uPx.value / dpr;
+      const before = cam.zoom;
+      cam.zoom = Math.min(16, Math.max(0.3, cam.zoom * Math.exp(-e.deltaY * 0.0015)));
+      const z1 = (z0 * cam.zoom) / before;
+      const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+      const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+      cam.pan.addScaledVector(right, sx / z0 - sx / z1).addScaledVector(up, sy / z0 - sy / z1);
+      input();
+    },
+    { passive: false }
+  );
+  canvas.addEventListener("dblclick", () => {
+    cam.zoom = 1;
+    cam.pan.set(0, 0, 0);
+    input();
+  });
+
+  const keys = new Map();
+  host.addEventListener("keydown", (e) => {
+    const k = e.key;
+    const own = keys.get(k) ?? keys.get(k.toLowerCase());
+    if (own) own(e);
+    else if (k === "e" || k === "E") st.explodeT = st.explodeT > 0.5 ? 0 : 1;
+    else if (k === "c" || k === "C") U.uCutOn.value = U.uCutOn.value > 0.5 ? 0 : 1;
+    else if (k === "b" || k === "B") st.balloons = !st.balloons;
+    else if (k === "s" || k === "S") lv.slow = lv.slow === 1 ? 0.2 : lv.slow === 0.2 ? 0.05 : 1;
+    else if ("1234".includes(k) && k.length === 1) setView(["iso", "front", "side", "top"][Number(k) - 1]);
+    else return;
+    e.preventDefault();
+    input();
+  });
+
+  // ---- the loop
+  function render(l) {
+    pageRender?.(l);
+    draw();
+  }
+  const tests = [];
+
+  const V = {
+    THREE,
+    renderer,
+    camera,
+    world,
+    host,
+    params: q,
+    // part record: { id, name, group, inner, holders: [{ holder, inner, mesh, lines, spec }], live }
+    part: (id) => PARTS.get(id),
+    // the holder of one solid, to turn or scale it about its own pivot; key: index or `live` name
+    solid: (id, key) => {
+      const rec = PARTS.get(id);
+      return (typeof key === "number" ? rec.holders[key] : rec.live[key]).holder;
+    },
+    // the base pose of a part, before explode: pos [x, y, z] in mm, rot [rx, ry, rz] about its pivot
+    set(id, { pos, rot } = {}) {
+      const rec = PARTS.get(id);
+      if (pos) rec.base.pos = pos;
+      if (rot) rec.base.rot = rot;
+    },
+    // replace one solid's geometry (a part whose shape changes: a seal, a bellows)
+    reshape(id, key, spec) {
+      const rec = PARTS.get(id);
+      const h = typeof key === "number" ? rec.holders[key] : rec.live[key];
+      const geo = geometryOf({ ...h.spec, ...spec });
+      h.mesh.geometry.dispose();
+      h.mesh.geometry = geo;
+      if (h.lines) {
+        h.lines.geometry.dispose();
+        h.lines.geometry = new THREE.EdgesGeometry(geo, 35);
+      }
+    },
+    // a fluid's look: density 0..1 (stipple), wash 0..1 (flat tint), stretch mm, offset [x, y, z]
+    fluid(name, { density, wash, stretch, offset, visible } = {}) {
+      const m = FLUIDS.get(name);
+      if (!m) throw new Error("solid3d: no fluid " + name);
+      const u = m.material.uniforms;
+      if (density != null) u.uDensity.value = density;
+      if (wash != null) u.uWash.value = wash;
+      if (stretch != null) u.uLift.value = stretch;
+      if (offset) m.position.set(...offset);
+      if (visible != null) m.visible = visible;
+    },
+    // poses whose union the camera frames: each sets the page's pose (via V.set) for one extreme
+    frame,
+    // drag a part to drive the model: axis [x, y, z] it moves along as the value grows by 1 over
+    // `length` mm; start() returns the value at the press, move(v) sets it, end() on release
+    drag(ids, { axis, length, start, move, end }) {
+      const meshes = [];
+      for (const id of [].concat(ids)) PARTS.get(id).group.traverse((o) => o.isMesh && meshes.push(o));
+      drags.push({ meshes, axis, length, start, move, end });
+    },
+    key: (k, fn) => keys.set(k, fn),
+    test: (name, fn) => tests.push([name, fn]),
+    project,
+    dim,
+    get explode() {
+      return st.explode;
+    },
+    get cut() {
+      return U.uCutOn.value > 0.5;
+    },
+    input,
+    redraw,
+    // start: step(dt, live) advances the page's model (return true while settling); render(live)
+    // sets poses and fluids; overlay() returns extra SVG (dimensions); still: the tour time shown
+    // under reduced motion
+    run({ step, render: r, overlay, still = 6, idleAfter = 5 }) {
+      pageRender = r;
+      overlayFn = overlay ?? null;
+      resize();
+      applyTheme();
+      new ResizeObserver(resize).observe(host);
+      lv = L.run({
+        root: host,
+        step: (dt, l) => {
+          const busy = step(dt, l);
+          const snap = l.reduced || l.frozen;
+          cam.az = snap ? cam.azT : L.follow(cam.az, cam.azT, 9, dt);
+          cam.el = snap ? cam.elT : L.follow(cam.el, cam.elT, 9, dt);
+          st.explode = snap ? st.explodeT : L.follow(st.explode, st.explodeT, 5, dt);
+          return busy || Math.abs(cam.az - cam.azT) > 0.01 || Math.abs(cam.el - cam.elT) > 0.01 || Math.abs(st.explode - st.explodeT) > 1e-3;
+        },
+        render,
+        idleAfter,
+        onFrozen: () => {
+          document.body.setAttribute("data-ready", "1");
+          if (q.check) report();
+        },
+      });
+      if (lv.reduced && !lv.frozen) {
+        const fake = { touring: true, reduced: false, frozen: true, clock: 0 };
+        for (let t = 0; t < still; t += 1 / 240) step(1 / 240, fake);
+        render(lv);
+      }
+      window.__v3ok = true;
+      if (q.selftest) setTimeout(selftest, 50);
+      if (q.bench) bench();
+      return lv;
+    },
+  };
+
+  // ---- ?check=1: the frame is drawn and not blank
+  function report() {
+    const gl = renderer.getContext();
+    const w = gl.drawingBufferWidth;
+    const h = gl.drawingBufferHeight;
+    const px = new Uint8Array(w * h * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    let cover = 0;
+    let n = 0;
+    let s1 = 0;
+    let s2 = 0;
+    for (let i = 0; i < px.length; i += 16) {
+      n++;
+      if (px[i + 3] > 0) cover++;
+      const l = 0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2];
+      s1 += l;
+      s2 += l * l;
+    }
+    const d = gl.getExtension("WEBGL_debug_renderer_info");
+    out("check3d", { webgl: gl instanceof WebGL2RenderingContext ? 2 : 1, gpu: d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : "?", cover: +(cover / n).toFixed(4), variance: +(s2 / n - (s1 / n) ** 2).toFixed(1), parts: PARTS.size, fluids: FLUIDS.size });
+  }
+  function out(id, data) {
+    const el = document.createElement("pre");
+    el.id = id;
+    el.hidden = true;
+    el.textContent = JSON.stringify(data);
+    document.body.appendChild(el);
+  }
+
+  // ---- ?selftest=1: drive the kit's controls with synthetic events, then the page's own tests
+  function selftest() {
+    const res = [];
+    const r = canvas.getBoundingClientRect();
+    const ptr = (type, x, y) => canvas.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 7, clientX: r.left + x, clientY: r.top + y, button: 0 }));
+    const key = (k) => host.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true }));
+    const ok = (name, pass, info) => res.push({ name, pass: !!pass, info });
+    draw();
+    document.querySelector('[data-view="front"]')?.click();
+    ok("front button", cam.azT === 0 && cam.elT === 0, [cam.azT, cam.elT]);
+    key("1");
+    ok("key 1 iso", cam.azT === 45, [cam.azT, cam.elT]);
+    key("e");
+    ok("key E explode", st.explodeT === 1, st.explodeT);
+    key("e");
+    const c0 = U.uCutOn.value;
+    key("c");
+    ok("key C cut", U.uCutOn.value !== c0, U.uCutOn.value);
+    key("c");
+    const z0 = cam.zoom;
+    canvas.dispatchEvent(new WheelEvent("wheel", { deltaY: -300, clientX: r.left + W / 2, clientY: r.top + H / 2, bubbles: true, cancelable: true }));
+    ok("wheel zoom", cam.zoom > z0, [z0, cam.zoom]);
+    cam.zoom = z0;
+    cam.pan.set(0, 0, 0);
+    const az0 = cam.azT;
+    ptr("pointerdown", 6, 6);
+    ptr("pointermove", 106, 6);
+    ptr("pointerup", 106, 6);
+    ok("orbit drag", Math.abs(cam.azT - az0) > 10, [az0, cam.azT]);
+    key("1");
+    cam.az = cam.azT;
+    cam.el = cam.elT;
+    draw();
+    for (const [name, fn] of tests) {
+      try {
+        const t = fn({ ptr, key, project, draw });
+        ok(name, t?.pass ?? t, t?.info);
+      } catch (err) {
+        ok(name, false, String(err));
+      }
+    }
+    out("selftest", res);
+  }
+
+  // ---- ?bench=1: time a frame, GPU drained (readPixels forces it)
+  function bench() {
+    const one = new Uint8Array(4);
+    const gl = renderer.getContext();
+    renderer.info.autoReset = false;
+    const time = (n) => {
+      const ts = [];
+      for (let i = 0; i < n; i++) {
+        renderer.info.reset();
+        const t0 = performance.now();
+        render(lv);
+        gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, one);
+        ts.push(performance.now() - t0);
+      }
+      ts.sort((a, b) => a - b);
+      return { median: +ts[n >> 1].toFixed(1), p90: +ts[Math.floor(n * 0.9)].toFixed(1) };
+    };
+    time(10);
+    const all = time(60);
+    const info = { triangles: renderer.info.render.triangles, calls: renderer.info.render.calls };
+    st.balloons = false;
+    const bare = time(60);
+    const d = gl.getExtension("WEBGL_debug_renderer_info");
+    out("bench", { frame: all, noBalloons: bare, ...info, size: [W, H, dpr], gpu: d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : "?" });
+  }
+
+  return V;
+}
+
+return { lathe, cylinder, tube, extrude, box, sphere, torus, helix, disc, gearOutline, gear, part, bore, fluid, circle, polygon, hexagon, rrectAt, saddle, geometryOf, create };
+})();
+
+const M = (() => {
+// Truth first: a 5-pin euro-profile half cylinder and its key. Pure, no imports, no DOM.
+// The geometry, the dimensions on the sheet, the readout and the chart all read this.
+//
+// Frame: u along the plug axis from the front face (mm), z up from the axis. The sheet draws the
+// cylinder fin-up, so the pin stacks stand above the plug.
+//
+// Key model. Each cut is a 90° V with a 0.6 mm flat root; depth code n puts the root
+// 0.5·n mm below the uncut blade top. A key pin cut for code n is 3.5 + 0.5·n long, so on its own
+// cut its crown lands exactly on the shear line. A key pin's nose is a 90° cone with a 0.6 mm
+// flat, so as the key slides the pin rides the highest point of the profile under its cone.
+// The plug may turn only when every key pin's crown sits on the shear line (AND over five pins).
+
+// ---------------------------------------------------------------- profile and plug (mm)
+const PLUG_R = 6.5; // Ø13 plug: its surface is the shear line
+const SHEAR = PLUG_R;
+const COLLAR_R = 7.5; // Ø15 front collar in a counterbore
+const COLLAR_L = 1.2;
+const BODY_R = 8.5; // DIN 18252 profile: Ø17 round
+const FIN_W = 10; // and a 10 mm fin
+const FIN_TOP = 24.5; // 33 mm overall
+const BODY_L = 40; // half cylinder 30/10
+const CAM_U = 30; // cam centre from the front face
+const SLOT = [25.6, 34.4]; // cam slot
+const CAM = [25.8, 34.2]; // cam faces
+const PLUG_END = SLOT[0];
+const KEYWAY_END = 25.0;
+const SPIGOT_R = 4; // plug tail through the cam
+const SPIGOT_END = 39.4;
+const GROOVE = [37.9, 38.6]; // retaining-washer groove, Ø6 root
+const REAR_BORE_R = 4.1;
+const REAR_CB = 37.4; // rear counterbore Ø13 from here to the back face
+const REAR_CB_R = 6.5;
+const BRIDGE = 12.5; // the fin bridge over the cam starts here
+const SCREW = { u: CAM_U, z: 18, d: 5, minor: 4.134 }; // M5 fixing screw, perpendicular to the cut
+
+// ---------------------------------------------------------------- pins
+const PINS = 5;
+const PIN_D = 3.0;
+const PIN_R = PIN_D / 2;
+const FIRST = 4.5;
+const PITCH = 4.0;
+const pinU = (i) => FIRST + PITCH * i;
+const NOSE_FLAT = 0.6; // Ø of the flat on the key pin's 90° cone
+const DRIVER_L = 5.0;
+const CAP_BOT = 22.5; // chamber caps Ø3×2, pressed in flush with the fin top
+const SPRING = { free: 16, rate: 0.05, wire: 0.25, mean: 2.3, turns: 7 }; // N/mm
+
+// ---------------------------------------------------------------- key and keyway
+const STEP = 0.5; // depth increment
+const DEPTHS = 7; // codes 0..6
+const BLADE_TOP = 3.0; // uncut blade top, above the axis
+const BLADE_BOT = -5.0;
+const BLADE_LEN = 24.8; // shoulder to tip: also the full insertion
+const ROOT_FLAT = 0.6;
+const TIP_LOW = -1.5; // the tip's 45° ramp starts this high at the tip
+const SHANK = { top: 5.5, bot: -6.0 }; // behind the shoulder
+const KEYWAY = { top: 3.4, bot: -5.3, hw: 1.2 };
+const BLADE_HW = 1.0; // 2 mm blade
+const PIN_REST = -0.3; // nose height with no key: the cone seats on the keyway ward
+const TOL = 0.15; // a gap this close to the shear line lets the plug turn
+
+const root = (code) => BLADE_TOP - STEP * code;
+const keyPinLength = (code) => SHEAR - root(code);
+
+// The lock is pinned for this key; the tour also tries a key one cut wrong.
+const RIGHT = [2, 4, 1, 6, 3];
+const WRONG = [2, 4, 3, 6, 3];
+const KEY_PINS = RIGHT.map(keyPinLength);
+const COMBINATIONS = DEPTHS ** PINS;
+const codeText = (b) => b.join("-");
+
+// The key's top edge at w (mm from the shoulder towards the tip), in plug z.
+function keyTop(bitting, w) {
+  if (w < 0) return SHANK.top;
+  if (w > BLADE_LEN) return -Infinity;
+  let z = Math.min(BLADE_TOP, TIP_LOW + (BLADE_LEN - w));
+  for (let i = 0; i < PINS; i++) z = Math.min(z, root(bitting[i]) + Math.max(0, Math.abs(w - pinU(i)) - ROOT_FLAT / 2));
+  return z;
+}
+
+// Plug u under key w, with the key inserted e mm (0: tip at the face; BLADE_LEN: home).
+const keyW = (u, e) => u + (BLADE_LEN - e);
+
+// The key pin's nose height: the highest point of the profile under its cone, or the rest stop.
+function nose(bitting, e, i) {
+  const u = pinU(i);
+  let best = PIN_REST;
+  for (let k = -30; k <= 30; k++) {
+    const du = (k / 30) * PIN_R;
+    const w = keyW(u + du, e);
+    if (w < 0 || w > BLADE_LEN) continue;
+    const z = keyTop(bitting, w) - Math.max(0, Math.abs(du) - NOSE_FLAT / 2);
+    if (z > best) best = z;
+  }
+  return best;
+}
+
+// The five stacks for a key inserted e mm.
+function stacks(bitting, e) {
+  const out = [];
+  for (let i = 0; i < PINS; i++) {
+    const n = nose(bitting, e, i);
+    const top = n + KEY_PINS[i];
+    const dTop = top + DRIVER_L;
+    const len = CAP_BOT - dTop;
+    out.push({ nose: n, top, off: top - SHEAR, dTop, spring: len, force: SPRING.rate * (SPRING.free - len) });
+  }
+  return out;
+}
+
+const aligned = (s) => Math.abs(s.off) <= TOL;
+const free = (st) => st.every(aligned);
+const blocking = (st) => st.map((s, i) => (aligned(s) ? -1 : i)).filter((i) => i >= 0);
+const springForce = (st) => st.reduce((f, s) => f + s.force, 0);
+
+// ---------------------------------------------------------------- the cam, in its own plane
+// The cam is drawn in an end view (s across, z up) with its lobe up at rest; the hull of the
+// Ø12.6 hub and a R2 tip 9 mm out.
+const CAM_HUB = 6.3;
+const CAM_TIP = { at: 9.0, r: 2.0 };
+const CAM_TURN = 90; // the tour turns the key a quarter turn
+
+// Rotate a point of the plug's own frame by phi (degrees, clockwise seen from the front).
+function rot([s, z], phi) {
+  const a = (phi * Math.PI) / 180;
+  return [s * Math.cos(a) + z * Math.sin(a), -s * Math.sin(a) + z * Math.cos(a)];
+}
+
+return { PLUG_R, SHEAR, COLLAR_R, COLLAR_L, BODY_R, FIN_W, FIN_TOP, BODY_L, CAM_U, SLOT, CAM, PLUG_END, KEYWAY_END, SPIGOT_R, SPIGOT_END, GROOVE, REAR_BORE_R, REAR_CB, REAR_CB_R, BRIDGE, SCREW, PINS, PIN_D, PIN_R, FIRST, PITCH, pinU, NOSE_FLAT, DRIVER_L, CAP_BOT, SPRING, STEP, DEPTHS, BLADE_TOP, BLADE_BOT, BLADE_LEN, ROOT_FLAT, TIP_LOW, SHANK, KEYWAY, BLADE_HW, PIN_REST, TOL, root, keyPinLength, RIGHT, WRONG, KEY_PINS, COMBINATIONS, codeText, keyTop, keyW, nose, stacks, aligned, free, blocking, springForce, CAM_HUB, CAM_TIP, CAM_TURN, rot };
+})();
+
+const P = (() => {
+// The pin tumbler cylinder's parts, in world mm.
+// Longitudinal views: u along the axis from the front face, z up (fin up).
+// End views (VIEW B, SECTION C-C, both looking towards the back): s across (sheet right), z up.
+// Each function draws one part into a view and returns SVG, so the main view and the enlarged
+// section draw the same geometry at their own scale. Parts that turn with the plug are drawn at
+// phi = 0 in the end views and turned by the page with a transform; in the longitudinal section a
+// turned plug is a different cut, so it is re-drawn as the plane's true intersection.
+
+
+
+const part = (id, inner, extra = "") => `<g data-part="${id}"${extra}>${inner}</g>`;
+
+const R = M.PLUG_R;
+const PR = M.PIN_R;
+const rad = (deg) => (deg * Math.PI) / 180;
+
+// ---------------------------------------------------------------- the cutting plane through a turned plug
+// A feature of the plug that is a prism along the axis (or a radial pin) has, in the plug's own
+// frame, a half-width hw across and a radial range [a, b]. With the plug turned by phi, the plane
+// of the longitudinal section meets it where |z·sin phi| <= hw and a <= z·cos phi <= b.
+function interval(a, b, hw, phi) {
+  const s = Math.abs(Math.sin(rad(phi)));
+  const c = Math.cos(rad(phi));
+  let lo = s > 1e-9 ? -hw / s : -Infinity;
+  let hi = s > 1e-9 ? hw / s : Infinity;
+  if (c > 1e-9) {
+    lo = Math.max(lo, a / c);
+    hi = Math.min(hi, b / c);
+  } else if (!(a <= 0 && 0 <= b)) return null;
+  return lo < hi ? [lo, hi] : null;
+}
+
+// Runs of non-empty intervals along u, as polygons (top chain forward, bottom chain back).
+function runs(samples) {
+  const out = [];
+  let cur = null;
+  samples.forEach(([u, iv], idx) => {
+    if (!iv) {
+      cur = null;
+      return;
+    }
+    if (!cur) out.push((cur = { start: idx, top: [], bot: [] }));
+    cur.top.push([u, iv[1]]);
+    cur.bot.push([u, iv[0]]);
+  });
+  return out.map((r) => ({ start: r.start, pts: [...r.top, ...r.bot.reverse()] }));
+}
+
+// ---------------------------------------------------------------- body (static)
+const W = [0, 1, 2, 3].map((i) => [M.pinU(i) + PR, M.pinU(i + 1) - PR]);
+const lastHole = M.pinU(4) + PR;
+
+function body(V) {
+  const A = [[0, 7.5], [1.2, 7.5], [1.2, R], [M.pinU(0) - PR, R], [M.pinU(0) - PR, M.FIN_TOP], [0.5, M.FIN_TOP], [0, M.FIN_TOP - 0.5], [0, 11.5], [2.5, 11.5], [2.5, 8.5], [0, 8.5]];
+  const webs = W.map(([u0, u1]) => K.rect(u0, R, u1, M.FIN_TOP));
+  const B = [
+    [lastHole, R], [M.SLOT[0], R], [M.SLOT[0], M.BRIDGE], [M.SLOT[1], M.BRIDGE], [M.SLOT[1], M.REAR_BORE_R], [M.REAR_CB, M.REAR_BORE_R],
+    [M.REAR_CB, M.REAR_CB_R], [M.BODY_L, M.REAR_CB_R], [M.BODY_L, M.FIN_TOP - 0.5], [M.BODY_L - 0.5, M.FIN_TOP], [lastHole, M.FIN_TOP],
+  ];
+  const C = [[0, -7.5], [1.2, -7.5], [1.2, -R], [M.SLOT[0], -R], [M.SLOT[0], -M.BODY_R], [0.5, -M.BODY_R], [0, -M.BODY_R + 0.5]];
+  const D = [[M.SLOT[1], -M.BODY_R], [M.BODY_L - 0.5, -M.BODY_R], [M.BODY_L, -M.BODY_R + 0.5], [M.BODY_L, -M.REAR_CB_R], [M.REAR_CB, -M.REAR_CB_R], [M.REAR_CB, -M.REAR_BORE_R], [M.SLOT[1], -M.REAR_BORE_R]];
+  return part(1, [A, ...webs, B, C, D].map((p) => K.cut(V, p, { mat: "brass", angle: 45 })).join(""));
+}
+
+function caps(V) {
+  let out = "";
+  for (let i = 0; i < M.PINS; i++) {
+    const u = M.pinU(i);
+    out += K.body(V, [[u - PR + 0.2, M.CAP_BOT], [u + PR - 0.2, M.CAP_BOT], [u + PR, M.CAP_BOT + 0.2], [u + PR, M.FIN_TOP], [u - PR, M.FIN_TOP], [u - PR, M.CAP_BOT + 0.2]]);
+  }
+  return part(10, out);
+}
+
+function antiDrill(V) {
+  return part(13, K.body(V, [[0.3, 8.5], [2.5, 8.5], [2.5, 11.5], [0.3, 11.5], [0.05, 11.25], [0.05, 8.75]]));
+}
+
+function screw(V) {
+  const { u, z, d, minor } = M.SCREW;
+  return part(
+    14,
+    K.cut(V, K.circle(u, z, d / 2, 40), { mat: "steel", angle: 135 }) +
+      K.line(V, K.arc(u, z, minor / 2, 100, 370, 30), "thin")
+  );
+}
+
+function washer(V) {
+  const top = K.rect(M.REAR_CB, 4.2, M.GROOVE[0], 6.0);
+  return part(16, K.cut(V, top, { mat: "solid" }) + K.cut(V, K.flipV(top), { mat: "solid" }));
+}
+
+function clip(V) {
+  const top = K.rect(M.GROOVE[0], 3.0, M.GROOVE[1], 6.15);
+  return part(12, K.cut(V, top, { mat: "steel", angle: 60 }) + K.cut(V, K.flipV(top), { mat: "steel", angle: 60 }));
+}
+
+// ---------------------------------------------------------------- stacks (move up and down)
+function drivers(V, st) {
+  let out = "";
+  st.forEach((s, i) => {
+    const u = M.pinU(i);
+    const b = s.top;
+    const t = s.dTop;
+    out += K.body(V, [[u - PR + 0.2, b], [u + PR - 0.2, b], [u + PR, b + 0.2], [u + PR, t - 0.2], [u + PR - 0.2, t], [u - PR + 0.2, t], [u - PR, t - 0.2], [u - PR, b + 0.2]]);
+  });
+  return part(8, out);
+}
+
+const SPR = { radius: (M.SPRING.mean / 2), wire: M.SPRING.wire, turns: M.SPRING.turns };
+function springs(V, st) {
+  let out = "";
+  st.forEach((s, i) => {
+    out += K.springSection(V, { from: s.dTop, to: M.CAP_BOT, radius: SPR.radius, wire: SPR.wire, turns: SPR.turns, axis: "v", at: M.pinU(i) });
+  });
+  return part(9, out);
+}
+// The centre of the lowest wire section on the right of stack i: a point always on the spring.
+const springDot = (s, i) => [M.pinU(i) + SPR.radius, s.dTop + SPR.wire / 2];
+
+// Key pins, at phi = 0 their true shape, turned their cut through the plane (they stay in the plug).
+function keyPin(V, s, i, phi) {
+  const u = M.pinU(i);
+  if (phi < 0.05) {
+    const n = s.nose;
+    const f = M.NOSE_FLAT / 2;
+    return K.body(V, [[u - f, n], [u + f, n], [u + PR, n + PR - f], [u + PR, s.top], [u - PR, s.top], [u - PR, n + PR - f]]);
+  }
+  const samples = [];
+  for (let k = 0; k <= 40; k++) {
+    const du = -PR + (2 * PR * k) / 40;
+    const iv = interval(s.nose, Infinity, Math.sqrt(Math.max(0, PR * PR - du * du)), phi);
+    samples.push([u + du, iv && [iv[0], Math.min(R, iv[1])]]);
+  }
+  return runs(samples).map((r) => K.body(V, r.pts)).join("");
+}
+
+// item numbers: pins 1..5 are items 3, 4, 5, 6, 7
+const PIN_ITEM = [3, 4, 5, 6, 7];
+const keyPins = (V, st, phi) => st.map((s, i) => part(PIN_ITEM[i], keyPin(V, s, i, phi))).join("");
+
+// A point on key pin i in the plane, or null when the turned plug has carried it out of the plane.
+function keyPinDot(s, i, phi) {
+  if (phi < 0.05) return [M.pinU(i), (s.nose + PR + s.top) / 2];
+  const iv = interval(s.nose, Infinity, PR, phi);
+  if (!iv) return null;
+  const lo = iv[0];
+  const hi = Math.min(R, iv[1]);
+  return hi - lo > 0.5 ? [M.pinU(i), (lo + hi) / 2] : null;
+}
+
+// ---------------------------------------------------------------- the plug, cut by the plane
+const PLUG_TOP = [[0, 7.2], [0.3, 7.5], [1.2, 7.5], [1.2, R], [M.PLUG_END, R], [M.PLUG_END, M.SPIGOT_R], [M.GROOVE[0], M.SPIGOT_R], [M.GROOVE[0], 3], [M.GROOVE[1], 3], [M.GROOVE[1], M.SPIGOT_R], [M.SPIGOT_END - 0.3, M.SPIGOT_R], [M.SPIGOT_END, M.SPIGOT_R - 0.3]];
+const PLUG_OUTLINE = [...PLUG_TOP, ...PLUG_TOP.map(([u, z]) => [u, -z]).reverse()];
+
+function keywayBand(phi) {
+  const iv = interval(M.KEYWAY.bot, M.KEYWAY.top, M.KEYWAY.hw, phi);
+  return [Math.max(-R, iv[0]), Math.min(R, iv[1])];
+}
+
+function plug(V, phi) {
+  const [kb, kt] = keywayBand(phi);
+  const eps = 1e-6;
+  const lenses = [];
+  for (let i = 0; i < M.PINS; i++) {
+    const u = M.pinU(i);
+    const samples = [];
+    for (let k = 0; k <= 40; k++) {
+      const du = -PR + (2 * PR * k) / 40;
+      const iv = interval(M.KEYWAY.top, Infinity, Math.sqrt(Math.max(0, PR * PR - du * du)), phi);
+      samples.push([u + du, iv && [Math.max(kt, iv[0]), Math.min(R, iv[1])]]);
+    }
+    for (const r of runs(samples)) if (r.pts.length > 2) lenses.push(r.pts);
+  }
+  // fills: the whole plug hatched, the keyway and the pin holes as voids
+  let fill = `<path class="paper" d="${K.d(V, PLUG_OUTLINE)}"/><path fill="url(#h-brass-135)" d="${K.d(V, PLUG_OUTLINE)}"/>`;
+  fill += `<path class="paper" d="${K.d(V, K.rect(-0.01, kb, M.KEYWAY_END, kt))}${lenses.map((p) => K.d(V, p)).join("")}"/>`;
+  // edges: the outline, broken where the keyway opens at the face and the holes open at the top
+  const openTop = [];
+  const openKey = [];
+  for (const p of lenses) {
+    const top = p.filter(([, z]) => z >= R - eps).map(([u]) => u);
+    const bot = p.filter(([, z]) => z <= kt + eps).map(([u]) => u);
+    if (top.length > 1) openTop.push([Math.min(...top), Math.max(...top)]);
+    if (bot.length > 1) openKey.push([Math.min(...bot), Math.max(...bot)]);
+  }
+  const along = (z, u0, u1, gaps) => {
+    const segs = [];
+    let at = u0;
+    for (const [g0, g1] of gaps.sort((a, b) => a[0] - b[0])) {
+      if (g0 > at) segs.push([[at, z], [g0, z]]);
+      at = Math.max(at, g1);
+    }
+    if (u1 > at) segs.push([[at, z], [u1, z]]);
+    return segs;
+  };
+  const edges = [
+    [[0, kt], [0, 7.2], [0.3, 7.5], [1.2, 7.5], [1.2, R]],
+    ...along(R, 1.2, M.PLUG_END, openTop),
+    [...PLUG_TOP.slice(4), ...PLUG_TOP.slice(4).map(([u, z]) => [u, -z]).reverse(), [1.2, -R], [1.2, -7.5], [0.3, -7.5], [0, -7.2], [0, kb]],
+    ...along(kt, 0, M.KEYWAY_END, openKey),
+    [[M.KEYWAY_END, kt], [M.KEYWAY_END, kb], [0, kb]],
+  ];
+  for (const p of lenses) {
+    for (let j = 0; j < p.length; j++) {
+      const a = p[j];
+      const b = p[(j + 1) % p.length];
+      const onTop = a[1] >= R - eps && b[1] >= R - eps;
+      const onKey = a[1] <= kt + eps && b[1] <= kt + eps;
+      if (!onTop && !onKey) edges.push([a, b]);
+    }
+  }
+  return part(2, fill + K.lines(V, edges));
+}
+
+// ---------------------------------------------------------------- the key, cut by the plane
+const keyBot = (w) => (w < 0 ? M.SHANK.bot : Math.max(M.BLADE_BOT, M.BLADE_BOT + (w - (M.BLADE_LEN - 1))));
+const KEY_BREAK = -3; // the shank is broken off 3 mm behind the shoulder
+
+function keyWs(bitting) {
+  const ws = [KEY_BREAK, -1e-4];
+  for (let w = 0; w <= M.BLADE_LEN + 1e-9; w += 0.1) ws.push(w);
+  for (let i = 0; i < M.PINS; i++) for (const d of [-M.ROOT_FLAT / 2, M.ROOT_FLAT / 2]) ws.push(M.pinU(i) + d);
+  ws.push(M.BLADE_LEN);
+  return [...new Set(ws.map((w) => Math.round(w * 1e4) / 1e4))].filter((w) => w <= M.BLADE_LEN).sort((a, b) => a - b);
+}
+
+function key(V, bitting, e, phi) {
+  const shift = M.BLADE_LEN - e;
+  const samples = keyWs(bitting).map((w) => {
+    const top = M.keyTop(bitting, w);
+    return [w - shift, interval(keyBot(w), top, w < 0 ? M.BLADE_HW : M.BLADE_HW, phi)];
+  });
+  let out = "";
+  for (const r of runs(samples)) {
+    const dd = K.d(V, r.pts);
+    out += `<path class="paper" d="${dd}"/>`;
+    if (r.start === 0) {
+      out += `<path class="vis" d="${K.d(V, r.pts, false)}"/>`;
+      const a = r.pts[r.pts.length - 1];
+      const b = r.pts[0];
+      out += K.breakLine(V, a, b);
+    } else out += `<path class="vis" d="${dd}"/>`;
+  }
+  return part(15, out);
+}
+const keyDot = (e) => [KEY_BREAK + 1.2 - (M.BLADE_LEN - e), 0];
+
+// ---------------------------------------------------------------- the cam
+function hull(points) {
+  const p = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower = [];
+  for (const q of p) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop();
+    lower.push(q);
+  }
+  const upper = [];
+  for (const q of p.reverse()) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop();
+    upper.push(q);
+  }
+  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
+}
+const CAM_SHAPE = hull([...K.circle(0, 0, M.CAM_HUB, 72), ...K.circle(0, M.CAM_TIP.at, M.CAM_TIP.r, 36)]);
+
+// Where the plane (s = 0) meets the turned cam: [zlo, zhi].
+function camSpan(phi) {
+  const pts = CAM_SHAPE.map((p) => M.rot(p, phi));
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (let j = 0; j < pts.length; j++) {
+    const [s0, z0] = pts[j];
+    const [s1, z1] = pts[(j + 1) % pts.length];
+    if ((s0 <= 0 && s1 >= 0) || (s0 >= 0 && s1 <= 0)) {
+      const z = s1 === s0 ? z0 : z0 + ((0 - s0) / (s1 - s0)) * (z1 - z0);
+      lo = Math.min(lo, z);
+      hi = Math.max(hi, z);
+    }
+  }
+  return [lo, hi];
+}
+
+function cam(V, phi) {
+  const [lo, hi] = camSpan(phi);
+  const [u0, u1] = M.CAM;
+  return part(11, K.cut(V, K.rect(u0, M.SPIGOT_R, u1, hi), { mat: "steel", angle: 60 }) + K.cut(V, K.rect(u0, lo, u1, -M.SPIGOT_R), { mat: "steel", angle: 60 }));
+}
+
+// ---------------------------------------------------------------- accent: the shear line and the gaps
+function shearLine(V) {
+  return `<path class="shear" d="${K.d(V, [[1.2, R], [M.PLUG_END, R]], false)}"/>`;
+}
+function gaps(V, st) {
+  return st.map((s, i) => `<path class="gap" d="${K.d(V, [[M.pinU(i) - PR, s.top], [M.pinU(i) + PR, s.top]], false)}"/>`).join("");
+}
+
+// ---------------------------------------------------------------- end views (s across, z up)
+const ZS = Math.sqrt(R * R - PR * PR); // where a pin hole meets the plug surface
+const FIN_Z = Math.sqrt(M.BODY_R ** 2 - (M.FIN_W / 2) ** 2);
+
+const KEYWAY_SHAPE = [
+  [-1.2, 3.4], [-1.2, -0.15], [-0.6, -0.75], [-0.6, -2.05], [-1.2, -2.65], [-1.2, -5.3],
+  [0.75, -5.3], [0.75, -3.8], [1.2, -3.35], [1.2, -1.05], [0.6, -0.45], [0.6, 0.85], [1.2, 1.45], [1.2, 3.4],
+];
+const KEY_SHAPE = (top) => [
+  [-1.0, top], [-1.0, -0.1], [-0.45, -0.65], [-0.45, -2.15], [-1.0, -2.7], [-1.0, -5.0],
+  [0.6, -5.0], [0.6, -3.7], [1.0, -3.3], [1.0, -1.1], [0.45, -0.55], [0.45, 0.95], [1.0, 1.5], [1.0, top],
+];
+
+// Clip a polygon to z <= top (Sutherland–Hodgman, one half-plane).
+function clipBelow(poly, top) {
+  const out = [];
+  for (let j = 0; j < poly.length; j++) {
+    const a = poly[j];
+    const b = poly[(j + 1) % poly.length];
+    const ain = a[1] <= top;
+    const bin = b[1] <= top;
+    if (ain) out.push(a);
+    if (ain !== bin) out.push([a[0] + ((top - a[1]) / (b[1] - a[1])) * (b[0] - a[0]), top]);
+  }
+  return out;
+}
+
+// The key's cross-section at plug position u (a plane across the axis), or "" if the key is not there.
+function keySection(V, bitting, e, u, { mat = "bronze", angle = 30 } = {}) {
+  const w = M.keyW(u, e);
+  if (w > M.BLADE_LEN || w < KEY_BREAK) return "";
+  if (w < 0) return part(15, K.cut(V, K.rect(-M.BLADE_HW, M.SHANK.bot, M.BLADE_HW, M.SHANK.top), { mat, angle }));
+  const top = M.keyTop(bitting, w);
+  const poly = clipBelow(KEY_SHAPE(Math.max(top, -4.9)), top);
+  return poly.length > 2 ? part(15, K.cut(V, poly, { mat, angle })) : "";
+}
+
+// The plug cut across a pin hole: a disc with the keyway and the hole up to the surface.
+function plugAcross(V) {
+  const a0 = (Math.atan2(ZS, PR) * 180) / Math.PI;
+  const poly = [[PR, ZS], ...K.arc(0, 0, R, a0, -180 - a0, 64), [-PR, ZS], [-PR, 3.4], ...KEYWAY_SHAPE, [PR, 3.4]];
+  return part(2, K.cut(V, poly, { mat: "brass", angle: 135 }));
+}
+
+// The key pin seen across: cone nose below, crown domed to the plug's radius.
+function keyPinAcross(V, s, item) {
+  const f = M.NOSE_FLAT / 2;
+  const c = s.top - R;
+  const crown = [];
+  for (let k = 0; k <= 12; k++) {
+    const x = PR - (2 * PR * k) / 12;
+    crown.push([x, c + Math.sqrt(R * R - x * x)]);
+  }
+  return part(item, K.body(V, [[-f, s.nose], [f, s.nose], [PR, s.nose + PR - f], ...crown, [-PR, s.nose + PR - f]]));
+}
+
+function driverAcross(V, s) {
+  const b = s.top;
+  const t = s.dTop;
+  return part(8, K.body(V, [[-PR + 0.2, b], [PR - 0.2, b], [PR, b + 0.2], [PR, t - 0.2], [PR - 0.2, t], [-PR + 0.2, t], [-PR, t - 0.2], [-PR, b + 0.2]]));
+}
+
+function springAcross(V, s) {
+  return part(9, K.springSection(V, { from: s.dTop, to: M.CAP_BOT, radius: SPR.radius, wire: SPR.wire, turns: SPR.turns, axis: "v", at: 0 }));
+}
+
+// The body cut across a pin chamber.
+function bodyAcross(V) {
+  const b0 = (Math.atan2(FIN_Z, M.FIN_W / 2) * 180) / Math.PI; // where the round meets the fin
+  const a0 = (Math.atan2(ZS, PR) * 180) / Math.PI;
+  const poly = [
+    [PR, M.FIN_TOP], [PR, ZS], ...K.arc(0, 0, R, a0, -180 - a0, 64), [-PR, ZS], [-PR, M.FIN_TOP],
+    [-M.FIN_W / 2, M.FIN_TOP], [-M.FIN_W / 2, FIN_Z], ...K.arc(0, 0, M.BODY_R, 180 - b0, 360 + b0, 64), [M.FIN_W / 2, FIN_Z], [M.FIN_W / 2, M.FIN_TOP],
+  ];
+  return part(1, K.cut(V, poly, { mat: "brass", angle: 45 }));
+}
+
+// VIEW B: the front face.
+function faceBody(V) {
+  const b0 = (Math.atan2(FIN_Z, M.FIN_W / 2) * 180) / Math.PI;
+  const out = [[-M.FIN_W / 2, M.FIN_TOP], [-M.FIN_W / 2, FIN_Z], ...K.arc(0, 0, M.BODY_R, 180 - b0, 360 + b0, 64), [M.FIN_W / 2, FIN_Z], [M.FIN_W / 2, M.FIN_TOP]];
+  const ch = 0.5;
+  const z1 = Math.sqrt((M.BODY_R - ch) ** 2 - (M.FIN_W / 2 - ch) ** 2);
+  const b1 = (Math.atan2(z1, M.FIN_W / 2 - ch) * 180) / Math.PI;
+  const inner = [[-(M.FIN_W / 2 - ch), M.FIN_TOP], [-(M.FIN_W / 2 - ch), z1], ...K.arc(0, 0, M.BODY_R - ch, 180 - b1, 360 + b1, 64), [M.FIN_W / 2 - ch, z1], [M.FIN_W / 2 - ch, M.FIN_TOP]];
+  return part(1, K.body(V, out) + K.line(V, inner, "vis") + K.line(V, K.circle(0, 0, M.COLLAR_R, 72), "vis", true));
+}
+const SILHOUETTE = (() => {
+  const b0 = (Math.atan2(FIN_Z, M.FIN_W / 2) * 180) / Math.PI;
+  return [[-M.FIN_W / 2, 40], [-M.FIN_W / 2, FIN_Z], ...K.arc(0, 0, M.BODY_R, 180 - b0, 360 + b0, 64), [M.FIN_W / 2, FIN_Z], [M.FIN_W / 2, 40]];
+})();
+
+function faceAntiDrill(V) {
+  return part(13, K.body(V, K.circle(0, 10, PR, 32)) + K.line(V, K.circle(0, 10, PR - 0.25, 32), "thin", true));
+}
+
+// The plug face turns: collar chamfer and the keyway.
+function facePlug(V) {
+  return part(2, `<path class="paper" d="${K.d(V, K.circle(0, 0, M.COLLAR_R - 0.02, 72))}"/>` + K.line(V, K.circle(0, 0, M.COLLAR_R - 0.3, 72), "vis", true) + K.line(V, KEYWAY_SHAPE, "vis", true));
+}
+
+function faceCam(V, cls) {
+  return K.line(V, CAM_SHAPE, cls, true);
+}
+
+return { part, interval, body, caps, antiDrill, screw, washer, clip, drivers, SPR, springs, springDot, keyPin, PIN_ITEM, keyPins, keyPinDot, keywayBand, plug, KEY_BREAK, key, keyDot, CAM_SHAPE, camSpan, cam, shearLine, gaps, KEYWAY_SHAPE, keySection, plugAcross, keyPinAcross, driverAcross, springAcross, bodyAcross, faceBody, SILHOUETTE, faceAntiDrill, facePlug, faceCam };
+})();
+
+const SC = (() => {
+// The pin tumbler cylinder's solids for its 3D view (pin-tumbler-3d.html), in the same world mm as
+// parts.mjs: the sheet's u is x, its z (fin up) is y, and the end views' s (across, seen from the
+// front) is z. The longitudinal section A-A, through the axis and the five pin stacks, is z = 0.
+// Pure data built with kit/solid3d.mjs from model.mjs and parts.mjs (KEYWAY_SHAPE, CAM_SHAPE).
+//
+// Moving parts are built at a reference pose and live3d.js moves them:
+//   key pins with their nose at y = 0 (V.set moves them to the model's nose height, turned with the plug);
+//   drivers from y = 0 to DRIVER_L (each moved by its own solid's inner offset);
+//   springs between the drivers' tops for the right key home and the caps (scaled about the cap end);
+//   the key home (shoulder on the plug face, so x = w, the distance from the shoulder).
+
+
+
+
+
+const R = M.PLUG_R;
+const PR = M.PIN_R;
+const FIT = 0.03; // pins and their bores: a sliding fit, so no two surfaces coincide
+const PIN_R = PR - FIT;
+const BORE_R = PR + FIT;
+const FIN_Z = Math.sqrt(M.BODY_R ** 2 - (M.FIN_W / 2) ** 2);
+const REST = M.stacks(M.RIGHT, M.BLADE_LEN); // every gap on the line: the scene's reference pose
+const CROWN = 0.25; // the lit slice at the top of each key pin (the key-pin/driver interface)
+
+// ---------------------------------------------------------------- the euro profile (z, y), DIN 18252
+const b0 = (Math.atan2(FIN_Z, M.FIN_W / 2) * 180) / Math.PI;
+const PROFILE = [[-M.FIN_W / 2, M.FIN_TOP], [-M.FIN_W / 2, FIN_Z], ...K.arc(0, 0, M.BODY_R, 180 - b0, 360 + b0, 72).slice(1, -1), [M.FIN_W / 2, FIN_Z], [M.FIN_W / 2, M.FIN_TOP]];
+
+// ---------------------------------------------------------------- the key: its profile swept, its top cut
+// The blade's cross-section (parts.mjs KEY_SHAPE: the wards that fit the keyway) is built as slabs in
+// s, each a side outline (x = w, y) extruded across its s range; the 45° flanks of the wards are taken
+// at their mid height. Each slab runs between its own y limits and the key's bitted top / bottom.
+const KEY_SLABS = [
+  { s: [-0.45, 0.45], y: [-Infinity, Infinity] },
+  { s: [-1.0, -0.45], y: [-0.375, Infinity] },
+  { s: [-1.0, -0.45], y: [-Infinity, -2.425] },
+  { s: [0.45, 1.0], y: [1.225, Infinity] },
+  { s: [0.45, 0.6], y: [-Infinity, -0.625] },
+  { s: [0.6, 1.0], y: [-3.5, -0.9] },
+];
+const L = M.BLADE_LEN;
+const keyBot = (w) => Math.max(M.BLADE_BOT, M.BLADE_BOT + (w - (L - 1)));
+
+// The w where the key's top or bottom has a corner: both are piecewise linear between them.
+function corners(bitting) {
+  const ws = [0, L, L - 1, L - (M.BLADE_TOP - M.TIP_LOW)];
+  const f = M.ROOT_FLAT / 2;
+  for (let i = 0; i < M.PINS; i++) {
+    const u = M.pinU(i);
+    const d = M.BLADE_TOP - M.root(bitting[i]);
+    ws.push(u - f, u + f, u - f - d, u + f + d);
+    if (i < M.PINS - 1) ws.push((M.root(bitting[i + 1]) - M.root(bitting[i]) + u + M.pinU(i + 1)) / 2);
+  }
+  const r5 = M.root(bitting[M.PINS - 1]);
+  ws.push((M.TIP_LOW + L - r5 + M.pinU(M.PINS - 1) + f) / 2);
+  return ws.filter((w) => w >= 0 && w <= L);
+}
+
+// The slab's outline pieces: runs of w where its top is above its bottom.
+function slabOutlines(bitting, { y: [ylo, yhi] }) {
+  const top = (w) => Math.min(yhi, M.keyTop(bitting, w));
+  const bot = (w) => Math.max(ylo, keyBot(w));
+  const base = [...new Set(corners(bitting).map((w) => Math.round(w * 1e6) / 1e6))].sort((a, b) => a - b);
+  // add the crossings of the top and bottom with the slab's limits and with each other
+  const ws = [];
+  for (let k = 0; k < base.length; k++) {
+    ws.push(base[k]);
+    if (k === base.length - 1) break;
+    const a = base[k];
+    const b = base[k + 1];
+    const fns = [(w) => M.keyTop(bitting, w) - yhi, (w) => M.keyTop(bitting, w) - ylo, (w) => keyBot(w) - ylo, (w) => keyBot(w) - yhi, (w) => top(w) - bot(w)];
+    for (const g of fns) {
+      const ga = g(a);
+      const gb = g(b);
+      if (Number.isFinite(ga) && Number.isFinite(gb) && ga * gb < 0) ws.push(a + ((b - a) * ga) / (ga - gb));
+    }
+  }
+  const all = [...new Set(ws.map((w) => Math.round(w * 1e6) / 1e6))].sort((a, b) => a - b);
+  const out = [];
+  let cur = null;
+  for (const w of all) {
+    const t = top(w);
+    const bt = bot(w);
+    if (t - bt > 1e-6) {
+      if (!cur) out.push((cur = { top: [], bot: [] }));
+      cur.top.push([w, t]);
+      cur.bot.push([w, bt]);
+    } else {
+      if (cur) {
+        cur.top.push([w, t]);
+        cur = null;
+      }
+      // a run may start here
+      const next = all[all.indexOf(w) + 1];
+      if (next != null && top(next) - bot(next) > 1e-6) out.push((cur = { top: [[w, t]], bot: [] }));
+    }
+  }
+  const polys = out.map((r) => {
+    let pts = [...r.top, ...r.bot.reverse()];
+    pts = pts.filter((p, i) => {
+      const q = pts[(i + 1) % pts.length];
+      return Math.hypot(p[0] - q[0], p[1] - q[1]) > 1e-6;
+    });
+    // drop points on a straight run (fewer triangles, no spurious creases)
+    return pts.filter((p, i) => {
+      const a = pts[(i - 1 + pts.length) % pts.length];
+      const b = pts[(i + 1) % pts.length];
+      return Math.abs((p[0] - a[0]) * (b[1] - a[1]) - (p[1] - a[1]) * (b[0] - a[0])) > 1e-7;
+    });
+  });
+  return polys.filter((p) => p.length >= 3);
+}
+
+// Is the point (w, y, s) inside the key (the slabs' union)? live3d.js uses it to drop crease lines
+// along the seams between slabs, which are not edges of the key.
+function inKey(bitting, w, y, s) {
+  if (w < 0 || w > L) return false;
+  if (y > M.keyTop(bitting, w) || y < keyBot(w)) return false;
+  return KEY_SLABS.some((sl) => s >= sl.s[0] && s <= sl.s[1] && y >= sl.y[0] && y <= sl.y[1]);
+}
+
+const BOW = { x0: -28, x1: -6, y: -0.25, hy: 12, hw: 1.25, hole: [-23, 3] };
+function keySolids(bitting, tag) {
+  const out = [];
+  for (const sl of KEY_SLABS) for (const poly of slabOutlines(bitting, sl)) out.push(S.extrude(poly, { along: "z", from: sl.s[0], to: sl.s[1], live: tag ? `${tag}${out.length}` : undefined }));
+  // shank behind the shoulder, then the bow with its ring hole
+  out.push(S.extrude(K.rect(BOW.x1, M.SHANK.bot, 0, M.SHANK.top), { along: "z", from: -M.BLADE_HW, to: M.BLADE_HW }));
+  out.push(S.extrude(S.rrectAt((BOW.x0 + BOW.x1) / 2, BOW.y, (BOW.x1 - BOW.x0) / 2, BOW.hy, 6, 6), { along: "z", from: -BOW.hw, to: BOW.hw, holes: [S.circle(BOW.hole[0], BOW.y, BOW.hole[1], 40)] }));
+  return out;
+}
+// Both keys are solids of item 15; live3d.js shows one (the tour swaps them while the key is out).
+const KEY_SPLIT = keySolids(M.RIGHT).length;
+
+// The keyway as bored: the sheet's profile, its far (s < 0) wall above the lower ward set back to the
+// pins' radius. The key pins are Ø3 and the keyway 2.4 wide, so where a cone dips into the keyway the
+// pin's back face lies behind the true far wall, which would draw over the pin's cut face (2D model,
+// 3D truth); behind the plane, 0.35 mm of extra depth is invisible.
+const KEYWAY_BORE = [[-BORE_R, M.KEYWAY.top], [-BORE_R, 0.2], ...P.KEYWAY_SHAPE.slice(1)];
+
+// ---------------------------------------------------------------- the stacks
+// The chamber bores are volumes, not holes, so the fin's top face runs over them: the caps stand
+// 0.03 mm proud of it, or their faces would fight it.
+const CAP_TOP = M.FIN_TOP + 0.03;
+const keyPinLoop = (len) => [[0, 0], [M.NOSE_FLAT / 2, 0], [PIN_R, PIN_R - M.NOSE_FLAT / 2], [PIN_R, len - CROWN], [0, len - CROWN]];
+const crownLoop = (len) => [[0, len - CROWN], [PIN_R, len - CROWN], [PIN_R, len], [0, len]];
+const c = 0.2;
+const driverLoop = [[0, 0], [PIN_R - c, 0], [PIN_R, c], [PIN_R, M.DRIVER_L - c], [PIN_R - c, M.DRIVER_L], [0, M.DRIVER_L]];
+const SPRING_LEN = M.CAP_BOT - REST[0].dTop;
+
+// the lowest wire section on the plane's left of a spring, from the helix: a point always on the wire
+function springAnchor(i) {
+  const from = REST[i].dTop;
+  const t = 7.5 / (2 * P.SPR.turns);
+  return [M.pinU(i) - P.SPR.radius, from + P.SPR.wire / 2 + t * (SPRING_LEN - P.SPR.wire), 0];
+}
+
+function parts() {
+  const pins = [];
+  for (let i = 0; i < M.PINS; i++) {
+    const len = M.KEY_PINS[i];
+    const at = [M.pinU(i), 0];
+    pins.push(
+      S.part(P.PIN_ITEM[i], `KEY PIN Ø3×${len}, CODE ${M.RIGHT[i]}, PIN ${i + 1}`, [
+        S.lathe(keyPinLoop(len), { at }),
+        S.lathe(crownLoop(len), { at, hatch: "solid", live: "crown" }),
+      ], {
+        explode: { to: [0, 28, 0] },
+        anchor: { cut: [M.pinU(i) - 0.4, len * 0.55, 0], out: { c: [M.pinU(i), len * 0.55, 0], r: PIN_R, axis: "y" } },
+      })
+    );
+  }
+  const axisX = (loop) => S.lathe(loop, { axis: "x", at: [0, 0] });
+  return [
+    // ---- the body: the euro profile in pieces along the axis, each with its own through holes
+    S.part(1, "BODY, EURO PROFILE DIN 18252, 30/10", [
+      S.extrude(PROFILE, { along: "x", from: 0, to: M.COLLAR_L, holes: [S.circle(0, 0, M.COLLAR_R + 0.05, 96), S.circle(0, 10, PR + 0.05, 32)] }),
+      S.extrude(PROFILE, { along: "x", from: M.COLLAR_L, to: 2.5, holes: [S.circle(0, 0, R + 0.05, 96), S.circle(0, 10, PR + 0.05, 32)] }),
+      S.extrude(PROFILE, { along: "x", from: 2.5, to: M.SLOT[0], holes: [S.circle(0, 0, R + 0.05, 96)] }),
+      // the bridge over the cam slot, with the fixing screw's hole across it
+      S.extrude(K.rect(M.SLOT[0], M.BRIDGE, M.SLOT[1], M.FIN_TOP), { along: "z", from: -M.FIN_W / 2, to: M.FIN_W / 2, holes: [S.circle(M.SCREW.u, M.SCREW.z, M.SCREW.d / 2 + 0.05, 48)] }),
+      S.extrude(PROFILE, { along: "x", from: M.SLOT[1], to: M.REAR_CB, holes: [S.circle(0, 0, M.REAR_BORE_R, 72)] }),
+      S.extrude(PROFILE, { along: "x", from: M.REAR_CB, to: M.BODY_L, holes: [S.circle(0, 0, M.REAR_CB_R, 96)] }),
+      // the five pin chambers, from the shear line up through the fin (the caps close them)
+      ...Array.from({ length: M.PINS }, (_, i) => S.bore(S.cylinder({ at: [M.pinU(i), 0], r: BORE_R, from: R, to: M.FIN_TOP }))),
+    ], { mat: "brass", angle: 45, anchor: { cut: [37.2, 16, 0], out: { c: [37.2, 16, 0], r: M.FIN_W / 2, axis: "box" } } }),
+
+    // ---- the plug: collar, plug, spigot and its groove, as the sheet's half-profile; keyway and pin holes bored
+    // (the pin holes are drilled on through the keyway, so no false floor shows under a pin at its top)
+    S.part(2, "PLUG Ø13, 5 CHAMBERS, PITCH 4", [
+      axisX([[0, 0], [7.2, 0], [M.COLLAR_R, 0.3], [M.COLLAR_R, M.COLLAR_L], [R, M.COLLAR_L], [R, M.PLUG_END], [M.SPIGOT_R, M.PLUG_END], [M.SPIGOT_R, M.GROOVE[0]], [3, M.GROOVE[0]], [3, M.GROOVE[1]], [M.SPIGOT_R, M.GROOVE[1]], [M.SPIGOT_R, M.SPIGOT_END - 0.3], [M.SPIGOT_R - 0.3, M.SPIGOT_END], [0, M.SPIGOT_END]]),
+      S.bore(S.extrude(KEYWAY_BORE, { along: "x", from: 0, to: M.KEYWAY_END })),
+      ...Array.from({ length: M.PINS }, (_, i) => S.bore(S.cylinder({ at: [M.pinU(i), 0], r: BORE_R, from: M.KEYWAY.bot, to: R }))),
+    ], { mat: "brass", angle: 135, explode: [-44, 0, 0], anchor: { cut: [23.6, 5.0, 0], out: { c: [23.6, 0, 0], r: R, axis: "x" } } }),
+
+    ...pins,
+
+    S.part(8, "DRIVER PIN Ø3×5", Array.from({ length: M.PINS }, (_, i) => S.lathe(driverLoop, { at: [M.pinU(i), 0] })), {
+      explode: [0, 32, 0], anchor: { cut: [M.pinU(2) + 0.6, 2.5, 0], out: { c: [M.pinU(2), 2.5, 0], r: PIN_R, axis: "y" }, solid: 2 },
+    }),
+    S.part(9, "PIN SPRING Ø2.55×0.25, 7 TURNS", Array.from({ length: M.PINS }, (_, i) =>
+      S.helix({ axis: "y", at: [M.pinU(i), 0], from: REST[i].dTop, to: M.CAP_BOT, radius: P.SPR.radius, wire: P.SPR.wire, turns: P.SPR.turns, pivot: [M.pinU(i), M.CAP_BOT, 0] })
+    ), { hatch: "solid", explode: [0, 37, 0], anchor: { cut: springAnchor(3), out: { c: [M.pinU(3), 17, 0], r: 1.3, axis: "y" }, solid: 3 } }),
+    S.part(10, "CHAMBER CAP Ø3×2, PRESSED", Array.from({ length: M.PINS }, (_, i) =>
+      S.lathe([[0, M.CAP_BOT], [PR - 0.2, M.CAP_BOT], [PR, M.CAP_BOT + 0.2], [PR, CAP_TOP], [0, CAP_TOP]], { at: [M.pinU(i), 0] })
+    ), { explode: [0, 42, 0], anchor: { cut: [M.pinU(4) + 0.6, 23.5, 0], out: { c: [M.pinU(4), M.FIN_TOP, 0], r: 0.6, axis: "z" }, solid: 4 } }),
+
+    // the cam turns with the plug's tail, cut like the sheet's section
+    S.part(11, "CAM, 30/10", [S.extrude(P.CAM_SHAPE, { along: "x", from: M.CAM[0], to: M.CAM[1], holes: [S.circle(0, 0, M.SPIGOT_R + 0.05, 64)] })], {
+      mat: "steel", angle: 60, explode: [0, -20, 0], anchor: { cut: [30, 8.2, 0], out: { c: [M.CAM[1], 0, 0], r: 6.3, axis: "x" } },
+    }),
+    S.part(12, "RETAINING WASHER DIN 6799-6", [S.tube({ axis: "x", at: [0, 0], r0: 3.02, r1: 6.15, from: M.GROOVE[0], to: M.GROOVE[1] })], {
+      mat: "steel", angle: 60, explode: [18, 0, 0], anchor: { cut: [38.25, 5.4, 0], out: { c: [38.25, 0, 0], r: 6.15, axis: "x" } },
+    }),
+    S.part(13, "ANTI-DRILL PIN Ø3×2.5", [S.lathe([[0, 0.05], [PR - 0.25, 0.05], [PR, 0.3], [PR, 2.5], [0, 2.5]], { axis: "x", at: [10, 0] })], {
+      explode: [-12, 0, 0], anchor: { cut: [1.4, 10.6, 0], out: { c: [0.05, 10, 0] } },
+    }),
+    S.part(14, "FIXING SCREW M5×70", [S.cylinder({ axis: "z", at: [M.SCREW.u, M.SCREW.z], r: M.SCREW.d / 2, from: -14, to: M.FIN_W / 2 })], {
+      mat: "steel", angle: 135, explode: [0, 0, -22], anchor: { cut: [M.SCREW.u + 1.2, M.SCREW.z + 1.0, 0], out: { c: [M.SCREW.u, M.SCREW.z, -14], r: 1, axis: "z" } },
+    }),
+    // the key, whole (not cut): its bitting and the wards of its profile are what fits the lock
+    S.part(15, "KEY, BITTING 2-4-1-6-3", [...keySolids(M.RIGHT, "r"), ...keySolids(M.WRONG, "w")], {
+      explode: { to: [-74, 0, 0] }, anchor: { cut: [-12, 6, BOW.hw], out: { c: [-12, 6, BOW.hw] } },
+    }),
+    S.part(16, "THRUST WASHER Ø8.4×Ø12×0.5", [S.tube({ axis: "x", at: [0, 0], r0: M.SPIGOT_R + 0.2, r1: 6.0, from: M.REAR_CB, to: M.GROOVE[0] })], {
+      hatch: "solid", explode: [10, 0, 0], anchor: { cut: [37.65, -5.2, 0], out: { c: [37.65, 0, 0], r: 6, axis: "x" } },
+    }),
+
+    // ---- the accent: a thin band lying on the plane along the shear line (not a part: no balloon)
+    S.part(90, "SHEAR LINE", [S.box([M.COLLAR_L, R - 0.2, -0.1], [M.PLUG_END, R + 0.2, 0])], { hatch: "solid" }),
+  ];
+}
+
+// centre lines: the plug's axis and the five chamber axes
+const centres = () => [
+  [[-32, 0, 0], [M.BODY_L + 4, 0, 0]],
+  ...Array.from({ length: M.PINS }, (_, i) => [[M.pinU(i), M.KEYWAY.top, 0], [M.pinU(i), M.FIN_TOP + 1.5, 0]]),
+];
+
+const scene = () => ({ parts: parts(), fluids: [], centres: centres() });
+
+return { REST, CROWN, PROFILE, KEY_SLABS, keyBot, slabOutlines, inKey, BOW, KEY_SPLIT, SPRING_LEN, parts, centres, scene };
+})();
+
+// Page code for pin-tumbler-3d.html (an ES module). Inlined above it: K (kit/draft.mjs), L (kit/live.mjs),
+// S (kit/solid3d.mjs), M (model.mjs, the 2D sheet's model, unchanged), P (parts.mjs) and SC (scene3d.mjs).
+// The kit does the drawing, the camera, explode, balloons and the controls; this file runs the
+// model exactly as the sheet's live.js does, poses the key, the stacks, the plug and the cam from it,
+// and adds the lock's own controls.
+
+const $ = (id) => document.getElementById(id);
+const V = S.create({ scene: SC.scene() });
+const E = M.BLADE_LEN;
+const rad = (d) => (d * Math.PI) / 180;
+
+// ---------------------------------------------------------------- not cut, and the accent
+// The key is shown whole, as a solid you could pick up: its wards and bitting are the point.
+const shared = V.part(1).holders[0].mesh.material.uniforms;
+for (const id of [15]) {
+  for (const h of V.part(id).holders) {
+    h.mesh.material.uniforms.uCutOn = { value: 0 };
+    if (h.lines) h.lines.material.uniforms.uCutOn = { value: 0 };
+  }
+}
+// The one accent: the shear line (a thin band lying on the plane) and the key-pin crowns, the
+// interfaces that must all reach it. Their tones and their cut faces take the theme's accent.
+const lit = (h) => {
+  const u = h.mesh.material.uniforms;
+  u.uLit = u.uMid = u.uDark = u.uInk = shared.uAccent;
+};
+lit(V.part(90).holders[0]);
+for (const id of P.PIN_ITEM) lit(V.part(id).live.crown);
+
+// The key is built as slabs across its thickness (its profile's wards); the seams between slabs are
+// not edges of the key, so their crease lines are dropped.
+function dropSeams(h, bitting) {
+  const g = h.lines.geometry;
+  const p = g.attributes.position;
+  const keep = [];
+  const d = 0.02;
+  const seams = [-0.45, 0.45, 0.6];
+  for (let i = 0; i < p.count; i += 2) {
+    const a = [p.getX(i), p.getY(i), p.getZ(i)];
+    const b = [p.getX(i + 1), p.getY(i + 1), p.getZ(i + 1)];
+    const zs = seams.find((s) => Math.abs(a[2] - s) < 1e-4 && Math.abs(b[2] - s) < 1e-4);
+    if (zs != null) {
+      const mx = (a[0] + b[0]) / 2;
+      const my = (a[1] + b[1]) / 2;
+      let same = true;
+      for (const [dx, dy] of [[d, 0], [-d, 0], [0, d], [0, -d], [d, d], [-d, -d], [d, -d], [-d, d]]) {
+        if (SC.inKey(bitting, mx + dx, my + dy, zs - d) !== SC.inKey(bitting, mx + dx, my + dy, zs + d)) same = false;
+      }
+      if (same) continue;
+    }
+    keep.push(...a, ...b);
+  }
+  const ng = new V.THREE.BufferGeometry();
+  ng.setAttribute("position", new V.THREE.Float32BufferAttribute(keep, 3));
+  h.lines.geometry.dispose();
+  h.lines.geometry = ng;
+}
+const KEYS = { right: [], wrong: [] };
+V.part(15).holders.forEach((h, k) => {
+  const n = SC.KEY_SPLIT;
+  const isWrong = k >= n;
+  (isWrong ? KEYS.wrong : KEYS.right).push(h);
+  if (k % n < n - 2) dropSeams(h, isWrong ? M.WRONG : M.RIGHT); // the last two are the shank and the bow
+});
+
+// ---------------------------------------------------------------- state: the 2D sheet's, from the same model
+let wrong = true; // the tour starts with the wrong key
+let e = 0; // insertion, mm (E = home)
+let phi = 0; // plug angle, degrees clockwise seen from the front
+let fade = 1; // the key is swapped while it is out
+let torque = false; // someone is trying to turn the key
+let eTarget = 0;
+let phiTarget = 0;
+let pendingSwap = false;
+let auto = false;
+let dragging = false;
+let st = M.stacks(M.WRONG, 0);
+const bitting = () => (wrong ? M.WRONG : M.RIGHT);
+
+// The tour, as on the sheet: the wrong key goes in and will not turn; out; the right key goes in and turns.
+const SEG = [
+  ["hold", 0.8],
+  ["in", 2.4],
+  ["try", 1.6],
+  ["out", 2.0],
+  ["swap", 0.8],
+  ["in", 2.4],
+  ["turn", 1.4],
+  ["dwell", 1.2],
+  ["back", 1.4],
+  ["out", 2.0],
+  ["swap", 0.8],
+];
+const PERIOD = SEG.reduce((s, [, d]) => s + d, 0);
+let tourT = 0;
+
+function tourPose(t) {
+  t %= PERIOD;
+  let w = true;
+  for (const [name, d] of SEG) {
+    if (t < d) {
+      const f = t / d;
+      const pose = { wrong: w, e: E, phi: 0, torque: false, fade: 1 };
+      if (name === "hold") pose.e = 0;
+      if (name === "in") pose.e = E * L.ease(f);
+      if (name === "try") {
+        pose.torque = f > 0.12 && f < 0.88;
+        pose.phi = pose.torque ? M.CAM_TURN : 0;
+      }
+      if (name === "out") pose.e = E * (1 - L.ease(f));
+      if (name === "swap") {
+        pose.e = 0;
+        pose.fade = Math.abs(1 - 2 * f);
+        if (f >= 0.5) pose.wrong = !w;
+      }
+      if (name === "turn") {
+        pose.phi = M.CAM_TURN * L.ease(f);
+        pose.torque = true;
+      }
+      if (name === "dwell") pose.phi = M.CAM_TURN;
+      if (name === "back") {
+        pose.phi = M.CAM_TURN * (1 - L.ease(f));
+        pose.torque = true;
+      }
+      return pose;
+    }
+    t -= d;
+    if (name === "swap") w = !w;
+  }
+  return { wrong: true, e: 0, phi: 0, torque: false, fade: 1 };
+}
+
+function step(dt, live) {
+  const driven = (live.touring || auto) && !dragging;
+  if (driven) {
+    tourT += dt;
+    const p = tourPose(tourT);
+    wrong = p.wrong;
+    e = p.e;
+    fade = p.fade;
+    torque = p.torque;
+    st = M.stacks(bitting(), e);
+    phi = M.free(st) ? p.phi : 0;
+    eTarget = e;
+    phiTarget = phi;
+    return true;
+  }
+  const n = Math.max(1, Math.ceil(dt * 240));
+  const h = dt / n;
+  for (let i = 0; i < n; i++) {
+    if (phi < 0.5) e = live.reduced ? eTarget : L.follow(e, eTarget, 14, h);
+    if (pendingSwap && e < 0.05) {
+      wrong = !wrong;
+      pendingSwap = false;
+      eTarget = 0;
+    }
+    st = M.stacks(bitting(), e);
+    const want = M.free(st) ? phiTarget : 0;
+    phi = live.reduced ? want : L.follow(phi, want, 12, h);
+    if (!M.free(st)) phi = 0;
+  }
+  torque = phiTarget > 0.5 && !M.free(st);
+  fade = 1;
+  return Math.abs(e - eTarget) > 1e-3 || Math.abs(phi - (M.free(st) ? phiTarget : 0)) > 1e-2;
+}
+
+// ---------------------------------------------------------------- poses from the model
+function pose(b, ee, ph, stacks) {
+  const a = rad(ph);
+  const rot = [a, 0, 0];
+  V.set(2, { rot });
+  V.set(11, { rot });
+  V.set(15, { pos: [-(E - ee), 0, 0], rot });
+  // key pins ride in the plug: lifted to their nose height in the plug's frame, then turned with it
+  stacks.forEach((s, i) => V.set(P.PIN_ITEM[i], { pos: [0, s.nose * Math.cos(a), s.nose * Math.sin(a)], rot }));
+  // drivers and springs stay in the body
+  const drv = V.part(8).holders;
+  stacks.forEach((s, i) => {
+    drv[i].inner.position.set(0, s.top, 0);
+    V.solid(9, i).scale.y = s.spring / SC.SPRING_LEN;
+  });
+  const isWrong = b === M.WRONG;
+  for (const h of KEYS.right) h.holder.visible = !isWrong;
+  for (const h of KEYS.wrong) h.holder.visible = isWrong;
+}
+V.frame([() => pose(M.WRONG, 0, 0, M.stacks(M.WRONG, 0)), () => pose(M.RIGHT, E, M.CAM_TURN, M.stacks(M.RIGHT, E))]);
+
+const say = L.announcer($("sr"), 2);
+const sign = (v) => (v > 0.049 ? "+" : v < -0.049 ? "−" : "±") + Math.abs(v).toFixed(1);
+const band = V.part(90).holders[0].holder;
+function render(live) {
+  const b = bitting();
+  pose(b, e, phi, st);
+  for (const h of [...KEYS.right, ...KEYS.wrong]) if (h.holder.visible && fade < 0.5) h.holder.visible = false;
+  band.visible = V.explode < 0.01 && V.cut;
+  const free = M.free(st);
+  const blk = M.blocking(st);
+  let state;
+  if (phi > 0.5) state = `PLUG TURNED ${Math.round(phi)}°`;
+  else if (free) state = "ALL 5 GAPS ON THE SHEAR LINE";
+  else if (blk.length === 1) state = `PIN ${blk[0] + 1} ${sign(st[blk[0]].off)} mm · ${torque ? "TURN BLOCKED" : "LOCKED"}`;
+  else state = `${blk.length} PINS OFF THE LINE · ${torque ? "TURN BLOCKED" : "LOCKED"}`;
+  $("readout").textContent = `KEY ${M.codeText(b)} · IN ${e.toFixed(1)} mm · ${state}`;
+  say(`Key ${M.codeText(b)}, inserted ${e.toFixed(0)} millimetres. ${state.toLowerCase()}.`, live.clock);
+  $("tour")?.setAttribute("aria-pressed", String(auto));
+}
+
+// the live dimension under the body: the key's travel still to go, shoulder to plug face (as on the
+// sheet), and a curved arrow round the plug face while someone turns the key
+function overlay() {
+  if (V.explode > 0.05) return "";
+  let s = "";
+  const togo = E - e;
+  if (togo > 0.3 && fade > 0.5) s += V.dim([-togo, -M.BODY_R - 1, 0], [0, -M.BODY_R - 1, 0], { text: togo.toFixed(1), off: 22 });
+  if (torque) {
+    const pts = [];
+    for (let k = 0; k <= 24; k++) {
+      const a = rad(-30 + (100 * k) / 24);
+      pts.push(V.project([-1, 12 * Math.cos(a), 12 * Math.sin(a)]));
+    }
+    const f = (p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+    const [p1, p0] = [pts[pts.length - 1], pts[pts.length - 3]];
+    const dx = p1[0] - p0[0];
+    const dy = p1[1] - p0[1];
+    const l = Math.hypot(dx, dy) || 1;
+    const u = [dx / l, dy / l];
+    const nn = [-u[1], u[0]];
+    const tip = [p1[0] + u[0] * 7, p1[1] + u[1] * 7];
+    s += `<g data-role="torque"><path class="thin" d="M${pts.map(f).join("L")}"/><path class="head" d="M${f(tip)}L${f([p1[0] + nn[0] * 2.4, p1[1] + nn[1] * 2.4])}L${f([p1[0] - nn[0] * 2.4, p1[1] - nn[1] * 2.4])}Z"/></g>`;
+  }
+  return s;
+}
+
+// ---------------------------------------------------------------- the lock's controls
+const stopTour = () => {
+  auto = false;
+  e = Math.min(E, Math.max(0, e));
+  eTarget = e;
+  phiTarget = phi;
+};
+// drag the key along the keyway: the value is the insertion, growing as the key moves in (+x) 24.8 mm
+V.drag(15, {
+  axis: [1, 0, 0],
+  length: E,
+  start: () => {
+    dragging = true;
+    stopTour();
+    return e / E;
+  },
+  move: (v) => {
+    if (phi < 0.5) eTarget = Math.min(E, Math.max(0, v * E));
+  },
+  end: () => {
+    dragging = false;
+    if (phi < 0.5) phiTarget = 0;
+  },
+});
+const insert = (d) => () => {
+  stopTour();
+  if (phi < 0.5) eTarget = Math.min(E, Math.max(0, eTarget + d));
+};
+const turn = (d) => () => {
+  stopTour();
+  phiTarget = Math.min(M.CAM_TURN, Math.max(0, phiTarget + d));
+};
+V.key("ArrowRight", insert(2));
+V.key("ArrowLeft", insert(-2));
+V.key("ArrowUp", turn(15));
+V.key("ArrowDown", turn(-15));
+V.key("End", insert(E));
+V.key("Home", insert(-E));
+V.key("k", () => {
+  stopTour();
+  phiTarget = 0;
+  eTarget = 0;
+  pendingSwap = true;
+});
+V.key(" ", () => {
+  auto = !auto;
+  if (auto) tourT = 0;
+});
+$("tour")?.addEventListener("click", () => {
+  auto = !auto;
+  if (auto) tourT = 0;
+  V.input();
+});
+
+// the lock's own self-tests (?selftest=1)
+V.test("key drag inserts", ({ ptr, project }) => {
+  const a = project([SC.BOW.x0 + 6 - (E - e), 8, SC.BOW.hw]);
+  const b = project([SC.BOW.x0 + 6 - (E - e) + 10, 8, SC.BOW.hw]);
+  const t0 = eTarget;
+  const ux = b[0] - a[0];
+  const uy = b[1] - a[1];
+  const l = Math.hypot(ux, uy) || 1;
+  ptr("pointerdown", a[0], a[1]);
+  ptr("pointermove", a[0] + (ux / l) * 120, a[1] + (uy / l) * 120);
+  const t1 = eTarget;
+  ptr("pointerup", a[0] + (ux / l) * 120, a[1] + (uy / l) * 120);
+  return { pass: t1 > t0 + 2, info: [t0, t1] };
+});
+V.test("arrow keys insert", ({ key }) => {
+  key("ArrowRight");
+  const t1 = eTarget;
+  key("ArrowLeft");
+  return { pass: t1 > e + 1, info: [e, t1] };
+});
+V.test("K swaps the key", ({ key }) => {
+  key("k");
+  const p = pendingSwap;
+  pendingSwap = false;
+  return { pass: p, info: p };
+});
+V.test("space toggles the tour", ({ key }) => {
+  const a = auto;
+  key(" ");
+  const b = auto;
+  key(" ");
+  return { pass: a !== b, info: [a, b] };
+});
+
+V.run({ step, render, overlay, still: 4.0, idleAfter: 6 });
+
+</script>
+</body>
+</html>

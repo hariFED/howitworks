@@ -119,11 +119,11 @@ export const EX = {
   crank: [0, -112, 0], rod: [0, EP, 0], piston: [0, EP, 0], pin: [0, EP, 64],
   ring8: [0, EP + 24.5, 0], ring9: [0, EP + 22, 0], ring10: [0, EP + 19.5, 0],
   liner: [0, EB, 0], barrel: [0, EB, 0], gasket: [0, EB + 22, 0], head: [0, EH, 0],
-  cams: [0, EH + 74, 0], cover: [0, EH + 132, 0], plug: [0, EH + 52, 0],
+  cams: [0, EH + 118, 0], cover: [0, EH + 190, 0], plug: [0, EH + 52, 0],
   manifold: [-46, EH, 0], pipe: [52, EH, 0],
 };
 // valve-train parts slide out of the head along their own axes (on top of the head's lift)
-const AX = { spring: 26, retainer: 40, collet: 46, bucket: 58, seal: 14 };
+const AX = { spring: 40, retainer: 60, collet: 68, bucket: 88, seal: 18 };
 
 // ---------------------------------------------------------------- parts
 export function parts() {

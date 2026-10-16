@@ -5,11 +5,35 @@
   "object": "Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section",
   "idea": "Negative-feedback proportional control: the speed sets the opening, so more load is carried at a lower speed (droop)",
   "summary": "Two iron balls on equal arms lift a weighted sleeve as the spindle speeds up, and the sleeve shuts a balanced double-beat valve through a bell crank. When the load steps up the engine slows, the balls drop, the valve opens, and the engine settles at a new, slightly lower speed. That offset is the droop of a proportional controller, plotted against the governor's own characteristic.",
-  "usedFor": ["Control engineering teaching: feedback, proportional control, droop and lag", "Steam and mill-engine history and museum interpretation", "A software-concept explainer for autoscaling and proportional controllers"],
+  "usedFor": [
+    "Control engineering teaching: feedback, proportional control, droop and lag",
+    "Steam and mill-engine history and museum interpretation",
+    "A software-concept explainer for autoscaling and proportional controllers"
+  ],
   "domain": "Control / steam",
   "parts": 28,
-  "views": ["Axial section 1:2.5", "Detail B double-beat valve 1:1", "Detail C swivel collar and crank slot 1:1", "View D from above 1:5", "Diagram 1 governor characteristic", "Diagram 2 speed and valve opening against time"],
+  "views": [
+    "Axial section 1:2.5",
+    "Detail B double-beat valve 1:1",
+    "Detail C swivel collar and crank slot 1:1",
+    "View D from above 1:5",
+    "Diagram 1 governor characteristic",
+    "Diagram 2 speed and valve opening against time"
+  ],
   "controls": "Drag up or down for load · ↑ ↓ load · Space steps light/heavy · S slow",
   "checkTimes": "0,1,2.2,2.6,3.2,4,6,9,10.2,10.8,12,15.9,16.5,18.4",
-  "shotT": 3.2
+  "shotT": 3.2,
+  "has3d": true,
+  "shot3d": {
+    "view": "iso",
+    "cut": 1,
+    "zoom": 1.15,
+    "look": [
+      100,
+      230,
+      0
+    ],
+    "t": 1
+  },
+  "controls3d": "Drag the balls or sleeve up for load · ↑ ↓ load · Space steps light/heavy · E explodes (spindle parts up, drive line down, valve parts up) · C cut · S slow motion"
 }

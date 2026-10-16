@@ -73,36 +73,51 @@ export function convLoop(z) {
 }
 
 // ---------------------------------------------------------------- water that changes with z (world frame)
+// A fluid shows its far wall through the cut, so each volume follows the walls round it (0.03 mm
+// inside them): where it ran into a solid, the solid's near face would hide the stipple behind it.
 // Under the diaphragm on the inlet side: the annulus round the seat tube and the curtain over the lip.
 export function underLoop(z) {
-  const top = conv(z).map(([r, v]) => [r, v + 0.5]).reverse(); // 0.5 into the rubber: it hides there
-  return [[8.5, 24.03], [14.97, 24.03], ...top.map(([r, v], i) => [i === 0 ? 14.97 : r, v]), [6.53, ST + z + 0.5], [6.53, ST], [8, ST], [8.5, ST - 0.5]];
+  const top = conv(z).map(([r, v]) => [r, v - 0.03]).reverse();
+  top[0][0] = 14.97;
+  const lip = Math.max(ST + z - 0.03, ST + 0.06); // over the lip: closed, it is a film inside the rubber
+  return [[8.53, 24.03], [14.97, 24.03], ...top.slice(0, -1), [12, lip], [6.53, lip], [6.53, ST + 0.03], [8, ST + 0.03], [8.53, ST - 0.5]];
 }
-// The outlet side inside the seat, up into the pilot bore to the pilot sleeve's top.
+// The outlet side inside the seat, round the support washer and the pilot sleeve, up the pilot bore
+// to the sleeve's top.
 export function seatLoop(z) {
-  return [[0, 5.1], [6.47, 7.03], [6.47, ST + z + 0.4], [M.PILOT_D / 2, ST + z + 0.4], [M.PILOT_D / 2, SL + z], [0, SL + z]];
+  return [
+    [0, 5.1], [6.47, 7.03], [6.47, ST + z - 0.03], [6.03, ST + z - 0.03], [6.03, 32.97 + z], [3.23, 32.97 + z], [3.23, 32.4 + z],
+    [3.01, 32.17 + z], [M.PILOT_D / 2 - 0.03, 32.17 + z], [M.PILOT_D / 2 - 0.03, SL + z], [0, SL + z],
+  ];
 }
-// Above the diaphragm: the control chamber, the cover bore and the armature tube up to the pole.
+// Above the diaphragm: the control chamber round the sleeve, the cover bore and the armature tube up
+// to the pole (the plunger, which moves, is cut where it stands in it).
 export function chamberLoop(z) {
-  const mid = conv(z).map(([r, v]) => [r, v + WEB / 2]);
-  return [[0, SL + z], [1.0, SL + z], [1.0, ST + WEB / 2 + z], ...mid, [15, 39.5], [6, 39.5], [6, M.POLE_FACE], [0, M.POLE_FACE]];
+  const top = conv(z).map(([r, v]) => [r, v + WEB + 0.03]);
+  return [
+    [0, SL + z], [1.33, SL + z + 0.03], [1.53, 37.4 + z], [1.53, 37.03 + z], [4.53, 37.03 + z], [4.53, ST + WEB + 0.03 + z],
+    ...top, [14.97, top[top.length - 1][1]], [14.97, 39.47], [5.97, 39.47], [5.97, M.POLE_FACE - 0.03], [0, M.POLE_FACE - 0.03],
+  ];
 }
 
 // ---------------------------------------------------------------- the body's pieces
 function bodySolids() {
-  // the turned inside: floor, drill point, seat tube with its lip, annulus, bead groove
-  const plug = [[0, 0], [17.5, 0], [17.5, 34], [15, 34], [15, 24], [8.5, 24], [8.5, ST - 0.5], [8, ST], [6.5, ST], [6.5, 7], [0, 5.05]];
   const boss = S.polygon(6, 16.17, 0, PV); // across flats 28: flats on y = 0 and y = 28
   const port = [S.circle(0, PV, RT, 96)];
   return [
-    extrude(S.rrectAt(0, 0, 25, 25, 1.5), { along: "y", from: 0, to: 36, holes: [S.circle(0, 0, 17.5, 96), ...SCREWS.map(([x, z]) => S.circle(x, z, 2.55, 24))] }),
-    S.lathe(plug),
+    // the forging up to the annulus floor: a solid block, its passages bored as volumes inside it
+    S.extrude(S.rrectAt(0, 0, 25, 25, 1.5), { along: "y", from: 0, to: 24 }),
+    // above: the rim the cover screws into, round the turned seat tube and the bead groove
+    extrude(S.rrectAt(0, 0, 25, 25, 1.5), { along: "y", from: 24, to: 36, holes: [S.circle(0, 0, 17.5, 96), ...SCREWS.map(([x, z]) => S.circle(x, z, 2.55, 24))] }),
+    S.lathe([[6.5, 24], [8.5, 24], [8.5, ST - 0.5], [8, ST], [6.5, ST]]),
+    S.lathe([[15, 24], [17.5, 24], [17.5, 34], [15, 34]]),
     extrude(boss, { along: "x", from: 25, to: 36, holes: port }),
     extrude(boss, { along: "x", from: -36, to: -25, holes: port }),
-    // passages inside the forging, butted end to end: inlet port -> gallery -> annulus floor,
-    // seat bore (real) -> outlet passage -> outlet port
+    // passages, butted end to end: inlet port -> gallery -> annulus; seat bore -> outlet passage -> port
     S.bore(S.lathe([[0, -25], [RT, -25], [RT, -23], [0, -23]], { axis: "x", at: PV })),
     S.bore(S.extrude([[-23, 7], [-8.5, 7], [-8.5, 24], [-15, 24], [-15, 21], [-23, 21]], { along: "z", from: -7, to: 7, conform: { x: -8.5, r: 8.5 } })),
+    S.bore(S.lathe([[0, 5.05], [6.5, 7], [6.5, 24], [0, 24]])),
+    S.disc([0, 24.03, 0], 6.5, { role: "mouth" }), // where the seat bore opens into the seat tube
     S.bore(S.extrude([[6.5, 7], [23, 7], [23, 21], [6.5, 21]], { along: "z", from: -6, to: 6, conform: { x: 6.5, r: 6.5 } })),
     S.bore(S.lathe([[0, 23], [RT, 23], [RT, 25], [0, 25]], { axis: "x", at: PV })),
     S.disc([25.03, PV, 0], RT, { normal: "x", role: "mouth" }),
@@ -165,7 +180,7 @@ export function parts() {
   const w = M.WIND;
   return [
     S.part(1, "VALVE BODY G1/2", bodySolids(), {
-      mat: "brass", angle: 45, explode: down(-60), anchor: { cut: [30, 26, 0], out: { c: [30, 26, 16] } },
+      mat: "brass", angle: 45, explode: down(-48), anchor: { cut: [30, 26, 0], out: { c: [30, 26, 16] } },
     }),
     // ---- the diaphragm group (moves by z)
     S.part(2, "DIAPHRAGM Ø35", [
@@ -176,7 +191,7 @@ export function parts() {
       mat: "brass", angle: 135, explode: at(-2), anchor: { cut: [3.9, 36.3, 0], out: { c: [0, 37, 0], r: 4.5, axis: "y" } },
     }),
     S.part(4, "SUPPORT WASHER Ø12×1", [S.tube({ r0: 2.5, r1: 6, from: 33, to: 34 })], {
-      mat: "brass", angle: 30, explode: at(-30), anchor: { cut: [-4.5, 33.5, 0], out: { c: [0, 33.5, 0], r: 6, axis: "y" } },
+      mat: "brass", angle: 30, explode: at(-22), anchor: { cut: [-4.5, 33.5, 0], out: { c: [0, 33.5, 0], r: 6, axis: "y" } },
     }),
     S.part(5, "BLEED BUSH Ø0.8", [S.lathe(bush, { at: M.BLEED_U })], {
       hatch: "solid", explode: at(-16), anchor: { cut: [M.BLEED_U + 0.65, 34.75, 0], out: { c: [M.BLEED_U, 35.8, 0], r: 1.3, axis: "y" } },
@@ -186,7 +201,7 @@ export function parts() {
       mat: "brass", angle: 135, explode: down(22), anchor: { cut: [-21, 42, 0], out: { c: [-21, 48, -12] } },
     }),
     S.part(7, "CAP SCREW M5×16", SCREWS.map(([x, z]) => S.lathe(screw, { at: [x, z] })), {
-      explode: down(46), anchor: { cut: [-19, 53, -19], out: { c: [-19, 53, -19] } },
+      explode: down(46), anchor: { cut: [19, 53, -19], out: { c: [19, 53, -19] } },
     }),
     S.part(8, "O-RING 20×1.8", [S.lathe(K.rrect(9.15, 46.3, 11.05, 47.95, 0.8))], {
       mat: "rubber", explode: down(30), anchor: { cut: [10.1, 47.1, 0], out: { c: [0, 47.95, 0], r: 11, axis: "y" } },

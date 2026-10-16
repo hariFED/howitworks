@@ -5,11 +5,34 @@
   "object": "Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section",
   "idea": "Authentication by matching a secret: every factor must match (AND)",
   "summary": "Each key pin is cut for one depth of the key, so the right key lifts every crown exactly to the shear line between plug and body. The key is cut in 0.5 mm steps; a key one cut wrong leaves pin 3 a millimetre low, its driver straddles the line and the plug will not turn. Only when all five gaps sit on the line does the plug, and its cam, turn.",
-  "usedFor": ["Security-concept explainers: shared secrets, multi-factor checks as a logical AND", "Locksmith and security-hardware training: bitting codes, depth steps, shear line", "Product pages and documentation for lock cylinders"],
+  "usedFor": [
+    "Security-concept explainers: shared secrets, multi-factor checks as a logical AND",
+    "Locksmith and security-hardware training: bitting codes, depth steps, shear line",
+    "Product pages and documentation for lock cylinders"
+  ],
   "domain": "Mechanical security",
   "parts": 16,
-  "views": ["Section A-A 5:1", "Detail D shear line at pins 2–4 10:1", "View B front face 5:1", "Section C-C across pin 3 10:1", "Diagram 1 pin offsets from the shear line"],
+  "views": [
+    "Section A-A 5:1",
+    "Detail D shear line at pins 2–4 10:1",
+    "View B front face 5:1",
+    "Section C-C across pin 3 10:1",
+    "Diagram 1 pin offsets from the shear line"
+  ],
   "controls": "Drag the key · ← → insert · drag View B or ↑ ↓ turn · K other key · Space tour · S slow",
   "checkTimes": "0,1.5,2.6,3.6,4.4,5.6,7.2,8.5,9.6,10.7,12.0,13.3,15.0,16.4,17.5",
-  "shotT": 3.6
+  "shotT": 3.6,
+  "has3d": true,
+  "shot3d": {
+    "view": "iso",
+    "cut": 1,
+    "zoom": 1.8,
+    "look": [
+      15,
+      7,
+      0
+    ],
+    "t": 9.99
+  },
+  "controls3d": "Drag to orbit · Drag the key or ← → to insert · ↑ ↓ turn · K other key · Space tour · E explode (pins, springs and caps up out of their chambers, key out along the keyway, plug forward) · C cut · 1–4 views · S slow motion"
 }

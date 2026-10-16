@@ -23,5 +23,18 @@
   ],
   "controls": "Space or click the closer pushes the door · drag the door in plan E · R shuts it · S slow motion",
   "checkTimes": "0,0.4,0.9,2,3.1,4.5,5.6,6.4,8,9.5,11,12.5,14.9,15.3",
-  "shotT": 6.4
+  "shotT": 6.4,
+  "has3d": true,
+  "shot3d": {
+    "view": "iso",
+    "cut": 1,
+    "zoom": 2.6,
+    "look": [
+      -50,
+      55,
+      0
+    ],
+    "t": 9
+  },
+  "controls3d": "Drag to orbit · Space or PUSH pushes the door · drag the door · R shuts it · E explodes · C cut · 1–4 views · S slow motion"
 }

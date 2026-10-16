@@ -11,5 +11,8 @@
   "views": ["Section A-A 1:2", "Detail B valves 2:1", "Detail C bayonet lug, gasket and window 5:1", "Detail D lock pin and slide 5:1", "View E lid from above, broken 1:2.5", "Diagram 1 saturation curve", "Table 1 saturated steam"],
   "controls": "Space hob on/off · drag the weight or ↑ ↓ to vent by hand · B blocks the vent (safety valve) · R refills · S slow motion",
   "checkTimes": "0,3,6,7.6,8.5,9.5,11,14,17,20,21.5,23,24.2,25.5,28",
-  "shotT": 11
+  "shotT": 11,
+  "has3d": true,
+  "shot3d": {"view": "iso", "cut": 1, "zoom": 1.45, "look": [30,140,0], "t": 11},
+  "controls3d": "Drag to orbit · Space hob on/off · drag the weight or ↑ ↓ to vent by hand · X blocks the vent · R refills · E explode · C cut · 1–4 views · S slow"
 }

@@ -23,5 +23,18 @@
   ],
   "controls": "Drag the handle · ↑ ↓ on/off · 1 2 3 normal, overload, short · ← → current · Space tour · S slow",
   "checkTimes": "0,2,5,9,10.95,11.3,14,18,19.6,20.3,23.55,23.8,26,27.2,28.5,30,33,45",
-  "shotT": 9
+  "shotT": 9,
+  "has3d": true,
+  "shot3d": {
+    "view": "iso",
+    "cut": 1,
+    "zoom": 1.25,
+    "look": [
+      36,
+      45,
+      0
+    ],
+    "t": 23.27
+  },
+  "controls3d": "Drag to orbit · Drag the handle or ↑ ↓ on/off · ← → current · N O X normal, overload, short (or the 12 A, 40 A, SHORT buttons) · Space tour · E explode (case halves apart along z, mechanism lifted out) · C cut · 1–4 views · S slow motion"
 }

@@ -11,5 +11,8 @@
   "views": ["Axial section 2:1", "Detail B float needle valve 5:1", "Detail D idle and progression ports 5:1", "View C from the air horn 1:1", "Diagram 1 AFR against throttle", "Diagram 2 throat depression and fuel against air flow"],
   "controls": "Drag the throttle plate · ← → throttle · C choke · [ ] mixture screw · S slow motion",
   "checkTimes": "0,1,2,3.5,5,6.8,8.5,10,11.5,13,14,15.3,16.5,20",
-  "shotT": 4.0
+  "shotT": 4,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1.3, "look": null, "t": 7 },
+  "controls3d": "Drag to orbit · Drag the throttle plate or ← → to open the throttle · K choke · [ ] mixture screw · E explode · C cut · 1–4 views · S slow motion"
 }

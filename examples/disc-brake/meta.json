@@ -23,5 +23,18 @@
   ],
   "controls": "Drag the lever · ↑ ↓ pull and release · Space squeezes · S slow motion",
   "checkTimes": "0,0.4,0.9,1.4,1.9,2.4,2.9,3.4,4.0,4.5,5.0,5.6,6.3,9.2",
-  "shotT": 3.2
+  "shotT": 3.2,
+  "has3d": true,
+  "shot3d": {
+    "view": "iso",
+    "cut": 1,
+    "zoom": 1.5,
+    "look": [
+      -28,
+      -62,
+      0
+    ],
+    "t": 3.2
+  },
+  "controls3d": "Drag to orbit · drag the lever or Space to squeeze · ↑ ↓ pull and release · E explode · C cut · 1–4 views · S slow motion"
 }

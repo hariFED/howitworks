@@ -1,0 +1,3970 @@
+<!doctype html>
+<html lang="en" data-theme="white">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit Breaker 3D</title>
+<meta name="description" content="The BP-009 B16 miniature circuit breaker as a live isometric half-section: the case cut on its centre plane, the mechanism whole inside it, the current path glowing in the accent, a thermal trip on overload and a magnetic trip with an arc running into the splitter plates, all from the 2D sheet's model.">
+<script>if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add("v3-embed");</script>
+<style>
+/* Blueprint sheet styles. Every colour a drawing uses is one of these tokens. */
+
+:root,
+[data-theme="blueprint"] {
+  --bp-page: #0a2747;
+  --bp-paper: #123b69;
+  --bp-ink: #e9f1ff;
+  --bp-hatch: rgba(214, 230, 255, 0.72);
+  --bp-muted: #95b3da;
+  --bp-grid: rgba(190, 215, 255, 0.07);
+  --bp-accent: #ffc94d;
+  --bp-accent-ink: #ffd77a;
+  --bp-ui: rgba(233, 241, 255, 0.12);
+  /* 3D mode (solid3d.mjs): uncut surfaces in three tones, lit, mid and shadow */
+  --bp3-lit: #2a5a93;
+  --bp3-mid: #1d4a7e;
+  --bp3-dark: #133864;
+}
+[data-theme="paper"] {
+  --bp-page: #e4dfd1;
+  --bp-paper: #f7f3e8;
+  --bp-ink: #1c2633;
+  --bp-hatch: rgba(28, 38, 51, 0.78);
+  --bp-muted: #616b78;
+  --bp-grid: rgba(28, 38, 51, 0.045);
+  --bp-accent: #d4472c;
+  --bp-accent-ink: #b8361e;
+  --bp-ui: rgba(28, 38, 51, 0.08);
+  --bp3-lit: #ece6d8;
+  --bp3-mid: #d9d0bc;
+  --bp3-dark: #bdb29b;
+}
+[data-theme="white"] {
+  --bp-page: #fafafa;
+  --bp-paper: #fafafa;
+  --bp-ink: #262626;
+  --bp-hatch: rgba(38, 38, 38, 0.42);
+  --bp-muted: #8f8f8f;
+  --bp-grid: rgba(0, 0, 0, 0);
+  --bp-accent: #e2552c;
+  --bp-accent-ink: #c8442b;
+  --bp-ui: rgba(0, 0, 0, 0.07);
+  --bp3-lit: #f1f1f0;
+  --bp3-mid: #e0e0de;
+  --bp3-dark: #c4c4c1;
+}
+[data-theme="dark"] {
+  --bp-page: #0d0f12;
+  --bp-paper: #15181c;
+  --bp-ink: #dde3ea;
+  --bp-hatch: rgba(221, 227, 234, 0.62);
+  --bp-muted: #86919d;
+  --bp-grid: rgba(221, 227, 234, 0.035);
+  --bp-accent: #f29f3d;
+  --bp-accent-ink: #f6b462;
+  --bp-ui: rgba(221, 227, 234, 0.08);
+  --bp3-lit: #353b43;
+  --bp3-mid: #272c32;
+  --bp3-dark: #1b1e22;
+}
+
+:root {
+  --bp-thick: 1.15px;
+  --bp-thin: 0.55px;
+  --bp-font: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bp-page);
+  color: var(--bp-ink);
+  font-family: var(--bp-font);
+}
+.bp-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  box-sizing: border-box;
+}
+.bp-figure {
+  margin: 0;
+}
+.bp-sheet {
+  display: block;
+  width: 100%;
+  height: auto;
+  outline: none;
+  border-radius: 2px;
+}
+.bp-sheet:focus-visible {
+  box-shadow: 0 0 0 2px var(--bp-accent);
+}
+.bp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--bp-muted);
+  letter-spacing: 0.03em;
+}
+.bp-bar kbd {
+  font: inherit;
+  color: var(--bp-ink);
+  border: 1px solid var(--bp-ui);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+.bp-themes {
+  display: flex;
+  gap: 4px;
+}
+.bp-themes button {
+  font: inherit;
+  color: var(--bp-muted);
+  background: transparent;
+  border: 1px solid var(--bp-ui);
+  border-radius: 3px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.bp-themes button[aria-pressed="true"] {
+  color: var(--bp-ink);
+  background: var(--bp-ui);
+}
+.bp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Zoom mode (?zoom=x,y,w,h): the region fills the window, for close-up checks. */
+body.bp-zoom .bp-page {
+  max-width: none;
+  padding: 0;
+}
+body.bp-zoom .bp-sheet {
+  width: 100vw;
+  height: 100vh;
+}
+body.bp-zoom .bp-bar {
+  display: none;
+}
+
+/* ---- the drawing */
+.bp-sheet .sheet-bg {
+  fill: var(--bp-paper);
+}
+.bp-sheet .grid {
+  fill: none;
+  stroke: var(--bp-grid);
+  stroke-width: 0.5px;
+}
+.bp-sheet .vis,
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  fill: none;
+  stroke: var(--bp-ink);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.bp-sheet .vis {
+  stroke-width: var(--bp-thick);
+}
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .hid {
+  stroke-dasharray: 4 2.2;
+  stroke-linecap: butt;
+}
+.bp-sheet .ctr {
+  stroke-dasharray: 15 2.6 2 2.6;
+  stroke-linecap: butt;
+}
+.bp-sheet .phan {
+  stroke-dasharray: 13 2.4 1.8 2.4 1.8 2.4;
+  stroke-linecap: butt;
+}
+.bp-sheet .vis.spring {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .paper,
+.bp-sheet .balloon {
+  fill: var(--bp-paper);
+}
+.bp-sheet .balloon {
+  stroke: var(--bp-ink);
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .solid,
+.bp-sheet .head,
+.bp-sheet .dot {
+  fill: var(--bp-ink);
+}
+.bp-sheet .hl {
+  fill: none;
+  stroke: var(--bp-hatch);
+  stroke-width: 0.5px;
+}
+.bp-sheet .hl-dash {
+  stroke-dasharray: 1.3 1.3;
+}
+.bp-sheet .hd {
+  fill: var(--bp-hatch);
+}
+.bp-sheet .tint {
+  fill: var(--bp-accent);
+}
+.bp-sheet .accent {
+  stroke: var(--bp-accent);
+}
+.bp-sheet .accent-fill {
+  fill: var(--bp-accent);
+}
+.bp-sheet .t {
+  font-family: var(--bp-font);
+  font-size: 9.5px;
+  fill: var(--bp-ink);
+  letter-spacing: 0.02em;
+}
+.bp-sheet .t-sm {
+  font-size: 7.6px;
+}
+.bp-sheet .t-lg {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-xl {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.bp-sheet .t-cap {
+  font-size: 6.2px;
+  fill: var(--bp-muted);
+  letter-spacing: 0.08em;
+}
+.bp-sheet .t-head {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-mute {
+  fill: var(--bp-muted);
+}
+.bp-sheet .t-accent {
+  fill: var(--bp-accent-ink);
+}
+.bp-sheet [data-drag] {
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+/* 3D mode page layout (writePage3d). Colours are the tokens of sheet.css, including --bp3-*. */
+html, body { height: 100%; overflow: hidden; }
+.v3 { display: flex; flex-direction: column; height: 100%; }
+.v3-bar { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 8px 16px; font-size: 12px; color: var(--bp-muted); letter-spacing: .03em; border-bottom: 1px solid var(--bp-ui); min-width: 0; }
+.v3-bar b { color: var(--bp-ink); font-weight: 600; letter-spacing: .08em; }
+.v3-bar a { color: var(--bp-muted); }
+.v3-grp { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.v3-bar button { font: inherit; color: var(--bp-muted); background: transparent; border: 1px solid var(--bp-ui); border-radius: 3px; padding: 3px 9px; cursor: pointer; }
+.v3-bar button[aria-pressed="true"] { color: var(--bp-ink); background: var(--bp-ui); }
+.v3-bar input[type="range"] { width: 92px; accent-color: var(--bp-accent); }
+.v3-stage { position: relative; flex: 1; min-height: 0; min-width: 0; overflow: hidden; outline: none; background-color: var(--bp-paper);
+  background-image: linear-gradient(var(--bp-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bp-grid) 1px, transparent 1px); background-size: 20px 20px; }
+.v3-stage:focus-visible { box-shadow: inset 0 0 0 2px var(--bp-accent); }
+.v3-stage::after { content: ""; position: absolute; inset: 10px; border: 1.2px solid var(--bp-ink); pointer-events: none; opacity: .85; }
+.v3-stage canvas { position: absolute; inset: 0; display: block; touch-action: none; cursor: grab; }
+.v3-stage canvas.v3-grab { cursor: grabbing; }
+#ov { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+#ov .thin, #ov .hid { fill: none; stroke: var(--bp-ink); stroke-width: .8px; }
+#ov .hid { stroke-dasharray: 4 2.6; }
+#ov .dot, #ov .head { fill: var(--bp-ink); }
+#ov .balloon { fill: var(--bp-paper); stroke: var(--bp-ink); stroke-width: .9px; }
+#ov .t { font-family: var(--bp-font); font-size: 10.5px; fill: var(--bp-ink); }
+.v3-title { position: absolute; right: 10px; bottom: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; width: min(420px, calc(100% - 20px)); border: 1.2px solid var(--bp-ink); border-right: 0; border-bottom: 0; background: var(--bp-paper); font-size: 10px; pointer-events: none; }
+.v3-title > div { border-right: .6px solid var(--bp-ink); border-bottom: .6px solid var(--bp-ink); padding: 3px 6px 4px; min-width: 0; }
+.v3-title i { display: block; font-style: normal; font-size: 7px; color: var(--bp-muted); letter-spacing: .08em; }
+.v3-title .w3 { grid-column: span 3; } .v3-title .w4 { grid-column: span 4; }
+.v3-title .lg { font-size: 12px; font-weight: 600; letter-spacing: .06em; }
+#readout { color: var(--bp-accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.v3-hint { position: absolute; left: 22px; bottom: 18px; font-size: 10.5px; color: var(--bp-muted); letter-spacing: .04em; max-width: 46%; pointer-events: none; }
+.v3-fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--bp-muted); background: var(--bp-paper); }
+.v3-fail a { color: var(--bp-ink); }
+@media (max-width: 640px) {
+  .v3-hint { display: none; }
+  .v3-bar { padding: 6px 10px; gap: 6px 10px; }
+  .v3-bar b { flex-basis: 100%; }
+  .v3-bar input[type="range"] { width: 70px; }
+  .v3-title > div:not(.w4) { display: none; }
+}
+/* ?embed=1: the object, its balloons and leaders only, on the page colour (an iframe hero) */
+.v3-embed .v3-bar, .v3-embed .v3-title, .v3-embed .v3-hint { display: none; }
+.v3-embed .v3-stage { background: var(--bp-page); }
+.v3-embed .v3-stage::after { display: none; }
+.v3-embed #ov .balloon { fill: var(--bp-page); }
+
+
+</style>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }</script>
+</head>
+<body>
+<div class="v3">
+<div class="v3-bar" role="toolbar" aria-label="View controls">
+  <b>CIRCUIT BREAKER · BP-009 · 3D</b>
+  <span class="v3-grp" role="group" aria-label="View"><button type="button" data-view="iso">ISO</button><button type="button" data-view="front">FRONT</button><button type="button" data-view="side">SIDE</button><button type="button" data-view="top">TOP</button></span>
+  <span class="v3-grp"><button type="button" id="cut" aria-pressed="true">CUT</button><label>plane <input id="offset" type="range" min="-30" max="30" step="0.5" value="0" aria-label="Cutting plane offset, mm"></label></span>
+  <span class="v3-grp"><label>explode <input id="explode" type="range" min="0" max="1" step="0.01" value="0" aria-label="Explode"></label></span>
+  <span class="v3-grp"><button type="button" id="balloons" aria-pressed="true">BALLOONS</button><button type="button" id="tour" aria-pressed="false">TOUR</button><button type="button" id="normal" aria-pressed="false">12 A</button><button type="button" id="over" aria-pressed="false">40 A</button><button type="button" id="short" aria-pressed="false">SHORT</button></span>
+  <span class="bp-themes" role="group" aria-label="Theme"><button type="button" data-theme-pick="blueprint">blueprint</button><button type="button" data-theme-pick="paper">paper</button><button type="button" data-theme-pick="white">white</button><button type="button" data-theme-pick="dark">dark</button></span>
+  <a href="../sheets/circuit-breaker.html">2D sheet</a>
+</div>
+<div id="stage" class="v3-stage" tabindex="0" role="img" aria-label="Isometric half-section of a B16 miniature circuit breaker, the case cut on its centre plane. Drag to orbit, drag the handle to switch it, and change the current: the bimetal heats and trips on overload, the coil's plunger trips at once on a short circuit and the arc runs into the splitter plates, from the same model as the 2D sheet.">
+  <canvas id="gl"></canvas>
+  <svg id="ov" aria-hidden="true"></svg>
+  <div class="v3-hint">DRAG TO ORBIT · DRAG THE HANDLE OR ↑ ↓ ON/OFF · ← → CURRENT · N O X NORMAL, OVERLOAD, SHORT · SPACE TOUR · E EXPLODE · C CUT · 1–4 VIEWS</div>
+  <div class="v3-title">
+    <div class="w3 lg"><i>TITLE</i>MCB B16 · ISOMETRIC HALF-SECTION</div><div class="lg"><i>DWG NO</i>BP-009-3D</div>
+    <div><i>SCALE</i>NTS</div><div><i>PROJECTION</i>ISOMETRIC</div><div><i>UNITS</i>mm · A · s · K</div><div><i>PARTS</i>30</div>
+    <div class="w4"><i>LIVE · SAME MODEL AS BP-009 · DRAG THE HANDLE · ← → CURRENT</i><span id="readout">&nbsp;</span></div>
+  </div>
+  <noscript><div class="v3-fail">This drawing needs JavaScript and WebGL. The 2D sheet, <a href="../sheets/circuit-breaker.html">circuit-breaker.html</a>, needs neither.</div></noscript>
+</div>
+<span id="sr" class="bp-sr" aria-live="polite"></span>
+</div>
+<script>
+window.addEventListener("error", (e) => { window.__v3err = String(e.message || e); });
+setTimeout(() => {
+  if (window.__v3ok) return;
+  const d = document.createElement("div");
+  d.className = "v3-fail";
+  d.id = "v3-fallback";
+  d.innerHTML = "The 3D view could not start (" + (window.__v3err || "three.js did not load: it needs WebGL and a connection to cdn.jsdelivr.net").replace(/</g, "&lt;") + "). The 2D sheet, <a href=\"circuit-breaker.html\">circuit-breaker.html</a>, needs neither.";
+  document.getElementById("stage").appendChild(d);
+}, 8000);
+</script>
+<script type="module">
+import * as THREE from "three";
+const K = (() => {
+// Blueprint drafting kit: orthographic views, sections, hatching, dimensions and sheet furniture.
+// Every function here is pure and returns SVG markup strings, so the same code runs in the build
+// and, inlined, in the page (live dimensions, moving springs, needles).
+//
+// Units. World geometry is in millimetres of the real object: u to the right, v up (a front view),
+// or u right, v away from the viewer (a plan view). The sheet is an A2 drawing, 594 mm wide, drawn
+// 1200 units wide; a view maps world mm to sheet units through its drawing scale.
+
+const SHEET = { w: 1200, h: 848 };
+const PX_PER_MM = SHEET.w / 594;
+
+// ISO 128 line widths and ISO 3098 lettering, in sheet units (A2: 0.5 / 0.25 mm lines, 3.5 mm text).
+const THICK = 1.15;
+const THIN = 0.55;
+const TEXT = 9.5;
+const ARROW = 7;
+const GAP = 2.2; // extension lines start this far from the object
+const OVER = 3.5; // and run this far past the dimension line
+
+const r2 = (n) => Math.round(n * 100) / 100;
+
+function fmt(n, digits = 1) {
+  const near = Math.round(n);
+  if (Math.abs(n - near) < 0.05) return String(near);
+  return n.toFixed(digits);
+}
+
+// ---------------------------------------------------------------- views
+
+// A view is a window from world mm onto the sheet. scale is the drawing scale (1/2.5 for "1:2.5").
+function view({ x, y, scale, name = "" }) {
+  const k = scale * PX_PER_MM;
+  return { x, y, scale, k, name, p: ([u, v]) => [r2(x + u * k), r2(y - v * k)] };
+}
+
+const scaleLabel = (scale) => (scale >= 1 ? `${fmt(scale)}:1` : `1:${fmt(1 / scale)}`);
+
+function d(V, pts, closed = true) {
+  let out = "";
+  for (let i = 0; i < pts.length; i++) {
+    const [x, y] = V.p(pts[i]);
+    out += `${i ? "L" : "M"}${x} ${y}`;
+  }
+  return closed ? out + "Z" : out;
+}
+
+// ---------------------------------------------------------------- world geometry (point lists)
+
+const rect = (u0, v0, u1, v1) => [[u0, v0], [u1, v0], [u1, v1], [u0, v1]];
+
+function arc(cu, cv, r, a0, a1, steps) {
+  const n = steps ?? Math.max(3, Math.ceil(Math.abs(a1 - a0) / 7.5));
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const a = ((a0 + ((a1 - a0) * i) / n) * Math.PI) / 180;
+    out.push([cu + r * Math.cos(a), cv + r * Math.sin(a)]);
+  }
+  return out;
+}
+
+const circle = (cu, cv, r, steps = 48) => arc(cu, cv, r, 0, 360 - 360 / steps, steps - 1);
+
+// A rectangle with filleted corners.
+function rrect(u0, v0, u1, v1, r, steps = 4) {
+  const q = Math.min(r, (u1 - u0) / 2, (v1 - v0) / 2);
+  return [
+    ...arc(u1 - q, v0 + q, q, -90, 0, steps),
+    ...arc(u1 - q, v1 - q, q, 0, 90, steps),
+    ...arc(u0 + q, v1 - q, q, 90, 180, steps),
+    ...arc(u0 + q, v0 + q, q, 180, 270, steps),
+  ];
+}
+
+const move = (pts, du, dv) => pts.map(([u, v]) => [u + du, v + dv]);
+const flipU = (pts, about = 0) => pts.map(([u, v]) => [2 * about - u, v]).reverse();
+const flipV = (pts, about = 0) => pts.map(([u, v]) => [u, 2 * about - v]).reverse();
+
+function inside([u, v], poly) {
+  let hit = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ui, vi] = poly[i];
+    const [uj, vj] = poly[j];
+    if (vi > v !== vj > v && u < ((uj - ui) * (v - vi)) / (vj - vi) + ui) hit = !hit;
+  }
+  return hit;
+}
+
+// A body of revolution cut through its axis.
+// loop is the half-profile as [r, s] pairs: r >= 0 measured from the axis, s along the axis.
+// axis "v" is a vertical axis at u = at; axis "u" a horizontal axis at v = at.
+// Returns the cut faces (hatched) and the edges seen through the bore behind the cutting plane:
+// every circle on an inner surface shows edge-on as a straight line across the bore.
+function revolve(loop, { axis = "v", at = 0 } = {}) {
+  const place = axis === "v" ? (r, s) => [at + r, s] : (r, s) => [s, at + r];
+  const n = loop.length;
+  const onAxis = loop.findIndex(([r], i) => r === 0 && loop[(i + 1) % n][0] === 0);
+  let cuts;
+  if (onAxis >= 0) {
+    const chain = Array.from({ length: n }, (_, j) => loop[(onAxis + 1 + j) % n]);
+    const right = chain.map(([r, s]) => place(r, s));
+    const left = chain.slice(1, -1).reverse().map(([r, s]) => place(-r, s));
+    cuts = [[...right, ...left]];
+  } else {
+    cuts = [loop.map(([r, s]) => place(r, s)), loop.map(([r, s]) => place(-r, s)).reverse()];
+  }
+  const eps = 1e-3;
+  const across = new Map();
+  const clear = (r, s) => [0.02, 0.25, 0.5, 0.75, 0.98].every((t) => !inside([t * r, s], loop));
+  for (const [r, s] of loop) {
+    if (r <= 0) continue;
+    if (clear(r, s + eps) && clear(r, s - eps)) across.set(s, Math.max(across.get(s) ?? 0, r));
+  }
+  const edges = [...across].map(([s, r]) => [place(-r, s), place(r, s)]);
+  return { cuts, edges };
+}
+
+// ---------------------------------------------------------------- hatching
+
+// ANSI/ISO-style material hatches. Spacing is in sheet units and never scales with the view,
+// so a detail at 2:1 shows the same density as the main view, as on a real drawing.
+const MATERIALS = {
+  steel: { kind: "lines", gap: 3.4 },
+  iron: { kind: "lines", gap: 5.6 },
+  alu: { kind: "pairs", gap: 5.2, pair: 1.5 },
+  brass: { kind: "dashed", gap: 4.6 },
+  bronze: { kind: "dashed", gap: 3.6 },
+  rubber: { kind: "cross", gap: 3.2 },
+  plastic: { kind: "lines", gap: 2.3 },
+  foam: { kind: "dots", gap: 2.6 },
+  wood: { kind: "grain", gap: 4 },
+};
+const ANGLES = [45, 135, 30, 60];
+
+function hatchDefs() {
+  let out = "";
+  for (const [name, m] of Object.entries(MATERIALS)) {
+    for (const angle of ANGLES) {
+      const g = m.gap;
+      let body = "";
+      if (m.kind === "lines") body = `<path class="hl" d="M0 -1V${g + 1}"/>`;
+      if (m.kind === "pairs") body = `<path class="hl" d="M0 -1V${g + 1}M${m.pair} -1V${g + 1}"/>`;
+      if (m.kind === "dashed") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl hl-dash" d="M${g / 2} -1V${g + 1}"/>`;
+      if (m.kind === "cross") body = `<path class="hl" d="M0 -1V${g + 1}M-1 0H${g + 1}"/>`;
+      if (m.kind === "dots") body = `<circle class="hd" cx="${g / 2}" cy="${g / 2}" r="0.42"/>`;
+      if (m.kind === "grain") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl" d="M${g * 0.55} -1C${g * 0.75} ${g * 0.3} ${g * 0.35} ${g * 0.7} ${g * 0.55} ${g + 1}"/>`;
+      out += `<pattern id="h-${name}-${angle}" patternUnits="userSpaceOnUse" width="${g}" height="${g}" patternTransform="rotate(${angle})">${body}</pattern>`;
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- drawing parts
+
+// A cut face: paper underneath (it hides what is behind), the material hatch, a thick outline.
+// mat "solid" blacks the section in, the ISO convention for sections too thin to hatch.
+function cut(V, pts, { mat = "steel", angle = 45 } = {}) {
+  const dd = d(V, pts);
+  if (mat === "solid") return `<path class="solid" d="${dd}"/>`;
+  return `<path class="paper" d="${dd}"/><path fill="url(#h-${mat}-${angle})" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+// A body of revolution in section, with the edges behind the cut.
+function section(V, rev, opts) {
+  return rev.cuts.map((c) => cut(V, c, opts)).join("") + rev.edges.map((e) => line(V, e)).join("");
+}
+
+// An unsectioned solid (shafts, rods, pins, balls, nuts and ribs are never hatched in a section).
+function body(V, pts) {
+  const dd = d(V, pts);
+  return `<path class="paper" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+const line = (V, pts, cls = "vis", closed = false) => `<path class="${cls}" d="${d(V, pts, closed)}"/>`;
+const lines = (V, list, cls = "vis") => `<path class="${cls}" d="${list.map((pts) => d(V, pts, false)).join("")}"/>`;
+
+// A centre line, run a little past the outline at both ends.
+function centerline(V, a, b, over = 6) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  return `<path class="ctr" d="M${r2(ax - ux * over)} ${r2(ay - uy * over)}L${r2(bx + ux * over)} ${r2(by + uy * over)}"/>`;
+}
+
+// Centre mark for a circle in a view: two crossed centre lines.
+function centerMark(V, [cu, cv], r, over = 5) {
+  return centerline(V, [cu - r, cv], [cu + r, cv], over) + centerline(V, [cu, cv - r], [cu, cv + r], over);
+}
+
+// A compression spring cut along its axis: wire sections (blacked in) on both sides, half a pitch
+// apart, joined by the back half of each turn. from/to are positions along the axis.
+function springSection(V, { from, to, radius, wire, turns, axis = "u", at = 0 }) {
+  const place = axis === "u" ? (s, r) => [s, at + r] : (s, r) => [at + r, s];
+  const pitch = (to - from - wire) / turns;
+  const start = from + wire / 2;
+  const back = [];
+  let sections = "";
+  for (let i = 0; i <= turns; i++) {
+    const sTop = start + i * pitch;
+    sections += cut(V, circle(...place(sTop, radius), wire / 2, 12), { mat: "solid" });
+    if (i < turns) {
+      const sBot = sTop + pitch / 2;
+      sections += cut(V, circle(...place(sBot, -radius), wire / 2, 12), { mat: "solid" });
+      back.push([place(sTop, radius), place(sBot, -radius)]);
+    }
+  }
+  return lines(V, back, "vis spring") + sections;
+}
+
+// ---------------------------------------------------------------- annotation
+
+function arrowHead([x, y], [dx, dy]) {
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const bx = x - ux * ARROW;
+  const by = y - uy * ARROW;
+  const half = ARROW * 0.25;
+  return `M${r2(x)} ${r2(y)}L${r2(bx - uy * half)} ${r2(by + ux * half)}L${r2(bx + uy * half)} ${r2(by - ux * half)}Z`;
+}
+
+const textWidth = (s, size = TEXT) => String(s).length * size * 0.6;
+
+// A linear dimension between two world points, measured along dir ("h" or "v").
+// off is the sheet distance from point a to the dimension line (negative: up or left).
+// The value is measured from the geometry unless text is given, so a dimension cannot lie.
+function dim(V, a, b, { dir = "h", off = 18, text, prefix = "", suffix = "", id = "", cls = "" } = {}) {
+  const A = V.p(a);
+  const B = V.p(b);
+  const value = text ?? prefix + fmt(Math.abs(dir === "h" ? b[0] - a[0] : b[1] - a[1])) + suffix;
+  const h = dir === "h";
+  const main = h ? 0 : 1; // the axis the dimension measures along
+  const side = 1 - main;
+  const at = A[side] + off; // where the dimension line sits
+  const pt = (m, s) => (h ? [m, s] : [s, m]);
+  let ext = "";
+  for (const P of [A, B]) {
+    const gapTo = at - P[side];
+    if (Math.abs(gapTo) <= GAP) continue;
+    const sgn = Math.sign(gapTo);
+    const [x1, y1] = pt(P[main], P[side] + sgn * GAP);
+    const [x2, y2] = pt(P[main], at + sgn * OVER);
+    ext += `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+  }
+  const lo = Math.min(A[main], B[main]);
+  const hi = Math.max(A[main], B[main]);
+  const span = hi - lo;
+  const tw = textWidth(value);
+  const arrowsIn = span >= ARROW * 2 + 3;
+  const textIn = span >= tw + ARROW * 2 + 6;
+  let lineD;
+  let heads;
+  let tm; // text position along the measured axis
+  let anchor = "middle";
+  if (arrowsIn) {
+    const [x1, y1] = pt(lo, at);
+    const [x2, y2] = pt(hi, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(-1, 0)) + arrowHead(pt(hi, at), pt(1, 0));
+  } else {
+    const [x1, y1] = pt(lo - ARROW - 7, at);
+    const [x2, y2] = pt(hi + ARROW + 7, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(1, 0)) + arrowHead(pt(hi, at), pt(-1, 0));
+  }
+  if (textIn) tm = (lo + hi) / 2;
+  else {
+    tm = hi + ARROW + 10 + tw / 2;
+    const [x2, y2] = pt(tm + tw / 2, at);
+    lineD += `L${r2(x2)} ${r2(y2)}`;
+  }
+  // ISO: text sits just above a horizontal line and reads from the right on a vertical one.
+  const [tx, ty] = pt(tm, at - 3);
+  const textEl = h
+    ? `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}">${value}</text>`
+    : `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}" transform="rotate(-90 ${r2(tx)} ${r2(ty)})">${value}</text>`;
+  return `<g data-role="dim"${id ? ` id="${id}"` : ""}${cls ? ` class="${cls}"` : ""}><path class="thin" d="${ext}${lineD}"/><path class="head" d="${heads}"/>${textEl}</g>`;
+}
+
+// A part balloon: a dot on the part, a thin leader, a circled item number.
+function balloon(V, at, [bx, by], n, { target = "", r = 8.5 } = {}) {
+  const [ax, ay] = V.p(at);
+  const a = Math.atan2(ay - by, ax - bx);
+  const ex = r2(bx + r * Math.cos(a));
+  const ey = r2(by + r * Math.sin(a));
+  return (
+    `<g data-role="balloon" data-target="${target}" data-at="${ax} ${ay}">` +
+    `<path class="thin" d="M${ex} ${ey}L${ax} ${ay}"/><circle class="dot" cx="${ax}" cy="${ay}" r="1.5"/>` +
+    `<circle class="balloon" cx="${bx}" cy="${by}" r="${r}"/>` +
+    `<text class="t" x="${bx}" y="${r2(by + 3.3)}" text-anchor="middle">${n}</text></g>`
+  );
+}
+
+// A view title: SECTION A-A over its scale, centred under the view.
+function viewLabel(x, y, title, sub = "") {
+  return (
+    `<g data-role="label"><text class="t t-lg" x="${x}" y="${y}" text-anchor="middle">${title}</text>` +
+    (sub ? `<text class="t t-sm" x="${x}" y="${y + 12}" text-anchor="middle">${sub}</text>` : "") +
+    `</g>`
+  );
+}
+
+// The circle that marks a detail in its parent view, with its letter.
+function detailMark(V, [cu, cv], r, letter, angle = 45) {
+  const [x, y] = V.p([cu, cv]);
+  const R = r * V.k;
+  const a = (-angle * Math.PI) / 180;
+  const lx = r2(x + (R + 9) * Math.cos(a));
+  const ly = r2(y + (R + 9) * Math.sin(a) + 4);
+  return `<g data-role="label"><circle class="thin mark" cx="${x}" cy="${y}" r="${r2(R)}"/><text class="t t-lg" x="${lx}" y="${ly}" text-anchor="middle">${letter}</text></g>`;
+}
+
+// A viewing-direction arrow (VIEW C): a thick-tipped arrow pointing at the surface, with its letter.
+function viewArrow(V, at, [dx, dy], letter, len = 26) {
+  const [x, y] = V.p(at);
+  const n = Math.hypot(dx, dy) || 1;
+  const ux = dx / n;
+  const uy = dy / n;
+  const sx = r2(x - ux * len);
+  const sy = r2(y - uy * len);
+  return (
+    `<g data-role="label"><path class="vis" d="M${sx} ${sy}L${r2(x - ux * ARROW)} ${r2(y - uy * ARROW)}"/>` +
+    `<path class="head" d="${arrowHead([x, y], [ux, uy])}"/>` +
+    `<text class="t t-lg" x="${r2(sx - uy * 10)}" y="${r2(sy + ux * 10 + 4)}" text-anchor="middle">${letter}</text></g>`
+  );
+}
+
+// A long-break line across a part (thin, with one zigzag), for parts that run out of the view.
+function breakLine(V, a, b) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const mx = (ax + bx) / 2;
+  const my = (ay + by) / 2;
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  const z = 3.5;
+  const p = (t, s) => `${r2(mx + ux * t - uy * s)} ${r2(my + uy * t + ux * s)}`;
+  return `<path class="thin" d="M${r2(ax - ux * 4)} ${r2(ay - uy * 4)}L${p(-z, 0)}L${p(-z / 2, z * 1.6)}L${p(z / 2, -z * 1.6)}L${p(z, 0)}L${r2(bx + ux * 4)} ${r2(by + uy * 4)}"/>`;
+}
+
+// ---------------------------------------------------------------- sheet furniture
+
+// The drawing frame: trimmed edge, a thick border, zone references and centring marks.
+function frame({ w = SHEET.w, h = SHEET.h, trim = 8, m = 24, cols = 8, rows = 6 } = {}) {
+  let out = `<g data-role="frame"><rect class="thin" x="${trim}" y="${trim}" width="${w - trim * 2}" height="${h - trim * 2}"/>`;
+  out += `<rect class="vis" x="${m}" y="${m}" width="${w - m * 2}" height="${h - m * 2}"/>`;
+  const cw = (w - m * 2) / cols;
+  const rh = (h - m * 2) / rows;
+  let ticks = "";
+  let labels = "";
+  for (let i = 0; i <= cols; i++) {
+    const x = r2(m + i * cw);
+    if (i > 0 && i < cols) ticks += `M${x} ${trim}V${m}M${x} ${h - m}V${h - trim}`;
+    if (i < cols) {
+      const cx = r2(m + (i + 0.5) * cw);
+      labels += `<text class="t t-sm" x="${cx}" y="${r2((trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+      labels += `<text class="t t-sm" x="${cx}" y="${r2(h - (trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+    }
+  }
+  for (let j = 0; j <= rows; j++) {
+    const y = r2(m + j * rh);
+    if (j > 0 && j < rows) ticks += `M${trim} ${y}H${m}M${w - m} ${y}H${w - trim}`;
+    if (j < rows) {
+      const cy = r2(m + (j + 0.5) * rh + 3);
+      const letter = String.fromCharCode(65 + j);
+      labels += `<text class="t t-sm" x="${r2((trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+      labels += `<text class="t t-sm" x="${r2(w - (trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+    }
+  }
+  const cm = `M${w / 2} ${trim}V${m + 10}M${w / 2} ${h - trim}V${h - m - 10}M${trim} ${h / 2}H${m + 10}M${w - trim} ${h / 2}H${w - m - 10}`;
+  out += `<path class="thin" d="${ticks}"/><path class="vis" d="${cm}"/>${labels}</g>`;
+  return out;
+}
+
+// A ruled table (parts list). cols: [{ w, align, title }]. rows: arrays of cell strings.
+// Item numbers count up from the bottom, as a parts list sits on top of the title block.
+function table(x, y, cols, rows, { rowH = 16, role = "bom", headH = 18 } = {}) {
+  const w = cols.reduce((s, c) => s + c.w, 0);
+  const h = headH + rows.length * rowH;
+  let rules = "";
+  let text = "";
+  let cx = x;
+  for (const [i, c] of cols.entries()) {
+    if (i > 0) rules += `M${r2(cx)} ${y}V${y + h}`;
+    const tx = c.align === "center" ? cx + c.w / 2 : c.align === "right" ? cx + c.w - 4 : cx + 4;
+    const anchor = c.align === "center" ? "middle" : c.align === "right" ? "end" : "start";
+    text += `<text class="t t-sm t-head" x="${r2(tx)}" y="${y + h - 5.5}" text-anchor="${anchor}">${c.title}</text>`;
+    rows.forEach((row, j) => {
+      text += `<text class="t t-sm" x="${r2(tx)}" y="${r2(y + (rows.length - 1 - j) * rowH + rowH - 4.8)}" text-anchor="${anchor}">${row[i]}</text>`;
+    });
+    cx += c.w;
+  }
+  for (let j = 1; j <= rows.length; j++) rules += `M${x} ${r2(y + j * rowH)}H${x + w}`;
+  return `<g data-role="${role}"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/><path class="thin" d="${rules}"/><rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/>${text}</g>`;
+}
+
+// A title-block cell: a small caption over a value. size: "sm" | "md" | "lg".
+function cell({ x, y, w, h, label, value = "", size = "md", id = "" }) {
+  const cls = size === "lg" ? "t t-xl" : size === "sm" ? "t t-sm" : "t";
+  const vy = size === "lg" ? y + h - 7 : y + h - 5;
+  return (
+    `<rect class="thin" x="${x}" y="${y}" width="${w}" height="${h}"/>` +
+    `<text class="t t-cap" x="${x + 4}" y="${y + 9}">${label}</text>` +
+    `<text class="${cls}" x="${x + 4}" y="${vy}"${id ? ` id="${id}"` : ""}>${value}</text>`
+  );
+}
+
+function titleBlock(x, y, w, h, cells) {
+  return `<g data-role="title"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/>${cells.map((c) => cell({ ...c, x: x + c.x, y: y + c.y })).join("")}<rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/></g>`;
+}
+
+// A notes block: a heading and numbered lines.
+function notes(x, y, heading, items, lead = 13) {
+  let out = `<g data-role="notes"><text class="t t-head" x="${x}" y="${y}">${heading}</text>`;
+  items.forEach((s, i) => {
+    out += `<text class="t t-sm" x="${x}" y="${r2(y + lead * (i + 1) + 2)}">${i + 1}. ${s}</text>`;
+  });
+  return out + `</g>`;
+}
+
+return { SHEET, PX_PER_MM, THICK, THIN, TEXT, ARROW, GAP, OVER, r2, fmt, view, scaleLabel, d, rect, arc, circle, rrect, move, flipU, flipV, inside, revolve, MATERIALS, ANGLES, hatchDefs, cut, section, body, line, lines, centerline, centerMark, springSection, textWidth, dim, balloon, viewLabel, detailMark, viewArrow, breakLine, frame, table, cell, titleBlock, notes };
+})();
+
+const L = (() => {
+// Live runtime for a blueprint sheet: one time-based loop, an idle tour, input wake-ups,
+// offscreen and hidden-tab pauses, reduced motion, and deterministic frames for checks.
+//
+// URL parameters (all optional):
+//   ?t=6.5            render the tour at 6.5 s, deterministically, and stop (for screenshots)
+//   ?theme=paper      blueprint | paper | white | dark
+//   ?zoom=x,y,w,h     show only this sheet region, filling the window (for 4x close-ups)
+//   ?mask=x,y,w,h     blank everything outside this box, so one view stands alone
+//   ?check=1          run the layout self-check after the first frame (see selfcheck.mjs)
+
+function params() {
+  const q = new URLSearchParams(location.search);
+  return {
+    t: q.has("t") ? Number(q.get("t")) : null,
+    theme: q.get("theme"),
+    zoom: q.get("zoom"),
+    mask: q.get("mask"),
+    check: q.has("check"),
+  };
+}
+
+const THEMES = ["blueprint", "paper", "white", "dark"];
+
+function setupPage(svg) {
+  const q = params();
+  // the page's own default (writePage's `theme`), then a saved choice, then ?theme=, which wins but isn't saved
+  const fallback = document.documentElement.dataset.theme || "blueprint";
+  const pick = (name, save) => {
+    if (!THEMES.includes(name)) return;
+    document.documentElement.dataset.theme = name;
+    for (const b of document.querySelectorAll("[data-theme-pick]")) b.setAttribute("aria-pressed", String(b.dataset.themePick === name));
+    if (save) {
+      try {
+        localStorage.setItem("bp-theme", name);
+      } catch {}
+    }
+  };
+  let saved = null;
+  try {
+    saved = localStorage.getItem("bp-theme");
+  } catch {}
+  pick(q.theme ?? saved ?? fallback, false);
+  for (const b of document.querySelectorAll("[data-theme-pick]")) b.addEventListener("click", () => pick(b.dataset.themePick, true));
+  // ?mask=x,y,w,h paints the page colour over everything outside one box, so a view stands alone
+  if (q.mask) {
+    const [x, y, w, h] = q.mask.split(",").map(Number);
+    if ([x, y, w, h].every(Number.isFinite)) {
+      const m = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      m.setAttribute("d", `M-9999 -9999H9999V9999H-9999Z M${x} ${y}V${y + h}H${x + w}V${y}Z`);
+      m.setAttribute("fill-rule", "evenodd");
+      m.setAttribute("style", "fill:var(--bp-page);pointer-events:none");
+      m.dataset.role = "mask";
+      svg.appendChild(m);
+    }
+  }
+  if (q.zoom) {
+    const box = q.zoom.split(",").map(Number);
+    if (box.length === 4 && box.every(Number.isFinite)) {
+      svg.setAttribute("viewBox", box.join(" "));
+      document.body.classList.add("bp-zoom");
+    }
+  }
+  return q;
+}
+
+// Critically damped follow toward a target: calm, no overshoot, frame-rate independent.
+function follow(at, want, rate, dt) {
+  return want + (at - want) * Math.exp(-rate * dt);
+}
+
+const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, t)));
+
+// run({ root, step, render, idleAfter })
+//   step(dt, live) advances the model; live.touring says whether the idle tour drives it.
+//   It returns true while something is still settling, so a reduced-motion page can sleep.
+//   render(live) writes attributes; it never rebuilds static geometry.
+function run({ root, step, render, idleAfter = 4, onFrozen }) {
+  const q = params();
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const live = { clock: 0, slow: 1, lastInput: -Infinity, reduced, touring: !reduced, frozen: q.t != null };
+  live.input = () => {
+    live.lastInput = live.clock;
+    live.touring = false;
+    wake();
+  };
+
+  if (live.frozen) {
+    const dt = 1 / 240;
+    for (let t = 0; t < q.t; t += dt) {
+      live.clock = t;
+      live.touring = true;
+      step(dt, live);
+    }
+    render(live);
+    onFrozen?.(live);
+    return live;
+  }
+
+  let raf = 0;
+  let last = 0;
+  let visible = true;
+  function frame(now) {
+    raf = 0;
+    const real = last ? Math.min(0.05, (now - last) / 1000) : 0;
+    last = now;
+    live.clock += real;
+    live.touring = !reduced && live.clock - live.lastInput > idleAfter;
+    const busy = step(real * live.slow, live);
+    render(live);
+    if (visible && !document.hidden && (!reduced || busy)) raf = requestAnimationFrame(frame);
+    else last = 0;
+  }
+  function wake() {
+    if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame);
+  }
+  live.wake = wake;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) wake();
+    }).observe(root);
+  }
+  document.addEventListener("visibilitychange", wake);
+  render(live);
+  wake();
+  return live;
+}
+
+// Vertical drag on an element, reported as a sheet-unit delta since the press.
+function dragY(svg, el, { start, move, end }) {
+  let id = null;
+  let y0 = 0;
+  const toSheet = (e) => {
+    const m = svg.getScreenCTM();
+    return m ? (e.clientY - m.f) / m.d : e.clientY;
+  };
+  el.addEventListener("pointerdown", (e) => {
+    id = e.pointerId;
+    el.setPointerCapture(id);
+    y0 = toSheet(e);
+    start?.();
+    e.preventDefault();
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (e.pointerId === id) move(toSheet(e) - y0);
+  });
+  const stop = (e) => {
+    if (e.pointerId !== id) return;
+    id = null;
+    end?.();
+  };
+  el.addEventListener("pointerup", stop);
+  el.addEventListener("pointercancel", stop);
+}
+
+// Announce a readout to screen readers at most every `every` seconds.
+function announcer(el, every = 1.5) {
+  let lastAt = -Infinity;
+  let lastText = "";
+  return (text, clock) => {
+    if (text === lastText || clock - lastAt < every) return;
+    lastAt = clock;
+    lastText = text;
+    el.textContent = text;
+  };
+}
+
+return { params, THEMES, setupPage, follow, ease, run, dragY, announcer };
+})();
+
+const S = (() => {
+// 3D mode: a live, sectioned, exploded technical illustration of an example, from the same model
+// and the same profile numbers as its 2D sheet. See references/3d.md.
+//
+// Two halves in one module:
+//   SPECS (pure, Node-safe): lathe, cylinder, tube, extrude, box, sphere, torus, helix, gear, disc,
+//     part, fluid, bore. A scene is plain data: parts made of closed solids, in world mm (x right,
+//     y up, z toward the viewer; the 2D sheet's u is x and v is y, its cutting plane is z = 0).
+//   RUNTIME (browser): create(opts) builds the three.js scene from that data and returns a view
+//     with poses, explode, fluids, drag, balloons, live dimensions and the loop (kit/live.mjs).
+//
+// THREE is not imported here: the page's module script does `import * as THREE from "three"`
+// (writePage3d in kit/page.mjs) and this module is inlined after it, so the runtime half uses that
+// binding. Nothing at the top level touches THREE or the DOM, so Node can import the spec half.
+//
+// How the drawing is made, three passes a frame:
+//   1. ids: a part id and a "cut face" flag per pixel, plus depth, into a render target;
+//   2. colour: toon tones on surfaces. While the section is open every closed solid is drawn double
+//      sided; its back faces are only ever seen through the opening, so they are shaded as the cut
+//      face (paper and the part's hatch, computed where the view ray meets the plane). Creases come
+//      from EdgesGeometry and skip pixels that pass 1 marked as a cut face;
+//   3. outlines: thick lines where the id, the flag or the depth's second difference jumps.
+//
+// URL parameters every 3D page supports:
+//   ?t=1.0 deterministic frame of the tour   ?view=iso|front|side|top   ?cut=0|1   ?offset=mm
+//   ?explode=0..1   ?zoom=k   ?look=x,y,z (mm)   ?theme=blueprint|paper|white|dark   ?balloons=0
+//   ?embed=1 (no page chrome)   ?check=1 (render stats)   ?selftest=1 (drive the controls)
+//   ?bench=1 (time a frame)   ?dbg=1 (tint bores, fluids and outlines)
+
+
+
+// ================================================================ SPECS (pure)
+
+const AXIS = { y: "y", v: "y", x: "x", u: "x", z: "z" };
+const pair = (at) => (Array.isArray(at) ? [at[0] ?? 0, at[1] ?? 0] : [at ?? 0, 0]);
+
+// A body of revolution from a closed half-profile [[r, s], …] in mm: the same loops K.revolve takes.
+// axis "y" (or "v"): vertical, through x = at[0], z = at[1]. axis "x" (or "u"): through y = at[0],
+// z = at[1]. axis "z": through x = at[0], y = at[1]. A number `at` means [at, 0].
+// A solid profile touches the axis along one edge (two consecutive points with r = 0).
+function lathe(loop, { axis = "y", at = 0, ...o } = {}) {
+  return { kind: "lathe", loop, axis: AXIS[axis], at: pair(at), ...o };
+}
+function cylinder({ axis = "y", at = 0, r, from, to, ...o }) {
+  return lathe([[0, from], [r, from], [r, to], [0, to]], { axis, at, ...o });
+}
+function tube({ axis = "y", at = 0, r0, r1, from, to, ...o }) {
+  return lathe([[r0, from], [r1, from], [r1, to], [r0, to]], { axis, at, ...o });
+}
+
+// A prism: an outline [[a, b], …] (with optional holes) swept from `from` to `to` along an axis.
+//   along "z": a = x, b = y      along "y": a = x, b = z      along "x": a = z, b = y
+// bevel rounds the edges and grows the outline by itself, so give a bevelled outline inset by it.
+// conform { x, r }: vertices on the face x = conform.x move onto the cylinder of radius r round
+// the y axis, so a boss of a casting meets a turned body exactly (castings without CSG).
+function extrude(shape, { along = "z", from, to, holes = [], bevel = 0, conform = null, ...o }) {
+  return { kind: "extrude", shape, holes, along: AXIS[along], from, to, bevel, conform, ...o };
+}
+const box = (min, max, o = {}) => ({ kind: "box", min, max, ...o });
+const sphere = (c, r, o = {}) => ({ kind: "sphere", c, r, ...o });
+// A ring of tube radius r on a circle of radius R round an axis through c; arc [a0, a1] in degrees.
+const torus = (c, R, r, { axis = "y", arc = [0, 360], ...o } = {}) => ({ kind: "torus", c, R, r, axis: AXIS[axis], arc, ...o });
+// A coil spring of wire diameter `wire` from s = from to s = to along an axis, coil radius `radius`.
+const helix = ({ axis = "x", at = 0, from, to, radius, wire, turns, ...o }) => ({ kind: "helix", axis: AXIS[axis], at: pair(at), from, to, radius, wire, turns, ...o });
+// A flat disc facing +normal (a dial face, a hole mouth). texture(ctx, size, tokens) draws on it.
+const disc = (c, r, { normal = "y", ...o } = {}) => ({ kind: "disc", c, r, normal, ...o });
+
+// An involute spur gear outline round (cx, cy): `teeth`, `module` (mm), pressure angle in degrees.
+// phase (degrees) turns the teeth. Returns [[a, b], …] for extrude().
+function gearOutline({ teeth, module: m, pressure = 20, addendum = 1, dedendum = 1.25, steps = 5, cx = 0, cy = 0, phase = 0 }) {
+  const r = (m * teeth) / 2;
+  const rb = r * Math.cos((pressure * Math.PI) / 180);
+  const ra = r + addendum * m;
+  const rf = Math.max(0.1, r - dedendum * m);
+  const inv = (a) => Math.tan(a) - a;
+  const a0 = (pressure * Math.PI) / 180;
+  // half the tooth's angular thickness at radius ρ (involute flanks)
+  const half = (rho) => Math.PI / (2 * teeth) + inv(a0) - inv(Math.acos(Math.min(1, rb / rho)));
+  const lo = Math.max(rf, rb);
+  const out = [];
+  const at = (rho, ang) => out.push([cx + rho * Math.cos(ang), cy + rho * Math.sin(ang)]);
+  for (let k = 0; k < teeth; k++) {
+    const c = (2 * Math.PI * k) / teeth + (phase * Math.PI) / 180;
+    if (rf < rb) at(rf, c - half(rb));
+    for (let i = 0; i <= steps; i++) {
+      const rho = lo + ((ra - lo) * i) / steps;
+      at(rho, c - half(rho));
+    }
+    for (let i = steps; i >= 0; i--) {
+      const rho = lo + ((ra - lo) * i) / steps;
+      at(rho, c + half(rho));
+    }
+    if (rf < rb) at(rf, c + half(rb));
+    // root arc to the next tooth
+    const n = (2 * Math.PI * (k + 1)) / teeth + (phase * Math.PI) / 180;
+    const e0 = c + half(lo);
+    const e1 = n - half(lo);
+    for (let i = 1; i < 3; i++) at(rf, e0 + ((e1 - e0) * i) / 3);
+  }
+  return out;
+}
+// A spur gear: the outline extruded along its axis, with a bore. `at` is the gear centre in the
+// outline's plane (see extrude); give the part or the solid a pivot there to turn it.
+function gear({ teeth, module: m, along = "z", at = [0, 0], from, to, bore = 0, phase = 0, pressure = 20, ...o }) {
+  const [cx, cy] = pair(at);
+  const holes = bore > 0 ? [circle(cx, cy, bore, 48)] : [];
+  return extrude(gearOutline({ teeth, module: m, cx, cy, phase, pressure }), { along, from, to, holes, ...o });
+}
+
+// A part: one balloon number, one name, one or more closed solids that share its hatch.
+//   mat, angle: a kit material (K.MATERIALS) and angle (K.ANGLES), as the 2D sheet hatches it;
+//   hatch: "solid" (blacked in: thin walls, springs) or "none" (rods, nuts, balls: not hatched).
+//   explode: [dx, dy, dz] at explode = 1, or { to: [x, y, z] } (an absolute place from rest).
+//   anchor: { cut: [x, y, z] on its cut face, out: { c, r, axis: "y"|"x"|"z"|"box"|"sphere" } }
+//   pivot: [x, y, z] the part turns about when its pose has `rot`.
+//   layer: 1 for a part that runs through another part's bore and out behind it (a shaft through a
+//     gear pocket, a crank through its case, a bolt through a hole): its cut face must win there.
+// Each solid may override hatch, give role (bore, fluid, glass, decal, mouth, ink), own: true (its
+// own outline against the other solids of the part), explode (an extra offset of that solid),
+// pivot (to turn or scale that solid alone, see V.solid) and live (a name for V.solid).
+function part(id, name, solids, { mat, angle = 45, hatch, explode = null, anchor = null, pivot = null, layer } = {}) {
+  const h = hatch ?? (mat ? [mat, angle] : "none");
+  return { id, name, explode, anchor, pivot, solids: solids.map((s) => ({ hatch: h, ...(layer ? { layer } : {}), ...s })) };
+}
+// A bore or passage inside a solid of the same part: its far wall shows through the cut, and only
+// where the view ray crosses the plane inside it. Lathe or extrude only (it is tested in shape).
+const bore = (s) => ({ ...s, role: "void", hatch: "none" });
+// A fluid volume (air, oil, water): stippled in the accent, density set at run time. Lathe or
+// extrude only. stretch: { from } lets the vertices beyond s = from move with V.fluid(...).stretch.
+const fluid = (name, s, { stretch = null } = {}) => ({ ...s, role: "fluid", name, stretch });
+
+// Outline helpers in mm.
+function circle(cx, cy, r, n = 32) {
+  return Array.from({ length: n }, (_, i) => [cx + r * Math.cos((i / n) * 2 * Math.PI), cy + r * Math.sin((i / n) * 2 * Math.PI)]);
+}
+function polygon(n, R, cx = 0, cy = 0, rot = 0) {
+  return Array.from({ length: n }, (_, i) => [cx + R * Math.cos(rot + (i * 2 * Math.PI) / n), cy + R * Math.sin(rot + (i * 2 * Math.PI) / n)]);
+}
+// A hexagon across flats `af`, corners on the a axis (a nut seen along its axis).
+const hexagon = (af, cx = 0, cy = 0) => polygon(6, af / 2 / Math.cos(Math.PI / 6), cx, cy);
+const rrectAt = (cx, cy, hx, hy, r, steps = 4) => K.rrect(cx - hx, cy - hy, cx + hx, cy + hy, r, steps);
+// A block with a cylindrical cross bore that touches its bottom face: one simple outline (U shape).
+function saddle(a0, a1, b0, b1, bc, r) {
+  const arc = K.arc((a0 + a1) / 2, bc, r, -88, 268, 72);
+  return [[a1, b0], [a1, b1], [a0, b1], [a0, b0], ...arc.reverse()];
+}
+
+// ================================================================ RUNTIME (browser, needs THREE)
+
+const VIEWS = { iso: [45, 35.264], front: [0, 0], side: [90, 0], top: [0, 90] };
+const NEAR = 1;
+const FAR = 9000;
+const MATKIND = { lines: 1, pairs: 2, dashed: 3, cross: 4, dots: 5, grain: 1 };
+const ROLES = { solid: 0, void: 1, fluid: 2, glass: 3, decal: 4, mouth: 5, ink: 6 };
+const smooth = (t) => t * t * (3 - 2 * t);
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+
+const VERT = /* glsl */ `
+uniform float uLiftFrom, uLift; uniform vec3 uAxisP, uAxisD;
+varying vec3 vW; varying vec3 vN;
+#ifdef DECAL
+varying vec2 vUv;
+#endif
+void main() {
+  vec3 p = position;
+  if (dot(p - uAxisP, uAxisD) > uLiftFrom) p += uAxisD * uLift;
+  vec4 w = modelMatrix * vec4(p, 1.0);
+  vW = w.xyz;
+  vN = normalize(mat3(modelMatrix) * normal);
+#ifdef DECAL
+  vUv = uv;
+#endif
+  gl_Position = projectionMatrix * viewMatrix * w;
+}`;
+
+const FRAG = /* glsl */ `
+uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash, uLayer, uLayerBias;
+uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
+uniform vec2 uProf[64]; uniform int uProfN, uProfKind; uniform vec3 uAxisP, uAxisD, uPA, uPB; uniform vec2 uRange;
+uniform float uLiftFrom, uLift; uniform mat4 uInv; uniform vec3 uShift;
+uniform sampler2D tIds; uniform vec2 uRes;
+varying vec3 vW; varying vec3 vN;
+#ifdef DECAL
+uniform sampler2D uTex; varying vec2 vUv;
+#endif
+
+float lines(float f, float widthPx) {
+  float d = abs(fract(f + 0.5) - 0.5);
+  return clamp(0.5 * widthPx - d / max(fwidth(f), 1e-5) + 0.5, 0.0, 1.0);
+}
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+// Is the plane point h inside this volume, in the mesh's own rest frame? Bores and fluids are
+// volumes inside other solids, not holes in them, so their far walls may show only where the view
+// ray crosses the plane inside them; elsewhere the cut face in front of them is the truth.
+bool inside(vec3 hw) {
+  if (uProfKind == 0) return true;
+  vec3 h = (uInv * vec4(hw, 1.0)).xyz;
+  float s = dot(h - uAxisP, uAxisD);
+  if (s > uLiftFrom + uLift) s -= uLift; else if (s > uLiftFrom) s = uLiftFrom;
+  vec2 q;
+  if (uProfKind == 1) q = vec2(length((h - uAxisP) - uAxisD * dot(h - uAxisP, uAxisD)), s);
+  else {
+    if (s < uRange.x || s > uRange.y) return false;
+    q = vec2(dot(h, uPA), dot(h, uPB));
+  }
+  bool inn = false;
+  for (int i = 0; i < 64; i++) {
+    if (i >= uProfN) break;
+    vec2 a = uProf[i];
+    vec2 b = uProf[i + 1 < uProfN ? i + 1 : 0];
+    if ((a.y > q.y) != (b.y > q.y) && q.x < a.x + (q.y - a.y) / (b.y - a.y) * (b.x - a.x)) inn = !inn;
+  }
+  return inn;
+}
+
+void main() {
+  bool cutting = uCutOn > 0.5;
+  // the plane travels with the part's explode offset, so an exploded part keeps its own half-section
+  float side = dot(uCut.xyz, vW - uShift) - uCut.w;
+  if (cutting && side > 0.0) discard;
+  float dn = dot(uCut.xyz, uCamDir);
+  vec3 h = abs(dn) < 1e-4 ? vW - uCut.xyz * side : vW - uCamDir * (side / dn);
+  vec3 up = abs(uCut.y) > 0.9 ? vec3(0.0, 0.0, -1.0) : vec3(0.0, 1.0, 0.0);
+  vec3 e1 = normalize(cross(up, uCut.xyz));
+  vec3 e2 = cross(uCut.xyz, e1);
+  vec2 uv = vec2(dot(h - uShift, e1), dot(h - uShift, e2)) * uPx;
+
+  float a = radians(uAngle);
+  vec2 dir = vec2(sin(a), cos(a));
+  vec2 perp = vec2(cos(a), -sin(a));
+  float qx = dot(uv, perp), qy = dot(uv, dir);
+  float unit = 1.4 * uDpr;
+  float g = uGap * unit;
+  float lw = 0.8 * uDpr;
+  int kind = int(uKind + 0.5);
+  float hv = 0.0;
+  if (kind == 1) hv = lines(qx / g, lw);
+  else if (kind == 2) hv = max(lines(qx / g, lw), lines((qx - uPair * unit) / g, lw));
+  else if (kind == 3) hv = max(lines(qx / g, lw), step(0.5, fract(qy / (2.6 * unit))) * lines(qx / g - 0.5, lw));
+  else if (kind == 4) hv = max(lines(qx / g, lw), lines(qy / g, lw));
+  else if (kind == 5) { vec2 c = (fract(vec2(qx, qy) / g) - 0.5) * g; hv = clamp(0.62 * unit - length(c) + 0.5, 0.0, 1.0); }
+
+  vec2 cell = floor(uv / (3.2 * unit));
+  vec2 jit = vec2(hash(cell), hash(cell + 7.3)) * 0.5 + 0.25;
+  float dd = length((uv / (3.2 * unit) - cell - jit) * 3.2 * unit);
+  float stip = step(hash(cell + 3.1), uDensity) * clamp(0.8 * unit - dd + 0.5, 0.0, 1.0);
+
+  vec3 nv = normalize((viewMatrix * vec4(normalize(vN), 0.0)).xyz);
+  float k = dot(nv, uLight);
+  float aa = max(fwidth(k), 1e-4);
+
+  int role = int(uRole + 0.5);
+  bool front = gl_FrontFacing;
+  bool cap = false;
+  float alpha = 1.0;
+  vec3 col = uMid;
+  if (role == 0 || role == 6) {
+    if (!front) { if (!cutting) discard; cap = true; }
+  } else if (role == 1) {
+    if (front || !cutting || !inside(h)) discard;
+    k = -k;
+  } else if (role == 2) {
+    if (front || !cutting || uMode > 0.5 || !inside(h)) discard;
+    // a cut face is on the plane, in front of any fluid: fluid shows only where no solid is cut
+    if (texture2D(tIds, gl_FragCoord.xy / uRes).g > 0.5) discard;
+    alpha = max(stip, uWash);
+#ifdef DBG
+    alpha = 1.0;
+#endif
+    if (alpha < 0.01) discard;
+    col = uAccent;
+  } else if (role == 3) {
+    if (front || !cutting || !inside(h)) discard;
+    cap = true;
+  } else if (role == 4 || role == 5) {
+    if (!front) discard;
+  }
+
+  // a cut face is drawn just in front of its back face; a solid running through another part's bore
+  // (layer 1+) is pulled well forward, so its cut face wins over the bore and the part around it
+  float capZ = gl_FragCoord.z - uCapBias - uLayer * uLayerBias;
+  if (uMode > 0.5) {
+    gl_FragColor = vec4(uEdge / 255.0, cap ? 1.0 : 0.0, 0.0, 1.0);
+    gl_FragDepth = cap ? capZ : gl_FragCoord.z;
+    return;
+  }
+  if (cap) {
+    if (kind == 6) col = uInk;
+    else col = mix(uPaper, uHatch.rgb, hv * uHatch.a);
+  } else if (role == 2) {
+  } else if (role == 5) {
+    col = mix(uDark, uInk, 0.25);
+  } else if (role == 6) {
+    col = uInk;
+  } else {
+#ifdef DECAL
+    col = texture2D(uTex, vUv).rgb;
+#else
+    float t1 = smoothstep(0.1 - aa, 0.1 + aa, k);
+    float t2 = smoothstep(0.58 - aa, 0.58 + aa, k);
+    col = mix(mix(uDark, uMid, t1), uLit, t2);
+    if (role == 1) col = mix(col, uDark, 0.45);
+#ifdef DBG
+    if (role == 1) col = vec3(1.0, 0.0, 0.0);
+#endif
+#endif
+  }
+  gl_FragColor = vec4(col, alpha);
+  gl_FragDepth = cap ? capZ : gl_FragCoord.z - (role == 2 ? uCapBias : 0.0);
+}`;
+
+const LINE_VERT = /* glsl */ `
+uniform float uLineBias;
+attribute float dist;
+varying vec3 vW; varying float vDist;
+void main() {
+  vec4 w = modelMatrix * vec4(position, 1.0);
+  vW = w.xyz; vDist = dist;
+  gl_Position = projectionMatrix * viewMatrix * w;
+  gl_Position.z -= uLineBias * gl_Position.w;
+}`;
+const LINE_FRAG = /* glsl */ `
+uniform float uCutOn, uPx, uDpr, uDash, uAlpha, uCull; uniform vec4 uCut; uniform vec3 uInk, uShift;
+uniform sampler2D tIds; uniform vec2 uRes;
+varying vec3 vW; varying float vDist;
+void main() {
+  if (uCutOn > 0.5 && dot(uCut.xyz, vW - uShift) > uCut.w + 0.01) discard;
+  // a cut face lies on the plane, in front of anything left: creases never draw on one
+  if (uCull > 0.5 && texture2D(tIds, gl_FragCoord.xy / uRes).g > 0.5) discard;
+  if (uDash > 0.5) {
+    float u = mod(vDist * uPx / (1.4 * uDpr), 22.2); // ISO 128 long dash dot: 15 2.6 2 2.6
+    if ((u > 15.0 && u < 17.6) || u > 19.6) discard;
+  }
+  gl_FragColor = vec4(uInk, uAlpha);
+}`;
+
+const EDGE_FRAG = /* glsl */ `
+uniform sampler2D tId, tDepth; uniform vec2 uTexel; uniform vec3 uInk; uniform float uW, uRange, uThr;
+varying vec2 vUv;
+vec4 at(vec2 d) { return texture2D(tId, vUv + d * uTexel * uW); }
+bool same(vec4 a, vec4 b) { return abs(a.r - b.r) < 0.5 / 255.0 && abs(a.g - b.g) < 0.5; }
+// a pixel unlike all four neighbours is a pinhole (a ray slipping through a crack between triangles)
+bool speck(vec2 d) {
+  vec4 c = at(d);
+  return !same(c, at(d + vec2(1.0, 0.0))) && !same(c, at(d - vec2(1.0, 0.0))) && !same(c, at(d + vec2(0.0, 1.0))) && !same(c, at(d - vec2(0.0, 1.0)));
+}
+void main() {
+  vec4 c = at(vec2(0.0));
+  if (speck(vec2(0.0))) discard;
+  float e = 0.0;
+  vec2 o[4];
+  o[0] = vec2(1.0, 0.0); o[1] = vec2(-1.0, 0.0); o[2] = vec2(0.0, 1.0); o[3] = vec2(0.0, -1.0);
+  for (int i = 0; i < 4; i++) if (!same(at(o[i]), c) && !speck(o[i])) e = 1.0;
+  if (e < 0.5 && c.a > 0.5 && c.g < 0.5) {
+    float d0 = texture2D(tDepth, vUv).x;
+    for (int i = 0; i < 2; i++) {
+      vec2 st = o[2 * i] * uTexel * uW;
+      float dl = texture2D(tDepth, vUv - st).x, dr = texture2D(tDepth, vUv + st).x;
+      if (abs(dl + dr - 2.0 * d0) * uRange > uThr) e = 1.0;
+    }
+  }
+  if (e < 0.5) discard;
+  gl_FragColor = vec4(uInk, 1.0);
+#ifdef DBG
+  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
+}`;
+
+// ---------------------------------------------------------------- geometry from specs
+
+// A closed body of revolution round local Y, one strip per profile edge (every corner a crease),
+// wound outward whichever way the profile runs.
+function latheGeometry(loop, seg) {
+  const n = loop.length;
+  let area = 0;
+  for (let i = 0; i < n; i++) {
+    const [r0, s0] = loop[i];
+    const [r1, s1] = loop[(i + 1) % n];
+    area += r0 * s1 - r1 * s0;
+  }
+  const sign = area > 0 ? 1 : -1;
+  const pos = [];
+  const nor = [];
+  const idx = [];
+  const P3 = (i) => new THREE.Vector3(pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]);
+  for (let i = 0; i < n; i++) {
+    const [r0, s0] = loop[i];
+    const [r1, s1] = loop[(i + 1) % n];
+    if (r0 === 0 && r1 === 0) continue;
+    const dr = r1 - r0;
+    const ds = s1 - s0;
+    const len = Math.hypot(dr, ds);
+    if (len < 1e-9) continue;
+    const nr = (sign * ds) / len;
+    const ns = (-sign * dr) / len;
+    const base = pos.length / 3;
+    for (let j = 0; j <= seg; j++) {
+      const t = (j / seg) * Math.PI * 2;
+      const c = Math.cos(t);
+      const sn = Math.sin(t);
+      pos.push(r0 * c, s0, -r0 * sn, r1 * c, s1, -r1 * sn);
+      nor.push(nr * c, ns, -nr * sn, nr * c, ns, -nr * sn);
+    }
+    for (let j = 0; j < seg; j++) {
+      const a = base + 2 * j;
+      for (const [i0, i1, i2] of [[a, a + 1, a + 3], [a, a + 3, a + 2]]) {
+        const p0 = P3(i0);
+        const cr = P3(i1).sub(p0).cross(P3(i2).sub(p0));
+        if (cr.lengthSq() < 1e-12) continue;
+        const want = new THREE.Vector3(nor[3 * i0], nor[3 * i0 + 1], nor[3 * i0 + 2]);
+        if (cr.dot(want) >= 0) idx.push(i0, i1, i2);
+        else idx.push(i0, i2, i1);
+      }
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+  geo.setIndex(idx);
+  return geo;
+}
+
+// local Y → the spec's axis, through `at`
+function axisMatrix(axis, [a, b]) {
+  const m = new THREE.Matrix4();
+  if (axis === "x") m.makeRotationZ(-Math.PI / 2).setPosition(0, a, b);
+  else if (axis === "z") m.makeRotationX(Math.PI / 2).setPosition(a, b, 0);
+  else m.makeTranslation(a, 0, b);
+  return m;
+}
+const axisDir = (axis) => (axis === "x" ? [1, 0, 0] : axis === "z" ? [0, 0, 1] : [0, 1, 0]);
+const axisPoint = (axis, [a, b]) => (axis === "x" ? [0, a, b] : axis === "z" ? [a, b, 0] : [a, 0, b]);
+// extrude: outline (a, b) and sweep s, as world vectors
+const PRISM = {
+  z: { A: [1, 0, 0], B: [0, 1, 0], D: [0, 0, 1] },
+  y: { A: [1, 0, 0], B: [0, 0, 1], D: [0, 1, 0] },
+  x: { A: [0, 0, 1], B: [0, 1, 0], D: [1, 0, 0] },
+};
+
+function extrudeGeometry({ shape, holes = [], along, from, to, bevel = 0, conform }) {
+  // local (X, Y) is the outline, local Z the sweep; rotations below put them on (a, b, s)
+  const flip = along === "y" ? ([a, b]) => [a, -b] : along === "x" ? ([a, b]) => [-a, b] : (p) => p;
+  // three.js only fixes hole winding when it reverses the outline, so normalise both here, after the
+  // flip: outline clockwise, holes counter-clockwise. Any input winding then gives outward hole walls.
+  const area = (pts) => pts.reduce((s, [x0, y0], i) => { const [x1, y1] = pts[(i + 1) % pts.length]; return s + x0 * y1 - x1 * y0; }, 0);
+  const wind = (pts, cw) => ((area(pts) < 0) === cw ? pts : pts.slice().reverse());
+  const sh = new THREE.Shape(wind(shape.map(flip), true).map((p) => new THREE.Vector2(...p)));
+  for (const hole of holes) sh.holes.push(new THREE.Path(wind(hole.map(flip), false).map((p) => new THREE.Vector2(...p))));
+  const geo = new THREE.ExtrudeGeometry(sh, {
+    depth: to - from - 2 * bevel,
+    bevelEnabled: bevel > 0,
+    bevelThickness: bevel,
+    bevelSize: bevel,
+    bevelSegments: 3,
+    steps: conform ? 24 : 1,
+    curveSegments: 24,
+  });
+  geo.translate(0, 0, from + bevel);
+  if (along === "y") geo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+  if (along === "x") geo.applyMatrix4(new THREE.Matrix4().makeRotationY(Math.PI / 2));
+  if (conform) {
+    const p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      if (Math.abs(p.getX(i) - conform.x) < 1e-3) p.setX(i, Math.sign(conform.x) * Math.sqrt(Math.max(0, conform.r ** 2 - p.getZ(i) ** 2)));
+    }
+    geo.computeVertexNormals();
+  }
+  return geo;
+}
+
+function helixGeometry(s) {
+  class Helix extends THREE.Curve {
+    getPoint(t, out = new THREE.Vector3()) {
+      const a = 2 * Math.PI * s.turns * t;
+      // along local Y; axisMatrix turns it onto the spec's axis
+      return out.set(s.radius * Math.sin(a), s.from + s.wire / 2 + t * (s.to - s.from - s.wire), s.radius * Math.cos(a));
+    }
+  }
+  return new THREE.TubeGeometry(new Helix(), Math.max(80, Math.round(s.turns * 60)), s.wire / 2, 10, false).applyMatrix4(axisMatrix(s.axis, s.at));
+}
+
+function geometryOf(s) {
+  const seg = (r) => (r > 20 ? 144 : r > 6 ? 96 : 48);
+  if (s.kind === "lathe") return latheGeometry(s.loop, seg(Math.max(...s.loop.map(([r]) => r)))).applyMatrix4(axisMatrix(s.axis, s.at));
+  if (s.kind === "extrude") return extrudeGeometry(s);
+  if (s.kind === "sphere") return new THREE.SphereGeometry(s.r, 48, 32).translate(...s.c);
+  if (s.kind === "helix") return helixGeometry(s);
+  if (s.kind === "box") {
+    const size = s.max.map((v, i) => v - s.min[i]);
+    return new THREE.BoxGeometry(...size).translate(...s.min.map((v, i) => v + size[i] / 2));
+  }
+  if (s.kind === "torus") {
+    const [a0, a1] = s.arc;
+    const g = new THREE.TorusGeometry(s.R, s.r, 14, 120, ((a1 - a0) * Math.PI) / 180);
+    g.rotateZ((a0 * Math.PI) / 180);
+    // the torus lies in local XY round local Z: turn local Z onto the axis
+    if (s.axis === "y") g.rotateX(-Math.PI / 2);
+    if (s.axis === "x") g.rotateY(Math.PI / 2);
+    return g.translate(...s.c);
+  }
+  if (s.kind === "disc") {
+    const g = new THREE.CircleGeometry(s.r, 96);
+    if (s.normal === "y") g.rotateX(-Math.PI / 2);
+    if (s.normal === "x") g.rotateY(Math.PI / 2);
+    return g.translate(...s.c);
+  }
+  throw new Error("solid3d: unknown solid kind " + s.kind);
+}
+
+// the shape a bore, fluid or glass is tested against (see inside() in FRAG): at most 64 points, so a
+// longer outline (a fine circle) is resampled evenly round its perimeter
+const PROF_MAX = 64;
+function resample(loop) {
+  if (loop.length <= PROF_MAX) return loop;
+  const seg = loop.map((p, i) => Math.hypot(loop[(i + 1) % loop.length][0] - p[0], loop[(i + 1) % loop.length][1] - p[1]));
+  const total = seg.reduce((a, b) => a + b, 0);
+  const out = [];
+  let i = 0;
+  let acc = 0;
+  for (let k = 0; k < PROF_MAX; k++) {
+    const want = (k / PROF_MAX) * total;
+    while (acc + seg[i] < want) acc += seg[i++];
+    const t = seg[i] ? (want - acc) / seg[i] : 0;
+    const a = loop[i];
+    const b = loop[(i + 1) % loop.length];
+    out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+  }
+  return out;
+}
+function profileOf(s) {
+  if (s.kind === "lathe") return { kind: 1, loop: resample(s.loop), P: axisPoint(s.axis, s.at), D: axisDir(s.axis), A: [1, 0, 0], B: [0, 1, 0], range: [0, 0] };
+  if (s.kind === "extrude") {
+    const b = PRISM[s.along];
+    return { kind: 2, loop: resample(s.shape), P: [0, 0, 0], D: b.D, A: b.A, B: b.B, range: [s.from, s.to] };
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------- create
+
+// create({ scene: { parts, fluids, centres }, sheet2d, title }) → V. Call after the page's DOM (writePage3d).
+function create({ scene, title = "" } = {}) {
+  const $ = (id) => document.getElementById(id);
+  const host = $("stage");
+  const canvas = $("gl");
+  const overlay = $("ov");
+  const Qs = new URLSearchParams(location.search);
+  const num = (k, d) => (Qs.has(k) && Number.isFinite(Number(Qs.get(k))) ? Number(Qs.get(k)) : d);
+  const flag = (k, d) => (Qs.has(k) ? Qs.get(k) !== "0" : d);
+  const q = {
+    view: Qs.get("view"),
+    cut: flag("cut", true),
+    explode: clamp01(num("explode", 0)),
+    zoom: num("zoom", 1),
+    look: Qs.get("look") ? Qs.get("look").split(",").map(Number) : null,
+    balloons: flag("balloons", true),
+    offset: num("offset", 0),
+    embed: flag("embed", false),
+    check: Qs.has("check"),
+    selftest: Qs.has("selftest"),
+    bench: Qs.has("bench"),
+    dbg: Qs.has("dbg"),
+  };
+  if (q.embed) document.documentElement.classList.add("v3-embed");
+  L.setupPage(host);
+  THREE.ColorManagement.enabled = false; // the tokens are sRGB and the shaders write them unchanged
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: Qs.has("t") || q.bench || q.check });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.setClearColor(0x000000, 0);
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, NEAR, FAR);
+  const world = new THREE.Scene();
+  const root = new THREE.Group();
+  world.add(root);
+
+  const C = () => new THREE.Color();
+  const U = {
+    uMode: { value: 0 },
+    uCutOn: { value: q.cut ? 1 : 0 },
+    uCut: { value: new THREE.Vector4(0, 0, 1, q.offset) },
+    uCamDir: { value: new THREE.Vector3(0, 0, -1) },
+    uPx: { value: 1 },
+    uDpr: { value: 1 },
+    uLight: { value: new THREE.Vector3(-0.42, 0.72, 0.55).normalize() },
+    uLit: { value: C() },
+    uMid: { value: C() },
+    uDark: { value: C() },
+    uPaper: { value: C() },
+    uInk: { value: C() },
+    uHatch: { value: new THREE.Vector4() },
+    uAccent: { value: C() },
+    // depth bias of cut faces: must stay below the thinnest wall seen edge-on (0.25 mm)
+    uCapBias: { value: 0.25 / (FAR - NEAR) },
+    uLineBias: { value: (2 * 0.6) / (FAR - NEAR) },
+    // layer 1+ cut faces come this far forward, assembled only (exploded parts may sit in front)
+    uLayerBias: { value: 1000 / (FAR - NEAR) },
+    tIds: { value: null },
+    uRes: { value: new THREE.Vector2(1, 1) },
+  };
+  const dbg = q.dbg ? { DBG: 1 } : {};
+  const allMats = [];
+  const decals = [];
+
+  function material(s, edge) {
+    const role = s.role ?? "solid";
+    const hatch = s.hatch ?? (role === "ink" ? "solid" : "none");
+    let kind = 0;
+    let gap = 3;
+    let pairGap = 0;
+    let angle = 45;
+    if (hatch === "solid" || role === "ink") kind = 6;
+    else if (Array.isArray(hatch)) {
+      const m = K.MATERIALS[hatch[0]];
+      if (!m) throw new Error("solid3d: unknown material " + hatch[0]);
+      kind = MATKIND[m.kind];
+      gap = m.gap;
+      pairGap = m.pair ?? 0;
+      angle = hatch[1] ?? 45;
+    }
+    const prof = role === "void" || role === "fluid" || role === "glass" ? profileOf(s) : null;
+    let tex = null;
+    if (role === "decal") {
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = 1024;
+      tex = new THREE.CanvasTexture(cv);
+      tex.anisotropy = 4;
+      decals.push({ cv, tex, draw: s.texture });
+    }
+    const st = s.stretch && prof ? s.stretch.from : 1e9;
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        ...U,
+        uKind: { value: kind },
+        uGap: { value: gap },
+        uPair: { value: pairGap },
+        uAngle: { value: angle },
+        uRole: { value: ROLES[role] },
+        uEdge: { value: edge },
+        uDensity: { value: 0.3 },
+        uWash: { value: 0.08 },
+        uLiftFrom: { value: st },
+        uLift: { value: 0 },
+        uTex: { value: tex },
+        uInv: { value: new THREE.Matrix4() },
+        uShift: { value: new THREE.Vector3() },
+        uLayer: { value: s.layer ?? 0 },
+        uProf: { value: Array.from({ length: PROF_MAX }, (_, i) => new THREE.Vector2(...(prof?.loop[i] ?? [0, 0]))) },
+        uProfN: { value: prof ? prof.loop.length : 0 },
+        uProfKind: { value: prof ? prof.kind : 0 },
+        uAxisP: { value: new THREE.Vector3(...(prof?.P ?? [0, 0, 0])) },
+        uAxisD: { value: new THREE.Vector3(...(prof?.D ?? [0, 1, 0])) },
+        uPA: { value: new THREE.Vector3(...(prof?.A ?? [1, 0, 0])) },
+        uPB: { value: new THREE.Vector3(...(prof?.B ?? [0, 1, 0])) },
+        uRange: { value: new THREE.Vector2(...(prof?.range ?? [0, 0])) },
+      },
+      vertexShader: VERT,
+      fragmentShader: FRAG,
+      defines: { ...(tex ? { DECAL: 1 } : {}), ...dbg },
+      // never BackSide: three.js draws it by flipping the GL front face, which flips gl_FrontFacing too
+      side: role === "void" || role === "fluid" || role === "glass" ? THREE.DoubleSide : THREE.FrontSide,
+      transparent: role === "fluid",
+      depthWrite: role !== "fluid",
+    });
+    mat.userData.role = role;
+    allMats.push(mat);
+    return mat;
+  }
+  const lineMat = (dash, alpha = 1) =>
+    new THREE.ShaderMaterial({
+      uniforms: { ...U, uDash: { value: dash ? 1 : 0 }, uAlpha: { value: alpha }, uCull: { value: dash ? 0 : 1 }, uShift: { value: new THREE.Vector3() } },
+      vertexShader: LINE_VERT,
+      fragmentShader: LINE_FRAG,
+      transparent: alpha < 1,
+    });
+
+  // ---- build
+  const PARTS = new Map();
+  const FLUIDS = new Map();
+  let edgeSeq = 0;
+  const syncInv = (mesh) => {
+    mesh.onBeforeRender = () => mesh.material.uniforms.uInv.value.copy(mesh.matrixWorld).invert();
+  };
+  function addSolid(rec, s, k, shared) {
+    const role = s.role ?? "solid";
+    const holder = new THREE.Group();
+    const pivot = s.pivot ?? [0, 0, 0];
+    holder.position.set(...pivot);
+    const inner = new THREE.Group();
+    inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
+    holder.add(inner);
+    rec.inner.add(holder);
+    const edge = role === "mouth" || s.own || !shared ? ++edgeSeq : shared;
+    if (edge > 255) throw new Error("solid3d: more than 255 outlined solids");
+    rec.edges.add(edge);
+    const geo = geometryOf(s);
+    const mesh = new THREE.Mesh(geo, material(s, edge));
+    syncInv(mesh);
+    inner.add(mesh);
+    let lines = null;
+    if (role === "solid" || role === "void" || role === "glass" || role === "ink") {
+      lines = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 35), lineMat(false)); // own material: own uShift
+      lines.userData.crease = true;
+      inner.add(lines);
+    }
+    const h = { holder, inner, mesh, lines, spec: s, pivot, k };
+    rec.holders.push(h);
+    if (s.live) rec.live[s.live] = h;
+    return h;
+  }
+  for (const spec of scene.parts) {
+    const group = new THREE.Group();
+    const pivot = spec.pivot ?? [0, 0, 0];
+    const inner = new THREE.Group();
+    inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
+    group.add(inner);
+    root.add(group);
+    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
+    const shared = ++edgeSeq;
+    spec.solids.forEach((s, k) => addSolid(rec, s, k, shared));
+    PARTS.set(spec.id, rec);
+  }
+  const fluidGroup = new THREE.Group();
+  root.add(fluidGroup);
+  for (const f of scene.fluids ?? []) {
+    const mesh = new THREE.Mesh(geometryOf(f), material({ ...f, role: "fluid" }, 0));
+    mesh.renderOrder = 2;
+    mesh.frustumCulled = false; // the stretch moves vertices past the rest-pose bounding sphere
+    syncInv(mesh);
+    fluidGroup.add(mesh);
+    FLUIDS.set(f.name, mesh);
+  }
+  function centreLine([a, b], parent = root) {
+    const A = new THREE.Vector3(...a);
+    const B = new THREE.Vector3(...b);
+    const geo = new THREE.BufferGeometry().setFromPoints([A, B]);
+    geo.setAttribute("dist", new THREE.Float32BufferAttribute([0, A.distanceTo(B)], 1));
+    const l = new THREE.Line(geo, lineMat(true, 0.85));
+    l.userData.crease = true;
+    parent.add(l);
+    return l;
+  }
+  for (const c of scene.centres ?? []) {
+    const l = centreLine(c.line ?? c, c.part ? PARTS.get(c.part).inner : root);
+    if (c.part) PARTS.get(c.part).centres.push(l);
+  }
+
+  // ---- outline pass
+  const idTarget = new THREE.WebGLRenderTarget(4, 4, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthTexture: new THREE.DepthTexture(4, 4) });
+  U.tIds.value = idTarget.texture;
+  const edgeMat = new THREE.ShaderMaterial({
+    uniforms: { tId: { value: idTarget.texture }, tDepth: { value: idTarget.depthTexture }, uTexel: { value: new THREE.Vector2() }, uInk: U.uInk, uW: { value: 1 }, uRange: { value: FAR - NEAR }, uThr: { value: 2.0 } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    fragmentShader: EDGE_FRAG,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    defines: dbg,
+  });
+  const edgeScene = new THREE.Scene();
+  edgeScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), edgeMat));
+  const quadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+  // ---- theme
+  const token = (name) => {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const m = v.match(/rgba?\(([^)]+)\)/);
+    if (m) {
+      const [r, g, b, a = 1] = m[1].split(",").map(Number);
+      return { c: new THREE.Color(r / 255, g / 255, b / 255), a, css: v };
+    }
+    return { c: new THREE.Color(v || "#888"), a: 1, css: v };
+  };
+  function applyTheme() {
+    for (const [u, name] of [["uLit", "--bp3-lit"], ["uMid", "--bp3-mid"], ["uDark", "--bp3-dark"], ["uPaper", "--bp-paper"], ["uInk", "--bp-ink"], ["uAccent", "--bp-accent"]]) U[u].value.copy(token(name).c);
+    const h = token("--bp-hatch");
+    U.uHatch.value.set(h.c.r, h.c.g, h.c.b, h.a);
+    const tk = { paper: token("--bp-paper").css, ink: token("--bp-ink").css, muted: token("--bp-muted").css, accent: token("--bp-accent").css };
+    for (const d of decals) {
+      const g = d.cv.getContext("2d");
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.fillStyle = tk.paper;
+      g.fillRect(0, 0, d.cv.width, d.cv.height);
+      d.draw?.(g, d.cv.width, tk);
+      d.tex.needsUpdate = true;
+    }
+    redraw();
+  }
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // ---- view state
+  const start = VIEWS[q.view] ?? VIEWS.iso;
+  const cam = { az: start[0], el: start[1], azT: start[0], elT: start[1], zoom: q.zoom, pan: new THREE.Vector3() };
+  const st = { explode: q.explode, explodeT: q.explode, balloons: q.balloons };
+
+  // ---- poses: the page sets base poses, explode adds on top
+  function applyPoses() {
+    const e = st.explode;
+    for (const rec of PARTS.values()) {
+      const ex = rec.spec.explode;
+      const [bx, by, bz] = rec.base.pos;
+      let off = [0, 0, 0];
+      if (Array.isArray(ex)) off = ex.map((v) => v * e);
+      else if (ex?.to) off = [(ex.to[0] - bx) * e, (ex.to[1] - by) * e, (ex.to[2] - bz) * e];
+      rec.group.position.set(rec.pivot[0] + bx + off[0], rec.pivot[1] + by + off[1], rec.pivot[2] + bz + off[2]);
+      rec.group.rotation.set(...rec.base.rot);
+      for (const h of rec.holders) {
+        const sx = h.spec.explode ?? [0, 0, 0];
+        h.holder.position.set(h.pivot[0] + sx[0] * e, h.pivot[1] + sx[1] * e, h.pivot[2] + sx[2] * e);
+        const shift = [off[0] + sx[0] * e, off[1] + sx[1] * e, off[2] + sx[2] * e];
+        h.mesh.material.uniforms.uShift.value.set(...shift);
+        h.lines?.material.uniforms.uShift.value.set(...shift);
+      }
+      for (const l of rec.centres) l.material.uniforms.uShift.value.set(...off);
+    }
+    fluidGroup.visible = e < 0.01 && U.uCutOn.value > 0.5;
+  }
+
+  // ---- framing: the union of the page's envelope poses, assembled and exploded
+  let B0 = null;
+  let B1 = null;
+  function measure(poses, e) {
+    const keep = st.explode;
+    st.explode = e;
+    const box = new THREE.Box3();
+    for (const p of poses) {
+      p();
+      applyPoses();
+      root.updateMatrixWorld(true);
+      for (const rec of PARTS.values()) box.expandByObject(rec.group);
+    }
+    st.explode = keep;
+    return box;
+  }
+  let envelope = [() => {}];
+  function frame(poses) {
+    envelope = poses?.length ? poses : [() => {}];
+    B0 = measure(envelope, 0);
+    B1 = measure(envelope, 1);
+  }
+
+  let W = 1;
+  let H = 1;
+  let dpr = 1;
+  function resize() {
+    const r = host.getBoundingClientRect();
+    W = Math.max(1, Math.round(r.width));
+    H = Math.max(1, Math.round(r.height));
+    dpr = renderer.getPixelRatio();
+    renderer.setSize(W, H, false);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    idTarget.setSize(Math.round(W * dpr), Math.round(H * dpr));
+    edgeMat.uniforms.uTexel.value.set(1 / (W * dpr), 1 / (H * dpr));
+    edgeMat.uniforms.uW.value = Math.max(1, Math.round(dpr * 0.75));
+    U.uRes.value.set(Math.round(W * dpr), Math.round(H * dpr));
+    overlay.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    redraw();
+  }
+  const margin = () => {
+    const side = st.balloons ? Math.min(150, Math.round(W * 0.16)) : Math.min(40, Math.round(W * 0.05));
+    if (q.embed) return { l: side, r: side, t: 16, b: 16 };
+    return { l: side, r: side, t: 34, b: W < 640 ? 64 : 34 };
+  };
+  const lerpBox = () => {
+    const k = smooth(clamp01(st.explode));
+    return new THREE.Box3(B0.min.clone().lerp(B1.min, k), B0.max.clone().lerp(B1.max, k));
+  };
+  function placeCamera() {
+    const az = (cam.az * Math.PI) / 180;
+    const el = (Math.min(89.9, cam.el) * Math.PI) / 180;
+    const dir = new THREE.Vector3(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az));
+    const box = lerpBox();
+    const centre = q.look ? new THREE.Vector3(...q.look) : box.getCenter(new THREE.Vector3());
+    camera.position.copy(centre).addScaledVector(dir, FAR / 2);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(centre);
+    camera.updateMatrixWorld(true);
+    const inv = camera.matrixWorldInverse;
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (let i = 0; i < 8; i++) {
+      const p = new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).applyMatrix4(inv);
+      x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
+    }
+    const MG = margin();
+    const fit = Math.min((W - MG.l - MG.r) / Math.max(1, x1 - x0), (H - MG.t - MG.b) / Math.max(1, y1 - y0));
+    const zoom = fit * cam.zoom;
+    const off = q.look ? new THREE.Vector3() : new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 0).applyMatrix3(new THREE.Matrix3().setFromMatrix4(camera.matrixWorld));
+    camera.position.add(off).add(cam.pan);
+    camera.position.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1), -(MG.b - MG.t) / 2 / zoom);
+    camera.left = -W / 2 / zoom;
+    camera.right = W / 2 / zoom;
+    camera.top = H / 2 / zoom;
+    camera.bottom = -H / 2 / zoom;
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld(true);
+    U.uCamDir.value.copy(dir).negate();
+    U.uPx.value = zoom * dpr;
+    U.uDpr.value = dpr;
+  }
+  const project = (v) => {
+    const p = (Array.isArray(v) ? new THREE.Vector3(...v) : v.clone()).project(camera);
+    return [((p.x + 1) / 2) * W, ((1 - p.y) / 2) * H];
+  };
+
+  // ---- balloons
+  function anchorWorld(rec) {
+    const a = rec.spec.anchor;
+    let p;
+    if (U.uCutOn.value > 0.5 && a.cut) p = new THREE.Vector3(...a.cut);
+    else {
+      const o = a.out ?? { c: a.cut };
+      p = new THREE.Vector3(...o.c);
+      const d = U.uCamDir.value.clone().negate();
+      if (o.axis === "y") d.y = 0;
+      if (o.axis === "x") d.x = 0;
+      if (o.axis === "z") d.z = 0;
+      if (o.axis === "box") {
+        d.y = 0;
+        d.divideScalar(Math.max(Math.abs(d.x), Math.abs(d.z)) || 1);
+        p.addScaledVector(d, o.r);
+      } else if (o.r) p.addScaledVector(d.normalize(), o.r);
+    }
+    const holder = a.solid != null ? rec.holders[a.solid].inner : rec.inner;
+    return p.applyMatrix4(holder.matrixWorld);
+  }
+  const pix = new Uint8Array(4);
+  const seen = new Map();
+  let visFrame = 0;
+  function visibleAt(rec, sx, sy) {
+    if (sx < 0 || sy < 0 || sx >= W || sy >= H) return false;
+    renderer.readRenderTargetPixels(idTarget, Math.round(sx * dpr), Math.round((H - sy) * dpr), 1, 1, pix);
+    return rec.edges.has(pix[0]) || pix[0] === 0;
+  }
+  function balloons() {
+    const recs = [...PARTS.values()].filter((r) => r.spec.anchor);
+    if (!recs.length) return "";
+    const items = recs.map((rec) => {
+      const [ax, ay] = project(anchorWorld(rec));
+      return { rec, ax, ay };
+    });
+    const box = lerpBox();
+    const pts = [];
+    for (let i = 0; i < 8; i++) pts.push(project(new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z)));
+    const minX = Math.min(...pts.map((p) => p[0]));
+    const maxX = Math.max(...pts.map((p) => p[0]));
+    const c0 = project(box.getCenter(new THREE.Vector3()).setY(box.min.y));
+    const c1 = project(box.getCenter(new THREE.Vector3()).setY(box.max.y));
+    const axisX = (y) => c0[0] + ((y - c0[1]) / (c1[1] - c0[1] || 1)) * (c1[0] - c0[0]);
+    const R = W < 640 ? 8 : 10;
+    const cols = { l: Math.max(R + 14, minX - 46), r: Math.min(W - R - 14, maxX + 46) };
+    const refresh = visFrame++ % 3 === 0;
+    // each balloon to the column on its anchor's side of the model's centre line; the fuller column
+    // then gives its anchors nearest the line to the other, so neither holds much more than half
+    for (const it of items) {
+      it.d = it.ax - axisX(it.ay);
+      it.side = it.d < -0.5 ? "l" : "r";
+    }
+    for (;;) {
+      const nl = items.filter((it) => it.side === "l").length;
+      const nr = items.length - nl;
+      if (Math.abs(nl - nr) <= 3) break;
+      const from = nl > nr ? "l" : "r";
+      const pick = items.filter((it) => it.side === from).sort((a, b) => Math.abs(a.d) - Math.abs(b.d))[0];
+      pick.side = from === "l" ? "r" : "l";
+    }
+    let out = "";
+    for (const side of ["l", "r"]) {
+      const col = items.filter((it) => it.side === side).sort((a, b) => a.ay - b.ay);
+      const top = R + 18;
+      const lim = H - R - (q.embed ? 14 : 44); // clear of the hint line
+      const gap = Math.min(2 * R + 6, (lim - top) / Math.max(1, col.length - 1));
+      const ys = col.map((c) => Math.min(lim, Math.max(top, c.ay)));
+      for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i], ys[i - 1] + gap);
+      if (ys.length && ys[ys.length - 1] > lim) {
+        ys[ys.length - 1] = lim;
+        for (let i = ys.length - 2; i >= 0; i--) ys[i] = Math.min(ys[i], ys[i + 1] - gap);
+      }
+      col.forEach((c, i) => {
+        const bx = cols[side];
+        const by = ys[i];
+        const id = c.rec.id;
+        if (refresh || !seen.has(id)) seen.set(id, visibleAt(c.rec, c.ax, c.ay));
+        const vis = seen.get(id);
+        const dx = c.ax - bx;
+        const dy = c.ay - by;
+        const d = Math.hypot(dx, dy) || 1;
+        const f = (v) => v.toFixed(1);
+        out += `<path class="${vis ? "thin" : "hid"}" d="M${f(bx + (dx / d) * R)} ${f(by + (dy / d) * R)}L${f(c.ax)} ${f(c.ay)}"/>`;
+        out += `<circle class="${vis ? "dot" : "balloon"}" cx="${f(c.ax)}" cy="${f(c.ay)}" r="1.7"/>`;
+        out += `<g data-part="${id}"><title>${id} ${c.rec.name}</title><circle class="balloon" cx="${f(bx)}" cy="${f(by)}" r="${R}"/><text class="t" x="${f(bx)}" y="${f(by + 3.4)}" text-anchor="middle">${id}</text></g>`;
+      });
+    }
+    return out;
+  }
+
+  // A linear dimension between two world points, drawn on screen beside them: extension lines,
+  // a dimension line `off` px to the side, arrowheads when there is room, the text along it.
+  function dim(a, b, { text = "", off = 26 } = {}) {
+    const A = project(a);
+    const B = project(b);
+    const ax = [B[0] - A[0], B[1] - A[1]];
+    const len = Math.hypot(...ax);
+    const nrm = len > 0.5 ? [-ax[1] / len, ax[0] / len] : [1, 0];
+    const side = nrm[0] < 0 ? -1 : 1;
+    const o = off * side;
+    const a2 = [A[0] + nrm[0] * o, A[1] + nrm[1] * o];
+    const b2 = [B[0] + nrm[0] * o, B[1] + nrm[1] * o];
+    const f = (p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+    const ext = (p, p2) => `M${f([p[0] + nrm[0] * 4 * side, p[1] + nrm[1] * 4 * side])}L${f([p2[0] + nrm[0] * 5 * side, p2[1] + nrm[1] * 5 * side])}`;
+    let s = `<path class="thin" d="${ext(A, a2)}${len > 1 ? ext(B, b2) : ""}M${f(a2)}L${f(b2)}"/>`;
+    if (len > 16) {
+      const u = [ax[0] / len, ax[1] / len];
+      const head = (p, sg) => {
+        const t = [p[0] + u[0] * 7 * sg, p[1] + u[1] * 7 * sg];
+        return `M${f(p)}L${f([t[0] + nrm[0] * 1.6, t[1] + nrm[1] * 1.6])}L${f([t[0] - nrm[0] * 1.6, t[1] - nrm[1] * 1.6])}Z`;
+      };
+      s += `<path class="head" d="${head(a2, 1)}${head(b2, -1)}"/>`;
+    }
+    const mx = (a2[0] + b2[0]) / 2 + nrm[0] * 9 * side;
+    const my = (a2[1] + b2[1]) / 2 + nrm[1] * 9 * side;
+    const ang = (Math.atan2(ax[1], ax[0]) * 180) / Math.PI + (len > 0.5 ? 0 : 90);
+    const rot = ((ang + 360 + 90) % 180) - 90;
+    s += `<text class="t" x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)})">${text}</text>`;
+    return `<g data-role="dim">${s}</g>`;
+  }
+
+  // ---- draw
+  let overlayFn = null;
+  let pageRender = null;
+  function draw() {
+    applyPoses();
+    if (!B0) frame(envelope);
+    applyPoses();
+    const cutting = U.uCutOn.value > 0.5;
+    for (const m of allMats) if (m.userData.role === "solid" || m.userData.role === "ink") m.side = cutting ? THREE.DoubleSide : THREE.FrontSide;
+    placeCamera();
+    root.updateMatrixWorld(true);
+    U.uLayerBias.value = st.explode < 0.01 ? 1000 / (FAR - NEAR) : 0;
+    // 1: ids and depth, without lines or fluids (and not sampling the target it draws into)
+    U.uMode.value = 1;
+    U.tIds.value = null;
+    world.traverse((o) => o.userData.crease && (o.visible = false));
+    const fl = fluidGroup.visible;
+    fluidGroup.visible = false;
+    renderer.setRenderTarget(idTarget);
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear();
+    renderer.render(world, camera);
+    world.traverse((o) => o.userData.crease && (o.visible = true));
+    fluidGroup.visible = fl;
+    // 2: colour
+    U.uMode.value = 0;
+    U.tIds.value = idTarget.texture;
+    renderer.setRenderTarget(null);
+    renderer.render(world, camera);
+    // 3: outlines
+    renderer.autoClear = false;
+    renderer.render(edgeScene, quadCam);
+    renderer.autoClear = true;
+    let svg = st.balloons ? balloons() : "";
+    if (overlayFn) svg += overlayFn() ?? "";
+    overlay.innerHTML = svg;
+    syncControls();
+  }
+
+  // ---- controls (the ids writePage3d writes)
+  const ui = {
+    cut: $("cut"),
+    offset: $("offset"),
+    explode: $("explode"),
+    balloons: $("balloons"),
+    views: [...document.querySelectorAll("[data-view]")],
+  };
+  function syncControls() {
+    ui.cut?.setAttribute("aria-pressed", String(U.uCutOn.value > 0.5));
+    ui.balloons?.setAttribute("aria-pressed", String(st.balloons));
+    if (ui.explode && document.activeElement !== ui.explode) ui.explode.value = String(st.explodeT);
+    for (const b of ui.views) {
+      const [az, el] = VIEWS[b.dataset.view];
+      b.setAttribute("aria-pressed", String(Math.abs(cam.azT - az) < 0.01 && Math.abs(cam.elT - el) < 0.01));
+    }
+  }
+  let lv = null;
+  function redraw() {
+    if (!lv) return;
+    if (lv.frozen) render(lv);
+    else lv.wake?.();
+  }
+  function input() {
+    if (!lv) return;
+    if (lv.frozen) render(lv);
+    else lv.input();
+  }
+  function setView(name) {
+    const [az, el] = VIEWS[name];
+    cam.az = ((((cam.az - az) % 360) + 540) % 360) - 180 + az; // the short way round
+    cam.azT = az;
+    cam.elT = el;
+    cam.pan.set(0, 0, 0);
+    input();
+  }
+  const toggleCut = () => {
+    U.uCutOn.value = U.uCutOn.value > 0.5 ? 0 : 1;
+    input();
+  };
+  for (const b of ui.views) b.addEventListener("click", () => setView(b.dataset.view));
+  ui.cut?.addEventListener("click", toggleCut);
+  if (ui.offset) {
+    ui.offset.value = String(q.offset);
+    ui.offset.addEventListener("input", () => {
+      U.uCut.value.w = Number(ui.offset.value);
+      U.uCutOn.value = 1;
+      input();
+    });
+  }
+  ui.explode?.addEventListener("input", () => {
+    st.explodeT = Number(ui.explode.value);
+    input();
+  });
+  ui.balloons?.addEventListener("click", () => {
+    st.balloons = !st.balloons;
+    input();
+  });
+
+  // pointer: drag a registered part to drive it, drag elsewhere to orbit, shift or right drag to pan
+  const ray = new THREE.Raycaster();
+  const drags = [];
+  let drag = null;
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  canvas.addEventListener("pointerdown", (e) => {
+    const r = canvas.getBoundingClientRect();
+    const px = e.clientX - r.left;
+    const py = e.clientY - r.top;
+    ray.setFromCamera(new THREE.Vector2((px / W) * 2 - 1, 1 - (py / H) * 2), camera);
+    let hit = null;
+    if (st.explode < 0.05 && e.button === 0 && !e.shiftKey) {
+      let best = Infinity;
+      for (const d of drags) {
+        const h = ray.intersectObjects(d.meshes, false)[0];
+        if (h && h.distance < best) {
+          best = h.distance;
+          hit = d;
+        }
+      }
+    }
+    drag = { mode: hit ? "part" : e.button === 2 || e.shiftKey ? "pan" : "orbit", d: hit, px, py, az: cam.azT, el: cam.elT, pan: cam.pan.clone() };
+    if (hit) {
+      // the screen direction and length of the drag's full travel, from its start
+      const o = new THREE.Vector3();
+      hit.meshes[0].getWorldPosition(o);
+      const a = project(o);
+      const b = project(o.clone().addScaledVector(new THREE.Vector3(...hit.axis), hit.length));
+      drag.axis = [b[0] - a[0], b[1] - a[1]];
+      drag.v0 = hit.start?.() ?? 0;
+    }
+    try {
+      canvas.setPointerCapture(e.pointerId);
+    } catch {}
+    canvas.classList.add("v3-grab");
+    input();
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    const r = canvas.getBoundingClientRect();
+    const dx = e.clientX - r.left - drag.px;
+    const dy = e.clientY - r.top - drag.py;
+    if (drag.mode === "part") {
+      const [ax, ay] = drag.axis;
+      const l2 = ax * ax + ay * ay;
+      drag.d.move(drag.v0 + (l2 > 4 ? (dx * ax + dy * ay) / l2 : dy / 200));
+    } else if (drag.mode === "orbit") {
+      cam.azT = cam.az = drag.az - dx * 0.4;
+      cam.elT = cam.el = Math.min(90, Math.max(-60, drag.el + dy * 0.4));
+    } else {
+      const zoom = U.uPx.value / dpr;
+      const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+      const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+      cam.pan.copy(drag.pan).addScaledVector(right, -dx / zoom).addScaledVector(up, dy / zoom);
+    }
+    input();
+  });
+  const endDrag = () => {
+    if (!drag) return;
+    if (drag.mode === "part") drag.d.end?.();
+    drag = null;
+    canvas.classList.remove("v3-grab");
+    input();
+  };
+  canvas.addEventListener("pointerup", endDrag);
+  canvas.addEventListener("pointercancel", endDrag);
+  canvas.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      const r = canvas.getBoundingClientRect();
+      const sx = e.clientX - r.left - W / 2;
+      const sy = H / 2 - (e.clientY - r.top);
+      const z0 = U.uPx.value / dpr;
+      const before = cam.zoom;
+      cam.zoom = Math.min(16, Math.max(0.3, cam.zoom * Math.exp(-e.deltaY * 0.0015)));
+      const z1 = (z0 * cam.zoom) / before;
+      const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+      const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+      cam.pan.addScaledVector(right, sx / z0 - sx / z1).addScaledVector(up, sy / z0 - sy / z1);
+      input();
+    },
+    { passive: false }
+  );
+  canvas.addEventListener("dblclick", () => {
+    cam.zoom = 1;
+    cam.pan.set(0, 0, 0);
+    input();
+  });
+
+  const keys = new Map();
+  host.addEventListener("keydown", (e) => {
+    const k = e.key;
+    const own = keys.get(k) ?? keys.get(k.toLowerCase());
+    if (own) own(e);
+    else if (k === "e" || k === "E") st.explodeT = st.explodeT > 0.5 ? 0 : 1;
+    else if (k === "c" || k === "C") U.uCutOn.value = U.uCutOn.value > 0.5 ? 0 : 1;
+    else if (k === "b" || k === "B") st.balloons = !st.balloons;
+    else if (k === "s" || k === "S") lv.slow = lv.slow === 1 ? 0.2 : lv.slow === 0.2 ? 0.05 : 1;
+    else if ("1234".includes(k) && k.length === 1) setView(["iso", "front", "side", "top"][Number(k) - 1]);
+    else return;
+    e.preventDefault();
+    input();
+  });
+
+  // ---- the loop
+  function render(l) {
+    pageRender?.(l);
+    draw();
+  }
+  const tests = [];
+
+  const V = {
+    THREE,
+    renderer,
+    camera,
+    world,
+    host,
+    params: q,
+    // part record: { id, name, group, inner, holders: [{ holder, inner, mesh, lines, spec }], live }
+    part: (id) => PARTS.get(id),
+    // the holder of one solid, to turn or scale it about its own pivot; key: index or `live` name
+    solid: (id, key) => {
+      const rec = PARTS.get(id);
+      return (typeof key === "number" ? rec.holders[key] : rec.live[key]).holder;
+    },
+    // the base pose of a part, before explode: pos [x, y, z] in mm, rot [rx, ry, rz] about its pivot
+    set(id, { pos, rot } = {}) {
+      const rec = PARTS.get(id);
+      if (pos) rec.base.pos = pos;
+      if (rot) rec.base.rot = rot;
+    },
+    // replace one solid's geometry (a part whose shape changes: a seal, a bellows)
+    reshape(id, key, spec) {
+      const rec = PARTS.get(id);
+      const h = typeof key === "number" ? rec.holders[key] : rec.live[key];
+      const geo = geometryOf({ ...h.spec, ...spec });
+      h.mesh.geometry.dispose();
+      h.mesh.geometry = geo;
+      if (h.lines) {
+        h.lines.geometry.dispose();
+        h.lines.geometry = new THREE.EdgesGeometry(geo, 35);
+      }
+    },
+    // a fluid's look: density 0..1 (stipple), wash 0..1 (flat tint), stretch mm, offset [x, y, z]
+    fluid(name, { density, wash, stretch, offset, visible } = {}) {
+      const m = FLUIDS.get(name);
+      if (!m) throw new Error("solid3d: no fluid " + name);
+      const u = m.material.uniforms;
+      if (density != null) u.uDensity.value = density;
+      if (wash != null) u.uWash.value = wash;
+      if (stretch != null) u.uLift.value = stretch;
+      if (offset) m.position.set(...offset);
+      if (visible != null) m.visible = visible;
+    },
+    // poses whose union the camera frames: each sets the page's pose (via V.set) for one extreme
+    frame,
+    // drag a part to drive the model: axis [x, y, z] it moves along as the value grows by 1 over
+    // `length` mm; start() returns the value at the press, move(v) sets it, end() on release
+    drag(ids, { axis, length, start, move, end }) {
+      const meshes = [];
+      for (const id of [].concat(ids)) PARTS.get(id).group.traverse((o) => o.isMesh && meshes.push(o));
+      drags.push({ meshes, axis, length, start, move, end });
+    },
+    key: (k, fn) => keys.set(k, fn),
+    test: (name, fn) => tests.push([name, fn]),
+    project,
+    dim,
+    get explode() {
+      return st.explode;
+    },
+    get cut() {
+      return U.uCutOn.value > 0.5;
+    },
+    input,
+    redraw,
+    // start: step(dt, live) advances the page's model (return true while settling); render(live)
+    // sets poses and fluids; overlay() returns extra SVG (dimensions); still: the tour time shown
+    // under reduced motion
+    run({ step, render: r, overlay, still = 6, idleAfter = 5 }) {
+      pageRender = r;
+      overlayFn = overlay ?? null;
+      resize();
+      applyTheme();
+      new ResizeObserver(resize).observe(host);
+      lv = L.run({
+        root: host,
+        step: (dt, l) => {
+          const busy = step(dt, l);
+          const snap = l.reduced || l.frozen;
+          cam.az = snap ? cam.azT : L.follow(cam.az, cam.azT, 9, dt);
+          cam.el = snap ? cam.elT : L.follow(cam.el, cam.elT, 9, dt);
+          st.explode = snap ? st.explodeT : L.follow(st.explode, st.explodeT, 5, dt);
+          return busy || Math.abs(cam.az - cam.azT) > 0.01 || Math.abs(cam.el - cam.elT) > 0.01 || Math.abs(st.explode - st.explodeT) > 1e-3;
+        },
+        render,
+        idleAfter,
+        onFrozen: () => {
+          document.body.setAttribute("data-ready", "1");
+          if (q.check) report();
+        },
+      });
+      if (lv.reduced && !lv.frozen) {
+        const fake = { touring: true, reduced: false, frozen: true, clock: 0 };
+        for (let t = 0; t < still; t += 1 / 240) step(1 / 240, fake);
+        render(lv);
+      }
+      window.__v3ok = true;
+      if (q.selftest) setTimeout(selftest, 50);
+      if (q.bench) bench();
+      return lv;
+    },
+  };
+
+  // ---- ?check=1: the frame is drawn and not blank
+  function report() {
+    const gl = renderer.getContext();
+    const w = gl.drawingBufferWidth;
+    const h = gl.drawingBufferHeight;
+    const px = new Uint8Array(w * h * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    let cover = 0;
+    let n = 0;
+    let s1 = 0;
+    let s2 = 0;
+    for (let i = 0; i < px.length; i += 16) {
+      n++;
+      if (px[i + 3] > 0) cover++;
+      const l = 0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2];
+      s1 += l;
+      s2 += l * l;
+    }
+    const d = gl.getExtension("WEBGL_debug_renderer_info");
+    out("check3d", { webgl: gl instanceof WebGL2RenderingContext ? 2 : 1, gpu: d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : "?", cover: +(cover / n).toFixed(4), variance: +(s2 / n - (s1 / n) ** 2).toFixed(1), parts: PARTS.size, fluids: FLUIDS.size });
+  }
+  function out(id, data) {
+    const el = document.createElement("pre");
+    el.id = id;
+    el.hidden = true;
+    el.textContent = JSON.stringify(data);
+    document.body.appendChild(el);
+  }
+
+  // ---- ?selftest=1: drive the kit's controls with synthetic events, then the page's own tests
+  function selftest() {
+    const res = [];
+    const r = canvas.getBoundingClientRect();
+    const ptr = (type, x, y) => canvas.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 7, clientX: r.left + x, clientY: r.top + y, button: 0 }));
+    const key = (k) => host.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true }));
+    const ok = (name, pass, info) => res.push({ name, pass: !!pass, info });
+    draw();
+    document.querySelector('[data-view="front"]')?.click();
+    ok("front button", cam.azT === 0 && cam.elT === 0, [cam.azT, cam.elT]);
+    key("1");
+    ok("key 1 iso", cam.azT === 45, [cam.azT, cam.elT]);
+    key("e");
+    ok("key E explode", st.explodeT === 1, st.explodeT);
+    key("e");
+    const c0 = U.uCutOn.value;
+    key("c");
+    ok("key C cut", U.uCutOn.value !== c0, U.uCutOn.value);
+    key("c");
+    const z0 = cam.zoom;
+    canvas.dispatchEvent(new WheelEvent("wheel", { deltaY: -300, clientX: r.left + W / 2, clientY: r.top + H / 2, bubbles: true, cancelable: true }));
+    ok("wheel zoom", cam.zoom > z0, [z0, cam.zoom]);
+    cam.zoom = z0;
+    cam.pan.set(0, 0, 0);
+    const az0 = cam.azT;
+    ptr("pointerdown", 6, 6);
+    ptr("pointermove", 106, 6);
+    ptr("pointerup", 106, 6);
+    ok("orbit drag", Math.abs(cam.azT - az0) > 10, [az0, cam.azT]);
+    key("1");
+    cam.az = cam.azT;
+    cam.el = cam.elT;
+    draw();
+    for (const [name, fn] of tests) {
+      try {
+        const t = fn({ ptr, key, project, draw });
+        ok(name, t?.pass ?? t, t?.info);
+      } catch (err) {
+        ok(name, false, String(err));
+      }
+    }
+    out("selftest", res);
+  }
+
+  // ---- ?bench=1: time a frame, GPU drained (readPixels forces it)
+  function bench() {
+    const one = new Uint8Array(4);
+    const gl = renderer.getContext();
+    renderer.info.autoReset = false;
+    const time = (n) => {
+      const ts = [];
+      for (let i = 0; i < n; i++) {
+        renderer.info.reset();
+        const t0 = performance.now();
+        render(lv);
+        gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, one);
+        ts.push(performance.now() - t0);
+      }
+      ts.sort((a, b) => a - b);
+      return { median: +ts[n >> 1].toFixed(1), p90: +ts[Math.floor(n * 0.9)].toFixed(1) };
+    };
+    time(10);
+    const all = time(60);
+    const info = { triangles: renderer.info.render.triangles, calls: renderer.info.render.calls };
+    st.balloons = false;
+    const bare = time(60);
+    const d = gl.getExtension("WEBGL_debug_renderer_info");
+    out("bench", { frame: all, noBalloons: bare, ...info, size: [W, H, dpr], gpu: d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : "?" });
+  }
+
+  return V;
+}
+
+return { lathe, cylinder, tube, extrude, box, sphere, torus, helix, disc, gearOutline, gear, part, bore, fluid, circle, polygon, hexagon, rrectAt, saddle, geometryOf, create };
+})();
+
+const M = (() => {
+// Truth first: a B16 miniature circuit breaker (EN 60898-1, In = 16 A). Pure, no imports, no DOM.
+// The geometry, the dimensions on the sheet, the readout, the trip curve and the states all read this.
+//
+// Thermal trip. The bimetal is heated by its own resistance: C·dΔT/dt = I²·R − ΔT/Rth. It bends
+// as a cantilever with constant curvature, tip deflection f = a·ΔT·L²/s, and trips the latch when
+// f reaches F_TRIP. From cold at a steady current the trip time is t = τ·ln(ΔTss / (ΔTss − ΔT_TRIP)),
+// τ = Rth·C, which is the inverse-time I²t branch of the curve.
+// Magnetic trip. The coil pulls its plunger with F = (N·I)²·μ0·A / (2·g²). When F beats the
+// return spring's preload the plunger drives the striker into the trip lever: that is Im.
+
+const IN = 16; // rated current, A
+const CURVE = "B"; // magnetic band 3–5 × In
+
+// ---------------------------------------------------------------- bimetal (TB 1577, DIN 1715)
+const BI_L = 20; // free length, mm (riveted at v = 7, tip at v = 27)
+const BI_W = 6; // width, across the section, mm
+const BI_S = 0.6; // thickness, mm
+const BI_RHO = 0.79e-6; // resistivity, Ω·m
+const BI_A = 14e-6; // specific thermal deflection, 1/K
+const BI_HEATED = 22; // current-carrying length, mm
+const R_BI = (BI_RHO * BI_HEATED * 1e-3) / (BI_W * 1e-3 * BI_S * 1e-3); // Ω
+const RTH = 40; // thermal resistance to the case, K/W
+const C_TH = 0.75; // heat capacity of strip, rivet and braid end, J/K
+const TAU = RTH * C_TH; // s
+
+const F_GAP = 0.3; // calibration screw gap: the tip touches the lever after this, mm
+const F_TRIP = 0.8; // tip travel that knocks the latch out, mm
+const F_RESET = 0.64; // the latch only holds a reset below this, mm
+const deflection = (dT) => (BI_A * dT * BI_L ** 2) / BI_S; // mm
+const DT_TRIP = (F_TRIP * BI_S) / (BI_A * BI_L ** 2); // K
+const DT_RESET = (F_RESET * BI_S) / (BI_A * BI_L ** 2); // K
+const dTss = (I) => RTH * R_BI * I * I; // steady temperature rise at I, K
+const I_CONV = Math.sqrt(DT_TRIP / (RTH * R_BI)); // the current that just trips, given forever, A
+
+// Cold trip time at I, or Infinity below I_CONV.
+function thermalTime(I) {
+  const ss = dTss(I);
+  return ss <= DT_TRIP ? Infinity : TAU * Math.log(ss / (ss - DT_TRIP));
+}
+// How long I would take from cold to heat the strip as far as dT: the operating point's time.
+function equivalentTime(I, dT) {
+  const ss = dTss(I);
+  if (ss <= dT) return Infinity;
+  return -TAU * Math.log(1 - dT / ss);
+}
+// Time left before a trip at I from dT.
+function timeToTrip(I, dT) {
+  const ss = dTss(I);
+  if (ss <= DT_TRIP) return Infinity;
+  if (dT >= DT_TRIP) return 0;
+  return TAU * Math.log((ss - dT) / (ss - DT_TRIP));
+}
+// Cooling with no current: time until the latch will hold a reset.
+const coolTime = (dT) => (dT <= DT_RESET ? 0 : TAU * Math.log(dT / DT_RESET));
+// One step of the thermal model.
+function heat(dT, I, dt) {
+  const ss = dTss(I);
+  return ss + (dT - ss) * Math.exp(-dt / TAU);
+}
+
+// ---------------------------------------------------------------- solenoid
+const MU0 = 4e-7 * Math.PI;
+const COIL_N = 7; // turns of Ø1.8 wire
+const PLUNGER_D = 6; // mm
+const GAP_G = 3; // air gap at rest = plunger stroke, mm
+const SPRING_F0 = 0.4; // plunger return spring preload, N
+const PLUNGER_M = 0.85e-3; // plunger and striker, kg
+const AREA = Math.PI * (PLUNGER_D / 2) ** 2 * 1e-6; // m²
+const magForce = (I) => ((COIL_N * I) ** 2 * MU0 * AREA) / (2 * (GAP_G * 1e-3) ** 2); // N
+const IM = Math.sqrt((2 * SPRING_F0 * (GAP_G * 1e-3) ** 2) / (MU0 * AREA)) / COIL_N; // A
+const T_BREAK = 0.004; // contact parting and arc in the splitter plates, s
+// Magnetic trip time at I >= IM: the plunger's flight (constant net force) plus the break.
+function magneticTime(I) {
+  const net = magForce(I) - SPRING_F0;
+  if (net <= 0) return Infinity;
+  return Math.sqrt((2 * GAP_G * 1e-3 * PLUNGER_M) / net) + T_BREAK;
+}
+function tripTime(I) {
+  return I >= IM ? Math.min(magneticTime(I), thermalTime(I)) : thermalTime(I);
+}
+
+// ---------------------------------------------------------------- the tour's loads
+const LOAD_NORMAL = 12; // A, 0.75 In
+const LOAD_OVER = 40; // A, 2.5 In
+const LOAD_FAULT = 480; // A, 30 In: a short circuit limited by the cable
+
+// ---------------------------------------------------------------- mechanism geometry (world mm)
+// u from the back of the case (the DIN rail) to the front, v up from the load end.
+const H = [56, 45]; // handle pivot
+const M = [36, 56]; // main pivot: contact arm and cradle
+const T = [28, 30]; // trip lever pivot
+const HANDLE_ON = 20; // handle angle, degrees, CCW from +u
+const HANDLE_OFF = -20;
+const CRANK_R = 5; // handle crank pin radius
+const CRANK_A0 = 100; // crank pin angle at handle angle 0
+const B0 = [42.5, 52.5]; // cradle link pin, closed
+const R_TOP = 22; // trip lever: pivot to latch face
+const R_BIM = 5; // pivot to calibration screw
+const R_STRIKE = 3; // pivot to striker
+const STRIKER_GAP = 2.47; // striker tip to lever at rest, mm
+const LEVER_MAX = 10; // trip lever stop, degrees
+
+
+const rad = (d) => (d * Math.PI) / 180;
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+const crankPin = (h) => [H[0] + CRANK_R * Math.cos(rad(CRANK_A0 + h)), H[1] + CRANK_R * Math.sin(rad(CRANK_A0 + h))];
+const RB = dist(B0, M);
+const BETA0 = Math.atan2(B0[1] - M[1], B0[0] - M[0]);
+const LINK = dist(crankPin(HANDLE_ON), B0); // coupling link, pin to pin
+
+// The four-bar handle → link → cradle: the cradle angle (degrees, CCW) for a handle angle.
+function cradleAngle(h) {
+  const A = crankPin(h);
+  const dx = A[0] - M[0];
+  const dy = A[1] - M[1];
+  const d = Math.hypot(dx, dy);
+  const a = (RB * RB - LINK * LINK + d * d) / (2 * d);
+  const k = Math.sqrt(Math.max(0, RB * RB - a * a));
+  const px = M[0] + (a * dx) / d;
+  const py = M[1] + (a * dy) / d;
+  const sols = [
+    [px + (k * dy) / d, py - (k * dx) / d],
+    [px - (k * dy) / d, py + (k * dx) / d],
+  ];
+  let best = 0;
+  let err = Infinity;
+  for (const [x, y] of sols) {
+    let c = ((Math.atan2(y - M[1], x - M[0]) - BETA0) * 180) / Math.PI;
+    c = ((c + 540) % 360) - 180;
+    if (Math.abs(c) < err) {
+      err = Math.abs(c);
+      best = c;
+    }
+  }
+  return best;
+}
+const ARM_OPEN = cradleAngle(HANDLE_OFF); // the contact arm's open angle: the cradle's at OFF
+
+// Trip lever angle (degrees, CW positive) from the bimetal tip and the striker.
+function leverAngle(f, plunger) {
+  const fromBi = (Math.max(0, f - F_GAP) / R_BIM) * (180 / Math.PI);
+  const fromStriker = (Math.max(0, plunger - STRIKER_GAP) / R_STRIKE) * (180 / Math.PI);
+  return Math.min(LEVER_MAX, Math.max(fromBi, fromStriker));
+}
+const latchTravel = (lever) => R_TOP * Math.sin(rad(lever)); // mm at the pawl
+const LATCH_HOLD = latchTravel(leverAngle(F_TRIP, 0)); // the lever's latch-face travel that frees the pawl, mm
+
+return { IN, CURVE, BI_L, BI_W, BI_S, BI_RHO, BI_A, BI_HEATED, R_BI, RTH, C_TH, TAU, F_GAP, F_TRIP, F_RESET, deflection, DT_TRIP, DT_RESET, dTss, I_CONV, thermalTime, equivalentTime, timeToTrip, coolTime, heat, MU0, COIL_N, PLUNGER_D, GAP_G, SPRING_F0, PLUNGER_M, magForce, IM, T_BREAK, magneticTime, tripTime, LOAD_NORMAL, LOAD_OVER, LOAD_FAULT, H, M, T, HANDLE_ON, HANDLE_OFF, CRANK_R, CRANK_A0, B0, R_TOP, R_BIM, R_STRIKE, STRIKER_GAP, LEVER_MAX, crankPin, LINK, cradleAngle, ARM_OPEN, leverAngle, latchTravel, LATCH_HOLD };
+})();
+
+const X = (() => {
+// Local drawing helpers the kit does not have: rotation about a point, unions of cut faces,
+// hulls of circles, tension springs between any two points, braids, bent strips and an angular
+// dimension. Pure, returns SVG strings, runs in node and in the page.
+
+const rad = (d) => (d * Math.PI) / 180;
+
+// Rotate world points about c by deg (counter-clockwise, v up).
+function rot(pts, [cu, cv], deg) {
+  if (!deg) return pts;
+  const c = Math.cos(rad(deg));
+  const s = Math.sin(rad(deg));
+  return pts.map(([u, v]) => [cu + (u - cu) * c - (v - cv) * s, cv + (u - cu) * s + (v - cv) * c]);
+}
+const rotPt = (p, c, deg) => rot([p], c, deg)[0];
+
+// Convex hull (monotone chain) of a point cloud.
+function hull(points) {
+  const p = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower = [];
+  for (const q of p) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop();
+    lower.push(q);
+  }
+  const upper = [];
+  for (const q of p.reverse()) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop();
+    upper.push(q);
+  }
+  return lower.slice(0, -1).concat(upper.slice(0, -1));
+}
+// The hull of several circles [[u, v, r], ...]: a link plate or a lever with rounded ends.
+const hullCircles = (cs, steps = 28) => hull(cs.flatMap(([u, v, r]) => K.circle(u, v, r, steps)));
+
+// One cut face made of several overlapping polygons: the union's outline only.
+// Strokes go first at twice the weight, then every fill covers the inner half of every stroke.
+function cutUnion(V, polys, { mat = "steel", angle = 45 } = {}) {
+  const dd = polys.map((p) => K.d(V, p)).join("");
+  if (mat === "solid") return `<path class="solid" d="${dd}"/>`;
+  return `<path class="vis2" d="${dd}"/><path class="paper" d="${dd}"/><path fill="url(#h-${mat}-${angle})" d="${dd}"/>`;
+}
+function bodyUnion(V, polys) {
+  const dd = polys.map((p) => K.d(V, p)).join("");
+  return `<path class="vis2" d="${dd}"/><path class="paper" d="${dd}"/>`;
+}
+
+// A tension spring cut along its axis between two world points: wire sections blacked in on
+// both sides, joined by the back half of each turn, with a hook loop at each end.
+function springBetween(V, a, b, { radius = 1, wire = 0.4, turns = 8, hook = 1.2 } = {}) {
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+  const ux = (b[0] - a[0]) / L;
+  const uy = (b[1] - a[1]) / L;
+  const at = (s, r) => [a[0] + ux * s - uy * r, a[1] + uy * s + ux * r];
+  const from = hook + radius * 0.6;
+  const to = L - hook - radius * 0.6;
+  const pitch = (to - from - wire) / turns;
+  const start = from + wire / 2;
+  const back = [];
+  let sections = "";
+  for (let i = 0; i <= turns; i++) {
+    const s = start + i * pitch;
+    sections += K.cut(V, K.circle(...at(s, radius), wire / 2, 10), { mat: "solid" });
+    if (i < turns) {
+      sections += K.cut(V, K.circle(...at(s + pitch / 2, -radius), wire / 2, 10), { mat: "solid" });
+      back.push([at(s, radius), at(s + pitch / 2, -radius)]);
+    }
+  }
+  // hooks: a half loop from the end coil to the anchor point
+  const hookA = [at(start, radius), at(hook * 0.9, radius * 0.9), at(hook * 0.3, radius * 0.5), at(0, 0)];
+  const hookB = [at(start + turns * pitch, radius), at(L - hook * 0.9, radius * 0.9), at(L - hook * 0.3, radius * 0.5), at(L, 0)];
+  return K.lines(V, back, "vis spring") + K.lines(V, [hookA, hookB], "vis") + sections;
+}
+
+// Points along a quadratic Bézier.
+function quad(a, c, b, n = 16) {
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const m = 1 - t;
+    out.push([m * m * a[0] + 2 * m * t * c[0] + t * t * b[0], m * m * a[1] + 2 * m * t * c[1] + t * t * b[1]]);
+  }
+  return out;
+}
+
+// A band of width w along a polyline (a flexible braid or a bent strip).
+function band(line, w) {
+  const left = [];
+  const right = [];
+  for (let i = 0; i < line.length; i++) {
+    const p = line[Math.max(0, i - 1)];
+    const q = line[Math.min(line.length - 1, i + 1)];
+    const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1;
+    const nx = -(q[1] - p[1]) / L;
+    const ny = (q[0] - p[0]) / L;
+    left.push([line[i][0] + (nx * w) / 2, line[i][1] + (ny * w) / 2]);
+    right.push([line[i][0] - (nx * w) / 2, line[i][1] - (ny * w) / 2]);
+  }
+  return [...left, ...right.reverse()];
+}
+
+// Angular dimension: an arc about c from angle a0 to a1 (degrees), arrowheads, text beyond a1.
+function angDim(V, c, r, a0, a1, text, { id = "" } = {}) {
+  const [cx, cy] = V.p(c);
+  const R = r * V.k;
+  const pt = (a, rr = R) => [K.r2(cx + rr * Math.cos(rad(a))), K.r2(cy - rr * Math.sin(rad(a)))];
+  const lo = Math.min(a0, a1);
+  const hi = Math.max(a0, a1);
+  let arcD = "";
+  const n = Math.max(2, Math.ceil((hi - lo) / 3));
+  for (let i = 0; i <= n; i++) {
+    const [x, y] = pt(lo + ((hi - lo) * i) / n);
+    arcD += `${i ? "L" : "M"}${x} ${y}`;
+  }
+  const head = (a, dir) => {
+    // arrow tip at angle a, pointing along the arc (dir +1 = increasing angle)
+    const [x, y] = pt(a);
+    const tx = -Math.sin(rad(a)) * dir;
+    const ty = -Math.cos(rad(a)) * dir;
+    const bx = x - tx * K.ARROW;
+    const by = y - ty * K.ARROW;
+    const h = K.ARROW * 0.25;
+    return `M${x} ${y}L${K.r2(bx - ty * h)} ${K.r2(by + tx * h)}L${K.r2(bx + ty * h)} ${K.r2(by - tx * h)}Z`;
+  };
+  const span = ((hi - lo) * Math.PI * R) / 180;
+  const heads = span > 2 * K.ARROW + 2 ? head(hi, 1) + head(lo, -1) : "";
+  const [tx, ty] = pt(lo - 5, R + 4);
+  const ext = [a0, a1].map((a) => {
+    const [x1, y1] = pt(a, R - 3);
+    const [x2, y2] = pt(a, R + 3.5);
+    return `M${x1} ${y1}L${x2} ${y2}`;
+  });
+  return (
+    `<g data-role="dim"${id ? ` id="${id}"` : ""}><path class="thin" d="${arcD}${ext.join("")}"/>` +
+    (heads ? `<path class="head" d="${heads}"/>` : "") +
+    `<text class="t" x="${tx}" y="${K.r2(ty + 3)}" text-anchor="start">${text}</text></g>`
+  );
+}
+
+// The centre of wire section i (on the +radius side) of springBetween with the same options.
+function springPoint(a, b, { radius = 1, wire = 0.4, turns = 8, hook = 1.2 } = {}, i = 4) {
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+  const ux = (b[0] - a[0]) / L;
+  const uy = (b[1] - a[1]) / L;
+  const from = hook + radius * 0.6;
+  const to = L - hook - radius * 0.6;
+  const pitch = (to - from - wire) / turns;
+  const sp = from + wire / 2 + i * pitch;
+  return [a[0] + ux * sp - uy * radius, a[1] + uy * sp + ux * radius];
+}
+
+return { rot, rotPt, hull, hullCircles, cutUnion, bodyUnion, springBetween, quad, band, angDim, springPoint };
+})();
+
+const P = (() => {
+// The circuit breaker's parts, in world mm: u from the back of the case (on the DIN rail) to the
+// front, v up from the load end. Each function draws one part into a view and returns SVG, so the
+// section and every detail draw the same geometry at their own scale. Moving parts take a pose
+//   S = { h, c, a, pawl, lever, plunger, f }
+// (handle, cradle and arm angles in degrees CCW; pawl CCW; trip lever CW; plunger travel and
+// bimetal tip deflection in mm) and are drawn at it.
+
+
+
+
+const part = (id, inner) => `<g data-part="${id}">${inner}</g>`;
+
+const H = M.H;
+const MP = M.M;
+const T = M.T;
+const VC = 35; // solenoid axis
+const CLOSED = { h: M.HANDLE_ON, c: 0, a: 0, pawl: 0, lever: 0, plunger: 0, f: 0 };
+
+const peg = (V, [u, v], r) => K.cut(V, K.circle(u, v, r, 20), { mat: "plastic", angle: 45 });
+const pin = (V, [u, v], r, angle = 45) => K.cut(V, K.circle(u, v, r, 20), { mat: "steel", angle });
+
+// ---------------------------------------------------------------- housing (cut on its centre plane)
+
+const SPRING_POST_ARM = [41, 67.4];
+const SPRING_POST_HANDLE = [40.5, 40.5];
+
+function housing(V) {
+  const back = [
+    [0, 27.5], [0, 62.6], [-1.1, 62.6], [-1.1, 60.8], [-1.8, 60.8], [-1.8, 65.5], [0, 65.5],
+    [0, 89], [1, 90], [39.6, 90], [39.6, 88], [2, 88], [2, 29.5], [5, 29.5], [5, 2], [39.6, 2], [39.6, 0], [4, 0], [3, 1], [3, 27.5],
+  ];
+  const topFront = [[46.8, 90], [59, 90], [60, 89], [60, 83], [58, 83], [58, 88], [46.8, 88]];
+  const humpTop = [[58, 77], [60, 77], [60, 67.5], [69, 67.5], [70, 66.5], [70, 54.5], [68, 54.5], [68, 65.5], [58, 65.5]];
+  const humpLow = [[68, 35.5], [70, 35.5], [70, 23.5], [69, 22.5], [60, 22.5], [60, 13], [58, 13], [58, 24.5], [68, 24.5]];
+  const lowFront = [[58, 7], [60, 7], [60, 1], [59, 0], [46.8, 0], [46.8, 2], [58, 2]];
+  const walls = [back, topFront, humpTop, humpLow, lowFront].map((p) => K.cut(V, p, { mat: "plastic", angle: 45 })).join("");
+  // moulded pegs that carry the pivots and the springs, cut across
+  const pegs = peg(V, T, 1) + peg(V, SPRING_POST_ARM, 1) + peg(V, SPRING_POST_HANDLE, 1);
+  // bosses of the far half, seen beyond the plane
+  const bosses = K.line(V, K.circle(...H, 8.6, 40), "vis", true);
+  return part(1, bosses + walls + pegs);
+}
+
+// The DIN rail clip: a POM slider in a channel at the back, its nose under the rail's lower brim.
+function clip(V) {
+  const slider = [
+    [0.3, -3], [2.7, -3], [2.7, 25.5], [0.3, 27.4], [-1.1, 27.4], [-1.1, 29.2], [-1.8, 29.2], [-1.8, 25.5], [0.3, 25.5],
+  ];
+  const tab = K.line(V, [[0.6, -1.6], [2.4, -1.6]], "thin");
+  const slot = K.line(V, K.rrect(0.9, 4, 2.1, 20, 0.6), "vis", true);
+  return part(2, K.cut(V, slider, { mat: "plastic", angle: 135 }) + tab + slot);
+}
+
+// The DIN rail TH35-7.5 (EN 60715) and the mounting plate: adjacent parts, phantom.
+function rail(V) {
+  const prof = [
+    [0, 27.5], [0, 31.5], [-6.5, 31.5], [-6.5, 58.5], [0, 58.5], [0, 62.5], [-1, 62.5], [-1, 59.5],
+    [-7.5, 59.5], [-7.5, 30.5], [-1, 30.5], [-1, 27.5],
+  ];
+  return K.line(V, prof, "phan", true);
+}
+
+// ---------------------------------------------------------------- terminals
+
+// A box terminal: cage walls either side of the wire, the screw through the front wall.
+function cage(V, vs) {
+  const wall = (u0, u1) => K.cut(V, K.rect(u0, vs - 6, u1, vs + 6), { mat: "steel", angle: 135 });
+  const front = K.cut(V, K.rect(52.8, vs - 6, 54, vs - 2.5), { mat: "steel", angle: 135 }) + K.cut(V, K.rect(52.8, vs + 2.5, 54, vs + 6), { mat: "steel", angle: 135 });
+  return wall(39, 40.2) + front;
+}
+function cages(V) {
+  return part(3, cage(V, 80) + cage(V, 10));
+}
+
+// Terminal screw M5×12, pan head, captive in the cage (not hatched: a screw cut lengthwise).
+function screw(V, vs) {
+  const shank = [[47.8, vs - 2.1], [48.2, vs - 2.5], [54, vs - 2.5], [54, vs + 2.5], [48.2, vs + 2.5], [47.8, vs + 2.1]];
+  const head = [[54, vs - 4.2], [55, vs - 4.75], [57, vs - 4.75], [57.5, vs - 4.2], [57.5, vs + 4.2], [57, vs + 4.75], [55, vs + 4.75], [54, vs + 4.2]];
+  const roots = [[[48.4, vs - 2.07], [52.8, vs - 2.07]], [[48.4, vs + 2.07], [52.8, vs + 2.07]]];
+  const recess = [[57.5, vs - 1.6], [56, vs - 1.6], [55.4, vs], [56, vs + 1.6], [57.5, vs + 1.6]];
+  return K.body(V, shank) + K.body(V, head) + K.lines(V, roots, "thin") + K.line(V, recess, "hid");
+}
+function screws(V) {
+  return part(4, screw(V, 80) + screw(V, 10));
+}
+
+// The conductors on each side of the cage, phantom: adjacent parts.
+function wires(V) {
+  return K.line(V, [[40.2, 96], [40.2, 74.5], [46.2, 74.5], [46.2, 96]], "phan") + K.line(V, [[40.2, -6], [40.2, 15.5], [46.2, 15.5], [46.2, -6]], "phan");
+}
+
+// Line strip: up the cage, down and back over the contacts, and on as the upper arc runner.
+function lineStrip(V) {
+  const s = [
+    [46.2, 86.5], [46.2, 73.6], ...K.arc(44.6, 73.6, 1.6, 0, -90, 3).slice(1), [3.2, 72], [3.2, 67.4], [4.8, 67.4], [4.8, 70.4],
+    [44.6, 70.4], ...K.arc(44.6, 73.6, 3.2, -90, 0, 4).slice(1), [47.8, 86.5],
+  ];
+  return part(5, K.cut(V, s, { mat: "bronze", angle: 45 }));
+}
+
+const FIXED_TIP = K.rect(14.5, 69.2, 18.5, 70.4);
+function fixedTip(V) {
+  return part(6, K.cut(V, FIXED_TIP, { mat: "brass", angle: 135 }));
+}
+
+// Lower arc runner: under the plates and up their front edge; the coil's back lead lands on it.
+function runner(V) {
+  const s = [[3.2, 45], [12.6, 45], [13.8, 46.2], [13.8, 58], [12.6, 58], [12.6, 46.6], [3.2, 46.6]];
+  return part(7, K.cut(V, s, { mat: "bronze", angle: 135 }));
+}
+
+// Splitter plates: steel, V-notched towards the contacts; the notch's flanks seen beyond the cut.
+const PLATE_V = Array.from({ length: 9 }, (_, i) => 48.2 + 2.2 * i);
+function plates(V) {
+  let out = "";
+  for (const v0 of PLATE_V) {
+    out += K.cut(V, K.rect(3.2, v0, 8, v0 + 0.8), { mat: "steel", angle: 45 });
+    out += K.line(V, [[8, v0 + 0.8], [11, v0 + 0.8], [11, v0], [8, v0]], "vis");
+  }
+  return part(8, out);
+}
+
+// ---------------------------------------------------------------- solenoid (axis along u at v = VC)
+
+function yoke(V) {
+  const c = VC;
+  const low = [
+    [24, c - 1], [20, c - 1], [20, c - 1.8], [18, c - 1.8], [18, c - 3], [22.5, c - 3], [22.5, c - 6.5], [6, c - 6.5], [6, c + 6.5], [4.5, c + 6.5], [4.5, c - 8], [24, c - 8],
+  ];
+  const up = [[24, c + 1], [24, c + 8], [22.5, c + 8], [22.5, c + 3], [18, c + 3], [18, c + 1.8], [20, c + 1.8], [20, c + 1]];
+  const back = [[4.5, c + 6.5], [6, c + 6.5], [6, c + 8], [4.5, c + 8]];
+  const side = K.line(V, [[6, c + 8], [22.5, c + 8]], "vis") + K.line(V, [[6, c - 8], [22.5, c - 8]], "vis");
+  return part(23, side + [low, up, back].map((p) => K.cut(V, p, { mat: "steel", angle: 45 })).join(""));
+}
+
+function former(V) {
+  const c = VC;
+  const half = (sgn) =>
+    [[6.2, 3.2], [22.3, 3.2], [22.3, 6], [21.5, 6], [21.5, 3.8], [7, 3.8], [7, 6], [6.2, 6]].map(([u, r]) => [u, c + sgn * r]);
+  return part(22, K.cut(V, half(1), { mat: "plastic", angle: 135 }) + K.cut(V, half(-1), { mat: "plastic", angle: 135 }));
+}
+
+const TURNS = Array.from({ length: 7 }, (_, i) => 7.9 + 1.9 * i); // top sections; the bottom ones sit half a pitch on
+function coil(V) {
+  const c = VC;
+  let out = K.body(V, K.rect(7.05, c + 4.7, 8.75, 45)); // back lead up to the runner
+  out += K.body(V, K.rect(19.6, 27.6, 21.25, c - 4.7)); // front lead down to the lead strip
+  const back = TURNS.map((u) => [[u, c + 4.7], [u + 0.95, c - 4.7]]);
+  out += K.lines(V, back, "thin");
+  for (const u of TURNS) out += K.cut(V, K.circle(u, c + 4.7, 0.9, 14), { mat: "solid" }) + K.cut(V, K.circle(u + 0.95, c - 4.7, 0.9, 14), { mat: "solid" });
+  return part(21, out);
+}
+
+// The coil's front lead strip, down past the trip lever's foot to the bimetal's foot.
+function leadStrip(V) {
+  const s = [[19.7, 28], [21.3, 28], [21.3, 6], [36, 6], [36, 4.4], [20.7, 4.4], [19.7, 5.4]];
+  return part(9, K.cut(V, s, { mat: "bronze", angle: 45 }));
+}
+
+function plunger(V, p) {
+  const c = VC;
+  const body = [[8.5 + p, c - 2.6], [8.9 + p, c - 3], [14.6 + p, c - 3], [15 + p, c - 2.6], [15 + p, c + 2.6], [14.6 + p, c + 3], [8.9 + p, c + 3], [8.5 + p, c + 2.6]];
+  return part(24, K.body(V, body) + K.line(V, [[13 + p, c - 0.8], [15 + p, c - 0.8]], "hid") + K.line(V, [[13 + p, c + 0.8], [15 + p, c + 0.8]], "hid"));
+}
+const strikerTip = (p) => 26.5 - M.STRIKER_GAP + p;
+function striker(V, p) {
+  const c = VC;
+  const tip = strikerTip(p);
+  return part(25, K.body(V, [[15 + p, c - 0.8], [tip - 0.3, c - 0.8], [tip, c - 0.5], [tip, c + 0.5], [tip - 0.3, c + 0.8], [15 + p, c + 0.8]]));
+}
+function plungerSpring(V, p) {
+  return part(26, K.springSection(V, { from: 15 + p, to: 20, radius: 1.3, wire: 0.35, turns: 4, axis: "u", at: VC }));
+}
+
+// ---------------------------------------------------------------- bimetal (riveted on the lead strip)
+
+const BI_BACK = 31.3; // the strip's back face, cold
+const BI_V0 = 7; // bending starts above the rivet
+const BI_TIP = 27;
+// The back face's u at height v for tip deflection f (constant curvature: f·x²/L²).
+const biShift = (v, f) => -f * Math.max(0, (v - BI_V0) / (BI_TIP - BI_V0)) ** 2;
+function biLayer(u0, u1, f) {
+  const left = [];
+  const right = [];
+  for (let v = 6; v <= BI_TIP + 1e-6; v += 1) {
+    const s = biShift(v, f);
+    left.push([u0 + s, v]);
+    right.push([u1 + s, v]);
+  }
+  return [...left, ...right.reverse()];
+}
+function bimetal(V, f) {
+  const s = M.BI_S / 2;
+  const layers = K.cut(V, biLayer(BI_BACK, BI_BACK + s - 0.04, f), { mat: "solid" }) + K.cut(V, biLayer(BI_BACK + s + 0.04, BI_BACK + 2 * s, f), { mat: "solid" });
+  const foot = K.cut(V, [[BI_BACK, 6], [35, 6], [35, 6.6], [BI_BACK + 2 * s, 6.6], [BI_BACK + 2 * s, 7], [BI_BACK, 7]], { mat: "solid" });
+  const rivet = K.body(V, [[33.1, 3.9], [34.5, 3.9], [34.5, 4.4], [34.2, 4.4], [34.2, 6.6], [34.6, 6.6], [34.6, 7.2], [33, 7.2], [33, 6.6], [33.4, 6.6], [33.4, 4.4], [33.1, 4.4]]);
+  return part(28, foot + layers + rivet);
+}
+const biTip = (f) => [BI_BACK + M.BI_S + biShift(BI_TIP, f), BI_TIP - 0.6];
+function bimetalCold(V) {
+  const u = BI_BACK + M.BI_S;
+  return K.line(V, [[BI_BACK, 18], [BI_BACK, BI_TIP], [u, BI_TIP], [u, 18]], "phan");
+}
+
+// ---------------------------------------------------------------- trip lever (CW positive)
+
+const LEVER_SCREW_V = 26;
+function lever(V, deg) {
+  const t = T;
+  const base = [
+    [26.5, 53], [29.5, 53], [29.5, 32], ...K.arc(t[0], t[1], 2.5, 53.13, 0, 6), [30.6, 30], [30.6, 22.8], [26.5, 22.8], [26.5, 28],
+    ...K.arc(t[0], t[1], 2.5, 233.13, 126.87, 8), [26.5, 32],
+  ];
+  const r = (pts) => X.rot(pts, t, -deg);
+  const screw = r([[27, LEVER_SCREW_V - 1], [31, LEVER_SCREW_V - 1], [31, LEVER_SCREW_V + 1], [27, LEVER_SCREW_V + 1]]);
+  const roots = r([[27.2, LEVER_SCREW_V - 0.8], [30.6, LEVER_SCREW_V - 0.8]]).concat();
+  const roots2 = r([[27.2, LEVER_SCREW_V + 0.8], [30.6, LEVER_SCREW_V + 0.8]]);
+  const socket = r([[27, LEVER_SCREW_V - 0.6], [28.4, LEVER_SCREW_V - 0.6], [28.4, LEVER_SCREW_V + 0.6], [27, LEVER_SCREW_V + 0.6]]);
+  return (
+    part(15, K.cut(V, r(base), { mat: "plastic", angle: 135 }) + peg(V, t, 1)) +
+    part(30, K.body(V, screw) + K.lines(V, [roots, roots2], "thin") + K.line(V, socket, "hid"))
+  );
+}
+
+// ---------------------------------------------------------------- the mechanism
+
+const P0 = [33.6, 53.4]; // pawl pivot on the cradle, closed
+const HOOK = [31.6, 56.7];
+const TAIL = [30.3, 52];
+const LUG_HOLE = [40.8, 57.6]; // arm's spring hook, closed
+
+function cradle(V, c) {
+  const polys = [X.hullCircles([[...MP, 3.6], [...M.B0, 1.9]]), X.hullCircles([[...MP, 3.6], [...P0, 1.7]])].map((p) => X.rot(p, MP, c));
+  return part(13, X.bodyUnion(V, polys) + pin(V, X.rotPt(P0, MP, c), 0.6, 135));
+}
+
+function pawl(V, c, pd) {
+  const P = X.rotPt(P0, MP, c);
+  const pts = (q) => X.rot(X.rot([q], MP, c), P, pd)[0];
+  const polys = [X.hullCircles([[...P, 1.3], [...pts(HOOK), 0.9]]), X.hullCircles([[...P, 1.3], [...pts(TAIL), 0.8]])];
+  return part(14, X.bodyUnion(V, polys));
+}
+
+// The contact arm, closed at a = 0: tip block, a bar up to the hub, the latch lug and the spring lug.
+const ARM = [
+  K.rect(13.8, 65.4, 20.2, 68),
+  X.hullCircles([[19.2, 66.6, 1.4], [...MP, 3.2]]),
+  X.hullCircles([[...MP, 3.2], [...LUG_HOLE, 1.5]]),
+  K.rrect(30.6, 57.6, 33, 61, 0.4),
+];
+const MOVING_TIP = K.rect(14.5, 68, 18.5, 69.2);
+function arm(V, a) {
+  const polys = ARM.map((p) => X.rot(p, MP, a));
+  const hole = X.rotPt(LUG_HOLE, MP, a);
+  return (
+    part(10, X.cutUnion(V, polys, { mat: "bronze", angle: 135 }) + `<path class="paper" d="${K.d(V, K.circle(...hole, 0.6, 12))}"/>` + K.line(V, K.circle(...hole, 0.6, 12), "vis", true)) +
+    part(11, K.cut(V, X.rot(MOVING_TIP, MP, a), { mat: "brass", angle: 45 })) +
+    part(12, pin(V, MP, 1, 45))
+  );
+}
+
+function handle(V, h) {
+  const blade = [[5.6, -3.2], [14.5, -3.2], [14.5, -3.9], [16, -3.9], [16, -3.4], [17.5, -3.4], [17.5, -3.9], [19, -3.9], [19, -3.4], [20.5, -3.4], [20.5, -3.9], [26.4, -3.9], [27.6, -2.8], [27.6, 2.8], [26.4, 3.9], [20.5, 3.9], [20.5, 3.4], [19, 3.4], [19, 3.9], [17.5, 3.9], [17.5, 3.4], [16, 3.4], [16, 3.9], [14.5, 3.9], [14.5, 3.2], [5.6, 3.2]];
+  const place = (p) => X.rot(p.map(([x, y]) => [H[0] + x, H[1] + y]), H, h);
+  const lugHole = handleLug(h);
+  const crank = M.crankPin(h);
+  const hole = (p, r) => `<path class="paper" d="${K.d(V, K.circle(...p, r, 12))}"/>` + K.line(V, K.circle(...p, r, 12), "vis", true);
+  return part(17, K.cut(V, place([...blade, ...hubArc()]), { mat: "plastic", angle: 60 }) + hole(lugHole, 0.6) + hole(crank, 0.75)) + part(18, pin(V, H, 1.5, 45));
+}
+// The hub outline from the blade's upper root, round the back (with the lug), to its lower root.
+function hubArc() {
+  const out = [];
+  for (let t = 29.5; t <= 330.5; t += 4) {
+    const bump = 1.9 * Math.exp(-(((t - 200) / 13) ** 2));
+    const r = 6.5 + bump;
+    out.push([r * Math.cos((t * Math.PI) / 180), r * Math.sin((t * Math.PI) / 180)]);
+  }
+  return out;
+}
+const handleTip = (h) => X.rotPt([H[0] + 27.6, H[1]], H, h);
+const handleLug = (h) => X.rotPt([H[0] + 8 * Math.cos((200 * Math.PI) / 180), H[1] + 8 * Math.sin((200 * Math.PI) / 180)], H, h);
+
+function handlePhantom(V, h) {
+  const blade = [[5.6, -3.2], [26.4, -3.9], [27.6, -2.8], [27.6, 2.8], [26.4, 3.9], [5.6, 3.2]];
+  const pts = X.rot([...blade, ...hubArc()].map(([x, y]) => [H[0] + x, H[1] + y]), H, h);
+  return K.line(V, pts, "phan", true);
+}
+
+function link(V, h, c) {
+  const A = M.crankPin(h);
+  const B = X.rotPt(M.B0, MP, c);
+  const end = (p) => K.cut(V, K.circle(...p, 0.6, 12), { mat: "solid" });
+  return part(16, K.body(V, X.hull([...K.circle(...A, 0.6, 10), ...K.circle(...B, 0.6, 10)])) + end(A) + end(B));
+}
+
+const ARM_SPRING = { radius: 0.9, wire: 0.35, turns: 9, hook: 1.4 };
+const HANDLE_SPRING = { radius: 0.8, wire: 0.3, turns: 9, hook: 1.4 };
+const armSpringDot = (a) => X.springPoint(X.rotPt(LUG_HOLE, MP, a), SPRING_POST_ARM, ARM_SPRING, 5);
+const handleSpringDot = (h) => X.springPoint(handleLug(h), SPRING_POST_HANDLE, HANDLE_SPRING, 5);
+function springs(V, h, a) {
+  const lug = X.rotPt(LUG_HOLE, MP, a);
+  return part(20, X.springBetween(V, lug, SPRING_POST_ARM, ARM_SPRING)) + part(19, X.springBetween(V, handleLug(h), SPRING_POST_HANDLE, HANDLE_SPRING));
+}
+// The centre of the plunger spring's wire section i, on the upper side.
+function plungerSpringDot(p, i = 2) {
+  const pitch = (20 - (15 + p) - 0.35) / 4;
+  return [15 + p + 0.175 + i * pitch, VC + 1.3];
+}
+
+// Flexible braids: arm → arc runner (and the coil's back lead), bimetal tip → load strip.
+const BRAID1_ARM = [24.5, 62.2];
+function braids(V, a, f) {
+  const p = X.rotPt(BRAID1_ARM, MP, a);
+  const one = X.quad(p, [17, 54 + 0.3 * (p[1] - 62)], [13.2, 47.4], 14);
+  const tip = biTip(f);
+  const two = X.quad([tip[0] - 0.2, tip[1]], [36.5, 25], [36.4, 18.4], 12);
+  return part(27, K.cut(V, X.band(one, 1.6), { mat: "rubber", angle: 45 }) + K.cut(V, X.band(two, 1.6), { mat: "rubber", angle: 45 }));
+}
+
+// ---------------------------------------------------------------- load strip
+
+function loadStrip(V) {
+  const s = [
+    [46.2, 3.5], [46.2, 15.4], ...K.arc(44.6, 15.4, 1.6, 0, 90, 3).slice(1), [35.5, 17], [35.5, 18.6], [44.6, 18.6],
+    ...K.arc(44.6, 15.4, 3.2, 90, 0, 4).slice(1), [47.8, 3.5],
+  ];
+  return part(29, K.cut(V, s, { mat: "bronze", angle: 45 }));
+}
+
+// ---------------------------------------------------------------- the current path (the accent)
+
+// Centrelines of the conductors, line terminal to load terminal, at pose S. Returns polylines.
+function currentPath(S, { closed = true, lowerFromRunner = false } = {}) {
+  const line = [[43.2, 95], [43.2, 81], [47, 81], [47, 73.6], ...K.arc(44.6, 73.6, 2.4, 0, -90, 3).slice(1), [16.5, 71.2], [16.5, 69.8]];
+  const tipC = X.rotPt([16.5, 68.6], MP, S.a);
+  const armLine = [tipC, X.rotPt([17.6, 66.7], MP, S.a), X.rotPt(BRAID1_ARM, MP, S.a)];
+  const p = X.rotPt(BRAID1_ARM, MP, S.a);
+  const braid1 = X.quad(p, [17, 54 + 0.3 * (p[1] - 62)], [13.2, 47.4], 14);
+  const runnerTail = [[13.2, 47.4], [13.2, 45.8], [7.9, 45.8], [7.9, 39.7]];
+  const coilZig = [];
+  for (const u of TURNS) coilZig.push([u, VC + 4.7], [u + 0.95, VC - 4.7]);
+  const tip = biTip(S.f);
+  const bim = [];
+  for (let v = 6.4; v <= BI_TIP - 0.6 + 1e-6; v += 1) bim.push([BI_BACK + M.BI_S / 2 + biShift(v, S.f), v]);
+  const braid2 = X.quad([tip[0] - 0.2, tip[1]], [36.5, 25], [36.4, 18.4], 12);
+  const load = [[36.4, 17.8], [44.6, 17.8], ...K.arc(44.6, 15.4, 2.4, 90, 0, 3).slice(1), [47, 9], [43.2, 9], [43.2, -5]];
+  const lower = [...coilZig, [20.4, 28], [20.5, 5.2], [BI_BACK + M.BI_S / 2, 5.2], ...bim, ...braid2, ...load];
+  if (closed) return [[...line, ...armLine, ...braid1, ...runnerTail, ...lower]];
+  if (lowerFromRunner) return [line, [[13.2, 58], ...runnerTail.slice(1), ...lower]];
+  return [line, [tipC, ...armLine.slice(1), ...braid1, ...runnerTail, ...lower]];
+}
+
+// The arc as the contacts part, 0 <= lam <= 1: between the contacts, then its roots run back
+// along the runners, then the splitter plates cut it into short arcs in series and it goes out.
+const jit = (i, seed, amp) => amp * (Math.sin(i * 12.9898 + seed * 78.233) * 0.6 + Math.sin(i * 4.1 + seed * 3.7) * 0.4);
+function arcPaths(S, lam, seed = 0) {
+  const top = [16.5, 69.2];
+  const bot = X.rotPt([16.5, 69.2], MP, S.a);
+  const zig = (a, b, amp, n, s0) => {
+    const out = [];
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      const bow = Math.sin(Math.PI * t);
+      out.push([a[0] + (b[0] - a[0]) * t + (i && i < n ? jit(i, seed + s0, amp) : 0) - bow * 0, a[1] + (b[1] - a[1]) * t + (i && i < n ? jit(i + 7, seed + s0, amp * 0.5) : 0)]);
+    }
+    return out;
+  };
+  if (lam < 0.4) {
+    const k = lam / 0.4;
+    const mid = [Math.min(top[0], bot[0]) - 2.5 * k, (top[1] + bot[1]) / 2];
+    return [[...zig(top, mid, 0.35, 4, 1), ...zig(mid, bot, 0.35, 4, 2).slice(1)]];
+  }
+  if (lam < 0.75) {
+    const k = (lam - 0.4) / 0.35;
+    const up = [14 - 6.5 * k, 70.4];
+    const low = [13.8, 58 - 9 * k];
+    const mid = [12.5 - 4 * k, (up[1] + low[1]) / 2];
+    return [[...zig(up, mid, 0.45, 5, 3), ...zig(mid, low, 0.45, 5, 4).slice(1)]];
+  }
+  const out = [];
+  const levels = [70.4, ...PLATE_V.slice().reverse().flatMap((v) => [v + 0.8, v]), 46.6];
+  for (let i = 0; i + 1 < levels.length; i += 2) {
+    const u = 6.2 + jit(i, seed, 0.4);
+    out.push(zig([u, levels[i]], [u + jit(i + 3, seed, 0.5), levels[i + 1]], 0.3, 3, 5 + i));
+  }
+  return out;
+}
+
+// The pawl's edges where the arm hides them: dashed, to show the hook under the arm's lug.
+function pawlHidden(V, c, pd) {
+  const P = X.rotPt(P0, MP, c);
+  const pts = (q) => X.rot(X.rot([q], MP, c), P, pd)[0];
+  return K.line(V, X.hullCircles([[...P, 1.3], [...pts(HOOK), 0.9]]), "hid", true);
+}
+
+// ---------------------------------------------------------------- VIEW E: the front, looking at the handle
+// World here is [w, v]: w across the 17.5 mm module, v up, as in the section.
+const MOD = 17.5;
+function frontView(V) {
+  const hw = MOD / 2;
+  const outline = [[-hw + 0.6, 0], [hw - 0.6, 0], [hw, 0.6], [hw, 89.4], [hw - 0.6, 90], [-hw + 0.6, 90], [-hw, 89.4], [-hw, 0.6]];
+  const steps = K.lines(V, [[[-hw, 22.5], [hw, 22.5]], [[-hw, 67.5], [hw, 67.5]], [[-hw, 23.5], [hw, 23.5]], [[-hw, 66.5], [hw, 66.5]]], "vis");
+  const windowE = K.line(V, K.rrect(-5, 35.5, 5, 54.5, 0.8), "vis", true);
+  const screwHole = (v) =>
+    K.line(V, K.circle(0, v, 3, 32), "vis", true) + K.line(V, K.circle(0, v, 2.4, 32), "thin", true) + K.lines(V, [[[-1.2, v], [1.2, v]], [[0, v - 1.2], [0, v + 1.2]]], "vis");
+  const label = K.line(V, K.rect(-6, 25.5, 6, 31.5), "thin", true);
+  return part(1, K.body(V, outline) + steps + windowE + label + screwHole(80) + screwHole(10)) + K.centerMark(V, [0, 80], 3, 2) + K.centerMark(V, [0, 10], 3, 2);
+}
+// The handle seen from the front: the part of its blade beyond the hump face, projected on v.
+function frontHandle(V, h) {
+  const blade = [[5.6, -3.9], [27.6, -3.9], [27.6, 3.9], [5.6, 3.9]];
+  const pts = X.rot(blade.map(([x, y]) => [H[0] + x, H[1] + y]), H, h);
+  // clip the blade outline to u >= 70 and take its extent in v
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+    for (let t = 0; t <= 1; t += 0.02) {
+      const u = a[0] + (b[0] - a[0]) * t;
+      const v = a[1] + (b[1] - a[1]) * t;
+      if (u >= 69.9) {
+        lo = Math.min(lo, v);
+        hi = Math.max(hi, v);
+      }
+    }
+  }
+  const tipV = X.rotPt([H[0] + 27.6, H[1]], H, h)[1];
+  const ribs = [16, 19].map((x) => X.rotPt([H[0] + x, H[1] + 3.9], H, h)[1]);
+  return part(17, K.body(V, K.rrect(-4.5, lo, 4.5, hi, 0.6)) + K.lines(V, [[[-4.5, tipV], [4.5, tipV]], ...ribs.map((v) => [[-4.5, v], [4.5, v]])], "thin"));
+}
+function frontText(V) {
+  const t = (v, s, w = 0) => {
+    const [x, y] = V.p([w, v]);
+    return `<text class="t t-sm" x="${x}" y="${K.r2(y + 2.7)}" text-anchor="middle">${s}</text>`;
+  };
+  return `<g data-role="engraved">${t(61.5, "B16")}${t(51, "I", -6.9)}${t(28.5, "6000")}${t(38.5, "O", -6.9)}</g>`;
+}
+
+// DETAIL C's local section: the arm broken out round the pawl's hook, so the hook under the
+// arm's lug shows. Thin freehand boundary; the pawl and the lug's bent tab seen through it.
+function latchBreakout(V, S) {
+  const P = X.rotPt(P0, MP, S.c);
+  const hookAt = X.rot(X.rot([HOOK], MP, S.c), P, S.pawl)[0];
+  const c = X.rotPt([31.8, 57.1], MP, S.c);
+  const edge = [];
+  for (let i = 0; i < 40; i++) {
+    const th = (i / 40) * 2 * Math.PI;
+    const r = 2.3 * (1 + 0.07 * Math.sin(5 * th) + 0.04 * Math.sin(11 * th + 1));
+    edge.push([c[0] + r * Math.cos(th), c[1] + r * Math.sin(th)]);
+  }
+  const pts = (q) => X.rot(X.rot([q], MP, S.c), P, S.pawl)[0];
+  const pawlPoly = X.hullCircles([[...P, 1.3], [...pts(HOOK), 0.9]]);
+  const lug = X.rot(K.rrect(30.6, 57.6, 33, 61, 0.4), MP, S.a);
+  void hookAt;
+  return (
+    `<clipPath id="bo-${V.name || "x"}"><path d="${K.d(V, edge)}"/></clipPath>` +
+    `<path class="paper" d="${K.d(V, edge)}"/>` +
+    `<g clip-path="url(#bo-${V.name || "x"})">${part(14, K.body(V, pawlPoly))}${K.body(V, lug)}</g>` +
+    K.line(V, edge, "thin", true)
+  );
+}
+
+return { part, H, MP, T, VC, CLOSED, SPRING_POST_ARM, SPRING_POST_HANDLE, housing, clip, rail, cages, screws, wires, lineStrip, FIXED_TIP, fixedTip, runner, PLATE_V, plates, yoke, former, TURNS, coil, leadStrip, plunger, strikerTip, striker, plungerSpring, BI_BACK, BI_V0, BI_TIP, biShift, bimetal, biTip, bimetalCold, LEVER_SCREW_V, lever, P0, LUG_HOLE, cradle, pawl, MOVING_TIP, arm, handle, handleTip, handleLug, handlePhantom, link, ARM_SPRING, HANDLE_SPRING, armSpringDot, handleSpringDot, springs, plungerSpringDot, BRAID1_ARM, braids, loadStrip, currentPath, arcPaths, pawlHidden, MOD, frontView, frontHandle, frontText, latchBreakout };
+})();
+
+const SC = (() => {
+// The circuit breaker's solids for its 3D view (circuit-breaker-3d.html), in the same world mm as
+// parts.mjs: u is x (back of the case on the DIN rail → front), v is y (up from the load end), and
+// the sheet's cutting plane, the case's centre plane, is z = 0. Pure data built with kit/solid3d.mjs.
+//
+// What is cut and what is whole:
+//   cut   - the two housing halves (the joint is the centre plane, so the case is the cut part), the
+//           terminal cages and the solenoid (yoke, former, coil): their cut faces are hatched as on
+//           the sheet, and they open to show the screws, the plunger and the striker inside;
+//   whole - the mechanism (WHOLE below): live3d.js gives those materials their own cut switch, held
+//           off, so the arm, the latch, the handle, the bimetal and the plates read as 3D parts.
+// Widths across the module (z) are the parts list's: strips 6 wide, tips 4, bimetal 6, handle 9.
+// Moving parts are built at their rest pose (closed at ON: handle angle 0 for the handle itself,
+// cradle and arm at 0, lever 0, plunger 0, bimetal cold) and live3d.js poses them from the model.
+// The sheet draws some outlines inside its part functions; those polygons are retyped here from
+// parts.mjs (same numbers), everything exported there is imported.
+
+
+
+
+
+
+const VC = P.VC;
+const MP = P.MP;
+const H = P.H;
+const T = P.T;
+
+const HALF = P.MOD / 2; // the case's outer faces, z = ±8.75
+const WALL = HALF - 1.5; // the side walls' inner faces
+const JOINT = 0.5; // the back half's rim stands this far proud of the plane, so the plane cuts it
+const LIFT = 104; // the mechanism lifts out of the case by this much
+const DZB = 16; // the back half goes back
+const DZF = 62; // the front half comes forward
+const up = [0, LIFT, 0];
+
+// ---------------------------------------------------------------- outlines (parts.mjs numbers)
+
+// the housing's walls cut on the centre plane, as housing() draws them
+const CASE_WALLS = [
+  [[0, 27.5], [0, 62.6], [-1.1, 62.6], [-1.1, 60.8], [-1.8, 60.8], [-1.8, 65.5], [0, 65.5], [0, 89], [1, 90], [39.6, 90], [39.6, 88], [2, 88], [2, 29.5], [5, 29.5], [5, 2], [39.6, 2], [39.6, 0], [4, 0], [3, 1], [3, 27.5]],
+  [[46.8, 90], [59, 90], [60, 89], [60, 83], [58, 83], [58, 88], [46.8, 88]],
+  [[58, 77], [60, 77], [60, 67.5], [69, 67.5], [70, 66.5], [70, 54.5], [68, 54.5], [68, 65.5], [58, 65.5]],
+  [[68, 35.5], [70, 35.5], [70, 23.5], [69, 22.5], [60, 22.5], [60, 13], [58, 13], [58, 24.5], [68, 24.5]],
+  [[58, 7], [60, 7], [60, 1], [59, 0], [46.8, 0], [46.8, 2], [58, 2]],
+];
+// the side wall: the case's outline in View E's depth, over the clip's channel at the back
+const CASE_OUTLINE = [
+  [1, 0], [59, 0], [60, 1], [60, 22.5], [69, 22.5], [70, 23.5], [70, 66.5], [69, 67.5], [60, 67.5], [60, 89], [59, 90], [1, 90], [0, 89],
+  [0, 65.5], [-1.8, 65.5], [-1.8, 60.8], [-1.1, 60.8], [-1.1, 62.6], [0, 62.6], [0, 1],
+];
+const CLIP = [[0.3, -3], [2.7, -3], [2.7, 25.5], [0.3, 27.4], [-1.1, 27.4], [-1.1, 29.2], [-1.8, 29.2], [-1.8, 25.5], [0.3, 25.5]];
+const LINE_STRIP = [
+  [46.2, 86.5], [46.2, 73.6], ...K.arc(44.6, 73.6, 1.6, 0, -90, 3).slice(1), [3.2, 72], [3.2, 67.4], [4.8, 67.4], [4.8, 70.4],
+  [44.6, 70.4], ...K.arc(44.6, 73.6, 3.2, -90, 0, 4).slice(1), [47.8, 86.5],
+];
+const RUNNER = [[3.2, 45], [12.6, 45], [13.8, 46.2], [13.8, 58], [12.6, 58], [12.6, 46.6], [3.2, 46.6]];
+const LEAD_STRIP = [[19.7, 28], [21.3, 28], [21.3, 6], [36, 6], [36, 4.4], [20.7, 4.4], [19.7, 5.4]];
+const LOAD_STRIP = [
+  [46.2, 3.5], [46.2, 15.4], ...K.arc(44.6, 15.4, 1.6, 0, 90, 3).slice(1), [35.5, 17], [35.5, 18.6], [44.6, 18.6],
+  ...K.arc(44.6, 15.4, 3.2, 90, 0, 4).slice(1), [47.8, 3.5],
+];
+const LEVER = [
+  [26.5, 53], [29.5, 53], [29.5, 32], ...K.arc(T[0], T[1], 2.5, 53.13, 0, 6), [30.6, 30], [30.6, 22.8], [26.5, 22.8], [26.5, 28],
+  ...K.arc(T[0], T[1], 2.5, 233.13, 126.87, 8), [26.5, 32],
+];
+const HOOK = [31.6, 56.7];
+const TAIL = [30.3, 52];
+const BLADE = [[5.6, -3.2], [14.5, -3.2], [14.5, -3.9], [16, -3.9], [16, -3.4], [17.5, -3.4], [17.5, -3.9], [19, -3.9], [19, -3.4], [20.5, -3.4], [20.5, -3.9], [26.4, -3.9], [27.6, -2.8], [27.6, 2.8], [26.4, 3.9], [20.5, 3.9], [20.5, 3.4], [19, 3.4], [19, 3.9], [17.5, 3.9], [17.5, 3.4], [16, 3.4], [16, 3.9], [14.5, 3.9], [14.5, 3.2], [5.6, 3.2]];
+function hubArc() {
+  const out = [];
+  for (let t = 29.5; t <= 330.5; t += 4) {
+    const r = 6.5 + 1.9 * Math.exp(-(((t - 200) / 13) ** 2));
+    out.push([r * Math.cos((t * Math.PI) / 180), r * Math.sin((t * Math.PI) / 180)]);
+  }
+  return out;
+}
+const HANDLE = [...BLADE, ...hubArc()].map(([x, y]) => [H[0] + x, H[1] + y]); // at handle angle 0
+
+// The union of convex outlines that all contain c (a lever made of hulls round one pivot): it is
+// star-shaped from c, so its edge is, ray by ray, the farthest of the outlines' edges.
+function rayExit(poly, [cx, cy], dx, dy) {
+  let best = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const [ax, ay] = poly[i];
+    const [bx, by] = poly[(i + 1) % poly.length];
+    const ex = bx - ax;
+    const ey = by - ay;
+    const den = dx * ey - dy * ex;
+    if (Math.abs(den) < 1e-12) continue;
+    const wx = ax - cx;
+    const wy = ay - cy;
+    const t = (wx * ey - wy * ex) / den;
+    const s = (wx * dy - wy * dx) / den;
+    if (s >= -1e-9 && s <= 1 + 1e-9 && t > best) best = t;
+  }
+  return best;
+}
+function starUnion(c, polys, n = 144) {
+  return Array.from({ length: n }, (_, i) => {
+    const a = (i / n) * 2 * Math.PI;
+    const t = Math.max(...polys.map((p) => rayExit(p, c, Math.cos(a), Math.sin(a))));
+    return [c[0] + t * Math.cos(a), c[1] + t * Math.sin(a)];
+  });
+}
+
+const zx = (shape, from, to, o = {}) => S.extrude(shape, { along: "z", from, to, ...o });
+const zcyl = (at, r, from, to, o = {}) => S.cylinder({ axis: "z", at, r, from, to, ...o });
+
+// one layer of the bimetal at tip deflection f, as the sheet's biLayer (P.biShift is its bend)
+function biLayer(u0, u1, f) {
+  const left = [];
+  const right = [];
+  for (let v = 6; v <= P.BI_TIP + 1e-6; v += 1) {
+    const s = P.biShift(v, f);
+    left.push([u0 + s, v]);
+    right.push([u1 + s, v]);
+  }
+  return [...left, ...right.reverse()];
+}
+const BI = M.BI_S / 2;
+const BI_LAYERS = [[P.BI_BACK, P.BI_BACK + BI - 0.04], [P.BI_BACK + BI + 0.04, P.BI_BACK + 2 * BI]];
+
+// the braids, as the sheet's braids(): arm → runner, bimetal tip → load strip
+function braid1Line(a) {
+  const p = X.rotPt(P.BRAID1_ARM, MP, a);
+  return X.quad(p, [17, 54 + 0.3 * (p[1] - 62)], [13.2, 47.4], 14);
+}
+function braid2Line(f) {
+  const tip = P.biTip(f);
+  return X.quad([tip[0] - 0.2, tip[1]], [36.5, 25], [36.4, 18.4], 12);
+}
+const BRAID_W = 2; // half width across the module (4 mm² braid)
+
+// tension springs: built along +x from the origin at their rest length, posed by live3d.js
+const ARM_L0 = Math.hypot(P.SPRING_POST_ARM[0] - P.LUG_HOLE[0], P.SPRING_POST_ARM[1] - P.LUG_HOLE[1]);
+const HANDLE_L0 = Math.hypot(P.SPRING_POST_HANDLE[0] - P.handleLug(M.HANDLE_ON)[0], P.SPRING_POST_HANDLE[1] - P.handleLug(M.HANDLE_ON)[1]);
+const LINK_Z = 5.3; // the coupling link runs in front of the handle
+
+// a placeholder for a solid live3d.js rebuilds every frame (the current's dashes, the arc)
+const live = (name, c) => S.box([c[0] - 0.1, c[1] - 0.1, c[2] - 0.1], [c[0] + 0.1, c[1] + 0.1, c[2] + 0.1], { role: "ink", live: name });
+
+// ---------------------------------------------------------------- parts
+
+function parts() {
+  const back = { explode: [0, 0, -DZB] };
+  const front = { explode: [0, 0, DZF], front: true };
+  const half = (o, z0, z1, zs0, zs1, b0, b1) => [
+    zx(CASE_OUTLINE, zs0, zs1, o),
+    ...CASE_WALLS.map((w) => zx(w, z0, z1, o)),
+    ...[T, P.SPRING_POST_ARM, P.SPRING_POST_HANDLE].map((c) => zcyl(c, 1, z0, z1, o)),
+    S.tube({ axis: "z", at: H, r0: 1.55, r1: 8.6, from: b0, to: b1, ...o }),
+  ];
+  const plate = (v0) =>
+    S.extrude([[3.2, -6], [11, -6], [11, -3.2], [8.2, -0.4], [8, 0], [8.2, 0.4], [11, 3.2], [11, 6], [3.2, 6]], { along: "y", from: v0, to: v0 + 0.8 });
+  const cage = (vs) => [
+    S.box([39, vs - 6, -6], [40.2, vs + 6, 6]),
+    S.box([40.2, vs - 6, -6], [52.8, vs + 6, -4.8]),
+    S.box([40.2, vs - 6, 4.8], [52.8, vs + 6, 6]),
+    S.extrude(K.rect(-6, vs - 6, 6, vs + 6), { along: "x", from: 52.8, to: 54, holes: [S.circle(0, vs, 2.55, 48)] }),
+  ];
+  const screw = (vs) => [
+    S.lathe([[0, 47.8], [2.1, 47.8], [2.5, 48.2], [2.5, 54], [4.2, 54], [4.75, 55], [4.75, 57], [4.2, 57.5], [0, 57.5]], { axis: "x", at: [vs, 0] }),
+    S.disc([57.52, vs, 0], 1.6, { normal: "x", role: "mouth" }),
+  ];
+  const PL = P.plungerSpringDot(0, 0);
+  const cradle = starUnion(MP, [X.hullCircles([[...MP, 3.6], [...M.B0, 1.9]]), X.hullCircles([[...MP, 3.6], [...P.P0, 1.7]])]);
+  const cradleHoles = [S.circle(...MP, 1.05, 32), S.circle(...M.B0, 0.66, 20), S.circle(...P.P0, 0.66, 20)];
+  const pawl = starUnion(P.P0, [X.hullCircles([[...P.P0, 1.3], [...HOOK, 0.9]]), X.hullCircles([[...P.P0, 1.3], [...TAIL, 0.8]])]);
+  const crank = M.crankPin(0);
+  return [
+    S.part(1, "HOUSING HALF", [
+      ...half(back, -WALL, JOINT, -HALF, -WALL, -WALL, -4.6),
+      ...half(front, JOINT, WALL, WALL, HALF, 6, WALL),
+    ], { mat: "plastic", angle: 45, anchor: { cut: [1, 76, 0], out: { c: [20, 90, -4] }, solid: 1 } }),
+    S.part(2, "DIN RAIL CLIP", [zx(CLIP, -4, 4, { holes: [K.rrect(0.9, 4, 2.1, 20, 0.6)] })], {
+      mat: "plastic", angle: 135, explode: [4, -52, -DZB], anchor: { cut: [1.5, 23, 4] },
+    }),
+    S.part(3, "TERMINAL CAGE 12×14", [...cage(80), ...cage(10)], { mat: "steel", angle: 135, explode: up, anchor: { cut: [39.6, 84, 0] } }),
+    S.part(4, "SCREW M5×12", [...screw(80), ...screw(10)], { explode: up, anchor: { cut: [56, 83.3, 3.3] } }),
+    S.part(5, "LINE STRIP 6×1.6, UPPER RUNNER", [zx(LINE_STRIP, -3, 3), live("flow", [30, 71.2, 0])], { mat: "bronze", angle: 45, explode: up, anchor: { cut: [30, 71.2, 3] } }),
+    S.part(6, "FIXED CONTACT TIP", [zx(P.FIXED_TIP, -2, 2), live("flow", [16.5, 69.8, 0])], { mat: "brass", angle: 135, explode: up, anchor: { cut: [17.8, 69.8, 2] } }),
+    S.part(7, "LOWER ARC RUNNER", [zx(RUNNER, -3, 3), live("flow", [13.2, 50, 0])], { mat: "bronze", angle: 135, explode: up, anchor: { cut: [13.2, 54, 3] } }),
+    S.part(8, "SPLITTER PLATE 0.8, V-NOTCH", P.PLATE_V.map(plate), { mat: "steel", angle: 45, explode: up, anchor: { cut: [5, P.PLATE_V[6] + 0.4, 6] } }),
+    S.part(9, "COIL LEAD STRIP", [zx(LEAD_STRIP, -3, 3), live("flow", [20.5, 15, 0])], { mat: "bronze", angle: 45, explode: up, anchor: { cut: [20.5, 15, 3] } }),
+    // the arm: hub, bar, contact block, spring lug and the latch lug, a tab bent back to the pawl
+    S.part(10, "MOVING CONTACT ARM", [
+      S.tube({ axis: "z", at: MP, r0: 1.05, r1: 3.3, from: -2.4, to: 2.4 }),
+      zx(X.hullCircles([[19.2, 66.6, 1.4], [...MP, 3.2]]), -1.5, 1.5),
+      S.box([13.8, 65.4, -2.5], [20.2, 68, 2.5]),
+      zx(X.hullCircles([[...MP, 3.2], [...P.LUG_HOLE, 1.5]]), -0.8, 0.8, { holes: [S.circle(...P.LUG_HOLE, 0.6, 16)] }),
+      zx(K.rrect(30.6, 57.6, 33, 61, 0.4), -4.4, 0.5),
+      live("flow", [22, 64, 0]),
+    ], { mat: "bronze", angle: 135, pivot: [...MP, 0], explode: up, anchor: { cut: [22, 64.5, 1.5] } }),
+    S.part(11, "MOVING CONTACT TIP", [zx(P.MOVING_TIP, -2, 2)], { mat: "brass", angle: 45, pivot: [...MP, 0], explode: up, anchor: { cut: [17.6, 68.6, 2] } }),
+    S.part(12, "MAIN PIVOT PIN Ø2×12", [zcyl(MP, 1, -6, 6)], { explode: up, anchor: { cut: [MP[0], MP[1] + 0.4, 6] } }),
+    S.part(13, "CRADLE, 2 PLATES", [
+      zx(cradle, -5.4, -4.4, { holes: cradleHoles }),
+      zx(cradle, -3.4, -2.4, { holes: cradleHoles }),
+      zcyl(P.P0, 0.6, -5.6, -2.2),
+    ], { mat: "steel", angle: 135, pivot: [...MP, 0], explode: up, anchor: { cut: [40.5, 52.6, -2.4] } }),
+    S.part(14, "LATCH PAWL", [zx(pawl, -4.4, -3.4, { holes: [S.circle(...P.P0, 0.66, 20)] })], {
+      mat: "steel", angle: 45, pivot: [...P.P0, 0], explode: up, anchor: { cut: [32.2, 55.2, -3.4] },
+    }),
+    S.part(15, "TRIP LEVER", [zx(LEVER, -2, 2, { holes: [S.circle(...T, 1.05, 32)] })], { mat: "plastic", angle: 135, pivot: [...T, 0], explode: up, anchor: { cut: [28, 44, 2] } }),
+    // the coupling link in its own frame: from the crank pin (origin) along +x to the cradle pin
+    S.part(16, "COUPLING LINK Ø1.2", [
+      S.cylinder({ axis: "x", at: [0, LINK_Z], r: 0.6, from: 0, to: M.LINK }),
+      zcyl([0, 0], 0.6, -4.5, LINK_Z + 0.6),
+      zcyl([M.LINK, 0], 0.6, -5.6, LINK_Z + 0.6),
+    ], { hatch: "none", explode: up, anchor: { cut: [M.LINK * 0.55, 0, LINK_Z + 0.6] } }),
+    S.part(17, "TOGGLE HANDLE", [zx(HANDLE, -4.5, 4.5, { holes: [S.circle(...H, 1.55, 40), S.circle(...crank, 0.75, 20)] })], {
+      mat: "plastic", angle: 60, pivot: [...H, 0], explode: up, anchor: { cut: [H[0] + 22, H[1] - 3.6, 4.5] },
+    }),
+    S.part(18, "HANDLE PIN Ø3×14", [zcyl(H, 1.5, -7, 7)], { explode: up, anchor: { cut: [H[0] + 0.6, H[1] + 0.6, 7] } }),
+    S.part(19, "HANDLE SPRING", [S.helix({ axis: "x", at: [0, 0], from: 0, to: HANDLE_L0, radius: P.HANDLE_SPRING.radius, wire: P.HANDLE_SPRING.wire, turns: P.HANDLE_SPRING.turns + 3, pivot: [0, 0, 0], live: "coil" })], {
+      hatch: "solid", explode: up, anchor: { cut: [HANDLE_L0 * 0.55, P.HANDLE_SPRING.radius, 0.3], solid: 0 },
+    }),
+    S.part(20, "ARM SPRING", [S.helix({ axis: "x", at: [0, 0], from: 0, to: ARM_L0, radius: P.ARM_SPRING.radius, wire: P.ARM_SPRING.wire, turns: P.ARM_SPRING.turns, pivot: [0, 0, 0], live: "coil" })], {
+      hatch: "solid", explode: up, anchor: { cut: [ARM_L0 * 0.5, P.ARM_SPRING.radius, 0.3], solid: 0 },
+    }),
+    // ---- the solenoid, cut on its axis: coil on its former inside the yoke, the plunger and striker whole
+    S.part(21, "SOLENOID COIL, 7 TURNS Ø1.8", [
+      S.helix({ axis: "x", at: [VC, 0], from: 7.02, to: 21.48, radius: 4.7, wire: 1.8, turns: 7 }),
+      S.cylinder({ axis: "y", at: [7.9, 0], r: 0.85, from: VC + 4.7, to: 45 }),
+      S.cylinder({ axis: "y", at: [20.4, 0], r: 0.85, from: 28, to: VC - 4.7 }),
+    ], { hatch: "solid", explode: up, anchor: { cut: [12.9, VC + 4.7, 0] } }),
+    S.part(22, "COIL FORMER", [S.lathe([[3.2, 6.2], [6, 6.2], [6, 7], [3.8, 7], [3.8, 21.5], [6, 21.5], [6, 22.3], [3.2, 22.3]], { axis: "x", at: [VC, 0] })], {
+      mat: "plastic", angle: 135, explode: up, anchor: { cut: [6.6, VC + 5, 0] },
+    }),
+    S.part(23, "MAGNET YOKE WITH CORE", [
+      S.box([4.5, VC - 8, -4.5], [6, VC + 8, 4.5]),
+      S.box([6, VC - 8, -4.5], [22.5, VC - 6.5, 4.5]),
+      S.box([6, VC + 6.5, -4.5], [22.5, VC + 8, -1.2]),
+      S.box([6, VC + 6.5, 1.2], [22.5, VC + 8, 4.5]),
+      S.extrude(K.rect(-4.5, VC - 8, 4.5, VC + 8), { along: "x", from: 22.5, to: 24, holes: [S.circle(0, VC, 1.02, 32)] }),
+      S.lathe([[1.8, 18], [3, 18], [3, 22.5], [1.02, 22.5], [1.02, 20], [1.8, 20]], { axis: "x", at: [VC, 0] }),
+    ], { mat: "steel", angle: 45, explode: up, anchor: { cut: [5.2, VC, 0] } }),
+    S.part(24, "PLUNGER Ø6×6.5", [S.lathe([[0, 8.5], [2.6, 8.5], [3, 8.9], [3, 14.6], [2.6, 15], [0, 15]], { axis: "x", at: [VC, 0] })], {
+      explode: up, anchor: { cut: [11, VC + 2.1, 2.1] },
+    }),
+    S.part(25, "STRIKER PIN Ø1.6", [S.lathe([[0, 14], [0.8, 14], [0.8, P.strikerTip(0) - 0.3], [0.5, P.strikerTip(0)], [0, P.strikerTip(0)]], { axis: "x", at: [VC, 0] })], {
+      explode: up, anchor: { cut: [P.strikerTip(0) - 1.6, VC + 0.55, 0.55] },
+    }),
+    S.part(26, "PLUNGER SPRING", [S.helix({ axis: "x", at: [VC, 0], from: 15, to: 20, radius: 1.3, wire: 0.35, turns: 4, pivot: [20, VC, 0], live: "coil" })], {
+      hatch: "solid", explode: up, anchor: { cut: [PL[0], VC + 1.0, 0.8] },
+    }),
+    S.part(27, "FLEXIBLE BRAID 4 mm²", [
+      zx(X.band(braid1Line(0), 1.6), -BRAID_W, BRAID_W, { live: "b1" }),
+      zx(X.band(braid2Line(0), 1.6), -BRAID_W, BRAID_W, { live: "b2" }),
+      live("flow", [36, 22, 0]),
+    ], { mat: "rubber", angle: 45, explode: up, anchor: { cut: [...braid2Line(0)[6], BRAID_W] } }),
+    S.part(28, "BIMETAL 26×6×0.6", [
+      zx(biLayer(...BI_LAYERS[0], 0), -3, 3, { live: "la" }),
+      zx(biLayer(...BI_LAYERS[1], 0), -3, 3, { live: "lb" }),
+      zx([[P.BI_BACK, 6], [35, 6], [35, 6.6], [P.BI_BACK + 2 * BI, 6.6], [P.BI_BACK + 2 * BI, 7], [P.BI_BACK, 7]], -3, 3),
+      S.lathe([[0, 3.9], [0.75, 3.9], [0.75, 4.4], [0.4, 4.4], [0.4, 6.6], [0.8, 6.6], [0.8, 7.2], [0, 7.2]], { axis: "y", at: [33.8, 0], hatch: "none" }),
+      live("flow", [31.6, 15, 0]),
+    ], { hatch: "solid", explode: up, anchor: { cut: [P.BI_BACK + 2 * BI, 16, 1.5] } }),
+    S.part(29, "LOAD STRIP 6×1.6", [zx(LOAD_STRIP, -3, 3), live("flow", [42, 17.8, 0])], { mat: "bronze", angle: 45, explode: up, anchor: { cut: [41, 17.8, 3] } }),
+    S.part(30, "SET SCREW M2×4", [
+      S.lathe([[0, 27], [1, 27], [1, 30.8], [0.8, 31], [0, 31]], { axis: "x", at: [P.LEVER_SCREW_V, 0] }),
+    ], { pivot: [...T, 0], explode: up, anchor: { cut: [30.3, P.LEVER_SCREW_V + 0.7, 0.7] } }),
+    // the arc: no balloon, rebuilt by live3d.js while it burns
+    S.part(31, "ARC", [live("arc", [12, 60, 0])], { hatch: "none", explode: up }),
+  ];
+}
+
+// the mechanism: drawn whole, never cut (live3d.js); the arc too
+const WHOLE = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 24, 25, 26, 27, 28, 29, 30, 31];
+// the conductors that carry the current, in series: the accent glows on them
+const CONDUCTORS = [5, 6, 10, 11, 27, 7, 21, 9, 28, 29];
+
+// The current's centre line on each conductor, on its front face (z), in the part's rest frame.
+// The same points as the sheet's currentPath(); the braids and bimetal move, so they take the pose.
+const arc3 = (cx, cy, r, a0, a1, n) => K.arc(cx, cy, r, a0, a1, n).slice(1);
+function flowLines(S) {
+  const tip = P.biTip(S.f);
+  const bim = [];
+  for (let v = 6.4; v <= P.BI_TIP - 0.6 + 1e-6; v += 1) bim.push([P.BI_BACK + BI + P.biShift(v, S.f), v]);
+  return {
+    5: [{ z: 3.05, pts: [[47, 86], [47, 73.6], ...arc3(44.6, 73.6, 2.4, 0, -90, 3), [16.5, 71.2]] }],
+    6: [{ z: 2.05, pts: [[16.5, 70.4], [16.5, 69.2]] }],
+    10: [{ z: 1.55, pts: [[20.3, 64.95], [24.5, 62.2]] }],
+    27: [{ z: BRAID_W + 0.05, pts: braid1Line(S.a), group: "arm" }, { z: BRAID_W + 0.05, pts: [[tip[0] - 0.2, tip[1]], ...braid2Line(S.f).slice(1)], group: "low" }],
+    7: [{ z: 3.05, pts: [[13.2, 47.4], [13.2, 45.8], [8.6, 45.8]] }],
+    9: [{ z: 3.05, pts: [[20.5, 27.8], [20.5, 5.2], [31.2, 5.2]] }],
+    28: [{ z: 3.05, pts: bim, w: 0.45 }],
+    29: [{ z: 3.05, pts: [[36.4, 17.8], [44.6, 17.8], ...arc3(44.6, 15.4, 2.4, 90, 0, 3), [47, 4]] }],
+  };
+}
+
+// centre lines: the solenoid's axis and the terminal screws', riding with their parts
+const centres = () => [
+  { line: [[2, VC, 0], [27.5, VC, 0]], part: 23 },
+  { line: [[36.5, 80, 0], [59.5, 80, 0]], part: 4 },
+  { line: [[36.5, 10, 0], [59.5, 10, 0]], part: 4 },
+];
+
+const scene = () => ({ parts: parts(), fluids: [], centres: centres() });
+
+return { HALF, WALL, JOINT, LIFT, DZB, DZF, starUnion, biLayer, BI_LAYERS, braid1Line, braid2Line, BRAID_W, ARM_L0, HANDLE_L0, LINK_Z, parts, WHOLE, CONDUCTORS, flowLines, centres, scene };
+})();
+
+// Page code for circuit-breaker-3d.html (an ES module). Inlined above it: K (kit/draft.mjs), L (kit/live.mjs),
+// S (kit/solid3d.mjs), M (model.mjs, the 2D sheet's model, unchanged), X (extra.mjs), P (parts.mjs) and
+// SC (scene3d.mjs). The kit draws, frames, explodes and labels; this file runs the sheet's state machine
+// and tour (the same thermal and magnetic model, the same latch rules), poses the handle, the four-bar,
+// the latch, the trip lever, the plunger and the bimetal from it, and lights the current path and the arc.
+
+const $ = (id) => document.getElementById(id);
+const V = S.create({ scene: SC.scene() });
+const rad = Math.PI / 180;
+const H = (id) => V.part(id).holders;
+const shared = H(1)[0].mesh.material.uniforms; // the theme's tones and accent (shared uniform objects)
+
+// ---------------------------------------------------------------- fewer draw calls
+// Pieces of one part that never move apart (a case half, the plate stack, the cages, the yoke) are
+// merged into one mesh and one set of creases: they share a material and a frame.
+function mergeGeo(geos) {
+  const pos = [];
+  const nor = [];
+  const idx = [];
+  for (const g of geos) {
+    const base = pos.length / 3;
+    const p = g.attributes.position;
+    const n = g.attributes.normal;
+    for (let i = 0; i < p.count; i++) {
+      pos.push(p.getX(i), p.getY(i), p.getZ(i));
+      nor.push(n.getX(i), n.getY(i), n.getZ(i));
+    }
+    if (g.index) for (let i = 0; i < g.index.count; i++) idx.push(base + g.index.getX(i));
+    else for (let i = 0; i < p.count; i++) idx.push(base + i);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+  geo.setIndex(idx);
+  return geo;
+}
+const hide = (h) => {
+  h.mesh.visible = false;
+  if (h.lines) {
+    h.lines.userData.crease = false;
+    h.lines.visible = false;
+  }
+};
+function merge(id, keep) {
+  const hs = H(id).filter(keep);
+  const geo = mergeGeo(hs.map((h) => h.mesh.geometry));
+  hs[0].mesh.geometry.dispose();
+  hs[0].mesh.geometry = geo;
+  hs[0].lines.geometry.dispose();
+  hs[0].lines.geometry = new THREE.EdgesGeometry(geo, 35);
+  hs.slice(1).forEach(hide);
+}
+merge(1, (h) => !h.spec.front);
+merge(1, (h) => h.spec.front);
+for (const id of [3, 8, 23]) merge(id, () => true);
+merge(10, (h) => h.spec.live !== "flow");
+merge(13, () => true);
+
+// ---------------------------------------------------------------- whole parts, the front half, the accent
+// The mechanism is drawn whole: its materials get their own cut switch, held off (the case is cut).
+for (const id of SC.WHOLE) {
+  for (const h of H(id)) {
+    h.mesh.material.uniforms.uCutOn = { value: 0 };
+    if (h.lines) h.lines.material.uniforms.uCutOn = { value: 0 };
+  }
+}
+// The front half: assembled, the plane takes it all away; exploded, the plane sweeps out through it,
+// so it comes forward whole and shows the case from outside.
+for (const h of H(1)) {
+  if (!h.spec.front) continue;
+  for (const o of [h.mesh, h.lines]) {
+    const before = o.onBeforeRender;
+    o.onBeforeRender = function (...args) {
+      before?.apply(this, args);
+      o.material.uniforms.uShift.value.z = V.explode * (SC.DZF + SC.HALF + 0.6);
+    };
+  }
+}
+// The current's dashes and the arc are ink in the accent; their creases are not drawn.
+const FLOW = new Map();
+for (const id of [...SC.CONDUCTORS, 31]) {
+  for (const h of H(id)) {
+    if (h.spec.live !== "flow" && h.spec.live !== "arc") continue;
+    h.mesh.material.uniforms.uInk = shared.uAccent;
+    h.mesh.frustumCulled = false;
+    hide(h);
+    h.mesh.visible = false;
+    if (h.spec.live === "flow") FLOW.set(id, h);
+  }
+}
+const ARC = H(31)[0];
+// The conductors glow: their toon tones are pulled toward the accent while current flows.
+const GLOW = { uLit: 0.3, uMid: 0.55, uDark: 0.66 };
+const tone = new Map();
+for (const id of SC.CONDUCTORS) {
+  for (const h of H(id)) {
+    if (h.spec.live === "flow" || !h.mesh.visible) continue;
+    const t = { uLit: new THREE.Color(), uMid: new THREE.Color(), uDark: new THREE.Color(), k: -1 };
+    for (const k of Object.keys(GLOW)) h.mesh.material.uniforms[k] = { value: t[k] };
+    tone.set(h, t);
+  }
+}
+let themeGen = 0;
+new MutationObserver(() => {
+  themeGen++;
+  V.redraw();
+}).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+function glow(h, k) {
+  const t = tone.get(h);
+  if (!t || (t.k === k && t.gen === themeGen)) return;
+  for (const [u, m] of Object.entries(GLOW)) t[u].copy(shared[u].value).lerp(shared.uAccent.value, m * k);
+  t.k = k;
+  t.gen = themeGen;
+}
+
+// ---------------------------------------------------------------- state: the 2D sheet's, from the same model
+const ON = M.HANDLE_ON;
+const OFF = M.HANDLE_OFF;
+const s = {
+  load: M.LOAD_NORMAL,
+  dT: M.dTss(M.LOAD_NORMAL),
+  h: ON,
+  a: 0,
+  c: 0,
+  pawl: 0,
+  plunger: 0,
+  pulse: 0,
+  held: true,
+  latched: true,
+  tripped: false,
+  arc: -1,
+  arcSeed: 1,
+  phase: 0,
+  last: null,
+  loadSince: 0,
+  note: "",
+};
+let clock = 0;
+let dragging = false;
+let dragH = OFF;
+let auto = false; // Space: run the tour even while the reader is at the controls
+let pushUp = false;
+
+const f = () => M.deflection(s.dT);
+const current = () => (s.held && s.a < 0.5 ? s.load : 0);
+function stateName() {
+  if (s.held) return "closed";
+  if (s.tripped) return f() >= M.F_RESET || !s.latched ? "open" : "half";
+  return "off";
+}
+function trip(kind, I, t) {
+  s.latched = false;
+  s.held = false;
+  s.tripped = true;
+  s.arc = 0;
+  s.arcSeed = (s.arcSeed * 7 + 3) % 97;
+  s.last = { m: I / M.IN, t, kind, I };
+  if (kind === "MAGNETIC") s.pulse = 0.35;
+}
+function tryClose() {
+  if (!s.latched || s.held) return;
+  if (f() >= M.F_RESET) {
+    trip("HOT", s.load, 0);
+    s.arc = -1;
+    s.note = "RESET REFUSED: STILL HOT";
+    return;
+  }
+  s.held = true;
+  s.tripped = false;
+  s.loadSince = clock;
+  s.note = "";
+}
+
+// The tour, as on the sheet: normal load, an overload that trips on heat, the cool-down, a reset; a
+// short circuit that trips at once with an arc into the plates, a reset into the fault, then cleared.
+const tour = { i: 0, t: 0 };
+const PH = [
+  { load: M.LOAD_NORMAL, until: (t) => t > 4 },
+  { load: M.LOAD_OVER, until: () => s.tripped && !s.held },
+  { until: (t) => stateName() === "half" && s.h < OFF + 0.5 && tour.ready(t, 1.2) },
+  { load: M.LOAD_NORMAL, raise: true, until: (t) => t > 1.3 },
+  { until: (t) => t > 3 },
+  { load: M.LOAD_FAULT, until: (t) => t > 2.4 },
+  { raise: true, until: (t) => t > 2.2 },
+  { load: M.LOAD_NORMAL, raise: true, until: (t) => t > 1.4 },
+  { until: (t) => t > 2.6, next: 1 },
+];
+tour.ready = (t, wait) => {
+  if (tour.okAt == null) tour.okAt = t;
+  return t - tour.okAt > wait;
+};
+function tourStep(dt) {
+  const p = PH[tour.i];
+  if (tour.t === 0 && p.load != null) setLoad(p.load);
+  tour.t += dt;
+  const want = p.raise && tour.t < 1.1 ? OFF + (ON - OFF) * L.ease(tour.t / 0.9) : null;
+  if (p.until(tour.t)) {
+    tour.i = p.next ?? (tour.i + 1) % PH.length;
+    tour.t = 0;
+    tour.okAt = null;
+  }
+  return want;
+}
+function setLoad(I) {
+  if (I === s.load) return;
+  s.load = I;
+  s.loadSince = clock;
+}
+
+function step(dt, live) {
+  const n = Math.max(1, Math.ceil(dt * 480));
+  const h = dt / n;
+  const driven = (live.touring || auto) && !dragging;
+  for (let i = 0; i < n; i++) {
+    clock += h;
+    let want = s.held ? ON : OFF;
+    if (driven) {
+      const w = tourStep(h);
+      if (w != null) want = w;
+    }
+    if (pushUp) want = ON;
+    if (dragging) want = dragH;
+    const rate = want > s.h ? 16 : s.held ? 16 : 11;
+    s.h = live.reduced && !driven ? want : L.follow(s.h, want, rate, h);
+    if (!s.held && s.h >= ON - 1) {
+      tryClose();
+      pushUp = false;
+    }
+    if (s.held && s.h < ON - 12) s.held = false; // switched off by hand
+    if (!s.latched && s.h <= OFF + 1) s.latched = true; // the pawl drops back under the arm's lug
+    const c = M.cradleAngle(s.h);
+    s.a = L.follow(s.a, s.latched ? c : M.ARM_OPEN, s.latched ? 40 : 55, h);
+    s.c = c;
+    const I = current();
+    if (I > 0 && I >= M.IM) {
+      const tm = M.magneticTime(I);
+      s.dT += (I * I * M.R_BI * tm) / M.C_TH;
+      trip("MAGNETIC", I, tm);
+    } else {
+      s.dT = M.heat(s.dT, I, h);
+      if (I > 0 && f() >= M.F_TRIP) trip("THERMAL", I, clock - s.loadSince);
+    }
+    if (s.pulse > 0) s.pulse -= h;
+    s.plunger = L.follow(s.plunger, s.pulse > 0 ? M.GAP_G : 0, s.pulse > 0 ? 70 : 18, h);
+    s.pawl = L.follow(s.pawl, !s.latched && c < 4 ? 24 : 0, 30, h);
+    if (s.arc >= 0) {
+      s.arc += h / 0.5;
+      if (s.arc > 1) s.arc = -1;
+    }
+    s.phase += h * (I > 0 || s.arc >= 0 ? 4 + 5 * Math.log10(1 + Math.max(I, s.arc >= 0 ? s.load : 0)) : 0);
+  }
+  return true;
+}
+
+// ---------------------------------------------------------------- poses from the model
+const LINK0 = 0;
+function pose(S) {
+  V.set(17, { rot: [0, 0, S.h * rad] });
+  V.set(13, { rot: [0, 0, S.c * rad] });
+  for (const id of [10, 11]) V.set(id, { rot: [0, 0, S.a * rad] });
+  const P0 = X.rotPt(P.P0, P.MP, S.c);
+  V.set(14, { pos: [P0[0] - P.P0[0], P0[1] - P.P0[1], 0], rot: [0, 0, (S.c + S.pawl) * rad] });
+  for (const id of [15, 30]) V.set(id, { rot: [0, 0, -S.lever * rad] });
+  const A = M.crankPin(S.h);
+  const B = X.rotPt(M.B0, P.MP, S.c);
+  V.set(16, { pos: [A[0], A[1], 0], rot: [0, 0, Math.atan2(B[1] - A[1], B[0] - A[0]) - LINK0] });
+  for (const id of [24, 25]) V.set(id, { pos: [S.plunger, 0, 0] });
+  V.solid(26, "coil").scale.x = (20 - (15 + S.plunger)) / 5;
+  spring(20, X.rotPt(P.LUG_HOLE, P.MP, S.a), P.SPRING_POST_ARM, SC.ARM_L0);
+  spring(19, P.handleLug(S.h), P.SPRING_POST_HANDLE, SC.HANDLE_L0);
+}
+function spring(id, a, b, l0) {
+  V.set(id, { pos: [a[0], a[1], 0], rot: [0, 0, Math.atan2(b[1] - a[1], b[0] - a[0])] });
+  V.solid(id, "coil").scale.x = Math.hypot(b[0] - a[0], b[1] - a[1]) / l0;
+}
+const poseOf = () => ({ h: s.h, c: M.cradleAngle(s.h), a: s.a, pawl: s.pawl, lever: M.leverAngle(f(), s.plunger), plunger: s.plunger, f: f() });
+const at = (h, a) => ({ h, c: M.cradleAngle(h), a, pawl: 0, lever: 0, plunger: 0, f: 0 });
+V.frame([() => pose(at(ON, 0)), () => pose(at(OFF, M.ARM_OPEN))]);
+
+// ---------------------------------------------------------------- the current's dashes and the arc
+// Dashes on a conductor's front face, marching from the line terminal to the load terminal.
+const DASH = 1.5;
+const PERIOD = 3.6;
+function dashes(lines, phase, quads = []) {
+  for (const { pts, z, w = 0.75 } of lines) {
+    let s0 = 0;
+    for (let i = 0; i + 1 < pts.length; i++) {
+      const [ax, ay] = pts[i];
+      const [bx, by] = pts[i + 1];
+      const len = Math.hypot(bx - ax, by - ay);
+      if (len < 1e-6) continue;
+      const ux = (bx - ax) / len;
+      const uy = (by - ay) / len;
+      const k0 = Math.floor((s0 - phase) / PERIOD) - 1;
+      for (let k = k0; ; k++) {
+        const d0 = k * PERIOD + phase;
+        if (d0 > s0 + len) break;
+        const a = Math.max(s0, d0);
+        const b = Math.min(s0 + len, d0 + DASH);
+        if (b - a > 0.05) quads.push([ax + ux * (a - s0), ay + uy * (a - s0), ax + ux * (b - s0), ay + uy * (b - s0), -uy, ux, z, w]);
+      }
+      s0 += len;
+    }
+  }
+  return quads;
+}
+function quadGeo(quads) {
+  const pos = [];
+  const nor = [];
+  const idx = [];
+  for (const [ax, ay, bx, by, nx, ny, z, w] of quads) {
+    const b = pos.length / 3;
+    const o = w / 2;
+    pos.push(ax + nx * o, ay + ny * o, z, ax - nx * o, ay - ny * o, z, bx - nx * o, by - ny * o, z, bx + nx * o, by + ny * o, z);
+    nor.push(0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1);
+    idx.push(b + 1, b + 2, b + 3, b + 1, b + 3, b);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+  geo.setIndex(idx);
+  return geo;
+}
+function setGeo(h, geo) {
+  h.mesh.geometry.dispose();
+  h.mesh.geometry = geo;
+}
+// The arc as P.arcPaths gives it: a crackling column between the contacts and up the runners, then
+// short arcs in series in the gaps between the splitter plates, across their full width, dying out.
+function arcGeo(S, lam, seed) {
+  const paths = P.arcPaths(S, lam, seed);
+  const geos = [];
+  if (lam < 0.75) {
+    for (const p of paths) {
+      const curve = new THREE.CatmullRomCurve3(p.map(([x, y]) => new THREE.Vector3(x, y, 0)));
+      geos.push(new THREE.TubeGeometry(curve, p.length * 4, 0.45, 6, false));
+    }
+  } else {
+    const w = 0.5 * (1 - (lam - 0.75) / 0.25) + 0.12;
+    for (const p of paths) {
+      const u = p.reduce((a, q) => a + q[0], 0) / p.length;
+      const v0 = Math.min(...p.map((q) => q[1]));
+      const v1 = Math.max(...p.map((q) => q[1]));
+      geos.push(new THREE.BoxGeometry(w, v1 - v0, 11.2).translate(u, (v0 + v1) / 2, 0.4));
+    }
+  }
+  return mergeGeo(geos);
+}
+
+// ---------------------------------------------------------------- render
+let shownF = -1;
+let shownA = -1e9;
+const say = L.announcer($("sr"), 2);
+function render(live) {
+  const S = poseOf();
+  pose(S);
+  // the bimetal bends and the braids follow (rebuilt only when they move)
+  if (Math.abs(S.f - shownF) > 0.004) {
+    V.reshape(28, "la", { shape: SC.biLayer(...SC.BI_LAYERS[0], S.f) });
+    V.reshape(28, "lb", { shape: SC.biLayer(...SC.BI_LAYERS[1], S.f) });
+    V.reshape(27, "b2", { shape: X.band(SC.braid2Line(S.f), 1.6) });
+    shownF = S.f;
+  }
+  if (Math.abs(S.a - shownA) > 0.02) {
+    V.reshape(27, "b1", { shape: X.band(SC.braid1Line(S.a), 1.6) });
+    shownA = S.a;
+  }
+  // the current path: lit while current flows or an arc burns; once the arc has left the contacts
+  // for the runners, the arm and its braid carry nothing
+  const I = current();
+  const arcing = s.arc >= 0;
+  const lit = I > 0 || arcing;
+  const armLit = I > 0 || (arcing && s.arc < 0.4);
+  const assembled = V.explode < 0.02;
+  const lines = SC.flowLines(S);
+  for (const id of SC.CONDUCTORS) {
+    const on = id === 6 || id === 10 || id === 11 ? armLit : lit;
+    for (const h of H(id)) {
+      if (!tone.has(h)) continue;
+      glow(h, (id === 27 ? (h.spec.live === "b1" ? armLit : lit) : on) ? 1 : 0);
+    }
+    const fh = FLOW.get(id);
+    if (!fh) continue;
+    const ls = (lines[id] ?? []).filter((l) => (id === 27 && l.group === "arm") || id === 10 || id === 6 ? armLit : lit);
+    const show = assembled && ls.length > 0 && lit;
+    fh.mesh.visible = show;
+    if (show) setGeo(fh, quadGeo(dashes(ls, s.phase % PERIOD)));
+  }
+  ARC.mesh.visible = arcing && assembled;
+  if (ARC.mesh.visible) setGeo(ARC, arcGeo(S, s.arc, s.arcSeed + Math.floor(s.arc * 24)));
+
+  const name = stateName();
+  const label = { closed: "CLOSED", open: "OPEN", half: "HALF-OPEN", off: "OFF" }[name];
+  let tail;
+  if (name === "closed") {
+    const tt = M.timeToTrip(I, s.dT);
+    tail = I >= M.IM ? "TRIP NOW" : Number.isFinite(tt) ? `TRIP IN ${tt.toFixed(1)} s` : "NO TRIP";
+  } else if (name === "open") {
+    tail = s.note || (s.last && s.last.kind === "MAGNETIC" ? `MAGNETIC TRIP IN ${(s.last.t * 1000).toFixed(1)} ms` : `RESET IN ${M.coolTime(s.dT).toFixed(1)} s`);
+    if (!s.note && s.last && s.last.kind === "MAGNETIC" && f() >= M.F_RESET) tail = `RESET IN ${M.coolTime(s.dT).toFixed(1)} s`;
+  } else if (name === "half") tail = "RESET ARMED";
+  else tail = "SWITCHED OFF";
+  if (name === "closed") s.note = "";
+  const amps = I > 0 ? `${I.toFixed(I >= 100 ? 0 : 1)} A = ${(I / M.IN).toFixed(2)} In` : "0 A";
+  $("readout").textContent = `${label} · I ${amps} · ΔT ${Math.round(s.dT)} K · f ${S.f.toFixed(2)} mm · ${tail}`;
+  say(`${label}. Current ${Math.round(I)} amps, bimetal ${Math.round(s.dT)} kelvin above ambient. ${tail.toLowerCase()}.`, live.clock);
+  $("tour")?.setAttribute("aria-pressed", String(auto));
+  for (const [b, I0] of LOAD_BUTTONS) $(b)?.setAttribute("aria-pressed", String(s.load === I0));
+}
+
+// ---------------------------------------------------------------- controls, as on the sheet
+// drag the handle down to switch off, up to switch on (or reset): the tip moves 19 mm along -y
+const TRAVEL = 2 * 27.6 * Math.sin(((ON - OFF) / 2) * rad);
+V.drag([17], {
+  axis: [0, -1, 0],
+  length: TRAVEL,
+  start: () => {
+    dragging = true;
+    auto = false;
+    dragH = s.h;
+    return (ON - s.h) / (ON - OFF);
+  },
+  move: (v) => (dragH = ON - Math.min(1, Math.max(0, v)) * (ON - OFF)),
+  end: () => (dragging = false),
+});
+const LOADS = [0, 6, 12, 16, 18, 20, 24, 30, 40, 50, 64, 100, 200, 480];
+const LOAD_BUTTONS = [["normal", M.LOAD_NORMAL], ["over", M.LOAD_OVER], ["short", M.LOAD_FAULT]];
+const nudgeLoad = (d) => () => {
+  const i = LOADS.findIndex((v) => v >= s.load - 1e-9);
+  setLoad(LOADS[Math.min(LOADS.length - 1, Math.max(0, (i < 0 ? LOADS.length - 1 : i) + d))]);
+  auto = false;
+};
+V.key("ArrowUp", () => ((pushUp = !s.held), (auto = false)));
+V.key("ArrowDown", () => {
+  pushUp = false;
+  auto = false;
+  if (s.held) s.held = false;
+});
+V.key("ArrowRight", nudgeLoad(1));
+V.key("ArrowLeft", nudgeLoad(-1));
+V.key("n", () => setLoad(M.LOAD_NORMAL));
+V.key("o", () => setLoad(M.LOAD_OVER));
+V.key("x", () => setLoad(M.LOAD_FAULT));
+V.key(" ", () => (auto = !auto));
+for (const [b, I0] of LOAD_BUTTONS) {
+  $(b)?.addEventListener("click", () => {
+    auto = false;
+    setLoad(I0);
+    V.input();
+  });
+}
+$("tour")?.addEventListener("click", () => {
+  auto = !auto;
+  V.input();
+});
+
+// the page's own self-tests (?selftest=1)
+V.test("dragging the handle down switches off", ({ ptr, project }) => {
+  const g = project(X.rotPt([P.H[0] + 22, P.H[1]], P.H, s.h).concat(4.5));
+  const h0 = s.h;
+  ptr("pointerdown", g[0], g[1]);
+  ptr("pointermove", g[0], g[1] + 80);
+  const h1 = dragH;
+  ptr("pointerup", g[0], g[1] + 80);
+  return { pass: dragging === false && h1 < h0 - 10, info: [h0, h1] };
+});
+V.test("arrow right raises the current", ({ key }) => {
+  const a = s.load;
+  key("ArrowRight");
+  const b = s.load;
+  key("ArrowLeft");
+  return { pass: b > a, info: [a, b] };
+});
+V.test("a short circuit trips at once", () => {
+  const keep = JSON.stringify(s);
+  Object.assign(s, { held: true, latched: true, tripped: false, h: ON, a: 0, load: M.LOAD_FAULT, dT: 0 });
+  step(1 / 240, { touring: false, reduced: false });
+  const ok = s.tripped && s.last.kind === "MAGNETIC";
+  Object.assign(s, JSON.parse(keep));
+  return { pass: ok, info: s.last };
+});
+V.test("space toggles the tour", ({ key }) => {
+  const a = auto;
+  key(" ");
+  const b = auto;
+  key(" ");
+  return { pass: a !== b, info: [a, b] };
+});
+
+V.run({ step, render, still: 9, idleAfter: 8 });
+
+</script>
+</body>
+</html>

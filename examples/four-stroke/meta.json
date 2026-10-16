@@ -5,11 +5,34 @@
   "object": "125 cc air-cooled DOHC single in section through the cylinder and valve axes",
   "idea": "Turning heat into rotation through a four-phase cycle",
   "summary": "An Otto cycle in a finned cylinder. The cams, turning at half crank speed, open each valve by the lift their profile gives; a computed cycle at 6000 rpm (CR 9.2, 58 bar peak) sets the gas, which changes from fresh charge to a flame growing from the plug to burned gas. The P–V diagram traces the loop as the crank turns, with the pumping loop visible on its log scale.",
-  "usedFor": ["Engineering and physics courses: the Otto cycle, valve timing, slider-crank kinematics", "Product and service documentation for small engines and motorcycles", "A software-concept explainer: a four-stage pipeline (fetch, decode, execute, writeback) with overlapping stages"],
+  "usedFor": [
+    "Engineering and physics courses: the Otto cycle, valve timing, slider-crank kinematics",
+    "Product and service documentation for small engines and motorcycles",
+    "A software-concept explainer: a four-stage pipeline (fetch, decode, execute, writeback) with overlapping stages"
+  ],
   "domain": "Thermodynamics",
   "parts": 29,
-  "views": ["Axial section 1:1", "Detail C chamber, seats and plug 2:1", "Detail B ring pack 2:1", "Diagram 1 P–V (log p)", "Diagram 2 valve lift against crank angle"],
+  "views": [
+    "Axial section 1:1",
+    "Detail C chamber, seats and plug 2:1",
+    "Detail B ring pack 2:1",
+    "Diagram 1 P–V (log p)",
+    "Diagram 2 valve lift against crank angle"
+  ],
   "controls": "Drag the crank · ← → turn · Space runs · S slow motion",
   "checkTimes": "0,0.6,1.3,2,2.7,3.4,4.1,4.6,5.3,6,6.7,7.4,7.95,8.6",
-  "shotT": 4.1
+  "shotT": 4.1,
+  "has3d": true,
+  "shot3d": {
+    "view": "iso",
+    "cut": 1,
+    "zoom": 1.45,
+    "look": [
+      0,
+      135,
+      0
+    ],
+    "t": 1
+  },
+  "controls3d": "Drag the crank to turn it · ← → turn 10° · Space runs · E explodes (head up, barrel and piston up, crank down) · C cut · S slow motion"
 }

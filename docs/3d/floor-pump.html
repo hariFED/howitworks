@@ -1398,8 +1398,12 @@ const PRISM = {
 function extrudeGeometry({ shape, holes = [], along, from, to, bevel = 0, conform }) {
   // local (X, Y) is the outline, local Z the sweep; rotations below put them on (a, b, s)
   const flip = along === "y" ? ([a, b]) => [a, -b] : along === "x" ? ([a, b]) => [-a, b] : (p) => p;
-  const sh = new THREE.Shape(shape.map((p) => new THREE.Vector2(...flip(p))));
-  for (const hole of holes) sh.holes.push(new THREE.Path(hole.map((p) => new THREE.Vector2(...flip(p)))));
+  // three.js only fixes hole winding when it reverses the outline, so normalise both here, after the
+  // flip: outline clockwise, holes counter-clockwise. Any input winding then gives outward hole walls.
+  const area = (pts) => pts.reduce((s, [x0, y0], i) => { const [x1, y1] = pts[(i + 1) % pts.length]; return s + x0 * y1 - x1 * y0; }, 0);
+  const wind = (pts, cw) => ((area(pts) < 0) === cw ? pts : pts.slice().reverse());
+  const sh = new THREE.Shape(wind(shape.map(flip), true).map((p) => new THREE.Vector2(...p)));
+  for (const hole of holes) sh.holes.push(new THREE.Path(wind(hole.map(flip), false).map((p) => new THREE.Vector2(...p))));
   const geo = new THREE.ExtrudeGeometry(sh, {
     depth: to - from - 2 * bevel,
     bevelEnabled: bevel > 0,
