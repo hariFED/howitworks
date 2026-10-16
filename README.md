@@ -1,3 +1,5 @@
+<img src="assets/logo.svg" width="72" alt="howitworks logo: a gear cut in half, the cut face hatched">
+
 # howitworks
 
 *Inspired by [Anatomy](https://skills.wheresryan.sh/anatomy), the Claude Code skill by Ryan ([@wheresryan22](https://x.com/wheresryan22)). Anatomy draws the machine; howitworks drafts the engineering drawing. Not affiliated with or endorsed by Anatomy.*

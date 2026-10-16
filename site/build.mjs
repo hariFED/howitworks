@@ -5,6 +5,7 @@ import { execFileSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import * as LOGO from "./logo.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "docs");
@@ -122,6 +123,11 @@ for (const theme of ["blueprint", "paper", "white", "dark"]) {
 }
 if (shots || !existsSync(join(out, "og.png"))) shot(join(root, "examples", "escapement", "escapement.html"), join(out, "og.png"), ["--zoom", pad(CROPS.escapement, 0.04, 1200 / 630).join(","), "--width", "1200", "--height", "630", "--t", "3", "--theme", "white"]);
 writeFileSync(join(out, ".nojekyll"), "");
+// the logo, as a standalone file: the favicon here, and assets/logo.svg for the README
+const logoSvg = LOGO.mark({ size: 64, ink: "#171717", accent: "#e2552c", id: "hiw" });
+writeFileSync(join(out, "logo.svg"), logoSvg);
+mkdirSync(join(root, "assets"), { recursive: true });
+writeFileSync(join(root, "assets", "logo.svg"), logoSvg);
 
 // ---- shared pieces
 const total = sheets.length;
@@ -162,10 +168,11 @@ p{margin:0 0 12px}
 .side{grid-column:2;position:sticky;top:0;align-self:start;height:100vh;padding:40px 0 0;font-size:13px;line-height:20px}
 .side a{display:block;color:var(--muted);text-decoration:none;position:relative}
 .side a:hover,.side a.on{color:var(--ink)}
-.side .brand{color:var(--ink);font-weight:500;display:flex;gap:8px;align-items:center;margin-left:-26px}
-.side .brand svg{width:18px;height:18px;flex:none}
+.side .brand{color:var(--ink);font-weight:500;display:flex;gap:7px;align-items:center;margin-left:-27px}
+.side .brand svg{width:20px;height:20px;flex:none}
 .side .group{margin:0 0 22px}
-.side .ptr{position:absolute;left:-24px;width:16px;height:20px;color:var(--accent);transition:top .35s cubic-bezier(.3,.7,.2,1);pointer-events:none}
+.side .ptr{position:absolute;left:-24px;width:15px;height:15px;margin-top:2.5px;transition:top .35s cubic-bezier(.3,.7,.2,1),opacity .2s;pointer-events:none}
+.side .ptr-g{transform-origin:8px 8px;transition:transform .35s cubic-bezier(.3,.7,.2,1)}
 .main{grid-column:3;grid-row:1;padding:40px 0 80px;min-width:0}
 .side{grid-row:1 / span 2}
 .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
@@ -302,8 +309,8 @@ footer a{color:var(--muted)}
 }
 `;
 
-const MARK = `<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 12.5h15M12.5 1.5v15" stroke="currentColor" stroke-width=".7"/><circle cx="6.8" cy="6.8" r="2.6" fill="none" stroke="var(--accent)" stroke-width="1.3"/><path d="M6.8 3.2v7.2M3.2 6.8h7.2" stroke="var(--accent)" stroke-width=".6"/></svg>`;
-const PTR = `<svg class="ptr" viewBox="0 0 16 20" aria-hidden="true"><path d="M1 10h9" stroke="currentColor" stroke-width="1"/><path d="M15 10l-6-3v6z" fill="currentColor"/></svg>`;
+const MARK = LOGO.mark({ size: 20, ink: "currentColor", accent: "var(--accent)", id: "hiw-side", title: "howitworks" });
+const PTR = LOGO.pointer();
 
 const TOC = [
   ["cut", "Sections, not diagrams"], ["prompt", "Writing a prompt"], ["does", "What Claude does"],
@@ -354,7 +361,7 @@ const SCRIPT = `<script>
   var brand = document.querySelector(".side .brand");
   var place = function (a) {
     Object.keys(links).forEach(function (k) { links[k].classList.toggle("on", links[k] === a); });
-    if (ptr) ptr.style.top = ((a || brand).offsetTop + (a ? 0 : 0)) + "px";
+    if (ptr) { ptr.style.opacity = a ? "1" : "0"; ptr.style.top = (a || brand).offsetTop + "px"; var g = ptr.querySelector(".ptr-g"); if (g) g.style.transform = "rotate(" + Math.round(scrollY * 0.35) + "deg)"; }
   };
   place(null);
   if (ptr && "IntersectionObserver" in window) {
@@ -387,6 +394,7 @@ const head = (title, desc) => `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
 <meta name="description" content="${esc(desc)}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
