@@ -157,6 +157,11 @@ const CSS = `
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+.lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
+.lenis.lenis-stopped{overflow:hidden}
+html.motion .rv{opacity:0;transform:translateY(18px)}
 body{margin:0;background:var(--page);color:var(--ink);font:450 14px/20.5px var(--sans);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
 a{color:inherit;text-decoration:underline;text-decoration-color:var(--link-line);text-underline-offset:3px}
 a:hover{text-decoration-color:var(--ink)}
@@ -337,7 +342,59 @@ Made by hariFED with Claude Code. Set in Inter, EB Garamond and JetBrains Mono.<
 Inspired by <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a>, the Claude Code skill by Ryan (<a href="https://x.com/wheresryan22">@wheresryan22</a>), which draws the machine; howitworks draws the drawing. Not affiliated with or endorsed by Anatomy.
 </footer>`;
 
-const SCRIPT = `<script>
+const MOTION = `<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+<script>
+// Smooth scroll and reveals. Nothing here is required: without the libraries, or under reduced
+// motion, the page scrolls natively and every element is visible.
+addEventListener("DOMContentLoaded", function () {
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || !window.gsap || !window.ScrollTrigger || !window.Lenis) return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  var lenis = new Lenis({ duration: 1.15, easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); }, smoothWheel: true });
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+  gsap.ticker.lagSmoothing(0);
+
+  // in-page links glide instead of jumping
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      var id = a.getAttribute("href");
+      var el = id.length > 1 && document.querySelector(id);
+      if (!el && id !== "#") return;
+      e.preventDefault();
+      lenis.scrollTo(el || 0, { offset: -24, duration: 1.4 });
+      history.replaceState(null, "", id);
+    });
+  });
+
+  // reveals: section headings and blocks rise in; grids stagger item by item
+  document.documentElement.classList.add("motion");
+  var blocks = document.querySelectorAll(".main section > h2, .main section > p, .main section > .rows, .main section > .card, .main section > .steps, .main section > table, .main section > .rules, .main section > .uses, .main section > .themes, .main section > pre, .main section > .install, .main section > details, .main .wide, .coll .cards > article");
+  blocks.forEach(function (el) { el.classList.add("rv"); });
+  blocks.forEach(function (el) {
+    gsap.to(el, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 88%", once: true } });
+  });
+  document.querySelectorAll(".grid, .six").forEach(function (g) {
+    var items = g.children;
+    gsap.set(items, { opacity: 0, y: 14 });
+    gsap.to(items, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.035, scrollTrigger: { trigger: g, start: "top 86%", once: true } });
+  });
+  // the header row of objects floats in on load
+  gsap.from(".minis a", { opacity: 0, y: 10, duration: 0.7, ease: "power2.out", stagger: 0.06, delay: 0.1 });
+
+  // the margin gear rolls with the smoothed scroll
+  var g = document.querySelector(".ptr-g");
+  if (g) lenis.on("scroll", function (e) { g.style.transform = "rotate(" + Math.round(e.scroll * 0.35) + "deg)"; });
+
+  // anything already on screen at load (or after a hash jump) shows at once
+  ScrollTrigger.refresh();
+  if (location.hash && document.querySelector(location.hash)) lenis.scrollTo(location.hash, { immediate: true, offset: -24 });
+});
+</script>`;
+const SCRIPT = MOTION + `<script>
 (function () {
   // live iframes start when they come near the screen, in the page's colour scheme
   var fit = function (f) {
