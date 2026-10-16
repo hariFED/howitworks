@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collection · Blueprint</title>
+<meta name="description" content="All 21 Blueprint sheets: live engineering drawings that explain mechanisms and ideas.">
+<meta property="og:title" content="Collection · Blueprint">
+<meta property="og:description" content="All 21 Blueprint sheets: live engineering drawings that explain mechanisms and ideas.">
+<meta property="og:image" content="og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#fafafa; --ink:#171717; --soft:#404040; --muted:#8a8a8a; --faint:#b5b5b5; --rule:#e8e8e8; --card:#fff;
+  --code:#f0f0f0; --accent:#c8442b; --link-line:#c9c9c9;
+  --sans:"Inter",system-ui,sans-serif; --serif:"EB Garamond",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:#111214; --ink:#ececec; --soft:#c4c4c4; --muted:#8c8c8c; --faint:#5a5a5a; --rule:#26282b; --card:#17191c;
+  --code:#1f2226; --accent:#f08a5d; --link-line:#4a4a4a; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --page:#111214; --ink:#ececec; --soft:#c4c4c4; --muted:#8c8c8c; --faint:#5a5a5a; --rule:#26282b; --card:#17191c;
+  --code:#1f2226; --accent:#f08a5d; --link-line:#4a4a4a; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--page);color:var(--ink);font:450 14px/20.5px var(--sans);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+a{color:inherit;text-decoration:underline;text-decoration-color:var(--link-line);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--ink)}
+em.s,.s{font-family:var(--serif);font-style:italic;font-size:1.08em;letter-spacing:.005em}
+code,kbd{font-family:var(--mono);font-size:11.5px;background:var(--code);border-radius:3px;padding:1px 4px}
+kbd{border:1px solid var(--rule);border-bottom-width:2px;background:var(--card)}
+p{margin:0 0 12px}
+.layout{display:grid;grid-template-columns:minmax(16px,1fr) 180px 550px 230px minmax(16px,1fr);column-gap:0;min-height:100vh}
+.side{grid-column:2;position:sticky;top:0;align-self:start;height:100vh;padding:40px 0 0;font-size:13px;line-height:20px}
+.side a{display:block;color:var(--muted);text-decoration:none;position:relative}
+.side a:hover,.side a.on{color:var(--ink)}
+.side .brand{color:var(--ink);font-weight:500;display:flex;gap:8px;align-items:center;margin-left:-26px}
+.side .brand svg{width:18px;height:18px;flex:none}
+.side .group{margin:0 0 22px}
+.side .ptr{position:absolute;left:-24px;width:16px;height:20px;color:var(--accent);transition:top .35s cubic-bezier(.3,.7,.2,1);pointer-events:none}
+.main{grid-column:3;grid-row:1;padding:40px 0 80px;min-width:0}
+.side{grid-row:1 / span 2}
+.head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.head b{font-weight:550}
+.head span{color:var(--muted)}
+.head .icons{display:flex;gap:12px;color:var(--muted)}
+.head .icons a{text-decoration:none}
+.tag{font-size:14px;margin:0 0 16px}
+.minis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.minis a{display:block;text-decoration:none}
+.minis img{display:block;width:100%;height:auto;border-radius:3px;opacity:.92;transition:opacity .2s}
+.minis a:hover img{opacity:1}
+.meta{display:flex;flex-wrap:wrap;gap:4px 10px;color:var(--muted);font-size:12.5px;margin:12px 0 26px}
+.meta a{color:var(--muted)}
+.meta i{font-style:normal;color:var(--faint)}
+.sn-ref{font-size:9px;vertical-align:super;color:var(--muted);margin-left:1px}
+.sn{float:right;clear:right;width:200px;margin:2px -260px 10px 0;font-size:11.5px;line-height:16px;color:var(--muted);position:relative}
+.sn b{font-weight:450;color:var(--muted);margin-right:4px}
+.wide{position:relative;width:780px;margin:36px 0 30px}
+.wide.side-by .controls{position:absolute;left:calc(100% + 24px);bottom:6px;width:170px}
+.frame{position:relative;aspect-ratio:1200/890;border-radius:4px;overflow:hidden;background:var(--card);box-shadow:0 0 0 1px var(--rule)}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.controls{font-size:12px;line-height:20px;color:var(--muted)}
+.controls div{display:flex;gap:8px;align-items:center;margin:4px 0}
+.controls kbd{min-width:20px;text-align:center}
+.controls .read{margin-top:10px;color:var(--soft)}
+section{padding-top:56px;clear:both}
+h2{display:flex;align-items:center;gap:14px;font-size:14px;font-weight:550;margin:0 0 18px;scroll-margin-top:24px}
+h2::after{content:"";flex:1;height:1px;background:var(--rule);order:1}
+h2 .n{order:2;font-family:var(--serif);font-style:italic;font-weight:400;color:var(--muted);font-size:15px}
+.quote{font-family:var(--serif);font-size:25px;line-height:1.2;margin:26px 0 4px;letter-spacing:-.005em}
+.quote-src{color:var(--muted);font-size:12px;margin:0 0 22px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px 10px;margin:26px 0 22px;text-align:center}
+.grid a{text-decoration:none;display:block}
+.grid img{display:block;width:100%;height:auto;border-radius:3px;margin-bottom:6px}
+.grid b{display:block;font-weight:500;font-size:12px;line-height:15px}
+.grid span{display:block;color:var(--muted);font-size:11.5px;line-height:15px}
+.rows{display:grid;grid-template-columns:120px 1fr;column-gap:14px;margin:18px 0;border-top:1px solid var(--rule)}
+.rows>div{padding:9px 0;border-bottom:1px solid var(--rule)}
+.rows>div:nth-child(odd){color:var(--muted)}
+.rows code{font-size:11px}
+.card{background:var(--card);border-radius:8px;box-shadow:0 0 0 1px var(--rule),0 1px 2px rgba(0,0,0,.03);padding:6px 14px;margin:18px 0}
+.card .rows{border-top:0;margin:0}
+.card .rows>div:nth-last-child(-n+2){border-bottom:0}
+.card .rows .cmd{color:var(--faint)}
+.steps{list-style:none;margin:18px 0;padding:0;border-top:1px solid var(--rule)}
+.steps li{display:grid;grid-template-columns:24px 1fr;gap:0;padding:9px 0;border-bottom:1px solid var(--rule);color:var(--soft)}
+.steps li span{color:var(--faint)}
+.steps b{color:var(--ink);font-weight:550}
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:13px}
+th{text-align:left;font-weight:450;color:var(--muted);padding:6px 10px 6px 0;border-bottom:1px solid var(--rule)}
+td{padding:8px 10px 8px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:14px 26px;margin:18px 0}
+.rules b{display:block;font-weight:550}
+.rules p{margin:2px 0 0;color:var(--soft)}
+.six{display:grid;grid-template-columns:1fr 1fr;gap:22px 18px;margin:22px 0}
+.six a{text-decoration:none;display:block}
+.six img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--rule);margin-bottom:8px}
+.six b{font-weight:550;display:block}
+.six span{display:block;color:var(--muted);font-size:12.5px}
+.six em{display:block;font-family:var(--serif);font-size:15px;margin-top:2px}
+.uses{margin:18px 0}
+.uses>div{padding:12px 0;border-bottom:1px solid var(--rule)}
+.uses>div:first-child{border-top:1px solid var(--rule)}
+.uses b{font-weight:550}
+.uses p{margin:4px 0;color:var(--soft)}
+.uses .l{font-size:12.5px;color:var(--muted)}
+.uses .l a{color:var(--muted)}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.themes img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--rule)}
+.themes figure{margin:0}
+.themes figcaption{font-size:12px;color:var(--muted);margin-top:4px}
+pre{font-family:var(--mono);font-size:11.5px;line-height:18px;background:var(--card);box-shadow:0 0 0 1px var(--rule);border-radius:6px;padding:12px 14px;overflow-x:auto;margin:14px 0}
+.install{display:flex;align-items:center;gap:10px;background:var(--card);box-shadow:0 0 0 1px var(--rule);border-radius:6px;padding:10px 12px;margin:14px 0}
+.install code{background:none;padding:0;font-size:13px;flex:1;min-width:0;overflow-wrap:anywhere}
+.install button{font:inherit;font-size:12px;color:var(--muted);background:none;border:1px solid var(--rule);border-radius:4px;padding:2px 8px;cursor:pointer}
+.install button:hover{color:var(--ink)}
+details{border-bottom:1px solid var(--rule);padding:10px 0}
+details:first-of-type{border-top:1px solid var(--rule)}
+summary{cursor:pointer;font-weight:500;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";display:inline-block;width:18px;color:var(--muted)}
+details[open] summary::before{content:"−"}
+details p{margin:6px 0 0 18px;color:var(--soft)}
+footer{grid-column:3;grid-row:2;border-top:1px solid var(--rule);padding:18px 0 60px;color:var(--muted);font-size:12px;line-height:19px}
+footer a{color:var(--muted)}
+/* collection */
+.coll{grid-column:3 / 5;grid-row:1;padding:40px 0 80px;min-width:0}
+.coll .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:26px 22px;margin-top:24px}
+.coll article{min-width:0}
+.coll article img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--rule);margin-bottom:10px}
+.coll .dwg{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.coll h3{font-size:14px;font-weight:550;margin:2px 0}
+.coll h3 a{text-decoration:none}
+.coll .obj{color:var(--muted);font-size:12.5px;margin:0 0 4px}
+.coll .idea{font-family:var(--serif);font-style:italic;font-size:15.5px;line-height:1.3;margin:0 0 6px}
+.coll .sum{color:var(--soft);font-size:13px;line-height:19px}
+.coll .used{margin:6px 0 0;padding-left:16px;color:var(--soft);font-size:12.5px;line-height:18px}
+.coll .facts{color:var(--muted);font-size:12px;margin-top:6px}
+@media (max-width:1360px){
+  .wide.side-by .controls{position:static;width:auto;display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px}
+  .wide.side-by .controls .read{width:100%;margin:0}
+}
+@media (max-width:1100px){
+  .layout{grid-template-columns:minmax(16px,1fr) 160px minmax(0,550px) minmax(16px,1fr)}
+  .sn{float:none;width:auto;margin:0 0 12px;padding-left:10px;border-left:2px solid var(--rule)}
+  .wide{width:100%}
+  .wide.side-by .controls{position:static;width:auto;display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px}
+  .wide.side-by .controls .read{width:100%;margin:0}
+  footer{grid-column:3}
+  .coll{grid-column:3 / 4}
+}
+@media (max-width:760px){
+  .layout{display:block;padding:0 16px}
+  .side{position:static;height:auto;padding:16px 0 0;display:flex;flex-wrap:wrap;gap:4px 14px}
+  .side .group{margin:0;display:flex;flex-wrap:wrap;gap:4px 14px}
+  .side .group.toc,.side .ptr{display:none}
+  .side .brand{margin-left:0}
+  .main{padding-top:20px}
+  .minis{grid-template-columns:repeat(5,1fr);gap:4px}
+  .grid{grid-template-columns:repeat(3,1fr)}
+  .six,.rules,.themes{grid-template-columns:1fr}
+  .rows{grid-template-columns:1fr}
+  .rows>div:nth-child(odd){border-bottom:0;padding-bottom:0}
+  .wide{width:100%;left:0;transform:none}
+  .frame{aspect-ratio:auto;height:auto}
+  .frame iframe{position:static;height:340px}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="side">
+
+<div class="group">
+<a class="brand" href="./"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 12.5h15M12.5 1.5v15" stroke="currentColor" stroke-width=".7"/><circle cx="6.8" cy="6.8" r="2.6" fill="none" stroke="var(--accent)" stroke-width="1.3"/><path d="M6.8 3.2v7.2M3.2 6.8h7.2" stroke="var(--accent)" stroke-width=".6"/></svg>Blueprint</a>
+<a href="collection.html" class="on">Collection</a>
+<a href="https://github.com/hariFED/blueprint">Source</a>
+<a href="./#install">Install</a>
+</div>
+
+</aside>
+<main class="coll">
+<div class="head"><div><b>Collection</b> <span>· 21 sheets, all live</span></div></div>
+<p class="tag">Every sheet drafted by Claude with the Blueprint skill. Each one passes the layout check at a dozen moments of its tour and at phone width. Open one and drag the moving part.</p>
+<div class="cards"><article id="floor-pump">
+<a href="sheets/floor-pump.html"><picture><source srcset="thumbs/floor-pump-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/floor-pump-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-001 · Pneumatics</div>
+<h3><a href="sheets/floor-pump.html">Floor pump</a></h3>
+<p class="obj">Bicycle floor pump in axial section</p>
+<p class="idea">Positive-displacement compression through two one-way valves</p>
+<p class="sum">Boyle's law in a barrel. The cup seal folds in on the upstroke because it is the inlet valve; the check ball lifts when the chamber passes tyre pressure because it is the outlet. The P–s diagram flattens the moment the valve opens.</p>
+<ul class="used"><li>Physics teaching: Boyle's law, dead volume, compression ratio</li><li>Product documentation for pumps and compressors</li><li>Explaining one-way valves and back-pressure</li></ul>
+<p class="facts">21 parts · 5 views · Drag the handle · Space pumps · R lets the tyre down · S slow motion</p>
+</article>
+<article id="four-stroke">
+<a href="sheets/four-stroke.html"><picture><source srcset="thumbs/four-stroke-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/four-stroke-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-002 · Thermodynamics</div>
+<h3><a href="sheets/four-stroke.html">Four-stroke engine</a></h3>
+<p class="obj">125 cc air-cooled DOHC single in section through the cylinder and valve axes</p>
+<p class="idea">Turning heat into rotation through a four-phase cycle</p>
+<p class="sum">An Otto cycle in a finned cylinder. The cams, turning at half crank speed, open each valve by the lift their profile gives; a computed cycle at 6000 rpm (CR 9.2, 58 bar peak) sets the gas, which changes from fresh charge to a flame growing from the plug to burned gas. The P–V diagram traces the loop as the crank turns, with the pumping loop visible on its log scale.</p>
+<ul class="used"><li>Engineering and physics courses: the Otto cycle, valve timing, slider-crank kinematics</li><li>Product and service documentation for small engines and motorcycles</li><li>A software-concept explainer: a four-stage pipeline (fetch, decode, execute, writeback) with overlapping stages</li></ul>
+<p class="facts">29 parts · 5 views · Drag the crank · ← → turn · Space runs · S slow motion</p>
+</article>
+<article id="governor">
+<a href="sheets/governor.html"><picture><source srcset="thumbs/governor-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/governor-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-003 · Control / steam</div>
+<h3><a href="sheets/governor.html">Porter governor</a></h3>
+<p class="obj">Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section</p>
+<p class="idea">Negative-feedback proportional control: the speed sets the opening, so more load is carried at a lower speed (droop)</p>
+<p class="sum">Two iron balls on equal arms lift a weighted sleeve as the spindle speeds up, and the sleeve shuts a balanced double-beat valve through a bell crank. When the load steps up the engine slows, the balls drop, the valve opens, and the engine settles at a new, slightly lower speed. That offset is the droop of a proportional controller, plotted against the governor's own characteristic.</p>
+<ul class="used"><li>Control engineering teaching: feedback, proportional control, droop and lag</li><li>Steam and mill-engine history and museum interpretation</li><li>A software-concept explainer for autoscaling and proportional controllers</li></ul>
+<p class="facts">28 parts · 6 views · Drag up or down for load · ↑ ↓ load · Space steps light/heavy · S slow</p>
+</article>
+<article id="escapement">
+<a href="sheets/escapement.html"><picture><source srcset="thumbs/escapement-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/escapement-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-004 · Horology</div>
+<h3><a href="sheets/escapement.html">Lever escapement</a></h3>
+<p class="obj">Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings</p>
+<p class="idea">Turning stored energy into equal ticks: a clock-driven scheduler, a rate-limited event loop</p>
+<p class="sum">A balance and hairspring swing at 4 Hz whatever the mainspring does; the escapement only lets the train move when the balance says so. Each beat the fork unlocks a stone, the club tooth pushes the stone and the fork pushes the impulse jewel, then the tooth drops onto the other stone and locks, so the escape wheel advances one tooth every two beats. The diagram marks every impulse on the balance's swing.</p>
+<ul class="used"><li>Horology teaching: lock, unlock, impulse, drop, draw and lift angle</li><li>Product pages and documentation for mechanical watches</li><li>Explaining a clock-driven scheduler or rate limiter: an independent oscillator releases stored work in fixed quanta</li></ul>
+<p class="facts">22 parts · 5 views · Drag the balance and let it go · ← → kick · Space pause · S speed · R restart</p>
+</article>
+<article id="bottle-jack">
+<a href="sheets/bottle-jack.html"><picture><source srcset="thumbs/bottle-jack-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/bottle-jack-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-005 · Hydraulics</div>
+<h3><a href="sheets/bottle-jack.html">Bottle jack</a></h3>
+<p class="obj">2-tonne hydraulic bottle jack in axial section</p>
+<p class="idea">Force multiplication by area ratio (Pascal's principle)</p>
+<p class="sum">Pascal's principle in a cast base. Each 25 mm stroke of the Ø12 plunger pushes 2.83 cm³ of oil past the delivery ball and lifts the Ø32 ram 3.52 mm, so 138 N on the handle holds 1.5 t. Section A-A puts the two bores side by side, and cracking the release screw lets the load drive the oil back to the reservoir.</p>
+<ul class="used"><li>Physics teaching: Pascal's principle, area ratio, work in equals work out</li><li>Product documentation for hydraulic jacks, presses and pumps</li><li>A metaphor for leverage and amortisation: many small strokes buy one large lift</li></ul>
+<p class="facts">29 parts · 5 views · Drag the handle · ↑ ↓ stroke · Space pumps · O opens the release valve · L changes the load · S slow motion</p>
+</article>
+<article id="token-bucket">
+<a href="sheets/token-bucket.html"><picture><source srcset="thumbs/token-bucket-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/token-bucket-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-006 · Hydraulics / software concepts</div>
+<h3><a href="sheets/token-bucket.html">Cistern token bucket</a></h3>
+<p class="obj">Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section</p>
+<p class="idea">Token bucket rate limiting (API rate limits)</p>
+<p class="sum">The water is the tokens. A fixed Ø3.5 jet at mains pressure refills at 0.146 L/s whatever the level, which is a constant token rate, and the float shuts it at capacity. Each pull of the knob takes one 1.5 L dose; below one token the dose float rests on its stop and the pull is refused, and the overflow tube is the hard cap if the float is held down.</p>
+<ul class="used"><li>Explaining API rate limits, bursts and HTTP 429 in a software-concepts course</li><li>A physical analogy for token bucket and leaky bucket algorithms in system design teaching</li><li>Plumbing training: diaphragm float valves, orifice flow and Torricelli drain</li></ul>
+<p class="facts">26 parts · 6 views · Pull (click or drag up) the knob or Space sends a request · H holds the float down (overflow) · R refills · S slow motion</p>
+</article>
+<article id="debounce">
+<a href="sheets/debounce.html"><picture><source srcset="thumbs/debounce-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/debounce-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-007 · Hydraulics</div>
+<h3><a href="sheets/debounce.html">Door closer</a></h3>
+<p class="obj">Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section</p>
+<p class="idea">Debounce: act only once the input has stopped for long enough</p>
+<p class="sum">A spring drives the piston back and the oil can only leave through two needle valves, so the door shuts at a pace set by the orifice equation. Every push reopens the door and starts the whole closing again; it latches only after a quiet spell as long as the closing time from where it was left.</p>
+<ul class="used"><li>Software-concept explainer: debounce and restartable timers drawn as hardware</li><li>Hydraulics teaching: orifice flow, check valves, rack-and-pinion conversion</li><li>Product documentation for door closers and their sweep and latch adjustment</li></ul>
+<p class="facts">23 parts · 7 views · Space or click the closer pushes the door · drag the door in plan E · R shuts it · S slow motion</p>
+</article>
+<article id="pin-tumbler">
+<a href="sheets/pin-tumbler.html"><picture><source srcset="thumbs/pin-tumbler-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/pin-tumbler-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-008 · Mechanical security</div>
+<h3><a href="sheets/pin-tumbler.html">Pin tumbler cylinder</a></h3>
+<p class="obj">Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section</p>
+<p class="idea">Authentication by matching a secret: every factor must match (AND)</p>
+<p class="sum">Each key pin is cut for one depth of the key, so the right key lifts every crown exactly to the shear line between plug and body. The key is cut in 0.5 mm steps; a key one cut wrong leaves pin 3 a millimetre low, its driver straddles the line and the plug will not turn. Only when all five gaps sit on the line does the plug, and its cam, turn.</p>
+<ul class="used"><li>Security-concept explainers: shared secrets, multi-factor checks as a logical AND</li><li>Locksmith and security-hardware training: bitting codes, depth steps, shear line</li><li>Product pages and documentation for lock cylinders</li></ul>
+<p class="facts">16 parts · 5 views · Drag the key · ← → insert · drag View B or ↑ ↓ turn · K other key · Space tour · S slow</p>
+</article>
+<article id="circuit-breaker">
+<a href="sheets/circuit-breaker.html"><picture><source srcset="thumbs/circuit-breaker-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/circuit-breaker-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-009 · Electrical protection</div>
+<h3><a href="sheets/circuit-breaker.html">Circuit breaker</a></h3>
+<p class="obj">B16 miniature circuit breaker (EN 60898-1) cut on its centre plane</p>
+<p class="idea">The circuit breaker pattern: closed, open, half-open</p>
+<p class="sum">A bimetal heated by its own I²R bends until it knocks the latch out, so an overload trips after seconds along an inverse-time curve, while above 4 × In the coil's plunger strikes at once. After a trip the latch only holds a reset once the strip has cooled: open, then half-open, then closed again, or straight back to open if the fault is still there.</p>
+<ul class="used"><li>Electrical installation courses: thermal and magnetic trips, type B curves, arc quenching</li><li>Product pages and datasheets for protective devices</li><li>Explaining the software circuit-breaker pattern (closed, open, half-open) with the real object</li></ul>
+<p class="facts">30 parts · 7 views · Drag the handle · ↑ ↓ on/off · 1 2 3 normal, overload, short · ← → current · Space tour · S slow</p>
+</article>
+<article id="thermostat">
+<a href="sheets/thermostat.html"><picture><source srcset="thumbs/thermostat-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/thermostat-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-010 · Thermal control</div>
+<h3><a href="sheets/thermostat.html">Wax thermostat</a></h3>
+<p class="obj">Automotive wax-pellet coolant thermostat (opens at 88 °C) in section, in its housing between engine and radiator</p>
+<p class="idea">A setpoint controller with no electronics: negative feedback through melting wax</p>
+<p class="sum">Paraffin in a brass cup gains 12 % in volume as it melts, squeezes a rubber sleeve and pushes the pin against the bridge, so the cup moves down: the valve opens to the radiator and the bypass disc shuts. The engine's heat balance closes the loop, and the coolant settles a little above 88 °C, higher under load. Wax freezes 2 K below where it melts, so the lift–temperature diagram traces a hysteresis loop.</p>
+<ul class="used"><li>Automotive technician training: cooling systems, thermostat faults, bypass and jiggle valve</li><li>Control engineering teaching: proportional control, droop, hysteresis and feedback without electronics</li><li>Product documentation for wax-element actuators and thermostatic valves</li></ul>
+<p class="facts">24 parts · 5 views · Drag up/down sets engine load · ↑ ↓ load · H hill · R cold start · S speed</p>
+</article>
+<article id="relief-valve">
+<a href="sheets/relief-valve.html"><picture><source srcset="thumbs/relief-valve-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/relief-valve-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-011 · Pneumatics, process safety</div>
+<h3><a href="sheets/relief-valve.html">Relief valve</a></h3>
+<p class="obj">DN25 spring-loaded safety relief valve in axial section</p>
+<p class="idea">A spring-set threshold with hysteresis: pop open, blow down, reseat</p>
+<p class="sum">The spring's preload over the seat area sets the opening pressure. Once the disc cracks open, gas fills the huddling chamber and acts on a larger area, so the valve pops to high lift and stays open until the pressure has fallen about 10 %, then snaps shut. A compressor refills the receiver and the cycle repeats, tracing the hysteresis loop in Diagram 1.</p>
+<ul class="used"><li>Process safety training: set pressure, simmer, blowdown and chatter</li><li>Product documentation for safety valves to ISO 4126 / ASME VIII</li><li>Explaining back-pressure, load shedding and hysteresis thresholds in queues</li></ul>
+<p class="facts">23 parts · 6 views · Drag up/down for vessel pressure · ↑ ↓ pressure · ← → adjusting screw · Space compressor · S slow motion</p>
+</article>
+<article id="differential">
+<a href="sheets/differential.html"><picture><source srcset="thumbs/differential-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/differential-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-012 · Automotive drivetrain</div>
+<h3><a href="sheets/differential.html">Open differential</a></h3>
+<p class="obj">Rear-axle open bevel-gear differential in plan section, with the car in a turn</p>
+<p class="idea">Splitting one input between two outputs that may run at different speeds: load balancing</p>
+<p class="sum">The crown wheel turns the carrier, and the carrier always turns at the mean of the two wheels. The spider gears stay still on their pin when the car runs straight and spin only when the wheels differ, in a turn or with one wheel on ice. Because a spider pushes equally on both side gears, the torque splits equally, so the wheel on ice sets what both wheels get.</p>
+<ul class="used"><li>Automotive engineering and mechanics courses: differential kinematics, ωC = (ωL + ωR)/2</li><li>Product and service documentation for axles and final drives</li><li>A software-concept explainer for load balancing and equal-share schedulers</li></ul>
+<p class="facts">25 parts · 5 views · Drag the plan view sideways to steer · ←→ steer · ↑↓ speed · I right wheel on ice · S slow motion</p>
+</article>
+<article id="shock-absorber">
+<a href="sheets/shock-absorber.html"><picture><source srcset="thumbs/shock-absorber-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/shock-absorber-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-013 · Hydraulics</div>
+<h3><a href="sheets/shock-absorber.html">Shock absorber</a></h3>
+<p class="obj">Monotube gas-charged automotive damper (de Carbon type) in axial section</p>
+<p class="idea">Smoothing a noisy input: the suspension as a low-pass filter</p>
+<p class="sum">A quarter car drives over a speed hump on a rough road. The oil is forced through the piston ports and bends the shim stacks, which is why the force–velocity curve is steep at low speed and flattens past the knee; the nitrogen behind the floating piston takes up the rod's volume and keeps the oil from cavitating. With the valves bypassed the body keeps bouncing, so the two passes on the body chart show what the damper filters out.</p>
+<ul class="used"><li>Vehicle dynamics teaching: quarter-car model, damping ratio, digressive valving</li><li>Product documentation for dampers and suspension components</li><li>Explaining low-pass filtering and exponential smoothing with a physical object</li></ul>
+<p class="facts">25 parts · 7 views · Drag the rod eye · ↑ ↓ stroke · Space drives over a hump · D damping on/off · S slow motion</p>
+</article>
+<article id="click-pen">
+<a href="sheets/click-pen.html"><picture><source srcset="thumbs/click-pen-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/click-pen-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-014 · Mechanisms</div>
+<h3><a href="sheets/click-pen.html">Click pen</a></h3>
+<p class="obj">Retractable ballpoint pen in longitudinal section</p>
+<p class="idea">A toggle (finite state machine) built from geometry</p>
+<p class="sum">A push-push cam as a state machine. Each press drives the rotator's lugs below the guide's ridge teeth and the plunger tooth turns them 30°; on release the ridge tooth turns them another 30°, into a long slot (retracted) or a short slot (extended), alternately. The developed cam track shows the lug's path, and the section shows the lug change sides with every click.</p>
+<ul class="used"><li>Product design teaching: cams, indexing and snap-fit mechanisms</li><li>Software-concept explainer: a toggle or T flip-flop as a finite state machine</li><li>Product documentation for retractable pens and push-push latches</li></ul>
+<p class="facts">17 parts · 7 views · Drag the button in · Space clicks · ← → press and release · S slow motion</p>
+</article>
+<article id="centrifugal-pump">
+<a href="sheets/centrifugal-pump.html"><picture><source srcset="thumbs/centrifugal-pump-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/centrifugal-pump-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-015 · Fluid machinery</div>
+<h3><a href="sheets/centrifugal-pump.html">Centrifugal pump</a></h3>
+<p class="obj">ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute</p>
+<p class="idea">Converting rotation into pressure, and the operating point where supply meets demand</p>
+<p class="sum">The impeller flings water outwards and the volute turns its speed into pressure, so the stipple thickens from the suction eye to the discharge. The affinity laws scale the pump curve with speed, the globe valve steepens the system curve as it throttles, and the duty point sits where the two cross; below 1674 rpm the pump cannot lift the 12 m static head and nothing flows.</p>
+<ul class="used"><li>Process-industry and maintenance training: reading a pump curve, throttling against speed control</li><li>Product documentation for pump and valve makers</li><li>Explaining an equilibrium point, supply meeting demand, as a software or economics metaphor</li></ul>
+<p class="facts">30 parts · 7 views · Drag the pump: speed · drag the handwheel: valve · ↑ ↓ speed · ← → valve · Space tour · S slow</p>
+</article>
+<article id="gear-pump">
+<a href="sheets/gear-pump.html"><picture><source srcset="thumbs/gear-pump-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/gear-pump-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-016 · Hydraulics</div>
+<h3><a href="sheets/gear-pump.html">External gear pump</a></h3>
+<p class="obj">Group 2 external gear pump, 8 cm³/rev, cut across and along its shafts</p>
+<p class="idea">Positive displacement: a conveyor of fixed-size batches</p>
+<p class="sum">Two involute gears carry oil round the outside of the bore in sealed tooth spaces, 24 batches of 0.33 cm³ per revolution, and the mesh squeezes them out at the outlet. Flow is displacement × speed less a laminar leak that grows with pressure, so the volumetric efficiency falls as pressure rises, and falls further at low speed. Each space's pressure builds over the last two pitches before the outlet.</p>
+<ul class="used"><li>Fluid power courses: displacement, volumetric efficiency, leakage and torque</li><li>Product pages and data sheets for hydraulic gear pumps</li><li>Explaining batching and positive displacement in software, such as fixed-size work queues</li></ul>
+<p class="facts">15 parts · 7 views · Drag the gears · ↑↓ pressure · ←→ speed · Space pauses · S slow motion</p>
+</article>
+<article id="carburettor">
+<a href="sheets/carburettor.html"><picture><source srcset="thumbs/carburettor-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/carburettor-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-017 · Fluid mechanics</div>
+<h3><a href="sheets/carburettor.html">Carburettor</a></h3>
+<p class="obj">Fixed-jet float-bowl carburettor, 26 mm bore, in axial section</p>
+<p class="idea">Bernoulli's principle: one flow metering another</p>
+<p class="sum">Air speeding through the venturi throat loses ½ρv² of pressure, and because the float bowl is vented that depression lifts petrol through the main jet, so fuel follows air in proportion. Below the threshold the pilot circuit takes over through the idle and progression ports; the float drops as the jets draw, and its needle opens to refill the bowl.</p>
+<ul class="used"><li>Engine and motorcycle courses: venturi depression, jetting, idle and progression circuits</li><li>Workshop and product documentation for small-engine carburettors</li><li>Explaining proportional control, where one flow meters another</li></ul>
+<p class="facts">26 parts · 6 views · Drag the throttle plate · ← → throttle · C choke · [ ] mixture screw · S slow motion</p>
+</article>
+<article id="pressure-cooker">
+<a href="sheets/pressure-cooker.html"><picture><source srcset="thumbs/pressure-cooker-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/pressure-cooker-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-018 · Thermodynamics</div>
+<h3><a href="sheets/pressure-cooker.html">Pressure cooker</a></h3>
+<p class="obj">6 L stovetop pressure cooker (EN 12778) in axial section</p>
+<p class="idea">Raising the boiling point with pressure; a safety interlock that cannot open while the resource is in use</p>
+<p class="sum">Water boils where its vapour pressure meets the pressure above it, so a 62 g weight on a Ø3 bore holds 0.86 bar and the water boils at 118 °C instead of 100. The lock pin rises at 3 kPa, seals its own vent and blocks the lid's slide, so the lid cannot be turned while the pot is pressurised. The operating point climbs the saturation curve, sits on the weight while the steam vents, and slides back down when the hob goes off.</p>
+<ul class="used"><li>Thermodynamics teaching: vapour pressure, the Antoine equation, latent heat and boiling point against pressure</li><li>Product documentation and safety training for pressure cookers and autoclaves</li><li>Explaining a lock that guards a resource: the lid stays locked for as long as the pressure (the work in progress) holds</li></ul>
+<p class="facts">24 parts · 7 views · Space hob on/off · drag the weight or ↑ ↓ to vent by hand · B blocks the vent (safety valve) · R refills · S slow motion</p>
+</article>
+<article id="solenoid-valve">
+<a href="sheets/solenoid-valve.html"><picture><source srcset="thumbs/solenoid-valve-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/solenoid-valve-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-019 · Hydraulics and electromagnetics</div>
+<h3><a href="sheets/solenoid-valve.html">Solenoid valve</a></h3>
+<p class="obj">2/2-way normally closed pilot-operated solenoid valve, G1/2, in axial section</p>
+<p class="idea">A small signal controlling a big flow: servo amplification through a pilot</p>
+<p class="sum">A 10 W coil lifts an 11 mm plunger only 3.2 mm, and that opens a 1.6 mm pilot. The pilot drains the chamber above the diaphragm faster than the 0.8 mm bleed refills it, so water pressure lifts the diaphragm after the plunger and 35 L/min flows. Switched off, the bleed lets the diaphragm down slowly enough (0.72 s) that the surge in the pipe stays below 1 bar.</p>
+<ul class="used"><li>Industrial automation and fluid-power training: pilot operation, MOPD, minimum differential pressure, water hammer</li><li>Product documentation for solenoid and diaphragm valves</li><li>Explaining amplification, or a feature flag as a small pilot signal that switches a large flow</li></ul>
+<p class="facts">21 parts · 5 views · Space or tap switches the coil · ↑ ↓ or drag sets supply pressure · S slow motion</p>
+</article>
+<article id="stirling">
+<a href="sheets/stirling.html"><picture><source srcset="thumbs/stirling-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/stirling-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-020 · Thermodynamics</div>
+<h3><a href="sheets/stirling.html">Stirling engine</a></h3>
+<p class="obj">Beta-type Stirling demonstrator with a rhombic drive, in axial section</p>
+<p class="idea">Heat flowing from hot to cold does work: the Stirling cycle</p>
+<p class="sum">A burner heats the cap, the displacer shuttles one sealed charge of air between the hot cap and the finned cooler through a 1 mm gap regenerator, and the power piston takes work from the pressure swing. A Schmidt model drives everything: the gas is shaded by the temperature of the space it is in, the P–V loop traces live, and turning the burner down shrinks the loop and slows the flywheel towards its stall.</p>
+<ul class="used"><li>Thermodynamics teaching: the Stirling cycle, Schmidt analysis, Carnot and the role of the regenerator</li><li>Explaining heat engines and why a temperature difference is needed to do work</li><li>Product or museum pages for demonstrator engines and rhombic drives</li></ul>
+<p class="facts">25 parts · 5 views · Drag the flywheel or gears · ← → turn · ↑ ↓ burner · Space flame on/off · S slow motion</p>
+</article>
+<article id="disc-brake">
+<a href="sheets/disc-brake.html"><picture><source srcset="thumbs/disc-brake-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/disc-brake-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<div class="dwg">BP-021 · Hydraulics</div>
+<h3><a href="sheets/disc-brake.html">Hydraulic disc brake</a></h3>
+<p class="obj">Bicycle hydraulic disc brake: lever master cylinder and two-piston post-mount caliper in section</p>
+<p class="idea">Hydraulic force transmission; a master–replica pair where one piston writes and the other follows</p>
+<p class="sum">Pascal's principle between two pistons. The lever's primary cup first has to pass the timing port before any pressure can build, then the oil pushes the caliper pistons across the pad gap, and only once the pads touch the rotor does the clamp force climb steeply. On release the square seals spring back and pull the pistons off the rotor by exactly the rollback they took.</p>
+<ul class="used"><li>Cycling mechanics training: bleeding, free stroke, bite point and pad clearance</li><li>Product documentation for hydraulic brakes and clutches</li><li>Explaining a master–replica (leader–follower) pair in software or systems design</li></ul>
+<p class="facts">29 parts · 7 views · Drag the lever · ↑ ↓ pull and release · Space squeezes · S slow motion</p>
+</article></div>
+</main>
+<footer>
+Made by hariFED with Claude Code. Set in Inter, EB Garamond and JetBrains Mono.<br>
+<a href="https://github.com/hariFED/blueprint">Source on GitHub</a> · <a href="https://www.npmjs.com/package/@harifed/blueprint">npm</a> · <a href="https://github.com/hariFED/blueprint/blob/main/LICENSE">MIT licence</a> · Version 0.1.0<br>
+Inspired by Ryan's <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a>, which draws the machine; Blueprint draws the drawing.
+</footer>
+</div>
+<script>
+(function () {
+  // live iframes start when they come near the screen, in the page's colour scheme
+  var dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  var fit = function (f) {
+    try { var d = f.contentDocument.documentElement; if (d && d.scrollHeight > 50) { f.parentNode.style.aspectRatio = "auto"; f.parentNode.style.height = d.scrollHeight + "px"; } } catch (e) {}
+  };
+  var load = function (f) {
+    if (f.src) return;
+    f.addEventListener("load", function () { fit(f); setTimeout(function () { fit(f); }, 400); });
+    f.src = f.dataset.src + "?theme=" + (dark ? "dark" : "paper");
+  };
+  addEventListener("resize", function () { document.querySelectorAll("iframe[src]").forEach(function (f) { f.parentNode.style.height = ""; f.parentNode.style.aspectRatio = ""; fit(f); }); });
+  var frames = document.querySelectorAll("iframe[data-src]");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { load(e.target); io.unobserve(e.target); } }); }, { rootMargin: "400px" });
+    frames.forEach(function (f) { io.observe(f); });
+  } else frames.forEach(load);
+  // the pointer in the margin follows the section being read
+  var ptr = document.querySelector(".ptr"), links = {};
+  document.querySelectorAll("[data-toc]").forEach(function (a) { links[a.dataset.toc] = a; });
+  var brand = document.querySelector(".side .brand");
+  var place = function (a) {
+    Object.keys(links).forEach(function (k) { links[k].classList.toggle("on", links[k] === a); });
+    if (ptr) ptr.style.top = ((a || brand).offsetTop + (a ? 0 : 0)) + "px";
+  };
+  place(null);
+  if (ptr && "IntersectionObserver" in window) {
+    var seen = {};
+    var so = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { seen[e.target.id] = e.isIntersecting ? e.boundingClientRect.top : undefined; });
+      var best = null, bestTop = -Infinity;
+      document.querySelectorAll("h2[id]").forEach(function (h) { var t = h.getBoundingClientRect().top; if (t < innerHeight * 0.35 && t > bestTop) { bestTop = t; best = h.id; } });
+      place(best ? links[best] : null);
+    }, { threshold: [0, 1] });
+    document.querySelectorAll("section").forEach(function (s) { so.observe(s); });
+    addEventListener("scroll", function () {
+      var best = null, bestTop = -Infinity;
+      document.querySelectorAll("h2[id]").forEach(function (h) { var t = h.getBoundingClientRect().top; if (t < innerHeight * 0.35 && t > bestTop) { bestTop = t; best = h.id; } });
+      place(best ? links[best] : null);
+    }, { passive: true });
+  }
+  document.querySelectorAll("[data-copy]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var t = document.getElementById(b.dataset.copy).textContent;
+      try { navigator.clipboard.writeText(t).then(function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); }); } catch (e) {}
+    });
+  });
+})();
+</script>
+</body>
+</html>

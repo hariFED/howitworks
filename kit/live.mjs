@@ -21,20 +21,24 @@ export const THEMES = ["blueprint", "paper", "dark"];
 
 export function setupPage(svg) {
   const q = params();
-  const pick = (name) => {
+  // the page's own default (writePage's `theme`), then a saved choice, then ?theme=, which wins but isn't saved
+  const fallback = document.documentElement.dataset.theme || "blueprint";
+  const pick = (name, save) => {
     if (!THEMES.includes(name)) return;
     document.documentElement.dataset.theme = name;
     for (const b of document.querySelectorAll("[data-theme-pick]")) b.setAttribute("aria-pressed", String(b.dataset.themePick === name));
-    try {
-      localStorage.setItem("bp-theme", name);
-    } catch {}
+    if (save) {
+      try {
+        localStorage.setItem("bp-theme", name);
+      } catch {}
+    }
   };
   let saved = null;
   try {
     saved = localStorage.getItem("bp-theme");
   } catch {}
-  pick(q.theme ?? saved ?? "blueprint");
-  for (const b of document.querySelectorAll("[data-theme-pick]")) b.addEventListener("click", () => pick(b.dataset.themePick));
+  pick(q.theme ?? saved ?? fallback, false);
+  for (const b of document.querySelectorAll("[data-theme-pick]")) b.addEventListener("click", () => pick(b.dataset.themePick, true));
   if (q.zoom) {
     const box = q.zoom.split(",").map(Number);
     if (box.length === 4 && box.every(Number.isFinite)) {

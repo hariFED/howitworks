@@ -91,6 +91,12 @@ Copy the example folder, rename it, and replace `model.mjs`, `parts.mjs`, `build
 - `kit/page.mjs`: inlines modules as namespaces and writes one standalone HTML page.
 - `kit/sheet.css`: the three themes as tokens. Every colour in a drawing is a token.
 
+Words in the request that change the output:
+
+- `paper` or `dark`: make that the sheet's default theme (`writePage(..., { theme: "paper" })`). The reader can still switch.
+- `set`: a Set, several sheets of one machine; propose the first sheet before starting.
+- `still`: no live layer. Draw the sheet at its most telling moment, with no tour, drag or keys; the model still sets every number.
+
 URL parameters every page supports: `?t=6.5` (render the tour at 6.5 s, deterministically), `?theme=paper`, `?zoom=x,y,w,h`, `?check=1`.
 
 ## References

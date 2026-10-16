@@ -21,11 +21,11 @@ export function inlineModule(file, name) {
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
-export function writePage(out, { title, description = "", svg, bar = "", css = "", modules = [], main = "" }) {
+export function writePage(out, { title, description = "", svg, bar = "", css = "", modules = [], main = "", theme = "blueprint" }) {
   const sheetCss = readFileSync(kitPath("sheet.css"), "utf8");
   const scripts = modules.map(([file, name]) => inlineModule(file, name)).join("\n");
   const html = `<!doctype html>
-<html lang="en" data-theme="blueprint">
+<html lang="en" data-theme="${esc(theme)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
