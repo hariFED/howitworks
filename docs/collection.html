@@ -19,14 +19,7 @@
   --sans:"Inter",system-ui,sans-serif; --serif:"EB Garamond",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --page:#111214; --ink:#ececec; --soft:#c4c4c4; --muted:#8c8c8c; --faint:#5a5a5a; --rule:#26282b; --card:#17191c;
-  --code:#1f2226; --accent:#f08a5d; --link-line:#4a4a4a; color-scheme:dark;
-}}
-:root[data-theme="dark"]{
-  --page:#111214; --ink:#ececec; --soft:#c4c4c4; --muted:#8c8c8c; --faint:#5a5a5a; --rule:#26282b; --card:#17191c;
-  --code:#1f2226; --accent:#f08a5d; --link-line:#4a4a4a; color-scheme:dark;
-}
+
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
@@ -55,7 +48,7 @@ p{margin:0 0 12px}
 .tag{font-size:14px;margin:0 0 16px}
 .minis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .minis a{display:block;text-decoration:none}
-.minis img{display:block;width:100%;height:auto;border-radius:3px;opacity:.92;transition:opacity .2s}
+.minis img{display:block;width:100%;height:auto}
 .minis a:hover img{opacity:1}
 .meta{display:flex;flex-wrap:wrap;gap:4px 10px;color:var(--muted);font-size:12.5px;margin:12px 0 26px}
 .meta a{color:var(--muted)}
@@ -67,6 +60,11 @@ p{margin:0 0 12px}
 .wide.side-by .controls{position:absolute;left:calc(100% + 24px);bottom:6px;width:170px}
 .frame{position:relative;aspect-ratio:1200/890;border-radius:4px;overflow:hidden;background:var(--card);box-shadow:0 0 0 1px var(--rule)}
 .frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.frame.bare{background:none;box-shadow:none;border-radius:0}
+.wide.narrow{width:440px;margin-left:auto;margin-right:auto}
+.wide.hero{margin:30px 0 26px}
+.minis img,.grid img,.six img,.coll article img{background:var(--page)}
+
 .controls{font-size:12px;line-height:20px;color:var(--muted)}
 .controls div{display:flex;gap:8px;align-items:center;margin:4px 0}
 .controls kbd{min-width:20px;text-align:center}
@@ -102,7 +100,7 @@ td{padding:8px 10px 8px 0;border-bottom:1px solid var(--rule);vertical-align:top
 .rules p{margin:2px 0 0;color:var(--soft)}
 .six{display:grid;grid-template-columns:1fr 1fr;gap:22px 18px;margin:22px 0}
 .six a{text-decoration:none;display:block}
-.six img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--rule);margin-bottom:8px}
+.six img{display:block;width:100%;height:auto;margin-bottom:8px}
 .six b{font-weight:550;display:block}
 .six span{display:block;color:var(--muted);font-size:12.5px}
 .six em{display:block;font-family:var(--serif);font-size:15px;margin-top:2px}
@@ -113,7 +111,7 @@ td{padding:8px 10px 8px 0;border-bottom:1px solid var(--rule);vertical-align:top
 .uses p{margin:4px 0;color:var(--soft)}
 .uses .l{font-size:12.5px;color:var(--muted)}
 .uses .l a{color:var(--muted)}
-.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:18px 0}
 .themes img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--rule)}
 .themes figure{margin:0}
 .themes figcaption{font-size:12px;color:var(--muted);margin-top:4px}
@@ -135,7 +133,7 @@ footer a{color:var(--muted)}
 .coll{grid-column:3 / 5;grid-row:1;padding:40px 0 80px;min-width:0}
 .coll .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:26px 22px;margin-top:24px}
 .coll article{min-width:0}
-.coll article img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--rule);margin-bottom:10px}
+.coll article img{display:block;width:100%;height:auto;margin-bottom:10px}
 .coll .dwg{font-family:var(--mono);font-size:11px;color:var(--accent)}
 .coll h3{font-size:14px;font-weight:550;margin:2px 0}
 .coll h3 a{text-decoration:none}
@@ -191,7 +189,7 @@ footer a{color:var(--muted)}
 <div class="head"><div><b>Collection</b> <span>· 21 sheets, all live</span></div></div>
 <p class="tag">Every sheet drafted by Claude with the Blueprint skill. Each one passes the layout check at a dozen moments of its tour and at phone width. Open one and drag the moving part.</p>
 <div class="cards"><article id="floor-pump">
-<a href="sheets/floor-pump.html"><picture><source srcset="thumbs/floor-pump-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/floor-pump-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/floor-pump.html"><img class="" src="thumbs/floor-pump.png?v=mvapmtf7" alt="Bicycle floor pump in axial section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-001 · Pneumatics</div>
 <h3><a href="sheets/floor-pump.html">Floor pump</a></h3>
 <p class="obj">Bicycle floor pump in axial section</p>
@@ -201,7 +199,7 @@ footer a{color:var(--muted)}
 <p class="facts">21 parts · 5 views · Drag the handle · Space pumps · R lets the tyre down · S slow motion</p>
 </article>
 <article id="four-stroke">
-<a href="sheets/four-stroke.html"><picture><source srcset="thumbs/four-stroke-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/four-stroke-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/four-stroke.html"><img class="" src="thumbs/four-stroke.png?v=mvapmtf7" alt="125 cc air-cooled DOHC single in section through the cylinder and valve axes" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-002 · Thermodynamics</div>
 <h3><a href="sheets/four-stroke.html">Four-stroke engine</a></h3>
 <p class="obj">125 cc air-cooled DOHC single in section through the cylinder and valve axes</p>
@@ -211,7 +209,7 @@ footer a{color:var(--muted)}
 <p class="facts">29 parts · 5 views · Drag the crank · ← → turn · Space runs · S slow motion</p>
 </article>
 <article id="governor">
-<a href="sheets/governor.html"><picture><source srcset="thumbs/governor-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/governor-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/governor.html"><img class="" src="thumbs/governor.png?v=mvapmtf7" alt="Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-003 · Control / steam</div>
 <h3><a href="sheets/governor.html">Porter governor</a></h3>
 <p class="obj">Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section</p>
@@ -221,7 +219,7 @@ footer a{color:var(--muted)}
 <p class="facts">28 parts · 6 views · Drag up or down for load · ↑ ↓ load · Space steps light/heavy · S slow</p>
 </article>
 <article id="escapement">
-<a href="sheets/escapement.html"><picture><source srcset="thumbs/escapement-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/escapement-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/escapement.html"><img class="" src="thumbs/escapement.png?v=mvapmtf7" alt="Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-004 · Horology</div>
 <h3><a href="sheets/escapement.html">Lever escapement</a></h3>
 <p class="obj">Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings</p>
@@ -231,7 +229,7 @@ footer a{color:var(--muted)}
 <p class="facts">22 parts · 5 views · Drag the balance and let it go · ← → kick · Space pause · S speed · R restart</p>
 </article>
 <article id="bottle-jack">
-<a href="sheets/bottle-jack.html"><picture><source srcset="thumbs/bottle-jack-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/bottle-jack-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/bottle-jack.html"><img class="" src="thumbs/bottle-jack.png?v=mvapmtf7" alt="2-tonne hydraulic bottle jack in axial section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-005 · Hydraulics</div>
 <h3><a href="sheets/bottle-jack.html">Bottle jack</a></h3>
 <p class="obj">2-tonne hydraulic bottle jack in axial section</p>
@@ -241,7 +239,7 @@ footer a{color:var(--muted)}
 <p class="facts">29 parts · 5 views · Drag the handle · ↑ ↓ stroke · Space pumps · O opens the release valve · L changes the load · S slow motion</p>
 </article>
 <article id="token-bucket">
-<a href="sheets/token-bucket.html"><picture><source srcset="thumbs/token-bucket-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/token-bucket-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/token-bucket.html"><img class="" src="thumbs/token-bucket.png?v=mvapmtf7" alt="Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-006 · Hydraulics / software concepts</div>
 <h3><a href="sheets/token-bucket.html">Cistern token bucket</a></h3>
 <p class="obj">Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section</p>
@@ -251,7 +249,7 @@ footer a{color:var(--muted)}
 <p class="facts">26 parts · 6 views · Pull (click or drag up) the knob or Space sends a request · H holds the float down (overflow) · R refills · S slow motion</p>
 </article>
 <article id="debounce">
-<a href="sheets/debounce.html"><picture><source srcset="thumbs/debounce-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/debounce-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/debounce.html"><img class="" src="thumbs/debounce.png?v=mvapmtf7" alt="Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-007 · Hydraulics</div>
 <h3><a href="sheets/debounce.html">Door closer</a></h3>
 <p class="obj">Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section</p>
@@ -261,7 +259,7 @@ footer a{color:var(--muted)}
 <p class="facts">23 parts · 7 views · Space or click the closer pushes the door · drag the door in plan E · R shuts it · S slow motion</p>
 </article>
 <article id="pin-tumbler">
-<a href="sheets/pin-tumbler.html"><picture><source srcset="thumbs/pin-tumbler-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/pin-tumbler-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/pin-tumbler.html"><img class="" src="thumbs/pin-tumbler.png?v=mvapmtf7" alt="Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-008 · Mechanical security</div>
 <h3><a href="sheets/pin-tumbler.html">Pin tumbler cylinder</a></h3>
 <p class="obj">Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section</p>
@@ -271,7 +269,7 @@ footer a{color:var(--muted)}
 <p class="facts">16 parts · 5 views · Drag the key · ← → insert · drag View B or ↑ ↓ turn · K other key · Space tour · S slow</p>
 </article>
 <article id="circuit-breaker">
-<a href="sheets/circuit-breaker.html"><picture><source srcset="thumbs/circuit-breaker-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/circuit-breaker-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/circuit-breaker.html"><img class="" src="thumbs/circuit-breaker.png?v=mvapmtf7" alt="B16 miniature circuit breaker (EN 60898-1) cut on its centre plane" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-009 · Electrical protection</div>
 <h3><a href="sheets/circuit-breaker.html">Circuit breaker</a></h3>
 <p class="obj">B16 miniature circuit breaker (EN 60898-1) cut on its centre plane</p>
@@ -281,7 +279,7 @@ footer a{color:var(--muted)}
 <p class="facts">30 parts · 7 views · Drag the handle · ↑ ↓ on/off · 1 2 3 normal, overload, short · ← → current · Space tour · S slow</p>
 </article>
 <article id="thermostat">
-<a href="sheets/thermostat.html"><picture><source srcset="thumbs/thermostat-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/thermostat-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/thermostat.html"><img class="" src="thumbs/thermostat.png?v=mvapmtf7" alt="Automotive wax-pellet coolant thermostat (opens at 88 °C) in section, in its housing between engine and radiator" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-010 · Thermal control</div>
 <h3><a href="sheets/thermostat.html">Wax thermostat</a></h3>
 <p class="obj">Automotive wax-pellet coolant thermostat (opens at 88 °C) in section, in its housing between engine and radiator</p>
@@ -291,7 +289,7 @@ footer a{color:var(--muted)}
 <p class="facts">24 parts · 5 views · Drag up/down sets engine load · ↑ ↓ load · H hill · R cold start · S speed</p>
 </article>
 <article id="relief-valve">
-<a href="sheets/relief-valve.html"><picture><source srcset="thumbs/relief-valve-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/relief-valve-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/relief-valve.html"><img class="" src="thumbs/relief-valve.png?v=mvapmtf7" alt="DN25 spring-loaded safety relief valve in axial section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-011 · Pneumatics, process safety</div>
 <h3><a href="sheets/relief-valve.html">Relief valve</a></h3>
 <p class="obj">DN25 spring-loaded safety relief valve in axial section</p>
@@ -301,7 +299,7 @@ footer a{color:var(--muted)}
 <p class="facts">23 parts · 6 views · Drag up/down for vessel pressure · ↑ ↓ pressure · ← → adjusting screw · Space compressor · S slow motion</p>
 </article>
 <article id="differential">
-<a href="sheets/differential.html"><picture><source srcset="thumbs/differential-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/differential-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/differential.html"><img class="" src="thumbs/differential.png?v=mvapmtf7" alt="Rear-axle open bevel-gear differential in plan section, with the car in a turn" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-012 · Automotive drivetrain</div>
 <h3><a href="sheets/differential.html">Open differential</a></h3>
 <p class="obj">Rear-axle open bevel-gear differential in plan section, with the car in a turn</p>
@@ -311,7 +309,7 @@ footer a{color:var(--muted)}
 <p class="facts">25 parts · 5 views · Drag the plan view sideways to steer · ←→ steer · ↑↓ speed · I right wheel on ice · S slow motion</p>
 </article>
 <article id="shock-absorber">
-<a href="sheets/shock-absorber.html"><picture><source srcset="thumbs/shock-absorber-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/shock-absorber-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/shock-absorber.html"><img class="" src="thumbs/shock-absorber.png?v=mvapmtf7" alt="Monotube gas-charged automotive damper (de Carbon type) in axial section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-013 · Hydraulics</div>
 <h3><a href="sheets/shock-absorber.html">Shock absorber</a></h3>
 <p class="obj">Monotube gas-charged automotive damper (de Carbon type) in axial section</p>
@@ -321,7 +319,7 @@ footer a{color:var(--muted)}
 <p class="facts">25 parts · 7 views · Drag the rod eye · ↑ ↓ stroke · Space drives over a hump · D damping on/off · S slow motion</p>
 </article>
 <article id="click-pen">
-<a href="sheets/click-pen.html"><picture><source srcset="thumbs/click-pen-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/click-pen-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/click-pen.html"><img class="" src="thumbs/click-pen.png?v=mvapmtf7" alt="Retractable ballpoint pen in longitudinal section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-014 · Mechanisms</div>
 <h3><a href="sheets/click-pen.html">Click pen</a></h3>
 <p class="obj">Retractable ballpoint pen in longitudinal section</p>
@@ -331,7 +329,7 @@ footer a{color:var(--muted)}
 <p class="facts">17 parts · 7 views · Drag the button in · Space clicks · ← → press and release · S slow motion</p>
 </article>
 <article id="centrifugal-pump">
-<a href="sheets/centrifugal-pump.html"><picture><source srcset="thumbs/centrifugal-pump-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/centrifugal-pump-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/centrifugal-pump.html"><img class="" src="thumbs/centrifugal-pump.png?v=mvapmtf7" alt="ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-015 · Fluid machinery</div>
 <h3><a href="sheets/centrifugal-pump.html">Centrifugal pump</a></h3>
 <p class="obj">ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute</p>
@@ -341,7 +339,7 @@ footer a{color:var(--muted)}
 <p class="facts">30 parts · 7 views · Drag the pump: speed · drag the handwheel: valve · ↑ ↓ speed · ← → valve · Space tour · S slow</p>
 </article>
 <article id="gear-pump">
-<a href="sheets/gear-pump.html"><picture><source srcset="thumbs/gear-pump-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/gear-pump-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/gear-pump.html"><img class="" src="thumbs/gear-pump.png?v=mvapmtf7" alt="Group 2 external gear pump, 8 cm³/rev, cut across and along its shafts" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-016 · Hydraulics</div>
 <h3><a href="sheets/gear-pump.html">External gear pump</a></h3>
 <p class="obj">Group 2 external gear pump, 8 cm³/rev, cut across and along its shafts</p>
@@ -351,7 +349,7 @@ footer a{color:var(--muted)}
 <p class="facts">15 parts · 7 views · Drag the gears · ↑↓ pressure · ←→ speed · Space pauses · S slow motion</p>
 </article>
 <article id="carburettor">
-<a href="sheets/carburettor.html"><picture><source srcset="thumbs/carburettor-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/carburettor-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/carburettor.html"><img class="" src="thumbs/carburettor.png?v=mvapmtf7" alt="Fixed-jet float-bowl carburettor, 26 mm bore, in axial section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-017 · Fluid mechanics</div>
 <h3><a href="sheets/carburettor.html">Carburettor</a></h3>
 <p class="obj">Fixed-jet float-bowl carburettor, 26 mm bore, in axial section</p>
@@ -361,7 +359,7 @@ footer a{color:var(--muted)}
 <p class="facts">26 parts · 6 views · Drag the throttle plate · ← → throttle · C choke · [ ] mixture screw · S slow motion</p>
 </article>
 <article id="pressure-cooker">
-<a href="sheets/pressure-cooker.html"><picture><source srcset="thumbs/pressure-cooker-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/pressure-cooker-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/pressure-cooker.html"><img class="" src="thumbs/pressure-cooker.png?v=mvapmtf7" alt="6 L stovetop pressure cooker (EN 12778) in axial section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-018 · Thermodynamics</div>
 <h3><a href="sheets/pressure-cooker.html">Pressure cooker</a></h3>
 <p class="obj">6 L stovetop pressure cooker (EN 12778) in axial section</p>
@@ -371,7 +369,7 @@ footer a{color:var(--muted)}
 <p class="facts">24 parts · 7 views · Space hob on/off · drag the weight or ↑ ↓ to vent by hand · B blocks the vent (safety valve) · R refills · S slow motion</p>
 </article>
 <article id="solenoid-valve">
-<a href="sheets/solenoid-valve.html"><picture><source srcset="thumbs/solenoid-valve-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/solenoid-valve-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/solenoid-valve.html"><img class="" src="thumbs/solenoid-valve.png?v=mvapmtf7" alt="2/2-way normally closed pilot-operated solenoid valve, G1/2, in axial section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-019 · Hydraulics and electromagnetics</div>
 <h3><a href="sheets/solenoid-valve.html">Solenoid valve</a></h3>
 <p class="obj">2/2-way normally closed pilot-operated solenoid valve, G1/2, in axial section</p>
@@ -381,7 +379,7 @@ footer a{color:var(--muted)}
 <p class="facts">21 parts · 5 views · Space or tap switches the coil · ↑ ↓ or drag sets supply pressure · S slow motion</p>
 </article>
 <article id="stirling">
-<a href="sheets/stirling.html"><picture><source srcset="thumbs/stirling-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/stirling-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/stirling.html"><img class="" src="thumbs/stirling.png?v=mvapmtf7" alt="Beta-type Stirling demonstrator with a rhombic drive, in axial section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-020 · Thermodynamics</div>
 <h3><a href="sheets/stirling.html">Stirling engine</a></h3>
 <p class="obj">Beta-type Stirling demonstrator with a rhombic drive, in axial section</p>
@@ -391,7 +389,7 @@ footer a{color:var(--muted)}
 <p class="facts">25 parts · 5 views · Drag the flywheel or gears · ← → turn · ↑ ↓ burner · Space flame on/off · S slow motion</p>
 </article>
 <article id="disc-brake">
-<a href="sheets/disc-brake.html"><picture><source srcset="thumbs/disc-brake-dark.png" media="(prefers-color-scheme: dark)"><img class="" src="thumbs/disc-brake-paper.png" alt="" width="960" height="679" loading="lazy"></picture></a>
+<a href="sheets/disc-brake.html"><img class="" src="thumbs/disc-brake.png?v=mvapmtf7" alt="Bicycle hydraulic disc brake: lever master cylinder and two-piston post-mount caliper in section" width="960" height="720" loading="lazy"></a>
 <div class="dwg">BP-021 · Hydraulics</div>
 <h3><a href="sheets/disc-brake.html">Hydraulic disc brake</a></h3>
 <p class="obj">Bicycle hydraulic disc brake: lever master cylinder and two-piston post-mount caliper in section</p>
@@ -410,14 +408,14 @@ Inspired by Ryan's <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a>, w
 <script>
 (function () {
   // live iframes start when they come near the screen, in the page's colour scheme
-  var dark = matchMedia("(prefers-color-scheme: dark)").matches;
   var fit = function (f) {
+    if (f.dataset.zoom) return;
     try { var d = f.contentDocument.documentElement; if (d && d.scrollHeight > 50) { f.parentNode.style.aspectRatio = "auto"; f.parentNode.style.height = d.scrollHeight + "px"; } } catch (e) {}
   };
   var load = function (f) {
     if (f.src) return;
     f.addEventListener("load", function () { fit(f); setTimeout(function () { fit(f); }, 400); });
-    f.src = f.dataset.src + "?theme=" + (dark ? "dark" : "paper");
+    f.src = f.dataset.src;
   };
   addEventListener("resize", function () { document.querySelectorAll("iframe[src]").forEach(function (f) { f.parentNode.style.height = ""; f.parentNode.style.aspectRatio = ""; fit(f); }); });
   var frames = document.querySelectorAll("iframe[data-src]");

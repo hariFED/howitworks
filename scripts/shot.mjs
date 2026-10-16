@@ -4,6 +4,7 @@
 //                                   [--t 6.5] [--theme paper] [--zoom x,y,w,h] [--times 0,0.9,4]
 //
 // --t renders the tour at that time (deterministic). --times takes several shots, name-<t>.png.
+// --mask x,y,w,h blanks everything outside that box (one view alone).
 // --zoom shows only that sheet region, filling the window: use it for 4x close-ups, e.g.
 // --zoom 400,470,320,320 --width 1280 --height 1280.
 import { mkdirSync } from "node:fs";
@@ -24,6 +25,7 @@ for (let i = 0; i < args.length; i++) {
   else if (a === "--times") opt.times = next().split(",");
   else if (a === "--theme") opt.theme = next();
   else if (a === "--zoom") opt.zoom = next();
+  else if (a === "--mask") opt.mask = next();
   else if (a === "--wait") opt.wait = Number(next());
   else rest.push(a);
 }
@@ -41,7 +43,7 @@ for (const [t, out] of shots) {
     `--force-device-scale-factor=${opt.scale}`,
     `--virtual-time-budget=${opt.wait}`,
     `--screenshot=${file}`,
-    pageUrl(rest[0], { t, theme: opt.theme, zoom: opt.zoom }),
+    pageUrl(rest[0], { t, theme: opt.theme, zoom: opt.zoom, mask: opt.mask }),
   ]);
   console.log(out);
 }

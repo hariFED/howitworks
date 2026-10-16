@@ -31,6 +31,17 @@
   --bp-accent-ink: #b8361e;
   --bp-ui: rgba(28, 38, 51, 0.08);
 }
+[data-theme="white"] {
+  --bp-page: #fafafa;
+  --bp-paper: #fafafa;
+  --bp-ink: #262626;
+  --bp-hatch: rgba(38, 38, 38, 0.42);
+  --bp-muted: #8f8f8f;
+  --bp-grid: rgba(0, 0, 0, 0);
+  --bp-accent: #e2552c;
+  --bp-accent-ink: #c8442b;
+  --bp-ui: rgba(0, 0, 0, 0.07);
+}
 [data-theme="dark"] {
   --bp-page: #0d0f12;
   --bp-paper: #15181c;
@@ -712,8 +723,9 @@ const L = (() => {
 //
 // URL parameters (all optional):
 //   ?t=6.5            render the tour at 6.5 s, deterministically, and stop (for screenshots)
-//   ?theme=paper      blueprint | paper | dark
+//   ?theme=paper      blueprint | paper | white | dark
 //   ?zoom=x,y,w,h     show only this sheet region, filling the window (for 4x close-ups)
+//   ?mask=x,y,w,h     blank everything outside this box, so one view stands alone
 //   ?check=1          run the layout self-check after the first frame (see selfcheck.mjs)
 
 function params() {
@@ -722,11 +734,12 @@ function params() {
     t: q.has("t") ? Number(q.get("t")) : null,
     theme: q.get("theme"),
     zoom: q.get("zoom"),
+    mask: q.get("mask"),
     check: q.has("check"),
   };
 }
 
-const THEMES = ["blueprint", "paper", "dark"];
+const THEMES = ["blueprint", "paper", "white", "dark"];
 
 function setupPage(svg) {
   const q = params();
@@ -748,6 +761,18 @@ function setupPage(svg) {
   } catch {}
   pick(q.theme ?? saved ?? fallback, false);
   for (const b of document.querySelectorAll("[data-theme-pick]")) b.addEventListener("click", () => pick(b.dataset.themePick, true));
+  // ?mask=x,y,w,h paints the page colour over everything outside one box, so a view stands alone
+  if (q.mask) {
+    const [x, y, w, h] = q.mask.split(",").map(Number);
+    if ([x, y, w, h].every(Number.isFinite)) {
+      const m = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      m.setAttribute("d", `M-9999 -9999H9999V9999H-9999Z M${x} ${y}V${y + h}H${x + w}V${y}Z`);
+      m.setAttribute("fill-rule", "evenodd");
+      m.setAttribute("style", "fill:var(--bp-page);pointer-events:none");
+      m.dataset.role = "mask";
+      svg.appendChild(m);
+    }
+  }
   if (q.zoom) {
     const box = q.zoom.split(",").map(Number);
     if (box.length === 4 && box.every(Number.isFinite)) {

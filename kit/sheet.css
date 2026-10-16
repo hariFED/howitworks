@@ -23,6 +23,17 @@
   --bp-accent-ink: #b8361e;
   --bp-ui: rgba(28, 38, 51, 0.08);
 }
+[data-theme="white"] {
+  --bp-page: #fafafa;
+  --bp-paper: #fafafa;
+  --bp-ink: #262626;
+  --bp-hatch: rgba(38, 38, 38, 0.42);
+  --bp-muted: #8f8f8f;
+  --bp-grid: rgba(0, 0, 0, 0);
+  --bp-accent: #e2552c;
+  --bp-accent-ink: #c8442b;
+  --bp-ui: rgba(0, 0, 0, 0.07);
+}
 [data-theme="dark"] {
   --bp-page: #0d0f12;
   --bp-paper: #15181c;

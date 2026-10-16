@@ -3,8 +3,9 @@
 //
 // URL parameters (all optional):
 //   ?t=6.5            render the tour at 6.5 s, deterministically, and stop (for screenshots)
-//   ?theme=paper      blueprint | paper | dark
+//   ?theme=paper      blueprint | paper | white | dark
 //   ?zoom=x,y,w,h     show only this sheet region, filling the window (for 4x close-ups)
+//   ?mask=x,y,w,h     blank everything outside this box, so one view stands alone
 //   ?check=1          run the layout self-check after the first frame (see selfcheck.mjs)
 
 export function params() {
@@ -13,11 +14,12 @@ export function params() {
     t: q.has("t") ? Number(q.get("t")) : null,
     theme: q.get("theme"),
     zoom: q.get("zoom"),
+    mask: q.get("mask"),
     check: q.has("check"),
   };
 }
 
-export const THEMES = ["blueprint", "paper", "dark"];
+export const THEMES = ["blueprint", "paper", "white", "dark"];
 
 export function setupPage(svg) {
   const q = params();
@@ -39,6 +41,18 @@ export function setupPage(svg) {
   } catch {}
   pick(q.theme ?? saved ?? fallback, false);
   for (const b of document.querySelectorAll("[data-theme-pick]")) b.addEventListener("click", () => pick(b.dataset.themePick, true));
+  // ?mask=x,y,w,h paints the page colour over everything outside one box, so a view stands alone
+  if (q.mask) {
+    const [x, y, w, h] = q.mask.split(",").map(Number);
+    if ([x, y, w, h].every(Number.isFinite)) {
+      const m = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      m.setAttribute("d", `M-9999 -9999H9999V9999H-9999Z M${x} ${y}V${y + h}H${x + w}V${y}Z`);
+      m.setAttribute("fill-rule", "evenodd");
+      m.setAttribute("style", "fill:var(--bp-page);pointer-events:none");
+      m.dataset.role = "mask";
+      svg.appendChild(m);
+    }
+  }
   if (q.zoom) {
     const box = q.zoom.split(",").map(Number);
     if (box.length === 4 && box.every(Number.isFinite)) {

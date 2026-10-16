@@ -48,6 +48,15 @@ const SHORT = {
 };
 const short = (m) => SHORT[m.slug] || [m.title, m.domain || ""];
 
+const BUILD = Date.now().toString(36);
+const CROPS = JSON.parse(readFileSync(join(root, "site", "crops.json"), "utf8"));
+// grow a box by a margin, then to an aspect ratio, about its centre
+const pad = ([x, y, w, h], m, aspect) => {
+  const cx = x + w / 2, cy = y + h / 2;
+  w *= 1 + 2 * m; h *= 1 + 2 * m;
+  if (aspect) { if (w / h < aspect) w = h * aspect; else h = w / aspect; }
+  return [cx - w / 2, cy - h / 2, w, h].map((v) => Math.round(v));
+};
 const shot = (page, png, args) => {
   execFileSync(process.execPath, [join(root, "scripts", "shot.mjs"), page, "--out", png, ...args], { stdio: "pipe" });
 };
@@ -73,30 +82,31 @@ html.in-frame .bp-page{padding:8px 8px 10px}
 <script>try{if(window.top!==window)document.documentElement.classList.add("in-frame")}catch(e){document.documentElement.classList.add("in-frame")}</script>`;
   html = html.replace("<body>", `<body>\n${bar}`);
   writeFileSync(join(out, "sheets", `${m.slug}.html`), html);
-  for (const theme of ["paper", "dark"]) {
-    const thumb = join(out, "thumbs", `${m.slug}-${theme}.png`);
-    if (shots || !existsSync(thumb)) {
-      shot(src, thumb, ["--zoom", "0,0,1200,848", "--width", "960", "--height", "679", "--t", String(m.shotT ?? 3), "--theme", theme]);
-      console.log(`thumb  ${m.slug} ${theme}`);
-    }
+  const thumb = join(out, "thumbs", `${m.slug}.png`);
+  if (shots || !existsSync(thumb)) {
+    shot(src, thumb, ["--zoom", pad(CROPS[m.slug] || [0, 0, 1200, 848], 0.06, 4 / 3).join(","), "--mask", pad(CROPS[m.slug] || [0, 0, 1200, 848], 0.025).join(","), "--width", "960", "--height", "720", "--t", String(m.shotT ?? 3), "--theme", "white"]);
+    console.log(`thumb  ${m.slug}`);
   }
 });
 
 const pump = join(root, "examples", "floor-pump", "floor-pump.html");
-for (const theme of ["blueprint", "paper", "dark"]) {
+for (const theme of ["blueprint", "paper", "white", "dark"]) {
   const png = join(out, "thumbs", `theme-${theme}.png`);
   if (shots || !existsSync(png)) shot(pump, png, ["--zoom", "380,270,420,297", "--width", "840", "--height", "594", "--t", "1.0", "--theme", theme]);
 }
-if (shots || !existsSync(join(out, "og.png"))) shot(pump, join(out, "og.png"), ["--zoom", "0,0,1200,630", "--width", "1200", "--height", "630", "--t", "1.0", "--theme", "paper"]);
+if (shots || !existsSync(join(out, "og.png"))) shot(join(root, "examples", "escapement", "escapement.html"), join(out, "og.png"), ["--zoom", pad(CROPS.escapement, 0.04, 1200 / 630).join(","), "--width", "1200", "--height", "630", "--t", "3", "--theme", "white"]);
 writeFileSync(join(out, ".nojekyll"), "");
 
 // ---- shared pieces
 const total = sheets.length;
 const parts = sheets.reduce((n, m) => n + (m.parts || 0), 0);
-const img = (slug, cls = "", w = 960, h = 679) =>
-  `<picture><source srcset="thumbs/${slug}-dark.png" media="(prefers-color-scheme: dark)"><img class="${cls}" src="thumbs/${slug}-paper.png" alt="" width="${w}" height="${h}" loading="lazy"></picture>`;
+const img = (slug, cls = "") =>
+  `<img class="${cls}" src="thumbs/${slug}.png?v=${BUILD}" alt="${esc(bySlug[slug] ? bySlug[slug].object : "")}" width="960" height="720" loading="lazy">`;
 const frame = (slug, title, cls = "") =>
-  `<div class="frame ${cls}"><iframe data-src="sheets/${slug}.html" title="${esc(title)}" loading="lazy"></iframe></div>`;
+  `<div class="frame ${cls}"><iframe data-src="sheets/${slug}.html?theme=white" title="${esc(title)}" loading="lazy"></iframe></div>`;
+// a live sheet zoomed to one view: no frame, no bar, just the object on the page
+const live = (slug, title, box, mask) =>
+  `<div class="frame bare" style="aspect-ratio:${box[2]}/${box[3]}"><iframe data-src="sheets/${slug}.html?theme=white&amp;zoom=${box.join(",")}${mask ? "&amp;mask=" + mask.join(",") : ""}" data-zoom="1" title="${esc(title)}"></iframe></div>`;
 
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -109,14 +119,7 @@ const CSS = `
   --sans:"Inter",system-ui,sans-serif; --serif:"EB Garamond",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --page:#111214; --ink:#ececec; --soft:#c4c4c4; --muted:#8c8c8c; --faint:#5a5a5a; --rule:#26282b; --card:#17191c;
-  --code:#1f2226; --accent:#f08a5d; --link-line:#4a4a4a; color-scheme:dark;
-}}
-:root[data-theme="dark"]{
-  --page:#111214; --ink:#ececec; --soft:#c4c4c4; --muted:#8c8c8c; --faint:#5a5a5a; --rule:#26282b; --card:#17191c;
-  --code:#1f2226; --accent:#f08a5d; --link-line:#4a4a4a; color-scheme:dark;
-}
+
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
@@ -145,7 +148,7 @@ p{margin:0 0 12px}
 .tag{font-size:14px;margin:0 0 16px}
 .minis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .minis a{display:block;text-decoration:none}
-.minis img{display:block;width:100%;height:auto;border-radius:3px;opacity:.92;transition:opacity .2s}
+.minis img{display:block;width:100%;height:auto}
 .minis a:hover img{opacity:1}
 .meta{display:flex;flex-wrap:wrap;gap:4px 10px;color:var(--muted);font-size:12.5px;margin:12px 0 26px}
 .meta a{color:var(--muted)}
@@ -157,6 +160,11 @@ p{margin:0 0 12px}
 .wide.side-by .controls{position:absolute;left:calc(100% + 24px);bottom:6px;width:170px}
 .frame{position:relative;aspect-ratio:1200/890;border-radius:4px;overflow:hidden;background:var(--card);box-shadow:0 0 0 1px var(--rule)}
 .frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.frame.bare{background:none;box-shadow:none;border-radius:0}
+.wide.narrow{width:440px;margin-left:auto;margin-right:auto}
+.wide.hero{margin:30px 0 26px}
+.minis img,.grid img,.six img,.coll article img{background:var(--page)}
+
 .controls{font-size:12px;line-height:20px;color:var(--muted)}
 .controls div{display:flex;gap:8px;align-items:center;margin:4px 0}
 .controls kbd{min-width:20px;text-align:center}
@@ -192,7 +200,7 @@ td{padding:8px 10px 8px 0;border-bottom:1px solid var(--rule);vertical-align:top
 .rules p{margin:2px 0 0;color:var(--soft)}
 .six{display:grid;grid-template-columns:1fr 1fr;gap:22px 18px;margin:22px 0}
 .six a{text-decoration:none;display:block}
-.six img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--rule);margin-bottom:8px}
+.six img{display:block;width:100%;height:auto;margin-bottom:8px}
 .six b{font-weight:550;display:block}
 .six span{display:block;color:var(--muted);font-size:12.5px}
 .six em{display:block;font-family:var(--serif);font-size:15px;margin-top:2px}
@@ -203,7 +211,7 @@ td{padding:8px 10px 8px 0;border-bottom:1px solid var(--rule);vertical-align:top
 .uses p{margin:4px 0;color:var(--soft)}
 .uses .l{font-size:12.5px;color:var(--muted)}
 .uses .l a{color:var(--muted)}
-.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:18px 0}
 .themes img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--rule)}
 .themes figure{margin:0}
 .themes figcaption{font-size:12px;color:var(--muted);margin-top:4px}
@@ -225,7 +233,7 @@ footer a{color:var(--muted)}
 .coll{grid-column:3 / 5;grid-row:1;padding:40px 0 80px;min-width:0}
 .coll .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:26px 22px;margin-top:24px}
 .coll article{min-width:0}
-.coll article img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--rule);margin-bottom:10px}
+.coll article img{display:block;width:100%;height:auto;margin-bottom:10px}
 .coll .dwg{font-family:var(--mono);font-size:11px;color:var(--accent)}
 .coll h3{font-size:14px;font-weight:550;margin:2px 0}
 .coll h3 a{text-decoration:none}
@@ -296,14 +304,14 @@ Inspired by Ryan's <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a>, w
 const SCRIPT = `<script>
 (function () {
   // live iframes start when they come near the screen, in the page's colour scheme
-  var dark = matchMedia("(prefers-color-scheme: dark)").matches;
   var fit = function (f) {
+    if (f.dataset.zoom) return;
     try { var d = f.contentDocument.documentElement; if (d && d.scrollHeight > 50) { f.parentNode.style.aspectRatio = "auto"; f.parentNode.style.height = d.scrollHeight + "px"; } } catch (e) {}
   };
   var load = function (f) {
     if (f.src) return;
     f.addEventListener("load", function () { fit(f); setTimeout(function () { fit(f); }, 400); });
-    f.src = f.dataset.src + "?theme=" + (dark ? "dark" : "paper");
+    f.src = f.dataset.src;
   };
   addEventListener("resize", function () { document.querySelectorAll("iframe[src]").forEach(function (f) { f.parentNode.style.height = ""; f.parentNode.style.aspectRatio = ""; fit(f); }); });
   var frames = document.querySelectorAll("iframe[data-src]");
@@ -361,7 +369,7 @@ ${FONTS}
 <body>`;
 
 // ---- landing page content
-const mini = ["floor-pump", "escapement", "pin-tumbler", "token-bucket", "four-stroke"]
+const mini = ["four-stroke", "governor", "pin-tumbler", "centrifugal-pump", "carburettor"]
   .filter((s) => bySlug[s]).map((s) => `<a href="sheets/${s}.html" title="${esc(bySlug[s].title)}">${img(s)}</a>`).join("");
 const grid = sheets.map((m) => { const [o, i] = short(m); return `<a href="sheets/${m.slug}.html">${img(m.slug)}<b>${esc(o)}</b><span>${esc(i)}</span></a>`; }).join("\n");
 const SIX = ["token-bucket", "debounce", "circuit-breaker", "pin-tumbler", "escapement", "differential"].filter((s) => bySlug[s]);
@@ -421,20 +429,20 @@ ${sidebar(true)}
 <p>Most explanations of how something works are boxes and arrows. A drafting office never drew boxes. It drew <em class="s">the thing itself</em>, cut open along the plane where the mechanism lives, with every part named, measured and made of something.</p>
 <p>Blueprint is a skill for Claude Code that does this. You name a mechanism or an idea, Claude picks the real object whose working <em class="s">is</em> the idea, and drafts it as a live A2 engineering sheet: a section through the mechanism, details at larger scale, dimensions, balloons, a parts list and a title block. Then the parts move, and every number on the sheet comes from <a href="#rules">one physical model</a>.</p>
 
-<div class="wide side-by">
-${frame("floor-pump", "Live drawing: bicycle floor pump in axial section")}
+<div class="wide side-by hero">
+${live("escapement", "Live drawing: Swiss lever escapement, plan view at 20:1", [36, 34, 745, 420], [36, 34, 745, 420])}
 <div class="controls">
-<div><kbd>↕</kbd> drag the handle</div>
-<div><kbd>Space</kbd> pump</div>
-<div><kbd>R</kbd> let the tyre down</div>
+<div><kbd>↻</kbd> drag the balance</div>
+<div><kbd>←</kbd><kbd>→</kbd> kick</div>
+<div><kbd>Space</kbd> pause</div>
 <div><kbd>S</kbd> slow</div>
-<p class="read">BP-001 · 21 parts · Boyle's law · dead volume 10.1 cm³ from the drawn geometry</p>
+<p class="read">4 Hz · 28,800 vph · amplitude 279°</p>
 </div>
 </div>
 
-<span class="sn"><b>1</b>About an hour of Claude's time, built and checked in one pass by the same agent.</span>
-<p>This is a bicycle floor pump in axial section. It came from one line, <code>${CMD} explain how a bicycle floor pump works</code>, and about an hour of Claude working on its own.<span class="sn-ref">1</span></p>
-<p>Drag the handle down and watch the stipple thicken as the air compresses. The cup seal folds in on the way up, because it is <em class="s">the inlet valve</em>; the ball lifts off its seat when the chamber passes tyre pressure, because it is the outlet. The stroke dimension re-measures itself, the gauge needle follows, and the P–s diagram flattens the moment the valve opens.</p>
+<span class="sn"><b>1</b>Built and checked in one pass by the same agent, from one line.</span>
+<p>This is a Swiss lever escapement, the part of a mechanical watch that turns a wound spring into equal ticks. It came from one line, <code>${CMD} explain how a mechanical watch keeps time</code>.<span class="sn-ref">1</span></p>
+<p>The balance swings at four beats a second. Each time its jewel flicks the pallet fork, one tooth of the escape wheel slips past a ruby stone and gives the balance <em class="s">a little push</em> back. Press <kbd>S</kbd> to slow time and watch the lock, the impulse and the drop. On the <a href="sheets/escapement.html">full sheet</a> the same model drives a section through the balance staff, a 50:1 detail of the pallets, and a chart of the balance angle against time.</p>
 
 <section>${H.cut}
 <p>The skill rests on one rule, written at the top of its instructions above everything else:</p>
@@ -479,6 +487,8 @@ ${frame("floor-pump", "Live drawing: bicycle floor pump in axial section")}
 <section>${H.rules}
 <p>These are the rules a drafting checker would mark you down for, from ISO 128, 129, 5455 and 7200. The kit makes them easy, and the check makes them hard to break.</p>
 <div class="rules">${rules}</div>
+<p>Here they are on one whole sheet: a bicycle floor pump, drafted at 1:2.5 with two details, a gauge view, a P–s diagram, 21 balloons, a parts list and a title block whose readout is live. Drag the handle and the stroke dimension re-measures itself.</p>
+<div class="wide">${frame("floor-pump", "Live drawing: bicycle floor pump, the whole A2 sheet")}</div>
 </section>
 
 <section>${H.six}
@@ -488,9 +498,9 @@ ${frame("floor-pump", "Live drawing: bicycle floor pump in axial section")}
 
 <section>${H.two}
 <p>Two of the densest sheets. The four-stroke engine runs an Otto cycle at 6000 rpm with valve timing from the cam profiles; the flame grows from the plug and the P–V loop traces live. Drag the crank, or press <kbd>Space</kbd>.</p>
-<div class="wide">${frame("four-stroke", "Live drawing: four-stroke engine in section")}</div>
+<div class="wide narrow">${live("four-stroke", "Live drawing: four-stroke engine in section", pad(CROPS["four-stroke"], 0.04), pad(CROPS["four-stroke"], 0.03))}</div>
 <p>The centrifugal pump is cut twice, through the shaft and through the volute. The duty point slides along the pump curve as the speed changes and the valve throttles; below 1674 rpm it can't lift the water and nothing flows.</p>
-<div class="wide">${frame("centrifugal-pump", "Live drawing: centrifugal pump in two sections")}</div>
+<div class="wide">${live("centrifugal-pump", "Live drawing: centrifugal pump, section through the shaft", pad(CROPS["centrifugal-pump"], 0.04), pad(CROPS["centrifugal-pump"], 0.03))}</div>
 </section>
 
 <section>${H.uses}
@@ -499,17 +509,18 @@ ${frame("floor-pump", "Live drawing: bicycle floor pump in axial section")}
 </section>
 
 <section>${H.themes}
-<p>Colours are tokens, never values, so every sheet has a blueprint, a paper and a dark theme. Pick one in the sheet's bar, or add <code>?theme=</code> to its address.</p>
+<p>Colours are tokens, never values, so every sheet comes in four themes: blueprint, paper, white and dark. Pick one in the sheet's bar, or add <code>?theme=</code> to its address.</p>
 <div class="themes">
 <figure><img src="thumbs/theme-blueprint.png" alt="Floor pump detail, blueprint theme" width="840" height="594" loading="lazy"><figcaption>blueprint</figcaption></figure>
 <figure><img src="thumbs/theme-paper.png" alt="Floor pump detail, paper theme" width="840" height="594" loading="lazy"><figcaption>paper</figcaption></figure>
+<figure><img src="thumbs/theme-white.png" alt="Floor pump detail, white theme" width="840" height="594" loading="lazy"><figcaption>white</figcaption></figure>
 <figure><img src="thumbs/theme-dark.png" alt="Floor pump detail, dark theme" width="840" height="594" loading="lazy"><figcaption>dark</figcaption></figure>
 </div>
 </section>
 
 <section>${H.code}
 <p>A sheet is a single HTML file: inline SVG, inlined CSS and plain JavaScript. Embed one anywhere:</p>
-<pre>&lt;iframe src="floor-pump.html?theme=paper" style="width:100%;aspect-ratio:1200/905;border:0"&gt;&lt;/iframe&gt;</pre>
+<pre>&lt;iframe src="floor-pump.html?theme=white" style="width:100%;aspect-ratio:1200/905;border:0"&gt;&lt;/iframe&gt;</pre>
 <p>The drafting kit is pure functions that return SVG strings, so it runs in Node and in the page:</p>
 <pre>npm install @harifed/blueprint
 
@@ -522,7 +533,7 @@ svg += K.dim(V, [-17.5, 384], [17.5, 384], { dir: "h", off: -24, prefix: "Ø" })
 <p>Every sheet understands the same addresses:</p>
 <div class="rows">
 <div><code>?t=6.5</code></div><div>Renders the tour at 6.5 s, the same every time. The screenshots and checks use it.</div>
-<div><code>?theme=paper</code></div><div>Blueprint, paper or dark.</div>
+<div><code>?theme=white</code></div><div>Blueprint, paper, white or dark.</div>
 <div><code>?zoom=x,y,w,h</code></div><div>One region of the sheet, filling the window, for close-ups.</div>
 <div><code>?check=1</code></div><div>Runs the in-page layout check and writes its findings as JSON.</div>
 </div>
