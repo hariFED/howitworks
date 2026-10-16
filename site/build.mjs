@@ -327,7 +327,7 @@ ${home ? `<div class="group toc">${TOC.map(([id, t]) => `<a href="#${id}" data-t
 const footer = `<footer>
 Made by hariFED with Claude Code. Set in Inter, EB Garamond and JetBrains Mono.<br>
 <a href="https://github.com/hariFED/howitworks">Source on GitHub</a> · <a href="https://www.npmjs.com/package/howitworks">npm</a> · <a href="https://github.com/hariFED/howitworks/blob/main/LICENSE">MIT licence</a> · Version ${esc(pkg.version)}<br>
-Inspired by Ryan's <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a>, which draws the machine; howitworks draws the drawing.
+Inspired by <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a>, the Claude Code skill by Ryan (<a href="https://x.com/wheresryan22">@wheresryan22</a>), which draws the machine; howitworks draws the drawing. Not affiliated with or endorsed by Anatomy.
 </footer>`;
 
 const SCRIPT = `<script>
@@ -453,7 +453,7 @@ ${sidebar(true)}
 <div class="head"><div><b>howitworks</b> <span>· a skill for Claude Code</span></div><div class="icons"><a href="https://github.com/hariFED/howitworks" aria-label="Source on GitHub">GitHub</a></div></div>
 <p class="tag">Name a mechanism, or an idea, and Claude drafts <em class="s">the drawing</em> that explains it.</p>
 <div class="minis">${mini}</div>
-<div class="meta"><span>${CMD}</span><i>·</i><a href="collection.html">${total} sheets, all live</a><i>·</i><span>${parts} drawn parts</span><i>·</i><span>by hariFED</span><i>·</i><span>15 October 2026</span><i>·</i><a href="#install">Install ↓</a></div>
+<div class="meta"><span>${CMD}</span><i>·</i><a href="collection.html">${total} sheets, all live</a><i>·</i><span>${parts} drawn parts</span><i>·</i><span>by hariFED</span><i>·</i><span>inspired by <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a> by Ryan</span><i>·</i><span>15 October 2026</span><i>·</i><a href="#install">Install ↓</a></div>
 
 <p>Most explanations of how something works are boxes and arrows. A drafting office never drew boxes. It drew <em class="s">the thing itself</em>, cut open along the plane where the mechanism lives, with every part named, measured and made of something.</p>
 <p>howitworks is a skill for Claude Code that does this. You name a mechanism or an idea, Claude picks the real object whose working <em class="s">is</em> the idea, and drafts it as a live A2 engineering sheet: a section through the mechanism, details at larger scale, dimensions, balloons, a parts list and a title block. Then the parts move, and every number on the sheet comes from <a href="#rules">one physical model</a>.</p>
