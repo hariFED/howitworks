@@ -1,0 +1,15 @@
+{
+  "slug": "pressure-cooker",
+  "dwg": "BP-018",
+  "title": "Pressure cooker",
+  "object": "6 L stovetop pressure cooker (EN 12778) in axial section",
+  "idea": "Raising the boiling point with pressure; a safety interlock that cannot open while the resource is in use",
+  "summary": "Water boils where its vapour pressure meets the pressure above it, so a 62 g weight on a Ø3 bore holds 0.86 bar and the water boils at 118 °C instead of 100. The lock pin rises at 3 kPa, seals its own vent and blocks the lid's slide, so the lid cannot be turned while the pot is pressurised. The operating point climbs the saturation curve, sits on the weight while the steam vents, and slides back down when the hob goes off.",
+  "usedFor": ["Thermodynamics teaching: vapour pressure, the Antoine equation, latent heat and boiling point against pressure", "Product documentation and safety training for pressure cookers and autoclaves", "Explaining a lock that guards a resource: the lid stays locked for as long as the pressure (the work in progress) holds"],
+  "domain": "Thermodynamics",
+  "parts": 24,
+  "views": ["Section A-A 1:2", "Detail B valves 2:1", "Detail C bayonet lug, gasket and window 5:1", "Detail D lock pin and slide 5:1", "View E lid from above, broken 1:2.5", "Diagram 1 saturation curve", "Table 1 saturated steam"],
+  "controls": "Space hob on/off · drag the weight or ↑ ↓ to vent by hand · B blocks the vent (safety valve) · R refills · S slow motion",
+  "checkTimes": "0,3,6,7.6,8.5,9.5,11,14,17,20,21.5,23,24.2,25.5,28",
+  "shotT": 11
+}

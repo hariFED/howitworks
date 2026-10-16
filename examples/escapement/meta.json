@@ -1,0 +1,15 @@
+{
+  "slug": "escapement",
+  "dwg": "BP-004",
+  "title": "Lever escapement",
+  "object": "Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings",
+  "idea": "Turning stored energy into equal ticks: a clock-driven scheduler, a rate-limited event loop",
+  "summary": "A balance and hairspring swing at 4 Hz whatever the mainspring does; the escapement only lets the train move when the balance says so. Each beat the fork unlocks a stone, the club tooth pushes the stone and the fork pushes the impulse jewel, then the tooth drops onto the other stone and locks, so the escape wheel advances one tooth every two beats. The diagram marks every impulse on the balance's swing.",
+  "usedFor": ["Horology teaching: lock, unlock, impulse, drop, draw and lift angle", "Product pages and documentation for mechanical watches", "Explaining a clock-driven scheduler or rate limiter: an independent oscillator releases stored work in fixed quanta"],
+  "domain": "Horology",
+  "parts": 22,
+  "views": ["Plan view from dial side 20:1", "Detail B pallets 50:1", "Section A-A balance staff and bearings 20:1", "Detail C upper bearing 50:1", "Diagram 1 balance angle against time"],
+  "controls": "Drag the balance and let it go · ← → kick · Space pause · S speed · R restart",
+  "checkTimes": "0,1,2,3,4,5,6,8,10,11.5,12.5,14",
+  "shotT": 3
+}

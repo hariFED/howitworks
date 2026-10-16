@@ -1,0 +1,15 @@
+{
+  "slug": "thermostat",
+  "dwg": "BP-010",
+  "title": "Wax thermostat",
+  "object": "Automotive wax-pellet coolant thermostat (opens at 88 °C) in section, in its housing between engine and radiator",
+  "idea": "A setpoint controller with no electronics: negative feedback through melting wax",
+  "summary": "Paraffin in a brass cup gains 12 % in volume as it melts, squeezes a rubber sleeve and pushes the pin against the bridge, so the cup moves down: the valve opens to the radiator and the bypass disc shuts. The engine's heat balance closes the loop, and the coolant settles a little above 88 °C, higher under load. Wax freezes 2 K below where it melts, so the lift–temperature diagram traces a hysteresis loop.",
+  "usedFor": ["Automotive technician training: cooling systems, thermostat faults, bypass and jiggle valve", "Control engineering teaching: proportional control, droop, hysteresis and feedback without electronics", "Product documentation for wax-element actuators and thermostatic valves"],
+  "domain": "Thermal control",
+  "parts": 24,
+  "views": ["Section A-A 2:1", "Detail B pellet 5:1", "Detail D jiggle valve and seat 5:1", "View C from above 1:1", "Lift–temperature diagram"],
+  "controls": "Drag up/down sets engine load · ↑ ↓ load · H hill · R cold start · S speed",
+  "checkTimes": "0,2,4.5,7,10,12,15,18,21,24,25.5,26.5,28,31",
+  "shotT": 14
+}

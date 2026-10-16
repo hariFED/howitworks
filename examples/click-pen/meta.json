@@ -1,0 +1,15 @@
+{
+  "slug": "click-pen",
+  "dwg": "BP-014",
+  "title": "Click pen",
+  "object": "Retractable ballpoint pen in longitudinal section",
+  "idea": "A toggle (finite state machine) built from geometry",
+  "summary": "A push-push cam as a state machine. Each press drives the rotator's lugs below the guide's ridge teeth and the plunger tooth turns them 30°; on release the ridge tooth turns them another 30°, into a long slot (retracted) or a short slot (extended), alternately. The developed cam track shows the lug's path, and the section shows the lug change sides with every click.",
+  "usedFor": ["Product design teaching: cams, indexing and snap-fit mechanisms", "Software-concept explainer: a toggle or T flip-flop as a finite state machine", "Product documentation for retractable pens and push-push latches"],
+  "domain": "Mechanisms",
+  "parts": 17,
+  "views": ["Longitudinal section 2:1", "Detail D cam mechanism 5:1", "Developed view E cam track 10:1", "Section B-B at the lugs 10:1", "Detail F ball and socket 20:1", "Diagram 1 state machine", "Diagram 2 spring force"],
+  "controls": "Drag the button in · Space clicks · ← → press and release · S slow motion",
+  "checkTimes": "0,0.5,0.95,1.1,1.3,1.6,2.0,2.6,3.6,3.9,4.2,4.6,5.0,6.1",
+  "shotT": 2.6
+}

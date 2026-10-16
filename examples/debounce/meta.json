@@ -1,0 +1,27 @@
+{
+  "slug": "debounce",
+  "dwg": "BP-007",
+  "title": "Door closer",
+  "object": "Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section",
+  "idea": "Debounce: act only once the input has stopped for long enough",
+  "summary": "A spring drives the piston back and the oil can only leave through two needle valves, so the door shuts at a pace set by the orifice equation. Every push reopens the door and starts the whole closing again; it latches only after a quiet spell as long as the closing time from where it was left.",
+  "usedFor": [
+    "Software-concept explainer: debounce and restartable timers drawn as hardware",
+    "Hydraulics teaching: orifice flow, check valves, rack-and-pinion conversion",
+    "Product documentation for door closers and their sweep and latch adjustment"
+  ],
+  "domain": "Hydraulics",
+  "parts": 23,
+  "views": [
+    "Section A-A 1:1",
+    "Section B-B 1:1",
+    "Detail C sweep needle 10:1",
+    "Detail F check valve 5:1",
+    "Plan E door and arm 1:10",
+    "Diagram 1 θ–t",
+    "Diagram 2 time to latch"
+  ],
+  "controls": "Space or click the closer pushes the door · drag the door in plan E · R shuts it · S slow motion",
+  "checkTimes": "0,0.4,0.9,2,3.1,4.5,5.6,6.4,8,9.5,11,12.5,14.9,15.3",
+  "shotT": 6.4
+}

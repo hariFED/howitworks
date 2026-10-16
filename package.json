@@ -1,0 +1,39 @@
+{
+  "name": "@harifed/blueprint",
+  "version": "0.1.0",
+  "description": "A Claude Code skill that draws live engineering blueprints: sectioned, dimensioned, ballooned A2 sheets whose parts move from one physical model.",
+  "keywords": ["claude-code", "claude", "skill", "agent-skill", "blueprint", "technical-drawing", "svg", "engineering", "explainer", "interactive"],
+  "license": "MIT",
+  "author": "hariFED",
+  "type": "module",
+  "homepage": "https://harifed.github.io/blueprint/",
+  "repository": { "type": "git", "url": "git+https://github.com/hariFED/blueprint.git" },
+  "bugs": "https://github.com/hariFED/blueprint/issues",
+  "bin": { "blueprint": "bin/install.mjs" },
+  "exports": {
+    "./kit/draft": "./kit/draft.mjs",
+    "./kit/live": "./kit/live.mjs",
+    "./kit/page": "./kit/page.mjs",
+    "./kit/selfcheck": "./kit/selfcheck.mjs",
+    "./kit/sheet.css": "./kit/sheet.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin/",
+    "kit/",
+    "scripts/",
+    "references/",
+    "examples/**/*.mjs",
+    "examples/**/*.js",
+    "examples/**/meta.json",
+    "SKILL.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node scripts/build-all.mjs",
+    "check": "node scripts/check-all.mjs",
+    "site": "node site/build.mjs"
+  }
+}

@@ -1,0 +1,6 @@
+node_modules/
+shots/
+examples/*/shots/*
+!examples/*/shots/sheet.png
+*.log
+.DS_Store

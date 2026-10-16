@@ -1,0 +1,27 @@
+{
+  "slug": "disc-brake",
+  "dwg": "BP-021",
+  "title": "Hydraulic disc brake",
+  "object": "Bicycle hydraulic disc brake: lever master cylinder and two-piston post-mount caliper in section",
+  "idea": "Hydraulic force transmission; a master–replica pair where one piston writes and the other follows",
+  "summary": "Pascal's principle between two pistons. The lever's primary cup first has to pass the timing port before any pressure can build, then the oil pushes the caliper pistons across the pad gap, and only once the pads touch the rotor does the clamp force climb steeply. On release the square seals spring back and pull the pistons off the rotor by exactly the rollback they took.",
+  "usedFor": [
+    "Cycling mechanics training: bleeding, free stroke, bite point and pad clearance",
+    "Product documentation for hydraulic brakes and clutches",
+    "Explaining a master–replica (leader–follower) pair in software or systems design"
+  ],
+  "domain": "Hydraulics",
+  "parts": 29,
+  "views": [
+    "Section in the plane of the lever 2:1",
+    "Section A-A split clamp 2:1",
+    "Detail D timing port 10:1",
+    "Section B-B caliper 2:1",
+    "Detail E square seal 20:1",
+    "View C rotor 1:2",
+    "Clamp force–finger travel diagram"
+  ],
+  "controls": "Drag the lever · ↑ ↓ pull and release · Space squeezes · S slow motion",
+  "checkTimes": "0,0.4,0.9,1.4,1.9,2.4,2.9,3.4,4.0,4.5,5.0,5.6,6.3,9.2",
+  "shotT": 3.2
+}

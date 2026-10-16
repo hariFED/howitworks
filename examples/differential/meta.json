@@ -1,0 +1,15 @@
+{
+  "slug": "differential",
+  "dwg": "BP-012",
+  "title": "Open differential",
+  "object": "Rear-axle open bevel-gear differential in plan section, with the car in a turn",
+  "idea": "Splitting one input between two outputs that may run at different speeds: load balancing",
+  "summary": "The crown wheel turns the carrier, and the carrier always turns at the mean of the two wheels. The spider gears stay still on their pin when the car runs straight and spin only when the wheels differ, in a turn or with one wheel on ice. Because a spider pushes equally on both side gears, the torque splits equally, so the wheel on ice sets what both wheels get.",
+  "usedFor": ["Automotive engineering and mechanics courses: differential kinematics, ωC = (ωL + ωR)/2", "Product and service documentation for axles and final drives", "A software-concept explainer for load balancing and equal-share schedulers"],
+  "domain": "Automotive drivetrain",
+  "parts": 25,
+  "views": ["Plan section through axle and pinion axes 1:2.5", "Detail E carrier bearing 2:1", "View D gear cluster riding with the carrier 1:1", "Plan of the car in a turn 1:50", "Wheel speed–time diagram"],
+  "controls": "Drag the plan view sideways to steer · ←→ steer · ↑↓ speed · I right wheel on ice · S slow motion",
+  "checkTimes": "0,1.5,3.2,5.5,8,10.4,13,16.4,18.8,20,22,24,26,27.6,28.6,41",
+  "shotT": 41
+}

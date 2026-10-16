@@ -1,0 +1,15 @@
+{
+  "slug": "centrifugal-pump",
+  "dwg": "BP-015",
+  "title": "Centrifugal pump",
+  "object": "ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute",
+  "idea": "Converting rotation into pressure, and the operating point where supply meets demand",
+  "summary": "The impeller flings water outwards and the volute turns its speed into pressure, so the stipple thickens from the suction eye to the discharge. The affinity laws scale the pump curve with speed, the globe valve steepens the system curve as it throttles, and the duty point sits where the two cross; below 1674 rpm the pump cannot lift the 12 m static head and nothing flows.",
+  "usedFor": ["Process-industry and maintenance training: reading a pump curve, throttling against speed control", "Product documentation for pump and valve makers", "Explaining an equilibrium point, supply meeting demand, as a software or economics metaphor"],
+  "domain": "Fluid machinery",
+  "parts": 30,
+  "views": ["Section A-A through the shaft 1:2", "Section B-B through the volute 1:2", "Detail C mechanical seal 2:1", "Detail D wear ring clearance 5:1", "Discharge valve axial section 1:2", "Diagram 1 H–Q", "Diagram 2 η and P against Q"],
+  "controls": "Drag the pump: speed · drag the handwheel: valve · ↑ ↓ speed · ← → valve · Space tour · S slow",
+  "checkTimes": "0,1.5,3,5,8,10,12,14.5,17,19,22,24,25.9,27",
+  "shotT": 9
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "gear-pump",
+  "dwg": "BP-016",
+  "title": "External gear pump",
+  "object": "Group 2 external gear pump, 8 cm³/rev, cut across and along its shafts",
+  "idea": "Positive displacement: a conveyor of fixed-size batches",
+  "summary": "Two involute gears carry oil round the outside of the bore in sealed tooth spaces, 24 batches of 0.33 cm³ per revolution, and the mesh squeezes them out at the outlet. Flow is displacement × speed less a laminar leak that grows with pressure, so the volumetric efficiency falls as pressure rises, and falls further at low speed. Each space's pressure builds over the last two pitches before the outlet.",
+  "usedFor": ["Fluid power courses: displacement, volumetric efficiency, leakage and torque", "Product pages and data sheets for hydraulic gear pumps", "Explaining batching and positive displacement in software, such as fixed-size work queues"],
+  "domain": "Hydraulics",
+  "parts": 15,
+  "views": ["Section A-A across the shafts 2:1", "Section B-B along the shafts (stepped) 1:1", "Detail C the mesh 5:1", "Detail D shaft seal 5:1", "View F shaft end 2:1", "Diagram 1 flow and ηv against pressure", "Diagram 2 pressure in one tooth space"],
+  "controls": "Drag the gears · ↑↓ pressure · ←→ speed · Space pauses · S slow motion",
+  "checkTimes": "0,1,2.5,4,5.5,7,8.5,10,12,14,16,18,19.5,20,21",
+  "shotT": 9
+}

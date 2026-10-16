@@ -1,0 +1,2053 @@
+<!doctype html>
+<html lang="en" data-theme="blueprint">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Door Closer Section</title>
+<meta name="description" content="A live engineering drawing of an overhead hydraulic door closer: oil through two needle valves times the closing, and every push restarts it, which is debounce.">
+<style>
+/* Blueprint sheet styles. Every colour a drawing uses is one of these tokens. */
+
+:root,
+[data-theme="blueprint"] {
+  --bp-page: #0a2747;
+  --bp-paper: #123b69;
+  --bp-ink: #e9f1ff;
+  --bp-hatch: rgba(214, 230, 255, 0.72);
+  --bp-muted: #95b3da;
+  --bp-grid: rgba(190, 215, 255, 0.07);
+  --bp-accent: #ffc94d;
+  --bp-accent-ink: #ffd77a;
+  --bp-ui: rgba(233, 241, 255, 0.12);
+}
+[data-theme="paper"] {
+  --bp-page: #e4dfd1;
+  --bp-paper: #f7f3e8;
+  --bp-ink: #1c2633;
+  --bp-hatch: rgba(28, 38, 51, 0.78);
+  --bp-muted: #616b78;
+  --bp-grid: rgba(28, 38, 51, 0.045);
+  --bp-accent: #d4472c;
+  --bp-accent-ink: #b8361e;
+  --bp-ui: rgba(28, 38, 51, 0.08);
+}
+[data-theme="dark"] {
+  --bp-page: #0d0f12;
+  --bp-paper: #15181c;
+  --bp-ink: #dde3ea;
+  --bp-hatch: rgba(221, 227, 234, 0.62);
+  --bp-muted: #86919d;
+  --bp-grid: rgba(221, 227, 234, 0.035);
+  --bp-accent: #f29f3d;
+  --bp-accent-ink: #f6b462;
+  --bp-ui: rgba(221, 227, 234, 0.08);
+}
+
+:root {
+  --bp-thick: 1.15px;
+  --bp-thin: 0.55px;
+  --bp-font: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bp-page);
+  color: var(--bp-ink);
+  font-family: var(--bp-font);
+}
+.bp-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  box-sizing: border-box;
+}
+.bp-figure {
+  margin: 0;
+}
+.bp-sheet {
+  display: block;
+  width: 100%;
+  height: auto;
+  outline: none;
+  border-radius: 2px;
+}
+.bp-sheet:focus-visible {
+  box-shadow: 0 0 0 2px var(--bp-accent);
+}
+.bp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--bp-muted);
+  letter-spacing: 0.03em;
+}
+.bp-bar kbd {
+  font: inherit;
+  color: var(--bp-ink);
+  border: 1px solid var(--bp-ui);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+.bp-themes {
+  display: flex;
+  gap: 4px;
+}
+.bp-themes button {
+  font: inherit;
+  color: var(--bp-muted);
+  background: transparent;
+  border: 1px solid var(--bp-ui);
+  border-radius: 3px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.bp-themes button[aria-pressed="true"] {
+  color: var(--bp-ink);
+  background: var(--bp-ui);
+}
+.bp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Zoom mode (?zoom=x,y,w,h): the region fills the window, for close-up checks. */
+body.bp-zoom .bp-page {
+  max-width: none;
+  padding: 0;
+}
+body.bp-zoom .bp-sheet {
+  width: 100vw;
+  height: 100vh;
+}
+body.bp-zoom .bp-bar {
+  display: none;
+}
+
+/* ---- the drawing */
+.bp-sheet .sheet-bg {
+  fill: var(--bp-paper);
+}
+.bp-sheet .grid {
+  fill: none;
+  stroke: var(--bp-grid);
+  stroke-width: 0.5px;
+}
+.bp-sheet .vis,
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  fill: none;
+  stroke: var(--bp-ink);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.bp-sheet .vis {
+  stroke-width: var(--bp-thick);
+}
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .hid {
+  stroke-dasharray: 4 2.2;
+  stroke-linecap: butt;
+}
+.bp-sheet .ctr {
+  stroke-dasharray: 15 2.6 2 2.6;
+  stroke-linecap: butt;
+}
+.bp-sheet .phan {
+  stroke-dasharray: 13 2.4 1.8 2.4 1.8 2.4;
+  stroke-linecap: butt;
+}
+.bp-sheet .vis.spring {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .paper,
+.bp-sheet .balloon {
+  fill: var(--bp-paper);
+}
+.bp-sheet .balloon {
+  stroke: var(--bp-ink);
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .solid,
+.bp-sheet .head,
+.bp-sheet .dot {
+  fill: var(--bp-ink);
+}
+.bp-sheet .hl {
+  fill: none;
+  stroke: var(--bp-hatch);
+  stroke-width: 0.5px;
+}
+.bp-sheet .hl-dash {
+  stroke-dasharray: 1.3 1.3;
+}
+.bp-sheet .hd {
+  fill: var(--bp-hatch);
+}
+.bp-sheet .tint {
+  fill: var(--bp-accent);
+}
+.bp-sheet .accent {
+  stroke: var(--bp-accent);
+}
+.bp-sheet .accent-fill {
+  fill: var(--bp-accent);
+}
+.bp-sheet .t {
+  font-family: var(--bp-font);
+  font-size: 9.5px;
+  fill: var(--bp-ink);
+  letter-spacing: 0.02em;
+}
+.bp-sheet .t-sm {
+  font-size: 7.6px;
+}
+.bp-sheet .t-lg {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-xl {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.bp-sheet .t-cap {
+  font-size: 6.2px;
+  fill: var(--bp-muted);
+  letter-spacing: 0.08em;
+}
+.bp-sheet .t-head {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-mute {
+  fill: var(--bp-muted);
+}
+.bp-sheet .t-accent {
+  fill: var(--bp-accent-ink);
+}
+.bp-sheet [data-drag] {
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.bp-sheet .hit{fill:transparent}.bp-sheet [data-push]{cursor:pointer}.bp-sheet [data-drag="plan"]{cursor:grab;touch-action:none}.bp-sheet .tint{fill:url(#oil)}.bp-sheet .oil-dot{fill:var(--bp-accent)}.bp-sheet .grid-line{stroke:var(--bp-grid);stroke-width:.6px}.bp-sheet .flow{fill:none;stroke:var(--bp-accent);stroke-width:1.3px;stroke-dasharray:3 4;stroke-linecap:round;stroke-linejoin:round}
+</style>
+</head>
+<body>
+<nav class="site-bar" aria-label="Blueprint">
+<a href="../">← Blueprint</a><span>BP-007 · Door closer</span>
+<span class="site-bar-pn"><a href="token-bucket.html" aria-label="Previous sheet: Cistern token bucket">‹ BP-006</a><a href="pin-tumbler.html" aria-label="Next sheet: Pin tumbler cylinder">BP-008 ›</a></span>
+</nav>
+<style>
+.site-bar{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;justify-content:space-between;max-width:1480px;margin:0 auto;padding:12px 16px 0;box-sizing:border-box;font:12px/1.4 var(--bp-font);color:var(--bp-muted);letter-spacing:.04em;text-transform:uppercase}
+.site-bar a{color:var(--bp-ink);text-decoration:none}.site-bar a:hover{text-decoration:underline}
+.site-bar-pn{display:flex;gap:14px}
+html.in-frame .site-bar{display:none}
+</style>
+<script>try{if(window.top!==window)document.documentElement.classList.add("in-frame")}catch(e){document.documentElement.classList.add("in-frame")}</script>
+<main class="bp-page">
+<figure class="bp-figure">
+<svg class="bp-sheet" viewBox="0 0 1200 848" role="img" tabindex="0" aria-label="Engineering drawing of an overhead hydraulic door closer cut through its cylinder, with the door and arm in plan. Press Space or click the closer to push the door open; drag the door in the plan. Each push restarts the closing; the door latches only after the pushes stop for long enough." data-views='{"main":{"x":410,"y":170,"scale":1},"C":{"x":-998.6363636363637,"y":-44.76767676767679,"scale":10},"F":{"x":-97.35353535353534,"y":434,"scale":5},"B":{"x":698,"y":168,"scale":1},"E":{"x":330,"y":766,"scale":0.1}}'><defs><pattern id="h-steel-45" patternUnits="userSpaceOnUse" width="3.4" height="3.4" patternTransform="rotate(45)"><path class="hl" d="M0 -1V4.4"/></pattern><pattern id="h-steel-135" patternUnits="userSpaceOnUse" width="3.4" height="3.4" patternTransform="rotate(135)"><path class="hl" d="M0 -1V4.4"/></pattern><pattern id="h-steel-30" patternUnits="userSpaceOnUse" width="3.4" height="3.4" patternTransform="rotate(30)"><path class="hl" d="M0 -1V4.4"/></pattern><pattern id="h-steel-60" patternUnits="userSpaceOnUse" width="3.4" height="3.4" patternTransform="rotate(60)"><path class="hl" d="M0 -1V4.4"/></pattern><pattern id="h-iron-45" patternUnits="userSpaceOnUse" width="5.6" height="5.6" patternTransform="rotate(45)"><path class="hl" d="M0 -1V6.6"/></pattern><pattern id="h-iron-135" patternUnits="userSpaceOnUse" width="5.6" height="5.6" patternTransform="rotate(135)"><path class="hl" d="M0 -1V6.6"/></pattern><pattern id="h-iron-30" patternUnits="userSpaceOnUse" width="5.6" height="5.6" patternTransform="rotate(30)"><path class="hl" d="M0 -1V6.6"/></pattern><pattern id="h-iron-60" patternUnits="userSpaceOnUse" width="5.6" height="5.6" patternTransform="rotate(60)"><path class="hl" d="M0 -1V6.6"/></pattern><pattern id="h-alu-45" patternUnits="userSpaceOnUse" width="5.2" height="5.2" patternTransform="rotate(45)"><path class="hl" d="M0 -1V6.2M1.5 -1V6.2"/></pattern><pattern id="h-alu-135" patternUnits="userSpaceOnUse" width="5.2" height="5.2" patternTransform="rotate(135)"><path class="hl" d="M0 -1V6.2M1.5 -1V6.2"/></pattern><pattern id="h-alu-30" patternUnits="userSpaceOnUse" width="5.2" height="5.2" patternTransform="rotate(30)"><path class="hl" d="M0 -1V6.2M1.5 -1V6.2"/></pattern><pattern id="h-alu-60" patternUnits="userSpaceOnUse" width="5.2" height="5.2" patternTransform="rotate(60)"><path class="hl" d="M0 -1V6.2M1.5 -1V6.2"/></pattern><pattern id="h-brass-45" patternUnits="userSpaceOnUse" width="4.6" height="4.6" patternTransform="rotate(45)"><path class="hl" d="M0 -1V5.6"/><path class="hl hl-dash" d="M2.3 -1V5.6"/></pattern><pattern id="h-brass-135" patternUnits="userSpaceOnUse" width="4.6" height="4.6" patternTransform="rotate(135)"><path class="hl" d="M0 -1V5.6"/><path class="hl hl-dash" d="M2.3 -1V5.6"/></pattern><pattern id="h-brass-30" patternUnits="userSpaceOnUse" width="4.6" height="4.6" patternTransform="rotate(30)"><path class="hl" d="M0 -1V5.6"/><path class="hl hl-dash" d="M2.3 -1V5.6"/></pattern><pattern id="h-brass-60" patternUnits="userSpaceOnUse" width="4.6" height="4.6" patternTransform="rotate(60)"><path class="hl" d="M0 -1V5.6"/><path class="hl hl-dash" d="M2.3 -1V5.6"/></pattern><pattern id="h-bronze-45" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(45)"><path class="hl" d="M0 -1V4.6"/><path class="hl hl-dash" d="M1.8 -1V4.6"/></pattern><pattern id="h-bronze-135" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(135)"><path class="hl" d="M0 -1V4.6"/><path class="hl hl-dash" d="M1.8 -1V4.6"/></pattern><pattern id="h-bronze-30" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(30)"><path class="hl" d="M0 -1V4.6"/><path class="hl hl-dash" d="M1.8 -1V4.6"/></pattern><pattern id="h-bronze-60" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(60)"><path class="hl" d="M0 -1V4.6"/><path class="hl hl-dash" d="M1.8 -1V4.6"/></pattern><pattern id="h-rubber-45" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(45)"><path class="hl" d="M0 -1V4.2M-1 0H4.2"/></pattern><pattern id="h-rubber-135" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(135)"><path class="hl" d="M0 -1V4.2M-1 0H4.2"/></pattern><pattern id="h-rubber-30" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(30)"><path class="hl" d="M0 -1V4.2M-1 0H4.2"/></pattern><pattern id="h-rubber-60" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(60)"><path class="hl" d="M0 -1V4.2M-1 0H4.2"/></pattern><pattern id="h-plastic-45" patternUnits="userSpaceOnUse" width="2.3" height="2.3" patternTransform="rotate(45)"><path class="hl" d="M0 -1V3.3"/></pattern><pattern id="h-plastic-135" patternUnits="userSpaceOnUse" width="2.3" height="2.3" patternTransform="rotate(135)"><path class="hl" d="M0 -1V3.3"/></pattern><pattern id="h-plastic-30" patternUnits="userSpaceOnUse" width="2.3" height="2.3" patternTransform="rotate(30)"><path class="hl" d="M0 -1V3.3"/></pattern><pattern id="h-plastic-60" patternUnits="userSpaceOnUse" width="2.3" height="2.3" patternTransform="rotate(60)"><path class="hl" d="M0 -1V3.3"/></pattern><pattern id="h-foam-45" patternUnits="userSpaceOnUse" width="2.6" height="2.6" patternTransform="rotate(45)"><circle class="hd" cx="1.3" cy="1.3" r="0.42"/></pattern><pattern id="h-foam-135" patternUnits="userSpaceOnUse" width="2.6" height="2.6" patternTransform="rotate(135)"><circle class="hd" cx="1.3" cy="1.3" r="0.42"/></pattern><pattern id="h-foam-30" patternUnits="userSpaceOnUse" width="2.6" height="2.6" patternTransform="rotate(30)"><circle class="hd" cx="1.3" cy="1.3" r="0.42"/></pattern><pattern id="h-foam-60" patternUnits="userSpaceOnUse" width="2.6" height="2.6" patternTransform="rotate(60)"><circle class="hd" cx="1.3" cy="1.3" r="0.42"/></pattern><pattern id="h-wood-45" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)"><path class="hl" d="M0 -1V5"/><path class="hl" d="M2.2 -1C3 1.2 1.4 2.8 2.2 5"/></pattern><pattern id="h-wood-135" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(135)"><path class="hl" d="M0 -1V5"/><path class="hl" d="M2.2 -1C3 1.2 1.4 2.8 2.2 5"/></pattern><pattern id="h-wood-30" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(30)"><path class="hl" d="M0 -1V5"/><path class="hl" d="M2.2 -1C3 1.2 1.4 2.8 2.2 5"/></pattern><pattern id="h-wood-60" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(60)"><path class="hl" d="M0 -1V5"/><path class="hl" d="M2.2 -1C3 1.2 1.4 2.8 2.2 5"/></pattern><pattern id="oil" patternUnits="userSpaceOnUse" width="3.2" height="3.2"><circle class="oil-dot" cx="0.8" cy="0.8" r="0.62"/><circle class="oil-dot" cx="2.4" cy="2.4" r="0.62"/></pattern><pattern id="grid" patternUnits="userSpaceOnUse" width="10" height="10"><path class="grid" d="M10 0H0V10"/></pattern><clipPath id="clip-C"><circle cx="165" cy="432" r="112"/></clipPath><clipPath id="clip-F"><rect x="322" y="348" width="232" height="172" rx="10"/></clipPath></defs><rect class="sheet-bg" width="1200" height="848"/><rect fill="url(#grid)" width="1200" height="848"/><g data-role="frame"><rect class="thin" x="8" y="8" width="1184" height="832"/><rect class="vis" x="24" y="24" width="1152" height="800"/><path class="thin" d="M168 8V24M168 824V840M312 8V24M312 824V840M456 8V24M456 824V840M600 8V24M600 824V840M744 8V24M744 824V840M888 8V24M888 824V840M1032 8V24M1032 824V840M8 157.33H24M1176 157.33H1192M8 290.67H24M1176 290.67H1192M8 424H24M1176 424H1192M8 557.33H24M1176 557.33H1192M8 690.67H24M1176 690.67H1192"/><path class="vis" d="M600 8V34M600 840V814M8 424H34M1192 424H1166"/><text class="t t-sm" x="96" y="19" text-anchor="middle">1</text><text class="t t-sm" x="96" y="835" text-anchor="middle">1</text><text class="t t-sm" x="240" y="19" text-anchor="middle">2</text><text class="t t-sm" x="240" y="835" text-anchor="middle">2</text><text class="t t-sm" x="384" y="19" text-anchor="middle">3</text><text class="t t-sm" x="384" y="835" text-anchor="middle">3</text><text class="t t-sm" x="528" y="19" text-anchor="middle">4</text><text class="t t-sm" x="528" y="835" text-anchor="middle">4</text><text class="t t-sm" x="672" y="19" text-anchor="middle">5</text><text class="t t-sm" x="672" y="835" text-anchor="middle">5</text><text class="t t-sm" x="816" y="19" text-anchor="middle">6</text><text class="t t-sm" x="816" y="835" text-anchor="middle">6</text><text class="t t-sm" x="960" y="19" text-anchor="middle">7</text><text class="t t-sm" x="960" y="835" text-anchor="middle">7</text><text class="t t-sm" x="1104" y="19" text-anchor="middle">8</text><text class="t t-sm" x="1104" y="835" text-anchor="middle">8</text><text class="t t-sm" x="16" y="93.67" text-anchor="middle">A</text><text class="t t-sm" x="1184" y="93.67" text-anchor="middle">A</text><text class="t t-sm" x="16" y="227" text-anchor="middle">B</text><text class="t t-sm" x="1184" y="227" text-anchor="middle">B</text><text class="t t-sm" x="16" y="360.33" text-anchor="middle">C</text><text class="t t-sm" x="1184" y="360.33" text-anchor="middle">C</text><text class="t t-sm" x="16" y="493.67" text-anchor="middle">D</text><text class="t t-sm" x="1184" y="493.67" text-anchor="middle">D</text><text class="t t-sm" x="16" y="627" text-anchor="middle">E</text><text class="t t-sm" x="1184" y="627" text-anchor="middle">E</text><text class="t t-sm" x="16" y="760.33" text-anchor="middle">F</text><text class="t t-sm" x="1184" y="760.33" text-anchor="middle">F</text></g><g data-geom="main"><g data-role="fluid" data-part="15"><path id="oil-lo-main" class="tint" fill-opacity="0.16" d="M86.75 210.4L345.37 210.4L345.37 129.6L86.75 129.6ZM345.35 160.91L375.66 160.91L375.66 150.81L345.35 150.81ZM345.35 189.19L375.66 189.19L375.66 179.09L345.35 179.09ZM375.64 203.54L500.93 203.54L500.93 136.92L375.64 136.92ZM500.89 172.53L511.03 172.53L511.03 167.47L500.89 167.47ZM61.52 120L531.23 120L531.23 114.95L61.52 114.95ZM61.52 225.05L523.15 225.05L523.15 220L61.52 220ZM88.79 129.58L93.84 129.58L114.04 119.98L108.99 119.98ZM88.79 210.42L108.99 220.02L114.04 220.02L93.84 210.42Z"/><path id="oil-hi-main" class="tint" fill-opacity="0.16" d="M535.23 210.4L545.37 210.4L545.37 129.6L535.23 129.6ZM537.78 129.62L542.83 129.62L542.83 117.47L537.78 117.47ZM531.21 121.01L551.43 121.01L551.43 113.94L531.21 113.94ZM527.68 222.53L532.73 222.53L532.73 210.38L527.68 210.38ZM523.13 226.06L551.43 226.06L551.43 218.99L523.13 218.99ZM511.01 174.44L535.27 174.44L535.27 165.56L511.01 165.56Z"/></g><g data-part="1"><path class="paper" d="M56.46 114.95L531.21 114.95L531.21 113.94L551.41 113.94L551.41 112.42L571.62 112.42L571.62 107.37L569.6 105.35L58.48 105.35L56.46 107.37Z"/><path fill="url(#h-alu-45)" d="M56.46 114.95L531.21 114.95L531.21 113.94L551.41 113.94L551.41 112.42L571.62 112.42L571.62 107.37L569.6 105.35L58.48 105.35L56.46 107.37Z"/><path class="vis" d="M56.46 114.95L531.21 114.95L531.21 113.94L551.41 113.94L551.41 112.42L571.62 112.42L571.62 107.37L569.6 105.35L58.48 105.35L56.46 107.37Z"/><path class="paper" d="M56.46 127.58L74.65 127.58L74.65 129.6L88.79 129.6L108.99 120L56.46 120Z"/><path fill="url(#h-alu-45)" d="M56.46 127.58L74.65 127.58L74.65 129.6L88.79 129.6L108.99 120L56.46 120Z"/><path class="vis" d="M56.46 127.58L74.65 127.58L74.65 129.6L88.79 129.6L108.99 120L56.46 120Z"/><path class="paper" d="M93.84 129.6L537.78 129.6L537.78 121.01L531.21 121.01L531.21 120L114.04 120Z"/><path fill="url(#h-alu-45)" d="M93.84 129.6L537.78 129.6L537.78 121.01L531.21 121.01L531.21 120L114.04 120Z"/><path class="vis" d="M93.84 129.6L537.78 129.6L537.78 121.01L531.21 121.01L531.21 120L114.04 120Z"/><path class="paper" d="M542.83 129.6L553.43 129.6L553.43 127.58L571.62 127.58L571.62 122.53L551.41 122.53L551.41 121.01L542.83 121.01Z"/><path fill="url(#h-alu-45)" d="M542.83 129.6L553.43 129.6L553.43 127.58L571.62 127.58L571.62 122.53L551.41 122.53L551.41 121.01L542.83 121.01Z"/><path class="vis" d="M542.83 129.6L553.43 129.6L553.43 127.58L571.62 127.58L571.62 122.53L551.41 122.53L551.41 121.01L542.83 121.01Z"/><path class="paper" d="M56.46 232.63L58.48 234.65L569.6 234.65L571.62 232.63L571.62 227.58L551.41 227.58L551.41 226.06L523.13 226.06L523.13 225.05L56.46 225.05Z"/><path fill="url(#h-alu-45)" d="M56.46 232.63L58.48 234.65L569.6 234.65L571.62 232.63L571.62 227.58L551.41 227.58L551.41 226.06L523.13 226.06L523.13 225.05L56.46 225.05Z"/><path class="vis" d="M56.46 232.63L58.48 234.65L569.6 234.65L571.62 232.63L571.62 227.58L551.41 227.58L551.41 226.06L523.13 226.06L523.13 225.05L56.46 225.05Z"/><path class="paper" d="M56.46 220L108.99 220L88.79 210.4L74.65 210.4L74.65 212.42L56.46 212.42Z"/><path fill="url(#h-alu-45)" d="M56.46 220L108.99 220L88.79 210.4L74.65 210.4L74.65 212.42L56.46 212.42Z"/><path class="vis" d="M56.46 220L108.99 220L88.79 210.4L74.65 210.4L74.65 212.42L56.46 212.42Z"/><path class="paper" d="M114.04 220L523.13 220L523.13 218.99L527.68 218.99L527.68 210.4L93.84 210.4Z"/><path fill="url(#h-alu-45)" d="M114.04 220L523.13 220L523.13 218.99L527.68 218.99L527.68 210.4L93.84 210.4Z"/><path class="vis" d="M114.04 220L523.13 220L523.13 218.99L527.68 218.99L527.68 210.4L93.84 210.4Z"/><path class="paper" d="M532.73 218.99L551.41 218.99L551.41 217.47L571.62 217.47L571.62 212.42L553.43 212.42L553.43 210.4L532.73 210.4Z"/><path fill="url(#h-alu-45)" d="M532.73 218.99L551.41 218.99L551.41 217.47L571.62 217.47L571.62 212.42L553.43 212.42L553.43 210.4L532.73 210.4Z"/><path class="vis" d="M532.73 218.99L551.41 218.99L551.41 217.47L571.62 217.47L571.62 212.42L553.43 212.42L553.43 210.4L532.73 210.4Z"/></g><g data-part="2"><path class="paper" d="M86.77 170L86.77 129.6L83.54 129.6L83.54 132.83L78.69 132.83L78.69 129.6L74.65 129.6L74.65 127.58L56.46 127.58L56.46 158.28L66.57 158.28L66.57 170L66.57 181.72L56.46 181.72L56.46 212.42L74.65 212.42L74.65 210.4L78.69 210.4L78.69 207.17L83.54 207.17L83.54 210.4L86.77 210.4Z"/><path fill="url(#h-steel-135)" d="M86.77 170L86.77 129.6L83.54 129.6L83.54 132.83L78.69 132.83L78.69 129.6L74.65 129.6L74.65 127.58L56.46 127.58L56.46 158.28L66.57 158.28L66.57 170L66.57 181.72L56.46 181.72L56.46 212.42L74.65 212.42L74.65 210.4L78.69 210.4L78.69 207.17L83.54 207.17L83.54 210.4L86.77 210.4Z"/><path class="vis" d="M86.77 170L86.77 129.6L83.54 129.6L83.54 132.83L78.69 132.83L78.69 129.6L74.65 129.6L74.65 127.58L56.46 127.58L56.46 158.28L66.57 158.28L66.57 170L66.57 181.72L56.46 181.72L56.46 212.42L74.65 212.42L74.65 210.4L78.69 210.4L78.69 207.17L83.54 207.17L83.54 210.4L86.77 210.4Z"/><path class="thin" d="M73.84 129.19L56.46 129.19M73.84 210.81L56.46 210.81"/><path class="vis" d="M66.57 181.72L66.57 158.28"/></g><g data-part="3"><path class="paper" d="M545.35 170L545.35 129.6L547.37 129.6L547.37 132.83L552.22 132.83L552.22 129.6L553.43 129.6L553.43 127.58L571.62 127.58L571.62 158.28L561.52 158.28L561.52 170L561.52 181.72L571.62 181.72L571.62 212.42L553.43 212.42L553.43 210.4L552.22 210.4L552.22 207.17L547.37 207.17L547.37 210.4L545.35 210.4Z"/><path fill="url(#h-steel-135)" d="M545.35 170L545.35 129.6L547.37 129.6L547.37 132.83L552.22 132.83L552.22 129.6L553.43 129.6L553.43 127.58L571.62 127.58L571.62 158.28L561.52 158.28L561.52 170L561.52 181.72L571.62 181.72L571.62 212.42L553.43 212.42L553.43 210.4L552.22 210.4L552.22 207.17L547.37 207.17L547.37 210.4L545.35 210.4Z"/><path class="vis" d="M545.35 170L545.35 129.6L547.37 129.6L547.37 132.83L552.22 132.83L552.22 129.6L553.43 129.6L553.43 127.58L571.62 127.58L571.62 158.28L561.52 158.28L561.52 170L561.52 181.72L571.62 181.72L571.62 212.42L553.43 212.42L553.43 210.4L552.22 210.4L552.22 207.17L547.37 207.17L547.37 210.4L545.35 210.4Z"/><path class="thin" d="M554.24 129.19L571.62 129.19M554.24 210.81L571.62 210.81"/><path class="vis" d="M561.52 181.72L561.52 158.28"/></g><g data-part="4"><path class="paper" d="M81.82 132.83L82.36 132.72L82.82 132.41L83.12 131.96L83.23 131.41L83.23 131.01L83.12 130.47L82.82 130.01L82.36 129.7L81.82 129.6L80.4 129.6L79.86 129.7L79.4 130.01L79.1 130.47L78.99 131.01L78.99 131.41L79.1 131.96L79.4 132.41L79.86 132.72L80.4 132.83Z"/><path fill="url(#h-rubber-45)" d="M81.82 132.83L82.36 132.72L82.82 132.41L83.12 131.96L83.23 131.41L83.23 131.01L83.12 130.47L82.82 130.01L82.36 129.7L81.82 129.6L80.4 129.6L79.86 129.7L79.4 130.01L79.1 130.47L78.99 131.01L78.99 131.41L79.1 131.96L79.4 132.41L79.86 132.72L80.4 132.83Z"/><path class="vis" d="M81.82 132.83L82.36 132.72L82.82 132.41L83.12 131.96L83.23 131.41L83.23 131.01L83.12 130.47L82.82 130.01L82.36 129.7L81.82 129.6L80.4 129.6L79.86 129.7L79.4 130.01L79.1 130.47L78.99 131.01L78.99 131.41L79.1 131.96L79.4 132.41L79.86 132.72L80.4 132.83Z"/><path class="paper" d="M81.82 210.4L82.36 210.3L82.82 209.99L83.12 209.53L83.23 208.99L83.23 208.59L83.12 208.04L82.82 207.59L82.36 207.28L81.82 207.17L80.4 207.17L79.86 207.28L79.4 207.59L79.1 208.04L78.99 208.59L78.99 208.99L79.1 209.53L79.4 209.99L79.86 210.3L80.4 210.4Z"/><path fill="url(#h-rubber-45)" d="M81.82 210.4L82.36 210.3L82.82 209.99L83.12 209.53L83.23 208.99L83.23 208.59L83.12 208.04L82.82 207.59L82.36 207.28L81.82 207.17L80.4 207.17L79.86 207.28L79.4 207.59L79.1 208.04L78.99 208.59L78.99 208.99L79.1 209.53L79.4 209.99L79.86 210.3L80.4 210.4Z"/><path class="vis" d="M81.82 210.4L82.36 210.3L82.82 209.99L83.12 209.53L83.23 208.99L83.23 208.59L83.12 208.04L82.82 207.59L82.36 207.28L81.82 207.17L80.4 207.17L79.86 207.28L79.4 207.59L79.1 208.04L78.99 208.59L78.99 208.99L79.1 209.53L79.4 209.99L79.86 210.3L80.4 210.4Z"/><path class="paper" d="M550.51 132.83L551.05 132.72L551.5 132.41L551.81 131.96L551.92 131.41L551.92 131.01L551.81 130.47L551.5 130.01L551.05 129.7L550.51 129.6L549.09 129.6L548.55 129.7L548.09 130.01L547.78 130.47L547.68 131.01L547.68 131.41L547.78 131.96L548.09 132.41L548.55 132.72L549.09 132.83Z"/><path fill="url(#h-rubber-45)" d="M550.51 132.83L551.05 132.72L551.5 132.41L551.81 131.96L551.92 131.41L551.92 131.01L551.81 130.47L551.5 130.01L551.05 129.7L550.51 129.6L549.09 129.6L548.55 129.7L548.09 130.01L547.78 130.47L547.68 131.01L547.68 131.41L547.78 131.96L548.09 132.41L548.55 132.72L549.09 132.83Z"/><path class="vis" d="M550.51 132.83L551.05 132.72L551.5 132.41L551.81 131.96L551.92 131.41L551.92 131.01L551.81 130.47L551.5 130.01L551.05 129.7L550.51 129.6L549.09 129.6L548.55 129.7L548.09 130.01L547.78 130.47L547.68 131.01L547.68 131.41L547.78 131.96L548.09 132.41L548.55 132.72L549.09 132.83Z"/><path class="paper" d="M550.51 210.4L551.05 210.3L551.5 209.99L551.81 209.53L551.92 208.99L551.92 208.59L551.81 208.04L551.5 207.59L551.05 207.28L550.51 207.17L549.09 207.17L548.55 207.28L548.09 207.59L547.78 208.04L547.68 208.59L547.68 208.99L547.78 209.53L548.09 209.99L548.55 210.3L549.09 210.4Z"/><path fill="url(#h-rubber-45)" d="M550.51 210.4L551.05 210.3L551.5 209.99L551.81 209.53L551.92 208.99L551.92 208.59L551.81 208.04L551.5 207.59L551.05 207.28L550.51 207.17L549.09 207.17L548.55 207.28L548.09 207.59L547.78 208.04L547.68 208.59L547.68 208.99L547.78 209.53L548.09 209.99L548.55 210.3L549.09 210.4Z"/><path class="vis" d="M550.51 210.4L551.05 210.3L551.5 209.99L551.81 209.53L551.92 208.99L551.92 208.59L551.81 208.04L551.5 207.59L551.05 207.28L550.51 207.17L549.09 207.17L548.55 207.28L548.09 207.59L547.78 208.04L547.68 208.59L547.68 208.99L547.78 209.53L548.09 209.99L548.55 210.3L549.09 210.4Z"/></g><g data-part="14"><path class="paper" d="M61.52 117.47L61.43 116.82L61.18 116.21L60.78 115.69L60.25 115.29L59.64 115.04L58.99 114.95L58.34 115.04L57.73 115.29L57.2 115.69L56.8 116.21L56.55 116.82L56.46 117.47L56.55 118.13L56.8 118.74L57.2 119.26L57.73 119.66L58.34 119.91L58.99 120L59.64 119.91L60.25 119.66L60.78 119.26L61.18 118.74L61.43 118.13Z"/><path class="vis" d="M61.52 117.47L61.43 116.82L61.18 116.21L60.78 115.69L60.25 115.29L59.64 115.04L58.99 114.95L58.34 115.04L57.73 115.29L57.2 115.69L56.8 116.21L56.55 116.82L56.46 117.47L56.55 118.13L56.8 118.74L57.2 119.26L57.73 119.66L58.34 119.91L58.99 120L59.64 119.91L60.25 119.66L60.78 119.26L61.18 118.74L61.43 118.13Z"/><path class="paper" d="M61.52 222.53L61.43 221.87L61.18 221.26L60.78 220.74L60.25 220.34L59.64 220.09L58.99 220L58.34 220.09L57.73 220.34L57.2 220.74L56.8 221.26L56.55 221.87L56.46 222.53L56.55 223.18L56.8 223.79L57.2 224.31L57.73 224.71L58.34 224.96L58.99 225.05L59.64 224.96L60.25 224.71L60.78 224.31L61.18 223.79L61.43 223.18Z"/><path class="vis" d="M61.52 222.53L61.43 221.87L61.18 221.26L60.78 220.74L60.25 220.34L59.64 220.09L58.99 220L58.34 220.09L57.73 220.34L57.2 220.74L56.8 221.26L56.55 221.87L56.46 222.53L56.55 223.18L56.8 223.79L57.2 224.31L57.73 224.71L58.34 224.96L58.99 225.05L59.64 224.96L60.25 224.71L60.78 224.31L61.18 223.79L61.43 223.18Z"/></g><g data-part="13"><path class="solid" d="M544.65 115.15L548.08 115.15L548.08 113.94L544.65 113.94Z"/><path class="solid" d="M544.65 121.01L548.08 121.01L548.08 119.8L544.65 119.8Z"/><path class="solid" d="M544.65 220.2L548.08 220.2L548.08 218.99L544.65 218.99Z"/><path class="solid" d="M544.65 226.06L548.08 226.06L548.08 224.85L544.65 224.85Z"/></g><g id="spring-main"><g data-part="7"><path class="vis spring" d="M92.83 138.69L101.63 201.31M110.43 138.69L119.24 201.31M128.04 138.69L136.84 201.31M145.64 138.69L154.44 201.31M163.25 138.69L172.05 201.31M180.85 138.69L189.65 201.31M198.46 138.69L207.26 201.31M216.06 138.69L224.86 201.31M233.67 138.69L242.47 201.31M251.27 138.69L260.07 201.31M268.87 138.69L277.68 201.31M286.48 138.69L295.28 201.31M304.08 138.69L312.89 201.31M321.69 138.69L330.49 201.31"/><path class="solid" d="M98.89 138.69L98.08 135.66L95.86 133.44L92.83 132.63L89.8 133.44L87.58 135.66L86.77 138.69L87.58 141.72L89.8 143.94L92.83 144.75L95.86 143.94L98.08 141.72Z"/><path class="solid" d="M107.69 201.31L106.88 198.28L104.66 196.06L101.63 195.25L98.6 196.06L96.38 198.28L95.57 201.31L96.38 204.34L98.6 206.56L101.63 207.37L104.66 206.56L106.88 204.34Z"/><path class="solid" d="M116.49 138.69L115.68 135.66L113.46 133.44L110.43 132.63L107.4 133.44L105.18 135.66L104.37 138.69L105.18 141.72L107.4 143.94L110.43 144.75L113.46 143.94L115.68 141.72Z"/><path class="solid" d="M125.3 201.31L124.48 198.28L122.27 196.06L119.24 195.25L116.2 196.06L113.99 198.28L113.17 201.31L113.99 204.34L116.2 206.56L119.24 207.37L122.27 206.56L124.48 204.34Z"/><path class="solid" d="M134.1 138.69L133.29 135.66L131.07 133.44L128.04 132.63L125.01 133.44L122.79 135.66L121.98 138.69L122.79 141.72L125.01 143.94L128.04 144.75L131.07 143.94L133.29 141.72Z"/><path class="solid" d="M142.9 201.31L142.09 198.28L139.87 196.06L136.84 195.25L133.81 196.06L131.59 198.28L130.78 201.31L131.59 204.34L133.81 206.56L136.84 207.37L139.87 206.56L142.09 204.34Z"/><path class="solid" d="M151.7 138.69L150.89 135.66L148.67 133.44L145.64 132.63L142.61 133.44L140.39 135.66L139.58 138.69L140.39 141.72L142.61 143.94L145.64 144.75L148.67 143.94L150.89 141.72Z"/><path class="solid" d="M160.51 201.31L159.69 198.28L157.47 196.06L154.44 195.25L151.41 196.06L149.2 198.28L148.38 201.31L149.2 204.34L151.41 206.56L154.44 207.37L157.47 206.56L159.69 204.34Z"/><path class="solid" d="M169.31 138.69L168.5 135.66L166.28 133.44L163.25 132.63L160.22 133.44L158 135.66L157.19 138.69L158 141.72L160.22 143.94L163.25 144.75L166.28 143.94L168.5 141.72Z"/><path class="solid" d="M178.11 201.31L177.3 198.28L175.08 196.06L172.05 195.25L169.02 196.06L166.8 198.28L165.99 201.31L166.8 204.34L169.02 206.56L172.05 207.37L175.08 206.56L177.3 204.34Z"/><path class="solid" d="M186.91 138.69L186.1 135.66L183.88 133.44L180.85 132.63L177.82 133.44L175.6 135.66L174.79 138.69L175.6 141.72L177.82 143.94L180.85 144.75L183.88 143.94L186.1 141.72Z"/><path class="solid" d="M195.71 201.31L194.9 198.28L192.68 196.06L189.65 195.25L186.62 196.06L184.41 198.28L183.59 201.31L184.41 204.34L186.62 206.56L189.65 207.37L192.68 206.56L194.9 204.34Z"/><path class="solid" d="M204.52 138.69L203.7 135.66L201.49 133.44L198.46 132.63L195.43 133.44L193.21 135.66L192.4 138.69L193.21 141.72L195.43 143.94L198.46 144.75L201.49 143.94L203.7 141.72Z"/><path class="solid" d="M213.32 201.31L212.51 198.28L210.29 196.06L207.26 195.25L204.23 196.06L202.01 198.28L201.2 201.31L202.01 204.34L204.23 206.56L207.26 207.37L210.29 206.56L212.51 204.34Z"/><path class="solid" d="M222.12 138.69L221.31 135.66L219.09 133.44L216.06 132.63L213.03 133.44L210.81 135.66L210 138.69L210.81 141.72L213.03 143.94L216.06 144.75L219.09 143.94L221.31 141.72Z"/><path class="solid" d="M230.92 201.31L230.11 198.28L227.89 196.06L224.86 195.25L221.83 196.06L219.61 198.28L218.8 201.31L219.61 204.34L221.83 206.56L224.86 207.37L227.89 206.56L230.11 204.34Z"/><path class="solid" d="M239.73 138.69L238.91 135.66L236.7 133.44L233.67 132.63L230.63 133.44L228.42 135.66L227.6 138.69L228.42 141.72L230.63 143.94L233.67 144.75L236.7 143.94L238.91 141.72Z"/><path class="solid" d="M248.53 201.31L247.72 198.28L245.5 196.06L242.47 195.25L239.44 196.06L237.22 198.28L236.41 201.31L237.22 204.34L239.44 206.56L242.47 207.37L245.5 206.56L247.72 204.34Z"/><path class="solid" d="M257.33 138.69L256.52 135.66L254.3 133.44L251.27 132.63L248.24 133.44L246.02 135.66L245.21 138.69L246.02 141.72L248.24 143.94L251.27 144.75L254.3 143.94L256.52 141.72Z"/><path class="solid" d="M266.13 201.31L265.32 198.28L263.1 196.06L260.07 195.25L257.04 196.06L254.82 198.28L254.01 201.31L254.82 204.34L257.04 206.56L260.07 207.37L263.1 206.56L265.32 204.34Z"/><path class="solid" d="M274.94 138.69L274.12 135.66L271.9 133.44L268.87 132.63L265.84 133.44L263.63 135.66L262.81 138.69L263.63 141.72L265.84 143.94L268.87 144.75L271.9 143.94L274.12 141.72Z"/><path class="solid" d="M283.74 201.31L282.93 198.28L280.71 196.06L277.68 195.25L274.65 196.06L272.43 198.28L271.62 201.31L272.43 204.34L274.65 206.56L277.68 207.37L280.71 206.56L282.93 204.34Z"/><path class="solid" d="M292.54 138.69L291.73 135.66L289.51 133.44L286.48 132.63L283.45 133.44L281.23 135.66L280.42 138.69L281.23 141.72L283.45 143.94L286.48 144.75L289.51 143.94L291.73 141.72Z"/><path class="solid" d="M301.34 201.31L300.53 198.28L298.31 196.06L295.28 195.25L292.25 196.06L290.03 198.28L289.22 201.31L290.03 204.34L292.25 206.56L295.28 207.37L298.31 206.56L300.53 204.34Z"/><path class="solid" d="M310.14 138.69L309.33 135.66L307.11 133.44L304.08 132.63L301.05 133.44L298.84 135.66L298.02 138.69L298.84 141.72L301.05 143.94L304.08 144.75L307.11 143.94L309.33 141.72Z"/><path class="solid" d="M318.95 201.31L318.13 198.28L315.92 196.06L312.89 195.25L309.86 196.06L307.64 198.28L306.83 201.31L307.64 204.34L309.86 206.56L312.89 207.37L315.92 206.56L318.13 204.34Z"/><path class="solid" d="M327.75 138.69L326.94 135.66L324.72 133.44L321.69 132.63L318.66 133.44L316.44 135.66L315.63 138.69L316.44 141.72L318.66 143.94L321.69 144.75L324.72 143.94L326.94 141.72Z"/><path class="solid" d="M336.55 201.31L335.74 198.28L333.52 196.06L330.49 195.25L327.46 196.06L325.24 198.28L324.43 201.31L325.24 204.34L327.46 206.56L330.49 207.37L333.52 206.56L335.74 204.34Z"/><path class="solid" d="M345.35 138.69L344.54 135.66L342.32 133.44L339.29 132.63L336.26 133.44L334.04 135.66L333.23 138.69L334.04 141.72L336.26 143.94L339.29 144.75L342.32 143.94L344.54 141.72Z"/></g></g><g data-role="phantom"><path class="phan" d="M294.66 210.4L484.56 210.4L484.56 129.6L294.66 129.6Z"/></g><g id="mv-main"><g data-part="5"><path class="paper" d="M345.35 150.81L375.66 150.81L375.66 136.92L379.94 136.92L384.07 148.28L388.33 148.28L392.46 136.92L395.8 136.92L399.94 148.28L404.2 148.28L408.33 136.92L411.67 136.92L415.8 148.28L420.06 148.28L424.2 136.92L427.54 136.92L431.67 148.28L435.93 148.28L440.06 136.92L443.4 136.92L447.54 148.28L451.79 148.28L455.93 136.92L459.27 136.92L463.4 148.28L467.66 148.28L471.8 136.92L475.14 136.92L479.27 148.28L483.53 148.28L487.66 136.92L500.91 136.92L500.91 167.47L511.01 167.47L511.01 165.56L525.15 165.56L525.15 167.47L535.25 167.47L535.25 131.21L533.64 129.6L525.15 129.6L525.15 132.63L517.07 132.63L517.07 129.6L346.97 129.6L345.35 131.21Z"/><path fill="url(#h-steel-135)" d="M345.35 150.81L375.66 150.81L375.66 136.92L379.94 136.92L384.07 148.28L388.33 148.28L392.46 136.92L395.8 136.92L399.94 148.28L404.2 148.28L408.33 136.92L411.67 136.92L415.8 148.28L420.06 148.28L424.2 136.92L427.54 136.92L431.67 148.28L435.93 148.28L440.06 136.92L443.4 136.92L447.54 148.28L451.79 148.28L455.93 136.92L459.27 136.92L463.4 148.28L467.66 148.28L471.8 136.92L475.14 136.92L479.27 148.28L483.53 148.28L487.66 136.92L500.91 136.92L500.91 167.47L511.01 167.47L511.01 165.56L525.15 165.56L525.15 167.47L535.25 167.47L535.25 131.21L533.64 129.6L525.15 129.6L525.15 132.63L517.07 132.63L517.07 129.6L346.97 129.6L345.35 131.21Z"/><path class="vis" d="M345.35 150.81L375.66 150.81L375.66 136.92L379.94 136.92L384.07 148.28L388.33 148.28L392.46 136.92L395.8 136.92L399.94 148.28L404.2 148.28L408.33 136.92L411.67 136.92L415.8 148.28L420.06 148.28L424.2 136.92L427.54 136.92L431.67 148.28L435.93 148.28L440.06 136.92L443.4 136.92L447.54 148.28L451.79 148.28L455.93 136.92L459.27 136.92L463.4 148.28L467.66 148.28L471.8 136.92L475.14 136.92L479.27 148.28L483.53 148.28L487.66 136.92L500.91 136.92L500.91 167.47L511.01 167.47L511.01 165.56L525.15 165.56L525.15 167.47L535.25 167.47L535.25 131.21L533.64 129.6L525.15 129.6L525.15 132.63L517.07 132.63L517.07 129.6L346.97 129.6L345.35 131.21Z"/><path class="paper" d="M345.35 179.09L375.66 179.09L375.66 160.91L345.35 160.91Z"/><path fill="url(#h-steel-135)" d="M345.35 179.09L375.66 179.09L375.66 160.91L345.35 160.91Z"/><path class="vis" d="M345.35 179.09L375.66 179.09L375.66 160.91L345.35 160.91Z"/><path class="paper" d="M345.35 208.79L346.97 210.4L517.07 210.4L517.07 207.37L525.15 207.37L525.15 210.4L533.64 210.4L535.25 208.79L535.25 172.53L525.15 172.53L525.15 174.44L511.01 174.44L511.01 172.53L500.91 172.53L500.91 203.54L375.66 203.54L375.66 189.19L345.35 189.19Z"/><path fill="url(#h-steel-135)" d="M345.35 208.79L346.97 210.4L517.07 210.4L517.07 207.37L525.15 207.37L525.15 210.4L533.64 210.4L535.25 208.79L535.25 172.53L525.15 172.53L525.15 174.44L511.01 174.44L511.01 172.53L500.91 172.53L500.91 203.54L375.66 203.54L375.66 189.19L345.35 189.19Z"/><path class="vis" d="M345.35 208.79L346.97 210.4L517.07 210.4L517.07 207.37L525.15 207.37L525.15 210.4L533.64 210.4L535.25 208.79L535.25 172.53L525.15 172.53L525.15 174.44L511.01 174.44L511.01 172.53L500.91 172.53L500.91 203.54L375.66 203.54L375.66 189.19L345.35 189.19Z"/></g><g data-part="6"><path class="paper" d="M517.07 132.63L525.15 132.63L525.15 129.6L517.07 129.6Z"/><path fill="url(#h-plastic-45)" d="M517.07 132.63L525.15 132.63L525.15 129.6L517.07 129.6Z"/><path class="vis" d="M517.07 132.63L525.15 132.63L525.15 129.6L517.07 129.6Z"/><path class="paper" d="M517.07 210.4L525.15 210.4L525.15 207.37L517.07 207.37Z"/><path fill="url(#h-plastic-45)" d="M517.07 210.4L525.15 210.4L525.15 207.37L517.07 207.37Z"/><path class="vis" d="M517.07 210.4L525.15 210.4L525.15 207.37L517.07 207.37Z"/></g><g id="ball-main"><g data-part="9"><path class="paper" d="M518.2 170L518.15 169.37L518.01 168.75L517.76 168.17L517.43 167.63L517.02 167.14L516.54 166.73L516 166.4L515.41 166.16L514.8 166.01L514.16 165.96L513.53 166.01L512.92 166.16L512.33 166.4L511.79 166.73L511.31 167.14L510.9 167.63L510.56 168.17L510.32 168.75L510.17 169.37L510.12 170L510.17 170.63L510.32 171.25L510.56 171.83L510.9 172.37L511.31 172.86L511.79 173.27L512.33 173.6L512.92 173.84L513.53 173.99L514.16 174.04L514.8 173.99L515.41 173.84L516 173.6L516.54 173.27L517.02 172.86L517.43 172.37L517.76 171.83L518.01 171.25L518.15 170.63Z"/><path class="vis" d="M518.2 170L518.15 169.37L518.01 168.75L517.76 168.17L517.43 167.63L517.02 167.14L516.54 166.73L516 166.4L515.41 166.16L514.8 166.01L514.16 165.96L513.53 166.01L512.92 166.16L512.33 166.4L511.79 166.73L511.31 167.14L510.9 167.63L510.56 168.17L510.32 168.75L510.17 169.37L510.12 170L510.17 170.63L510.32 171.25L510.56 171.83L510.9 172.37L511.31 172.86L511.79 173.27L512.33 173.6L512.92 173.84L513.53 173.99L514.16 174.04L514.8 173.99L515.41 173.84L516 173.6L516.54 173.27L517.02 172.86L517.43 172.37L517.76 171.83L518.01 171.25L518.15 170.63Z"/></g></g><g data-part="10"><path class="paper" d="M524.65 170L524.57 169.53L524.36 169.11L524.02 168.77L523.6 168.56L523.13 168.48L522.66 168.56L522.24 168.77L521.91 169.11L521.69 169.53L521.62 170L521.69 170.47L521.91 170.89L522.24 171.23L522.66 171.44L523.13 171.52L523.6 171.44L524.02 171.23L524.36 170.89L524.57 170.47Z"/><path fill="url(#h-steel-45)" d="M524.65 170L524.57 169.53L524.36 169.11L524.02 168.77L523.6 168.56L523.13 168.48L522.66 168.56L522.24 168.77L521.91 169.11L521.69 169.53L521.62 170L521.69 170.47L521.91 170.89L522.24 171.23L522.66 171.44L523.13 171.52L523.6 171.44L524.02 171.23L524.36 170.89L524.57 170.47Z"/><path class="vis" d="M524.65 170L524.57 169.53L524.36 169.11L524.02 168.77L523.6 168.56L523.13 168.48L522.66 168.56L522.24 168.77L521.91 169.11L521.69 169.53L521.62 170L521.69 170.47L521.91 170.89L522.24 171.23L522.66 171.44L523.13 171.52L523.6 171.44L524.02 171.23L524.36 170.89L524.57 170.47Z"/></g></g><g id="pinion-main"><g data-part="8"><path class="paper" d="M416.32 150.55L415.14 150.2L413.94 149.93L414.57 146.71L414.56 145.6L414.34 144.45L413.98 143.28L413.49 142.11L412.88 140.93L412.14 139.77L407.86 139.77L407.12 140.93L406.51 142.11L406.02 143.28L405.66 144.45L405.44 145.6L405.43 146.71L406.06 149.93L404.86 150.2L403.68 150.55L403.68 150.55L402.52 150.96L401.39 151.45L400.01 148.48L399.34 147.58L398.49 146.77L397.52 146.04L396.43 145.38L395.24 144.79L393.97 144.29L390.5 146.81L390.59 148.18L390.78 149.49L391.07 150.72L391.46 151.88L391.97 152.94L392.62 153.85L395.01 156.08L394.2 157L393.45 157.98L393.45 157.98L392.76 158.99L392.13 160.05L389.27 158.46L388.2 158.12L387.04 157.97L385.82 157.95L384.55 158.06L383.25 158.28L381.91 158.62L380.59 162.7L381.47 163.75L382.39 164.7L383.36 165.53L384.35 166.24L385.38 166.79L386.44 167.15L389.69 167.54L389.58 168.77L389.55 170L389.55 170L389.58 171.23L389.69 172.46L386.44 172.85L385.38 173.21L384.35 173.76L383.36 174.47L382.39 175.3L381.47 176.25L380.59 177.3L381.91 181.38L383.25 181.72L384.55 181.94L385.82 182.05L387.04 182.03L388.2 181.88L389.27 181.54L392.13 179.95L392.76 181.01L393.45 182.02L393.45 182.02L394.2 183L395.01 183.92L392.62 186.15L391.97 187.06L391.46 188.12L391.07 189.28L390.78 190.51L390.59 191.82L390.5 193.19L393.97 195.71L395.24 195.21L396.43 194.62L397.52 193.96L398.49 193.23L399.34 192.42L400.01 191.52L401.39 188.55L402.52 189.04L403.68 189.45L403.68 189.45L404.86 189.8L406.06 190.07L405.43 193.29L405.44 194.4L405.66 195.55L406.02 196.72L406.51 197.89L407.12 199.07L407.86 200.23L412.14 200.23L412.88 199.07L413.49 197.89L413.98 196.72L414.34 195.55L414.56 194.4L414.57 193.29L413.94 190.07L415.14 189.8L416.32 189.45L416.32 189.45L417.48 189.04L418.61 188.55L419.99 191.52L420.66 192.42L421.51 193.23L422.48 193.96L423.57 194.62L424.76 195.21L426.03 195.71L429.5 193.19L429.41 191.82L429.22 190.51L428.93 189.28L428.54 188.12L428.03 187.06L427.38 186.15L424.99 183.92L425.8 183L426.55 182.02L426.55 182.02L427.24 181.01L427.87 179.95L430.73 181.54L431.8 181.88L432.96 182.03L434.18 182.05L435.45 181.94L436.75 181.72L438.09 181.38L439.41 177.3L438.53 176.25L437.61 175.3L436.64 174.47L435.65 173.76L434.62 173.21L433.56 172.85L430.31 172.46L430.42 171.23L430.45 170L430.45 170L430.42 168.77L430.31 167.54L433.56 167.15L434.62 166.79L435.65 166.24L436.64 165.53L437.61 164.7L438.53 163.75L439.41 162.7L438.09 158.62L436.75 158.28L435.45 158.06L434.18 157.95L432.96 157.97L431.8 158.12L430.73 158.46L427.87 160.05L427.24 158.99L426.55 157.98L426.55 157.98L425.8 157L424.99 156.08L427.38 153.85L428.03 152.94L428.54 151.88L428.93 150.72L429.22 149.49L429.41 148.18L429.5 146.81L426.03 144.29L424.76 144.79L423.57 145.38L422.48 146.04L421.51 146.77L420.66 147.58L419.99 148.48L418.61 151.45L417.48 150.96L416.32 150.55Z"/><path fill="url(#h-steel-30)" d="M416.32 150.55L415.14 150.2L413.94 149.93L414.57 146.71L414.56 145.6L414.34 144.45L413.98 143.28L413.49 142.11L412.88 140.93L412.14 139.77L407.86 139.77L407.12 140.93L406.51 142.11L406.02 143.28L405.66 144.45L405.44 145.6L405.43 146.71L406.06 149.93L404.86 150.2L403.68 150.55L403.68 150.55L402.52 150.96L401.39 151.45L400.01 148.48L399.34 147.58L398.49 146.77L397.52 146.04L396.43 145.38L395.24 144.79L393.97 144.29L390.5 146.81L390.59 148.18L390.78 149.49L391.07 150.72L391.46 151.88L391.97 152.94L392.62 153.85L395.01 156.08L394.2 157L393.45 157.98L393.45 157.98L392.76 158.99L392.13 160.05L389.27 158.46L388.2 158.12L387.04 157.97L385.82 157.95L384.55 158.06L383.25 158.28L381.91 158.62L380.59 162.7L381.47 163.75L382.39 164.7L383.36 165.53L384.35 166.24L385.38 166.79L386.44 167.15L389.69 167.54L389.58 168.77L389.55 170L389.55 170L389.58 171.23L389.69 172.46L386.44 172.85L385.38 173.21L384.35 173.76L383.36 174.47L382.39 175.3L381.47 176.25L380.59 177.3L381.91 181.38L383.25 181.72L384.55 181.94L385.82 182.05L387.04 182.03L388.2 181.88L389.27 181.54L392.13 179.95L392.76 181.01L393.45 182.02L393.45 182.02L394.2 183L395.01 183.92L392.62 186.15L391.97 187.06L391.46 188.12L391.07 189.28L390.78 190.51L390.59 191.82L390.5 193.19L393.97 195.71L395.24 195.21L396.43 194.62L397.52 193.96L398.49 193.23L399.34 192.42L400.01 191.52L401.39 188.55L402.52 189.04L403.68 189.45L403.68 189.45L404.86 189.8L406.06 190.07L405.43 193.29L405.44 194.4L405.66 195.55L406.02 196.72L406.51 197.89L407.12 199.07L407.86 200.23L412.14 200.23L412.88 199.07L413.49 197.89L413.98 196.72L414.34 195.55L414.56 194.4L414.57 193.29L413.94 190.07L415.14 189.8L416.32 189.45L416.32 189.45L417.48 189.04L418.61 188.55L419.99 191.52L420.66 192.42L421.51 193.23L422.48 193.96L423.57 194.62L424.76 195.21L426.03 195.71L429.5 193.19L429.41 191.82L429.22 190.51L428.93 189.28L428.54 188.12L428.03 187.06L427.38 186.15L424.99 183.92L425.8 183L426.55 182.02L426.55 182.02L427.24 181.01L427.87 179.95L430.73 181.54L431.8 181.88L432.96 182.03L434.18 182.05L435.45 181.94L436.75 181.72L438.09 181.38L439.41 177.3L438.53 176.25L437.61 175.3L436.64 174.47L435.65 173.76L434.62 173.21L433.56 172.85L430.31 172.46L430.42 171.23L430.45 170L430.45 170L430.42 168.77L430.31 167.54L433.56 167.15L434.62 166.79L435.65 166.24L436.64 165.53L437.61 164.7L438.53 163.75L439.41 162.7L438.09 158.62L436.75 158.28L435.45 158.06L434.18 157.95L432.96 157.97L431.8 158.12L430.73 158.46L427.87 160.05L427.24 158.99L426.55 157.98L426.55 157.98L425.8 157L424.99 156.08L427.38 153.85L428.03 152.94L428.54 151.88L428.93 150.72L429.22 149.49L429.41 148.18L429.5 146.81L426.03 144.29L424.76 144.79L423.57 145.38L422.48 146.04L421.51 146.77L420.66 147.58L419.99 148.48L418.61 151.45L417.48 150.96L416.32 150.55Z"/><path class="vis" d="M416.32 150.55L415.14 150.2L413.94 149.93L414.57 146.71L414.56 145.6L414.34 144.45L413.98 143.28L413.49 142.11L412.88 140.93L412.14 139.77L407.86 139.77L407.12 140.93L406.51 142.11L406.02 143.28L405.66 144.45L405.44 145.6L405.43 146.71L406.06 149.93L404.86 150.2L403.68 150.55L403.68 150.55L402.52 150.96L401.39 151.45L400.01 148.48L399.34 147.58L398.49 146.77L397.52 146.04L396.43 145.38L395.24 144.79L393.97 144.29L390.5 146.81L390.59 148.18L390.78 149.49L391.07 150.72L391.46 151.88L391.97 152.94L392.62 153.85L395.01 156.08L394.2 157L393.45 157.98L393.45 157.98L392.76 158.99L392.13 160.05L389.27 158.46L388.2 158.12L387.04 157.97L385.82 157.95L384.55 158.06L383.25 158.28L381.91 158.62L380.59 162.7L381.47 163.75L382.39 164.7L383.36 165.53L384.35 166.24L385.38 166.79L386.44 167.15L389.69 167.54L389.58 168.77L389.55 170L389.55 170L389.58 171.23L389.69 172.46L386.44 172.85L385.38 173.21L384.35 173.76L383.36 174.47L382.39 175.3L381.47 176.25L380.59 177.3L381.91 181.38L383.25 181.72L384.55 181.94L385.82 182.05L387.04 182.03L388.2 181.88L389.27 181.54L392.13 179.95L392.76 181.01L393.45 182.02L393.45 182.02L394.2 183L395.01 183.92L392.62 186.15L391.97 187.06L391.46 188.12L391.07 189.28L390.78 190.51L390.59 191.82L390.5 193.19L393.97 195.71L395.24 195.21L396.43 194.62L397.52 193.96L398.49 193.23L399.34 192.42L400.01 191.52L401.39 188.55L402.52 189.04L403.68 189.45L403.68 189.45L404.86 189.8L406.06 190.07L405.43 193.29L405.44 194.4L405.66 195.55L406.02 196.72L406.51 197.89L407.12 199.07L407.86 200.23L412.14 200.23L412.88 199.07L413.49 197.89L413.98 196.72L414.34 195.55L414.56 194.4L414.57 193.29L413.94 190.07L415.14 189.8L416.32 189.45L416.32 189.45L417.48 189.04L418.61 188.55L419.99 191.52L420.66 192.42L421.51 193.23L422.48 193.96L423.57 194.62L424.76 195.21L426.03 195.71L429.5 193.19L429.41 191.82L429.22 190.51L428.93 189.28L428.54 188.12L428.03 187.06L427.38 186.15L424.99 183.92L425.8 183L426.55 182.02L426.55 182.02L427.24 181.01L427.87 179.95L430.73 181.54L431.8 181.88L432.96 182.03L434.18 182.05L435.45 181.94L436.75 181.72L438.09 181.38L439.41 177.3L438.53 176.25L437.61 175.3L436.64 174.47L435.65 173.76L434.62 173.21L433.56 172.85L430.31 172.46L430.42 171.23L430.45 170L430.45 170L430.42 168.77L430.31 167.54L433.56 167.15L434.62 166.79L435.65 166.24L436.64 165.53L437.61 164.7L438.53 163.75L439.41 162.7L438.09 158.62L436.75 158.28L435.45 158.06L434.18 157.95L432.96 157.97L431.8 158.12L430.73 158.46L427.87 160.05L427.24 158.99L426.55 157.98L426.55 157.98L425.8 157L424.99 156.08L427.38 153.85L428.03 152.94L428.54 151.88L428.93 150.72L429.22 149.49L429.41 148.18L429.5 146.81L426.03 144.29L424.76 144.79L423.57 145.38L422.48 146.04L421.51 146.77L420.66 147.58L419.99 148.48L418.61 151.45L417.48 150.96L416.32 150.55Z"/></g></g><g id="scr-s-main"><g data-part="11"><path class="paper" d="M509.72 221.92L526.97 219.49L527.57 220.51L534.44 220.51L535.05 219.19L544.34 219.19L544.34 220.2L548.38 220.2L548.38 219.19L551.82 219.19L552.63 217.47L572.26 217.47L572.87 218.08L572.87 221.72L570.44 221.72L570.44 223.33L572.87 223.33L572.87 226.97L572.26 227.58L552.63 227.58L551.82 225.86L548.38 225.86L548.38 224.85L544.34 224.85L544.34 225.86L535.05 225.86L534.44 224.55L527.57 224.55L526.97 225.56L509.72 223.13Z"/><path class="vis" d="M509.72 221.92L526.97 219.49L527.57 220.51L534.44 220.51L535.05 219.19L544.34 219.19L544.34 220.2L548.38 220.2L548.38 219.19L551.82 219.19L552.63 217.47L572.26 217.47L572.87 218.08L572.87 221.72L570.44 221.72L570.44 223.33L572.87 223.33L572.87 226.97L572.26 227.58L552.63 227.58L551.82 225.86L548.38 225.86L548.38 224.85L544.34 224.85L544.34 225.86L535.05 225.86L534.44 224.55L527.57 224.55L526.97 225.56L509.72 223.13Z"/><path class="thin" d="M553.84 218.28L572.06 218.28M553.84 226.77L572.06 226.77"/></g></g><g id="scr-l-main"><g data-part="12"><path class="paper" d="M517.66 116.87L534.91 114.44L535.51 115.45L542.38 115.45L542.99 114.14L544.34 114.14L544.34 115.15L548.38 115.15L548.38 114.14L551.82 114.14L552.63 112.42L572.12 112.42L572.73 113.03L572.73 116.67L570.3 116.67L570.3 118.28L572.73 118.28L572.73 121.92L572.12 122.53L552.63 122.53L551.82 120.81L548.38 120.81L548.38 119.8L544.34 119.8L544.34 120.81L542.99 120.81L542.38 119.49L535.51 119.49L534.91 120.51L517.66 118.08Z"/><path class="vis" d="M517.66 116.87L534.91 114.44L535.51 115.45L542.38 115.45L542.99 114.14L544.34 114.14L544.34 115.15L548.38 115.15L548.38 114.14L551.82 114.14L552.63 112.42L572.12 112.42L572.73 113.03L572.73 116.67L570.3 116.67L570.3 118.28L572.73 118.28L572.73 121.92L572.12 122.53L552.63 122.53L551.82 120.81L548.38 120.81L548.38 119.8L544.34 119.8L544.34 120.81L542.99 120.81L542.38 119.49L535.51 119.49L534.91 120.51L517.66 118.08Z"/><path class="thin" d="M553.84 113.23L571.92 113.23M553.84 121.72L571.92 121.72"/></g></g><g data-role="fluid"><path id="flow-s-main" class="flow" stroke-opacity="0" d="M540.1 192.22L530.2 207.37L530.2 218.38L525.96 218.38L523.13 220.12L517.07 220.51L511.01 221.2L503.14 222.53L114.04 222.53L111.01 219.7L91.62 210.81"/><path id="flow-l-main" class="flow" stroke-opacity="0" d="M540.3 147.78L540.3 132.63L540.3 121.62L534.04 121.62L531.21 119.88L525.15 119.49L519.09 118.8L511.22 117.47L114.04 117.47L111.01 120.3L91.62 129.19"/></g><path class="ctr" d="M50.4 170L579.7 170"/><path class="ctr" d="M379.76 170L440.24 170"/><path class="ctr" d="M410 206.36L410 133.64"/><path class="ctr" d="M50.4 117.47L579.7 117.47"/><path class="ctr" d="M50.4 222.53L579.7 222.53"/></g><g data-role="dim"><path class="thin" d="M56.46 236.85L56.46 292.15M571.62 236.85L571.62 292.15M56.46 288.65L571.62 288.65"/><path class="head" d="M56.46 288.65L63.46 286.9L63.46 290.4ZM571.62 288.65L564.62 290.4L564.62 286.9Z"/><text class="t" x="314.04" y="285.65" text-anchor="middle">255</text></g><g data-role="dim"><path class="thin" d="M54.26 105.35L34.5 105.35M54.26 234.65L34.5 234.65M38 105.35L38 234.65"/><path class="head" d="M38 105.35L39.75 112.35L36.25 112.35ZM38 234.65L36.25 227.65L39.75 227.65Z"/><text class="t" x="35" y="170" text-anchor="middle" transform="rotate(-90 35 170)">64</text></g><g id="dim-x-wrap"><g data-role="dim" id="dim-x"><path class="thin" d="M535.25 127.4L535.25 86.1M535.25 127.4L535.25 86.1M521.25 89.6L549.25 89.6L580.75 89.6"/><path class="head" d="M535.25 89.6L528.25 91.35L528.25 87.85ZM535.25 89.6L542.25 87.85L542.25 91.35Z"/><text class="t" x="566.5" y="86.6" text-anchor="middle">x=0.0</text></g></g><g data-role="balloon" data-target="14" data-at="58.99 117.47"><path class="thin" d="M50.65 92.08L58.99 117.47"/><circle class="dot" cx="58.99" cy="117.47" r="1.5"/><circle class="balloon" cx="48" cy="84" r="8.5"/><text class="t" x="48" y="87.3" text-anchor="middle">14</text></g><g data-role="balloon" data-target="2" data-at="64.55 145.76"><path class="thin" d="M72.71 92.4L64.55 145.76"/><circle class="dot" cx="64.55" cy="145.76" r="1.5"/><circle class="balloon" cx="74" cy="84" r="8.5"/><text class="t" x="74" y="87.3" text-anchor="middle">2</text></g><g data-role="balloon" data-target="4" data-at="80.1 131.21"><path class="thin" d="M96.7 91.83L80.1 131.21"/><circle class="dot" cx="80.1" cy="131.21" r="1.5"/><circle class="balloon" cx="100" cy="84" r="8.5"/><text class="t" x="100" y="87.3" text-anchor="middle">4</text></g><g data-role="balloon" data-target="7" data-at="92.83 138.69"><path class="thin" d="M121.59 91.27L92.83 138.69"/><circle class="dot" cx="92.83" cy="138.69" r="1.5"/><circle class="balloon" cx="126" cy="84" r="8.5"/><text class="t" x="126" y="87.3" text-anchor="middle">7</text></g><g data-role="balloon" data-target="1" data-at="207.98 110.4"><path class="thin" d="M209.35 92.48L207.98 110.4"/><circle class="dot" cx="207.98" cy="110.4" r="1.5"/><circle class="balloon" cx="210" cy="84" r="8.5"/><text class="t" x="210" y="87.3" text-anchor="middle">1</text></g><g data-role="balloon" data-target="8" data-at="404.95 164.95"><path class="thin" d="M375.2 91.87L404.95 164.95"/><circle class="dot" cx="404.95" cy="164.95" r="1.5"/><circle class="balloon" cx="372" cy="84" r="8.5"/><text class="t" x="372" y="87.3" text-anchor="middle">8</text></g><g data-role="balloon" data-target="12" data-at="563.54 117.47"><path class="thin" d="M597.9 106.57L563.54 117.47"/><circle class="dot" cx="563.54" cy="117.47" r="1.5"/><circle class="balloon" cx="606" cy="104" r="8.5"/><text class="t" x="606" y="107.3" text-anchor="middle">12</text></g><g data-role="balloon" data-target="3" data-at="563.54 145.76"><path class="thin" d="M597.91 134.62L563.54 145.76"/><circle class="dot" cx="563.54" cy="145.76" r="1.5"/><circle class="balloon" cx="606" cy="132" r="8.5"/><text class="t" x="606" y="135.3" text-anchor="middle">3</text></g><g data-role="balloon" data-target="13" data-at="546.36 225.45"><path class="thin" d="M597.71 213.87L546.36 225.45"/><circle class="dot" cx="546.36" cy="225.45" r="1.5"/><circle class="balloon" cx="606" cy="212" r="8.5"/><text class="t" x="606" y="215.3" text-anchor="middle">13</text></g><g data-role="balloon" data-target="11" data-at="563.54 222.53"><path class="thin" d="M598.14 236.77L563.54 222.53"/><circle class="dot" cx="563.54" cy="222.53" r="1.5"/><circle class="balloon" cx="606" cy="240" r="8.5"/><text class="t" x="606" y="243.3" text-anchor="middle">11</text></g><g data-role="balloon" data-target="15" data-at="541.72 188.18"><path class="thin" d="M557.96 253.75L541.72 188.18"/><circle class="dot" cx="541.72" cy="188.18" r="1.5"/><circle class="balloon" cx="560" cy="262" r="8.5"/><text class="t" x="560" y="265.3" text-anchor="middle">15</text></g><g id="mvb-main"><g data-role="balloon" data-target="5" data-at="476.67 206.97"><path class="thin" d="M469.12 263.57L476.67 206.97"/><circle class="dot" cx="476.67" cy="206.97" r="1.5"/><circle class="balloon" cx="468" cy="272" r="8.5"/><text class="t" x="468" y="275.3" text-anchor="middle">5</text></g><g data-role="balloon" data-target="6" data-at="521.11 208.89"><path class="thin" d="M504.46 263.86L521.11 208.89"/><circle class="dot" cx="521.11" cy="208.89" r="1.5"/><circle class="balloon" cx="502" cy="272" r="8.5"/><text class="t" x="502" y="275.3" text-anchor="middle">6</text></g></g><g data-role="label"><circle class="thin mark" cx="526.36" cy="217.68" r="11.31"/><text class="t t-lg" x="526.36" y="250.65" text-anchor="middle">C</text></g><g data-role="label"><path class="ctr" d="M410 95.25L410 244.75"/><path class="vis" d="M410 95.25L410 107.25M410 244.75L410 232.75"/><path class="thin" d="M410 99.25L401 99.25"/><path class="thin" d="M410 240.75L401 240.75"/><path class="head" d="M394 99.25L401 97.5L401 101ZM394 240.75L401 239L401 242.5Z"/><text class="t t-lg" x="401.2" y="94.45" text-anchor="middle">B</text><text class="t t-lg" x="401.2" y="253.95" text-anchor="middle">B</text></g><g data-role="label"><text class="t t-lg" x="314" y="50" text-anchor="middle">SECTION A-A</text><text class="t t-sm" x="314" y="62" text-anchor="middle">PLAN SECTION THROUGH THE CYLINDER AXIS · SCALE 1:1</text></g><g data-geom="C" clip-path="url(#clip-C)"><circle class="paper" cx="165" cy="432" r="112"/><g data-role="fluid" data-part="15"><path id="oil-lo-C" class="tint" fill-opacity="0.16" d="M-4231.16 359.27L-1644.9 359.27L-1644.9 -448.81L-4231.16 -448.81ZM-1645.1 -135.68L-1342.07 -135.68L-1342.07 -236.69L-1645.1 -236.69ZM-1645.1 147.15L-1342.07 147.15L-1342.07 46.14L-1645.1 46.14ZM-1342.27 290.59L-89.34 290.59L-89.34 -375.58L-1342.27 -375.58ZM-89.75 -19.52L11.67 -19.52L11.67 -70.02L-89.75 -70.02ZM-4483.48 -544.77L213.69 -544.77L213.69 -595.27L-4483.48 -595.27ZM-4483.48 505.74L132.88 505.74L132.88 455.23L-4483.48 455.23ZM-4210.76 -449.01L-4160.25 -449.01L-3958.23 -544.97L-4008.74 -544.97ZM-4210.76 359.47L-4008.74 455.43L-3958.23 455.43L-4160.25 359.47Z"/><path id="oil-hi-C" class="tint" fill-opacity="0.16" d="M253.69 359.27L355.1 359.27L355.1 -448.81L253.69 -448.81ZM279.14 -448.61L329.65 -448.61L329.65 -570.02L279.14 -570.02ZM213.48 -534.67L415.71 -534.67L415.71 -605.37L213.48 -605.37ZM178.13 480.48L228.64 480.48L228.64 359.07L178.13 359.07ZM132.68 515.84L415.71 515.84L415.71 445.13L132.68 445.13ZM11.46 -0.32L254.09 -0.32L254.09 -89.21L11.46 -89.21Z"/></g><g data-part="1"><path class="paper" d="M-4533.99 -595.27L213.48 -595.27L213.48 -605.37L415.51 -605.37L415.51 -620.53L617.53 -620.53L617.53 -671.03L597.32 -691.23L-4513.79 -691.23L-4533.99 -671.03Z"/><path fill="url(#h-alu-45)" d="M-4533.99 -595.27L213.48 -595.27L213.48 -605.37L415.51 -605.37L415.51 -620.53L617.53 -620.53L617.53 -671.03L597.32 -691.23L-4513.79 -691.23L-4533.99 -671.03Z"/><path class="vis" d="M-4533.99 -595.27L213.48 -595.27L213.48 -605.37L415.51 -605.37L415.51 -620.53L617.53 -620.53L617.53 -671.03L597.32 -691.23L-4513.79 -691.23L-4533.99 -671.03Z"/><path class="paper" d="M-4533.99 -469.01L-4352.17 -469.01L-4352.17 -448.81L-4210.76 -448.81L-4008.74 -544.77L-4533.99 -544.77Z"/><path fill="url(#h-alu-45)" d="M-4533.99 -469.01L-4352.17 -469.01L-4352.17 -448.81L-4210.76 -448.81L-4008.74 -544.77L-4533.99 -544.77Z"/><path class="vis" d="M-4533.99 -469.01L-4352.17 -469.01L-4352.17 -448.81L-4210.76 -448.81L-4008.74 -544.77L-4533.99 -544.77Z"/><path class="paper" d="M-4160.25 -448.81L279.14 -448.81L279.14 -534.67L213.48 -534.67L213.48 -544.77L-3958.23 -544.77Z"/><path fill="url(#h-alu-45)" d="M-4160.25 -448.81L279.14 -448.81L279.14 -534.67L213.48 -534.67L213.48 -544.77L-3958.23 -544.77Z"/><path class="vis" d="M-4160.25 -448.81L279.14 -448.81L279.14 -534.67L213.48 -534.67L213.48 -544.77L-3958.23 -544.77Z"/><path class="paper" d="M329.65 -448.81L435.71 -448.81L435.71 -469.01L617.53 -469.01L617.53 -519.52L415.51 -519.52L415.51 -534.67L329.65 -534.67Z"/><path fill="url(#h-alu-45)" d="M329.65 -448.81L435.71 -448.81L435.71 -469.01L617.53 -469.01L617.53 -519.52L415.51 -519.52L415.51 -534.67L329.65 -534.67Z"/><path class="vis" d="M329.65 -448.81L435.71 -448.81L435.71 -469.01L617.53 -469.01L617.53 -519.52L415.51 -519.52L415.51 -534.67L329.65 -534.67Z"/><path class="paper" d="M-4533.99 581.49L-4513.79 601.7L597.32 601.7L617.53 581.49L617.53 530.99L415.51 530.99L415.51 515.84L132.68 515.84L132.68 505.74L-4533.99 505.74Z"/><path fill="url(#h-alu-45)" d="M-4533.99 581.49L-4513.79 601.7L597.32 601.7L617.53 581.49L617.53 530.99L415.51 530.99L415.51 515.84L132.68 515.84L132.68 505.74L-4533.99 505.74Z"/><path class="vis" d="M-4533.99 581.49L-4513.79 601.7L597.32 601.7L617.53 581.49L617.53 530.99L415.51 530.99L415.51 515.84L132.68 515.84L132.68 505.74L-4533.99 505.74Z"/><path class="paper" d="M-4533.99 455.23L-4008.74 455.23L-4210.76 359.27L-4352.17 359.27L-4352.17 379.47L-4533.99 379.47Z"/><path fill="url(#h-alu-45)" d="M-4533.99 455.23L-4008.74 455.23L-4210.76 359.27L-4352.17 359.27L-4352.17 379.47L-4533.99 379.47Z"/><path class="vis" d="M-4533.99 455.23L-4008.74 455.23L-4210.76 359.27L-4352.17 359.27L-4352.17 379.47L-4533.99 379.47Z"/><path class="paper" d="M-3958.23 455.23L132.68 455.23L132.68 445.13L178.13 445.13L178.13 359.27L-4160.25 359.27Z"/><path fill="url(#h-alu-45)" d="M-3958.23 455.23L132.68 455.23L132.68 445.13L178.13 445.13L178.13 359.27L-4160.25 359.27Z"/><path class="vis" d="M-3958.23 455.23L132.68 455.23L132.68 445.13L178.13 445.13L178.13 359.27L-4160.25 359.27Z"/><path class="paper" d="M228.64 445.13L415.51 445.13L415.51 429.98L617.53 429.98L617.53 379.47L435.71 379.47L435.71 359.27L228.64 359.27Z"/><path fill="url(#h-alu-45)" d="M228.64 445.13L415.51 445.13L415.51 429.98L617.53 429.98L617.53 379.47L435.71 379.47L435.71 359.27L228.64 359.27Z"/><path class="vis" d="M228.64 445.13L415.51 445.13L415.51 429.98L617.53 429.98L617.53 379.47L435.71 379.47L435.71 359.27L228.64 359.27Z"/></g><g data-part="2"><path class="paper" d="M-4230.96 -44.77L-4230.96 -448.81L-4263.28 -448.81L-4263.28 -416.48L-4311.77 -416.48L-4311.77 -448.81L-4352.17 -448.81L-4352.17 -469.01L-4533.99 -469.01L-4533.99 -161.94L-4432.98 -161.94L-4432.98 -44.77L-4432.98 72.4L-4533.99 72.4L-4533.99 379.47L-4352.17 379.47L-4352.17 359.27L-4311.77 359.27L-4311.77 326.95L-4263.28 326.95L-4263.28 359.27L-4230.96 359.27Z"/><path fill="url(#h-steel-135)" d="M-4230.96 -44.77L-4230.96 -448.81L-4263.28 -448.81L-4263.28 -416.48L-4311.77 -416.48L-4311.77 -448.81L-4352.17 -448.81L-4352.17 -469.01L-4533.99 -469.01L-4533.99 -161.94L-4432.98 -161.94L-4432.98 -44.77L-4432.98 72.4L-4533.99 72.4L-4533.99 379.47L-4352.17 379.47L-4352.17 359.27L-4311.77 359.27L-4311.77 326.95L-4263.28 326.95L-4263.28 359.27L-4230.96 359.27Z"/><path class="vis" d="M-4230.96 -44.77L-4230.96 -448.81L-4263.28 -448.81L-4263.28 -416.48L-4311.77 -416.48L-4311.77 -448.81L-4352.17 -448.81L-4352.17 -469.01L-4533.99 -469.01L-4533.99 -161.94L-4432.98 -161.94L-4432.98 -44.77L-4432.98 72.4L-4533.99 72.4L-4533.99 379.47L-4352.17 379.47L-4352.17 359.27L-4311.77 359.27L-4311.77 326.95L-4263.28 326.95L-4263.28 359.27L-4230.96 359.27Z"/><path class="thin" d="M-4360.25 -452.85L-4533.99 -452.85M-4360.25 363.31L-4533.99 363.31"/><path class="vis" d="M-4432.98 72.4L-4432.98 -161.94"/></g><g data-part="3"><path class="paper" d="M354.9 -44.77L354.9 -448.81L375.1 -448.81L375.1 -416.48L423.59 -416.48L423.59 -448.81L435.71 -448.81L435.71 -469.01L617.53 -469.01L617.53 -161.94L516.52 -161.94L516.52 -44.77L516.52 72.4L617.53 72.4L617.53 379.47L435.71 379.47L435.71 359.27L423.59 359.27L423.59 326.95L375.1 326.95L375.1 359.27L354.9 359.27Z"/><path fill="url(#h-steel-135)" d="M354.9 -44.77L354.9 -448.81L375.1 -448.81L375.1 -416.48L423.59 -416.48L423.59 -448.81L435.71 -448.81L435.71 -469.01L617.53 -469.01L617.53 -161.94L516.52 -161.94L516.52 -44.77L516.52 72.4L617.53 72.4L617.53 379.47L435.71 379.47L435.71 359.27L423.59 359.27L423.59 326.95L375.1 326.95L375.1 359.27L354.9 359.27Z"/><path class="vis" d="M354.9 -44.77L354.9 -448.81L375.1 -448.81L375.1 -416.48L423.59 -416.48L423.59 -448.81L435.71 -448.81L435.71 -469.01L617.53 -469.01L617.53 -161.94L516.52 -161.94L516.52 -44.77L516.52 72.4L617.53 72.4L617.53 379.47L435.71 379.47L435.71 359.27L423.59 359.27L423.59 326.95L375.1 326.95L375.1 359.27L354.9 359.27Z"/><path class="thin" d="M443.79 -452.85L617.53 -452.85M443.79 363.31L617.53 363.31"/><path class="vis" d="M516.52 72.4L516.52 -161.94"/></g><g data-part="4"><path class="paper" d="M-4280.45 -416.48L-4275.04 -417.56L-4270.46 -420.63L-4267.39 -425.21L-4266.31 -430.63L-4266.31 -434.67L-4267.39 -440.08L-4270.46 -444.67L-4275.04 -447.73L-4280.45 -448.81L-4294.6 -448.81L-4300.01 -447.73L-4304.6 -444.67L-4307.66 -440.08L-4308.74 -434.67L-4308.74 -430.63L-4307.66 -425.21L-4304.6 -420.63L-4300.01 -417.56L-4294.6 -416.48Z"/><path fill="url(#h-rubber-45)" d="M-4280.45 -416.48L-4275.04 -417.56L-4270.46 -420.63L-4267.39 -425.21L-4266.31 -430.63L-4266.31 -434.67L-4267.39 -440.08L-4270.46 -444.67L-4275.04 -447.73L-4280.45 -448.81L-4294.6 -448.81L-4300.01 -447.73L-4304.6 -444.67L-4307.66 -440.08L-4308.74 -434.67L-4308.74 -430.63L-4307.66 -425.21L-4304.6 -420.63L-4300.01 -417.56L-4294.6 -416.48Z"/><path class="vis" d="M-4280.45 -416.48L-4275.04 -417.56L-4270.46 -420.63L-4267.39 -425.21L-4266.31 -430.63L-4266.31 -434.67L-4267.39 -440.08L-4270.46 -444.67L-4275.04 -447.73L-4280.45 -448.81L-4294.6 -448.81L-4300.01 -447.73L-4304.6 -444.67L-4307.66 -440.08L-4308.74 -434.67L-4308.74 -430.63L-4307.66 -425.21L-4304.6 -420.63L-4300.01 -417.56L-4294.6 -416.48Z"/><path class="paper" d="M-4280.45 359.27L-4275.04 358.2L-4270.46 355.13L-4267.39 350.54L-4266.31 345.13L-4266.31 341.09L-4267.39 335.68L-4270.46 331.09L-4275.04 328.03L-4280.45 326.95L-4294.6 326.95L-4300.01 328.03L-4304.6 331.09L-4307.66 335.68L-4308.74 341.09L-4308.74 345.13L-4307.66 350.54L-4304.6 355.13L-4300.01 358.2L-4294.6 359.27Z"/><path fill="url(#h-rubber-45)" d="M-4280.45 359.27L-4275.04 358.2L-4270.46 355.13L-4267.39 350.54L-4266.31 345.13L-4266.31 341.09L-4267.39 335.68L-4270.46 331.09L-4275.04 328.03L-4280.45 326.95L-4294.6 326.95L-4300.01 328.03L-4304.6 331.09L-4307.66 335.68L-4308.74 341.09L-4308.74 345.13L-4307.66 350.54L-4304.6 355.13L-4300.01 358.2L-4294.6 359.27Z"/><path class="vis" d="M-4280.45 359.27L-4275.04 358.2L-4270.46 355.13L-4267.39 350.54L-4266.31 345.13L-4266.31 341.09L-4267.39 335.68L-4270.46 331.09L-4275.04 328.03L-4280.45 326.95L-4294.6 326.95L-4300.01 328.03L-4304.6 331.09L-4307.66 335.68L-4308.74 341.09L-4308.74 345.13L-4307.66 350.54L-4304.6 355.13L-4300.01 358.2L-4294.6 359.27Z"/><path class="paper" d="M406.41 -416.48L411.83 -417.56L416.41 -420.63L419.48 -425.21L420.56 -430.63L420.56 -434.67L419.48 -440.08L416.41 -444.67L411.83 -447.73L406.41 -448.81L392.27 -448.81L386.86 -447.73L382.27 -444.67L379.21 -440.08L378.13 -434.67L378.13 -430.63L379.21 -425.21L382.27 -420.63L386.86 -417.56L392.27 -416.48Z"/><path fill="url(#h-rubber-45)" d="M406.41 -416.48L411.83 -417.56L416.41 -420.63L419.48 -425.21L420.56 -430.63L420.56 -434.67L419.48 -440.08L416.41 -444.67L411.83 -447.73L406.41 -448.81L392.27 -448.81L386.86 -447.73L382.27 -444.67L379.21 -440.08L378.13 -434.67L378.13 -430.63L379.21 -425.21L382.27 -420.63L386.86 -417.56L392.27 -416.48Z"/><path class="vis" d="M406.41 -416.48L411.83 -417.56L416.41 -420.63L419.48 -425.21L420.56 -430.63L420.56 -434.67L419.48 -440.08L416.41 -444.67L411.83 -447.73L406.41 -448.81L392.27 -448.81L386.86 -447.73L382.27 -444.67L379.21 -440.08L378.13 -434.67L378.13 -430.63L379.21 -425.21L382.27 -420.63L386.86 -417.56L392.27 -416.48Z"/><path class="paper" d="M406.41 359.27L411.83 358.2L416.41 355.13L419.48 350.54L420.56 345.13L420.56 341.09L419.48 335.68L416.41 331.09L411.83 328.03L406.41 326.95L392.27 326.95L386.86 328.03L382.27 331.09L379.21 335.68L378.13 341.09L378.13 345.13L379.21 350.54L382.27 355.13L386.86 358.2L392.27 359.27Z"/><path fill="url(#h-rubber-45)" d="M406.41 359.27L411.83 358.2L416.41 355.13L419.48 350.54L420.56 345.13L420.56 341.09L419.48 335.68L416.41 331.09L411.83 328.03L406.41 326.95L392.27 326.95L386.86 328.03L382.27 331.09L379.21 335.68L378.13 341.09L378.13 345.13L379.21 350.54L382.27 355.13L386.86 358.2L392.27 359.27Z"/><path class="vis" d="M406.41 359.27L411.83 358.2L416.41 355.13L419.48 350.54L420.56 345.13L420.56 341.09L419.48 335.68L416.41 331.09L411.83 328.03L406.41 326.95L392.27 326.95L386.86 328.03L382.27 331.09L379.21 335.68L378.13 341.09L378.13 345.13L379.21 350.54L382.27 355.13L386.86 358.2L392.27 359.27Z"/></g><g data-part="14"><path class="paper" d="M-4483.48 -570.02L-4484.35 -576.56L-4486.87 -582.65L-4490.88 -587.88L-4496.11 -591.89L-4502.2 -594.41L-4508.74 -595.27L-4515.27 -594.41L-4521.36 -591.89L-4526.59 -587.88L-4530.61 -582.65L-4533.13 -576.56L-4533.99 -570.02L-4533.13 -563.48L-4530.61 -557.39L-4526.59 -552.16L-4521.36 -548.15L-4515.27 -545.63L-4508.74 -544.77L-4502.2 -545.63L-4496.11 -548.15L-4490.88 -552.16L-4486.87 -557.39L-4484.35 -563.48Z"/><path class="vis" d="M-4483.48 -570.02L-4484.35 -576.56L-4486.87 -582.65L-4490.88 -587.88L-4496.11 -591.89L-4502.2 -594.41L-4508.74 -595.27L-4515.27 -594.41L-4521.36 -591.89L-4526.59 -587.88L-4530.61 -582.65L-4533.13 -576.56L-4533.99 -570.02L-4533.13 -563.48L-4530.61 -557.39L-4526.59 -552.16L-4521.36 -548.15L-4515.27 -545.63L-4508.74 -544.77L-4502.2 -545.63L-4496.11 -548.15L-4490.88 -552.16L-4486.87 -557.39L-4484.35 -563.48Z"/><path class="paper" d="M-4483.48 480.48L-4484.35 473.95L-4486.87 467.86L-4490.88 462.63L-4496.11 458.62L-4502.2 456.09L-4508.74 455.23L-4515.27 456.09L-4521.36 458.62L-4526.59 462.63L-4530.61 467.86L-4533.13 473.95L-4533.99 480.48L-4533.13 487.02L-4530.61 493.11L-4526.59 498.34L-4521.36 502.35L-4515.27 504.88L-4508.74 505.74L-4502.2 504.88L-4496.11 502.35L-4490.88 498.34L-4486.87 493.11L-4484.35 487.02Z"/><path class="vis" d="M-4483.48 480.48L-4484.35 473.95L-4486.87 467.86L-4490.88 462.63L-4496.11 458.62L-4502.2 456.09L-4508.74 455.23L-4515.27 456.09L-4521.36 458.62L-4526.59 462.63L-4530.61 467.86L-4533.13 473.95L-4533.99 480.48L-4533.13 487.02L-4530.61 493.11L-4526.59 498.34L-4521.36 502.35L-4515.27 504.88L-4508.74 505.74L-4502.2 504.88L-4496.11 502.35L-4490.88 498.34L-4486.87 493.11L-4484.35 487.02Z"/></g><g data-part="13"><path class="solid" d="M347.83 -593.25L382.17 -593.25L382.17 -605.37L347.83 -605.37Z"/><path class="solid" d="M347.83 -534.67L382.17 -534.67L382.17 -546.79L347.83 -546.79Z"/><path class="solid" d="M347.83 457.25L382.17 457.25L382.17 445.13L347.83 445.13Z"/><path class="solid" d="M347.83 515.84L382.17 515.84L382.17 503.72L347.83 503.72Z"/></g><g id="mv-C"><g data-part="5"><path class="paper" d="M-1645.1 -236.69L-1342.07 -236.69L-1342.07 -375.58L-1299.28 -375.58L-1257.92 -261.94L-1215.35 -261.94L-1173.99 -375.58L-1140.61 -375.58L-1099.25 -261.94L-1056.69 -261.94L-1015.33 -375.58L-981.95 -375.58L-940.59 -261.94L-898.02 -261.94L-856.66 -375.58L-823.28 -375.58L-781.92 -261.94L-739.35 -261.94L-697.99 -375.58L-664.62 -375.58L-623.25 -261.94L-580.69 -261.94L-539.33 -375.58L-505.95 -375.58L-464.59 -261.94L-422.02 -261.94L-380.66 -375.58L-347.28 -375.58L-305.92 -261.94L-263.35 -261.94L-221.99 -375.58L-89.55 -375.58L-89.55 -70.02L11.46 -70.02L11.46 -89.21L152.88 -89.21L152.88 -70.02L253.89 -70.02L253.89 -432.65L237.73 -448.81L152.88 -448.81L152.88 -418.51L72.07 -418.51L72.07 -448.81L-1628.94 -448.81L-1645.1 -432.65Z"/><path fill="url(#h-steel-135)" d="M-1645.1 -236.69L-1342.07 -236.69L-1342.07 -375.58L-1299.28 -375.58L-1257.92 -261.94L-1215.35 -261.94L-1173.99 -375.58L-1140.61 -375.58L-1099.25 -261.94L-1056.69 -261.94L-1015.33 -375.58L-981.95 -375.58L-940.59 -261.94L-898.02 -261.94L-856.66 -375.58L-823.28 -375.58L-781.92 -261.94L-739.35 -261.94L-697.99 -375.58L-664.62 -375.58L-623.25 -261.94L-580.69 -261.94L-539.33 -375.58L-505.95 -375.58L-464.59 -261.94L-422.02 -261.94L-380.66 -375.58L-347.28 -375.58L-305.92 -261.94L-263.35 -261.94L-221.99 -375.58L-89.55 -375.58L-89.55 -70.02L11.46 -70.02L11.46 -89.21L152.88 -89.21L152.88 -70.02L253.89 -70.02L253.89 -432.65L237.73 -448.81L152.88 -448.81L152.88 -418.51L72.07 -418.51L72.07 -448.81L-1628.94 -448.81L-1645.1 -432.65Z"/><path class="vis" d="M-1645.1 -236.69L-1342.07 -236.69L-1342.07 -375.58L-1299.28 -375.58L-1257.92 -261.94L-1215.35 -261.94L-1173.99 -375.58L-1140.61 -375.58L-1099.25 -261.94L-1056.69 -261.94L-1015.33 -375.58L-981.95 -375.58L-940.59 -261.94L-898.02 -261.94L-856.66 -375.58L-823.28 -375.58L-781.92 -261.94L-739.35 -261.94L-697.99 -375.58L-664.62 -375.58L-623.25 -261.94L-580.69 -261.94L-539.33 -375.58L-505.95 -375.58L-464.59 -261.94L-422.02 -261.94L-380.66 -375.58L-347.28 -375.58L-305.92 -261.94L-263.35 -261.94L-221.99 -375.58L-89.55 -375.58L-89.55 -70.02L11.46 -70.02L11.46 -89.21L152.88 -89.21L152.88 -70.02L253.89 -70.02L253.89 -432.65L237.73 -448.81L152.88 -448.81L152.88 -418.51L72.07 -418.51L72.07 -448.81L-1628.94 -448.81L-1645.1 -432.65Z"/><path class="paper" d="M-1645.1 46.14L-1342.07 46.14L-1342.07 -135.68L-1645.1 -135.68Z"/><path fill="url(#h-steel-135)" d="M-1645.1 46.14L-1342.07 46.14L-1342.07 -135.68L-1645.1 -135.68Z"/><path class="vis" d="M-1645.1 46.14L-1342.07 46.14L-1342.07 -135.68L-1645.1 -135.68Z"/><path class="paper" d="M-1645.1 343.11L-1628.94 359.27L72.07 359.27L72.07 328.97L152.88 328.97L152.88 359.27L237.73 359.27L253.89 343.11L253.89 -19.52L152.88 -19.52L152.88 -0.32L11.46 -0.32L11.46 -19.52L-89.55 -19.52L-89.55 290.59L-1342.07 290.59L-1342.07 147.15L-1645.1 147.15Z"/><path fill="url(#h-steel-135)" d="M-1645.1 343.11L-1628.94 359.27L72.07 359.27L72.07 328.97L152.88 328.97L152.88 359.27L237.73 359.27L253.89 343.11L253.89 -19.52L152.88 -19.52L152.88 -0.32L11.46 -0.32L11.46 -19.52L-89.55 -19.52L-89.55 290.59L-1342.07 290.59L-1342.07 147.15L-1645.1 147.15Z"/><path class="vis" d="M-1645.1 343.11L-1628.94 359.27L72.07 359.27L72.07 328.97L152.88 328.97L152.88 359.27L237.73 359.27L253.89 343.11L253.89 -19.52L152.88 -19.52L152.88 -0.32L11.46 -0.32L11.46 -19.52L-89.55 -19.52L-89.55 290.59L-1342.07 290.59L-1342.07 147.15L-1645.1 147.15Z"/></g><g data-part="6"><path class="paper" d="M72.07 -418.51L152.88 -418.51L152.88 -448.81L72.07 -448.81Z"/><path fill="url(#h-plastic-45)" d="M72.07 -418.51L152.88 -418.51L152.88 -448.81L72.07 -448.81Z"/><path class="vis" d="M72.07 -418.51L152.88 -418.51L152.88 -448.81L72.07 -448.81Z"/><path class="paper" d="M72.07 359.27L152.88 359.27L152.88 328.97L72.07 328.97Z"/><path fill="url(#h-plastic-45)" d="M72.07 359.27L152.88 359.27L152.88 328.97L72.07 328.97Z"/><path class="vis" d="M72.07 359.27L152.88 359.27L152.88 328.97L72.07 328.97Z"/></g><g id="ball-C"><g data-part="9"><path class="paper" d="M83.41 -44.77L82.91 -51.09L81.43 -57.25L79.01 -63.11L75.69 -68.52L71.58 -73.34L66.75 -77.46L61.35 -80.77L55.49 -83.19L49.33 -84.67L43.01 -85.17L36.68 -84.67L30.52 -83.19L24.66 -80.77L19.26 -77.46L14.44 -73.34L10.32 -68.52L7 -63.11L4.58 -57.25L3.1 -51.09L2.6 -44.77L3.1 -38.45L4.58 -32.28L7 -26.42L10.32 -21.02L14.44 -16.2L19.26 -12.08L24.66 -8.77L30.52 -6.34L36.68 -4.86L43.01 -4.36L49.33 -4.86L55.49 -6.34L61.35 -8.77L66.75 -12.08L71.58 -16.2L75.69 -21.02L79.01 -26.42L81.43 -32.28L82.91 -38.45Z"/><path class="vis" d="M83.41 -44.77L82.91 -51.09L81.43 -57.25L79.01 -63.11L75.69 -68.52L71.58 -73.34L66.75 -77.46L61.35 -80.77L55.49 -83.19L49.33 -84.67L43.01 -85.17L36.68 -84.67L30.52 -83.19L24.66 -80.77L19.26 -77.46L14.44 -73.34L10.32 -68.52L7 -63.11L4.58 -57.25L3.1 -51.09L2.6 -44.77L3.1 -38.45L4.58 -32.28L7 -26.42L10.32 -21.02L14.44 -16.2L19.26 -12.08L24.66 -8.77L30.52 -6.34L36.68 -4.86L43.01 -4.36L49.33 -4.86L55.49 -6.34L61.35 -8.77L66.75 -12.08L71.58 -16.2L75.69 -21.02L79.01 -26.42L81.43 -32.28L82.91 -38.45Z"/></g></g><g data-part="10"><path class="paper" d="M147.83 -44.77L147.09 -49.45L144.93 -53.67L141.58 -57.03L137.36 -59.18L132.68 -59.92L127.99 -59.18L123.77 -57.03L120.42 -53.67L118.27 -49.45L117.53 -44.77L118.27 -40.09L120.42 -35.86L123.77 -32.51L127.99 -30.36L132.68 -29.62L137.36 -30.36L141.58 -32.51L144.93 -35.86L147.09 -40.09Z"/><path fill="url(#h-steel-45)" d="M147.83 -44.77L147.09 -49.45L144.93 -53.67L141.58 -57.03L137.36 -59.18L132.68 -59.92L127.99 -59.18L123.77 -57.03L120.42 -53.67L118.27 -49.45L117.53 -44.77L118.27 -40.09L120.42 -35.86L123.77 -32.51L127.99 -30.36L132.68 -29.62L137.36 -30.36L141.58 -32.51L144.93 -35.86L147.09 -40.09Z"/><path class="vis" d="M147.83 -44.77L147.09 -49.45L144.93 -53.67L141.58 -57.03L137.36 -59.18L132.68 -59.92L127.99 -59.18L123.77 -57.03L120.42 -53.67L118.27 -49.45L117.53 -44.77L118.27 -40.09L120.42 -35.86L123.77 -32.51L127.99 -30.36L132.68 -29.62L137.36 -30.36L141.58 -32.51L144.93 -35.86L147.09 -40.09Z"/></g></g><g id="scr-s-C"><g data-part="11"><path class="paper" d="M-1.46 474.42L171.04 450.18L177.1 460.28L245.78 460.28L251.85 447.15L344.8 447.15L344.8 457.25L385.2 457.25L385.2 447.15L419.55 447.15L427.63 429.98L623.99 429.98L630.05 436.04L630.05 472.4L605.81 472.4L605.81 488.57L630.05 488.57L630.05 524.93L623.99 530.99L427.63 530.99L419.55 513.82L385.2 513.82L385.2 503.72L344.8 503.72L344.8 513.82L251.85 513.82L245.78 500.69L177.1 500.69L171.04 510.79L-1.46 486.55Z"/><path class="vis" d="M-1.46 474.42L171.04 450.18L177.1 460.28L245.78 460.28L251.85 447.15L344.8 447.15L344.8 457.25L385.2 457.25L385.2 447.15L419.55 447.15L427.63 429.98L623.99 429.98L630.05 436.04L630.05 472.4L605.81 472.4L605.81 488.57L630.05 488.57L630.05 524.93L623.99 530.99L427.63 530.99L419.55 513.82L385.2 513.82L385.2 503.72L344.8 503.72L344.8 513.82L251.85 513.82L245.78 500.69L177.1 500.69L171.04 510.79L-1.46 486.55Z"/><path class="thin" d="M439.75 438.06L621.97 438.06M439.75 522.91L621.97 522.91"/></g></g><g id="scr-l-C"><g data-part="12"><path class="paper" d="M77.94 -576.08L250.43 -600.32L256.49 -590.22L325.18 -590.22L331.24 -603.35L344.8 -603.35L344.8 -593.25L385.2 -593.25L385.2 -603.35L419.55 -603.35L427.63 -620.53L622.58 -620.53L628.64 -614.46L628.64 -578.1L604.39 -578.1L604.39 -561.94L628.64 -561.94L628.64 -525.58L622.58 -519.52L427.63 -519.52L419.55 -536.69L385.2 -536.69L385.2 -546.79L344.8 -546.79L344.8 -536.69L331.24 -536.69L325.18 -549.82L256.49 -549.82L250.43 -539.72L77.94 -563.96Z"/><path class="vis" d="M77.94 -576.08L250.43 -600.32L256.49 -590.22L325.18 -590.22L331.24 -603.35L344.8 -603.35L344.8 -593.25L385.2 -593.25L385.2 -603.35L419.55 -603.35L427.63 -620.53L622.58 -620.53L628.64 -614.46L628.64 -578.1L604.39 -578.1L604.39 -561.94L628.64 -561.94L628.64 -525.58L622.58 -519.52L427.63 -519.52L419.55 -536.69L385.2 -536.69L385.2 -546.79L344.8 -546.79L344.8 -536.69L331.24 -536.69L325.18 -549.82L256.49 -549.82L250.43 -539.72L77.94 -563.96Z"/><path class="thin" d="M439.75 -612.44L620.56 -612.44M439.75 -527.6L620.56 -527.6"/></g></g><g data-role="fluid"><path id="flow-s-C" class="flow" stroke-opacity="0" d="M302.37 177.45L203.38 328.97L203.38 439.07L160.96 439.07L132.68 456.44L72.07 460.28L11.46 467.22L-67.21 480.48L-3958.23 480.48L-3988.54 452.2L-4182.47 363.31"/><path id="flow-l-C" class="flow" stroke-opacity="0" d="M304.39 -266.99L304.39 -418.51L304.39 -528.61L241.77 -528.61L213.48 -545.98L152.88 -549.82L92.27 -556.75L13.6 -570.02L-3958.23 -570.02L-3988.54 -541.74L-4182.47 -452.85"/></g><path class="ctr" d="M-4594.6 -44.77L698.33 -44.77"/><path class="ctr" d="M-1247.06 -44.77L-750.21 -44.77"/><path class="ctr" d="M-998.64 318.87L-998.64 -408.4"/><path class="ctr" d="M-4594.6 -570.02L698.33 -570.02"/><path class="ctr" d="M-4594.6 480.48L698.33 480.48"/></g><circle class="thin" cx="165" cy="432" r="112"/><g data-role="label"><text class="t t-lg" x="165" y="566" text-anchor="middle">DETAIL C</text><text class="t t-sm" x="165" y="578" text-anchor="middle">SWEEP NEEDLE AND PORT · SCALE 10:1</text></g><g data-geom="F" clip-path="url(#clip-F)"><rect class="paper" x="322" y="348" width="232" height="172"/><g data-role="fluid" data-part="15"><path id="oil-lo-F" class="tint" fill-opacity="0.16" d="M205.68 555.21L357.29 555.21L357.29 312.79L205.68 312.79ZM357.09 446.63L407.8 446.63L407.8 421.37L357.09 421.37Z"/><path id="oil-hi-F" class="tint" fill-opacity="0.16" d="M407.7 456.22L529.01 456.22L529.01 411.78L407.7 411.78ZM528.91 555.21L710.73 555.21L710.73 312.79L528.91 312.79Z"/></g><g data-part="5"><path class="paper" d="M-420.59 338.04L-269.07 338.04L-269.07 268.6L-247.68 268.6L-227 325.41L-205.71 325.41L-185.03 268.6L-168.34 268.6L-147.66 325.41L-126.38 325.41L-105.7 268.6L-89.01 268.6L-68.33 325.41L-47.04 325.41L-26.36 268.6L-9.68 268.6L11 325.41L32.29 325.41L52.97 268.6L69.66 268.6L90.34 325.41L111.62 325.41L132.3 268.6L148.99 268.6L169.67 325.41L190.95 325.41L211.63 268.6L228.32 268.6L249 325.41L270.29 325.41L290.97 268.6L357.19 268.6L357.19 421.37L407.7 421.37L407.7 411.78L478.4 411.78L478.4 421.37L528.91 421.37L528.91 240.06L520.83 231.98L478.4 231.98L478.4 247.13L438 247.13L438 231.98L-412.51 231.98L-420.59 240.06Z"/><path fill="url(#h-steel-135)" d="M-420.59 338.04L-269.07 338.04L-269.07 268.6L-247.68 268.6L-227 325.41L-205.71 325.41L-185.03 268.6L-168.34 268.6L-147.66 325.41L-126.38 325.41L-105.7 268.6L-89.01 268.6L-68.33 325.41L-47.04 325.41L-26.36 268.6L-9.68 268.6L11 325.41L32.29 325.41L52.97 268.6L69.66 268.6L90.34 325.41L111.62 325.41L132.3 268.6L148.99 268.6L169.67 325.41L190.95 325.41L211.63 268.6L228.32 268.6L249 325.41L270.29 325.41L290.97 268.6L357.19 268.6L357.19 421.37L407.7 421.37L407.7 411.78L478.4 411.78L478.4 421.37L528.91 421.37L528.91 240.06L520.83 231.98L478.4 231.98L478.4 247.13L438 247.13L438 231.98L-412.51 231.98L-420.59 240.06Z"/><path class="vis" d="M-420.59 338.04L-269.07 338.04L-269.07 268.6L-247.68 268.6L-227 325.41L-205.71 325.41L-185.03 268.6L-168.34 268.6L-147.66 325.41L-126.38 325.41L-105.7 268.6L-89.01 268.6L-68.33 325.41L-47.04 325.41L-26.36 268.6L-9.68 268.6L11 325.41L32.29 325.41L52.97 268.6L69.66 268.6L90.34 325.41L111.62 325.41L132.3 268.6L148.99 268.6L169.67 325.41L190.95 325.41L211.63 268.6L228.32 268.6L249 325.41L270.29 325.41L290.97 268.6L357.19 268.6L357.19 421.37L407.7 421.37L407.7 411.78L478.4 411.78L478.4 421.37L528.91 421.37L528.91 240.06L520.83 231.98L478.4 231.98L478.4 247.13L438 247.13L438 231.98L-412.51 231.98L-420.59 240.06Z"/><path class="paper" d="M-420.59 479.45L-269.07 479.45L-269.07 388.55L-420.59 388.55Z"/><path fill="url(#h-steel-135)" d="M-420.59 479.45L-269.07 479.45L-269.07 388.55L-420.59 388.55Z"/><path class="vis" d="M-420.59 479.45L-269.07 479.45L-269.07 388.55L-420.59 388.55Z"/><path class="paper" d="M-420.59 627.94L-412.51 636.02L438 636.02L438 620.87L478.4 620.87L478.4 636.02L520.83 636.02L528.91 627.94L528.91 446.63L478.4 446.63L478.4 456.22L407.7 456.22L407.7 446.63L357.19 446.63L357.19 601.68L-269.07 601.68L-269.07 529.96L-420.59 529.96Z"/><path fill="url(#h-steel-135)" d="M-420.59 627.94L-412.51 636.02L438 636.02L438 620.87L478.4 620.87L478.4 636.02L520.83 636.02L528.91 627.94L528.91 446.63L478.4 446.63L478.4 456.22L407.7 456.22L407.7 446.63L357.19 446.63L357.19 601.68L-269.07 601.68L-269.07 529.96L-420.59 529.96Z"/><path class="vis" d="M-420.59 627.94L-412.51 636.02L438 636.02L438 620.87L478.4 620.87L478.4 636.02L520.83 636.02L528.91 627.94L528.91 446.63L478.4 446.63L478.4 456.22L407.7 456.22L407.7 446.63L357.19 446.63L357.19 601.68L-269.07 601.68L-269.07 529.96L-420.59 529.96Z"/></g><g id="ball-F"><g data-part="9"><path class="paper" d="M443.67 434L443.42 430.84L442.68 427.76L441.47 424.83L439.81 422.13L437.75 419.72L435.34 417.66L432.64 416L429.71 414.79L426.63 414.05L423.47 413.8L420.31 414.05L417.22 414.79L414.3 416L411.59 417.66L409.18 419.72L407.12 422.13L405.47 424.83L404.25 427.76L403.51 430.84L403.27 434L403.51 437.16L404.25 440.24L405.47 443.17L407.12 445.87L409.18 448.28L411.59 450.34L414.3 452L417.22 453.21L420.31 453.95L423.47 454.2L426.63 453.95L429.71 453.21L432.64 452L435.34 450.34L437.75 448.28L439.81 445.87L441.47 443.17L442.68 440.24L443.42 437.16Z"/><path class="vis" d="M443.67 434L443.42 430.84L442.68 427.76L441.47 424.83L439.81 422.13L437.75 419.72L435.34 417.66L432.64 416L429.71 414.79L426.63 414.05L423.47 413.8L420.31 414.05L417.22 414.79L414.3 416L411.59 417.66L409.18 419.72L407.12 422.13L405.47 424.83L404.25 427.76L403.51 430.84L403.27 434L403.51 437.16L404.25 440.24L405.47 443.17L407.12 445.87L409.18 448.28L411.59 450.34L414.3 452L417.22 453.21L420.31 453.95L423.47 454.2L426.63 453.95L429.71 453.21L432.64 452L435.34 450.34L437.75 448.28L439.81 445.87L441.47 443.17L442.68 440.24L443.42 437.16Z"/></g></g><g data-part="10"><path class="paper" d="M475.88 434L475.51 431.66L474.43 429.55L472.76 427.87L470.64 426.8L468.3 426.42L465.96 426.8L463.85 427.87L462.17 429.55L461.1 431.66L460.73 434L461.1 436.34L462.17 438.45L463.85 440.13L465.96 441.2L468.3 441.58L470.64 441.2L472.76 440.13L474.43 438.45L475.51 436.34Z"/><path fill="url(#h-steel-45)" d="M475.88 434L475.51 431.66L474.43 429.55L472.76 427.87L470.64 426.8L468.3 426.42L465.96 426.8L463.85 427.87L462.17 429.55L461.1 431.66L460.73 434L461.1 436.34L462.17 438.45L463.85 440.13L465.96 441.2L468.3 441.58L470.64 441.2L472.76 440.13L474.43 438.45L475.51 436.34Z"/><path class="vis" d="M475.88 434L475.51 431.66L474.43 429.55L472.76 427.87L470.64 426.8L468.3 426.42L465.96 426.8L463.85 427.87L462.17 429.55L461.1 431.66L460.73 434L461.1 436.34L462.17 438.45L463.85 440.13L465.96 441.2L468.3 441.58L470.64 441.2L472.76 440.13L474.43 438.45L475.51 436.34Z"/></g><path class="ctr" d="M306.69 434L569.31 434"/><path class="ctr" d="M456.73 434L479.88 434"/><path class="ctr" d="M468.3 445.58L468.3 422.42"/></g><rect class="thin" x="322" y="348" width="232" height="172" rx="10"/><g data-role="balloon" data-target="9" data-at="429.53 421.88"><path class="thin" d="M567.72 389.92L429.53 421.88"/><circle class="dot" cx="429.53" cy="421.88" r="1.5"/><circle class="balloon" cx="576" cy="388" r="8.5"/><text class="t" x="576" y="391.3" text-anchor="middle">9</text></g><g data-role="balloon" data-target="10" data-at="471.33 437.54"><path class="thin" d="M568.12 476.8L471.33 437.54"/><circle class="dot" cx="471.33" cy="437.54" r="1.5"/><circle class="balloon" cx="576" cy="480" r="8.5"/><text class="t" x="576" y="483.3" text-anchor="middle">10</text></g><g data-role="label"><text class="t t-lg" x="438" y="542" text-anchor="middle">DETAIL F</text><text class="t t-sm" x="438" y="554" text-anchor="middle">CHECK VALVE IN PISTON 5, RIDING WITH IT · 5:1</text></g><g data-geom="B"><g data-role="fluid" data-part="15"><path id="oil-B" class="tint" fill-opacity="0.16" d="M738.38 168L738.23 164.48L737.77 160.99L737.01 157.55L735.95 154.19L734.6 150.93L732.97 147.81L731.08 144.84L728.94 142.04L726.56 139.44L723.96 137.06L721.16 134.92L718.19 133.03L715.07 131.4L711.81 130.05L708.45 128.99L705.01 128.23L701.52 127.77L698 127.62L694.48 127.77L690.99 128.23L687.55 128.99L684.19 130.05L680.93 131.4L677.81 133.03L674.84 134.92L672.04 137.06L669.44 139.44L667.06 142.04L664.92 144.84L663.03 147.81L661.4 150.93L660.05 154.19L658.99 157.55L658.23 160.99L657.77 164.48L657.62 168L657.77 171.52L658.23 175.01L658.99 178.45L660.05 181.81L661.4 185.07L663.03 188.19L664.92 191.16L667.06 193.96L669.44 196.56L672.04 198.94L674.84 201.08L677.81 202.97L680.93 204.6L684.19 205.95L687.55 207.01L690.99 207.77L694.48 208.23L698 208.38L701.52 208.23L705.01 207.77L708.45 207.01L711.81 205.95L715.07 204.6L718.19 202.97L721.16 201.08L723.96 198.94L726.56 196.56L728.94 193.96L731.08 191.16L732.97 188.19L734.6 185.07L735.95 181.81L737.01 178.45L737.77 175.01L738.23 171.52Z"/></g><g data-part="1"><path class="paper" fill-rule="evenodd" d="M675.78 99.31L635.37 99.31L633.35 101.33L633.35 234.67L635.37 236.69L675.78 236.69L675.78 201.74L675.78 201.74L673.08 199.8L670.54 197.64L668.2 195.28L666.06 192.74L664.13 190.03L662.43 187.17L660.97 184.17L659.77 181.07L658.82 177.88L658.14 174.63L657.73 171.32L657.6 168L657.73 164.68L658.14 161.37L658.82 158.12L659.77 154.93L660.97 151.83L662.43 148.83L664.13 145.97L666.06 143.26L668.2 140.72L670.54 138.36L673.08 136.2L675.78 134.26L675.78 134.26ZM648 168L647.88 167.22L647.52 166.52L646.96 165.96L646.26 165.6L645.47 165.47L644.69 165.6L643.99 165.96L643.43 166.52L643.07 167.22L642.95 168L643.07 168.78L643.43 169.48L643.99 170.04L644.69 170.4L645.47 170.53L646.26 170.4L646.96 170.04L647.52 169.48L647.88 168.78Z"/><path fill="url(#h-alu-45)" fill-rule="evenodd" d="M675.78 99.31L635.37 99.31L633.35 101.33L633.35 234.67L635.37 236.69L675.78 236.69L675.78 201.74L675.78 201.74L673.08 199.8L670.54 197.64L668.2 195.28L666.06 192.74L664.13 190.03L662.43 187.17L660.97 184.17L659.77 181.07L658.82 177.88L658.14 174.63L657.73 171.32L657.6 168L657.73 164.68L658.14 161.37L658.82 158.12L659.77 154.93L660.97 151.83L662.43 148.83L664.13 145.97L666.06 143.26L668.2 140.72L670.54 138.36L673.08 136.2L675.78 134.26L675.78 134.26ZM648 168L647.88 167.22L647.52 166.52L646.96 165.96L646.26 165.6L645.47 165.47L644.69 165.6L643.99 165.96L643.43 166.52L643.07 167.22L642.95 168L643.07 168.78L643.43 169.48L643.99 170.04L644.69 170.4L645.47 170.53L646.26 170.4L646.96 170.04L647.52 169.48L647.88 168.78Z"/><path class="vis" d="M675.78 99.31L635.37 99.31L633.35 101.33L633.35 234.67L635.37 236.69L675.78 236.69L675.78 201.74L675.78 201.74L673.08 199.8L670.54 197.64L668.2 195.28L666.06 192.74L664.13 190.03L662.43 187.17L660.97 184.17L659.77 181.07L658.82 177.88L658.14 174.63L657.73 171.32L657.6 168L657.73 164.68L658.14 161.37L658.82 158.12L659.77 154.93L660.97 151.83L662.43 148.83L664.13 145.97L666.06 143.26L668.2 140.72L670.54 138.36L673.08 136.2L675.78 134.26L675.78 134.26ZM648 168L647.88 167.22L647.52 166.52L646.96 165.96L646.26 165.6L645.47 165.47L644.69 165.6L643.99 165.96L643.43 166.52L643.07 167.22L642.95 168L643.07 168.78L643.43 169.48L643.99 170.04L644.69 170.4L645.47 170.53L646.26 170.4L646.96 170.04L647.52 169.48L647.88 168.78Z"/><path class="paper" fill-rule="evenodd" d="M720.22 134.26L720.22 134.26L722.92 136.2L725.46 138.36L727.8 140.72L729.94 143.26L731.87 145.97L733.57 148.83L735.03 151.83L736.23 154.93L737.18 158.12L737.86 161.37L738.27 164.68L738.4 168L738.27 171.32L737.86 174.63L737.18 177.88L736.23 181.07L735.03 184.17L733.57 187.17L731.87 190.03L729.94 192.74L727.8 195.28L725.46 197.64L722.92 199.8L720.22 201.74L720.22 201.74L720.22 236.69L760.63 236.69L762.65 234.67L762.65 101.33L760.63 99.31L720.22 99.31ZM753.05 168L752.93 167.22L752.57 166.52L752.01 165.96L751.31 165.6L750.53 165.47L749.74 165.6L749.04 165.96L748.48 166.52L748.12 167.22L748 168L748.12 168.78L748.48 169.48L749.04 170.04L749.74 170.4L750.53 170.53L751.31 170.4L752.01 170.04L752.57 169.48L752.93 168.78Z"/><path fill="url(#h-alu-45)" fill-rule="evenodd" d="M720.22 134.26L720.22 134.26L722.92 136.2L725.46 138.36L727.8 140.72L729.94 143.26L731.87 145.97L733.57 148.83L735.03 151.83L736.23 154.93L737.18 158.12L737.86 161.37L738.27 164.68L738.4 168L738.27 171.32L737.86 174.63L737.18 177.88L736.23 181.07L735.03 184.17L733.57 187.17L731.87 190.03L729.94 192.74L727.8 195.28L725.46 197.64L722.92 199.8L720.22 201.74L720.22 201.74L720.22 236.69L760.63 236.69L762.65 234.67L762.65 101.33L760.63 99.31L720.22 99.31ZM753.05 168L752.93 167.22L752.57 166.52L752.01 165.96L751.31 165.6L750.53 165.47L749.74 165.6L749.04 165.96L748.48 166.52L748.12 167.22L748 168L748.12 168.78L748.48 169.48L749.04 170.04L749.74 170.4L750.53 170.53L751.31 170.4L752.01 170.04L752.57 169.48L752.93 168.78Z"/><path class="vis" d="M720.22 134.26L720.22 134.26L722.92 136.2L725.46 138.36L727.8 140.72L729.94 143.26L731.87 145.97L733.57 148.83L735.03 151.83L736.23 154.93L737.18 158.12L737.86 161.37L738.27 164.68L738.4 168L738.27 171.32L737.86 174.63L737.18 177.88L736.23 181.07L735.03 184.17L733.57 187.17L731.87 190.03L729.94 192.74L727.8 195.28L725.46 197.64L722.92 199.8L720.22 201.74L720.22 201.74L720.22 236.69L760.63 236.69L762.65 234.67L762.65 101.33L760.63 99.31L720.22 99.31ZM753.05 168L752.93 167.22L752.57 166.52L752.01 165.96L751.31 165.6L750.53 165.47L749.74 165.6L749.04 165.96L748.48 166.52L748.12 167.22L748 168L748.12 168.78L748.48 169.48L749.04 170.04L749.74 170.4L750.53 170.53L751.31 170.4L752.01 170.04L752.57 169.48L752.93 168.78Z"/></g><g data-part="5"><path class="paper" d="M731.08 191.2L731.08 191.2L733.66 186.99L735.71 182.5L737.2 177.79L738.1 172.93L738.4 168L738.1 163.07L737.2 158.21L735.71 153.5L733.66 149.01L731.08 144.8L731.08 144.8Z"/><path fill="url(#h-steel-135)" d="M731.08 191.2L731.08 191.2L733.66 186.99L735.71 182.5L737.2 177.79L738.1 172.93L738.4 168L738.1 163.07L737.2 158.21L735.71 153.5L733.66 149.01L731.08 144.8L731.08 144.8Z"/><path class="vis" d="M731.08 191.2L731.08 191.2L733.66 186.99L735.71 182.5L737.2 177.79L738.1 172.93L738.4 168L738.1 163.07L737.2 158.21L735.71 153.5L733.66 149.01L731.08 144.8L731.08 144.8Z"/><path class="paper" d="M664.46 145.46L731.54 145.46L716.27 131.96L696.35 127.63L676.85 133.57L662.74 148.28L657.6 168L662.74 187.72L676.85 202.43L696.35 208.37L716.27 204.04L731.54 190.54L664.46 190.54Z"/><path fill="url(#h-steel-135)" d="M664.46 145.46L731.54 145.46L716.27 131.96L696.35 127.63L676.85 133.57L662.74 148.28L657.6 168L662.74 187.72L676.85 202.43L696.35 208.37L716.27 204.04L731.54 190.54L664.46 190.54Z"/><path class="vis" d="M664.46 145.46L731.54 145.46L716.27 131.96L696.35 127.63L676.85 133.57L662.74 148.28L657.6 168L662.74 187.72L676.85 202.43L696.35 208.37L716.27 204.04L731.54 190.54L664.46 190.54Z"/></g><g data-part="8"><path class="paper" d="M709.11 75.07L709.11 97.29L714.16 97.29L714.16 143.76L727.29 143.76L728.3 144.77L728.3 191.23L727.29 192.24L714.16 192.24L714.16 238.71L709.11 238.71L709.11 260.93L686.89 260.93L686.89 238.71L681.84 238.71L681.84 192.24L668.71 192.24L667.7 191.23L667.7 144.77L668.71 143.76L681.84 143.76L681.84 97.29L686.89 97.29L686.89 75.07Z"/><path class="vis" d="M709.11 75.07L709.11 97.29L714.16 97.29L714.16 143.76L727.29 143.76L728.3 144.77L728.3 191.23L727.29 192.24L714.16 192.24L714.16 238.71L709.11 238.71L709.11 260.93L686.89 260.93L686.89 238.71L681.84 238.71L681.84 192.24L668.71 192.24L667.7 191.23L667.7 144.77L668.71 143.76L681.84 143.76L681.84 97.29L686.89 97.29L686.89 75.07Z"/><path class="thin" d="M718.45 192.24L718.45 143.76M677.55 192.24L677.55 143.76"/></g><g data-part="22"><path class="solid" d="M719.01 126.38L720.22 126.38L720.22 106.18L719.01 106.18Z"/><path class="paper" d="M714.16 124.57L719.01 124.57L719.01 108L714.16 108Z"/><path class="vis" d="M714.16 124.57L719.01 124.57L719.01 108L714.16 108Z"/><path class="solid" d="M675.78 126.38L676.99 126.38L676.99 106.18L675.78 106.18Z"/><path class="paper" d="M676.99 124.57L681.84 124.57L681.84 108L676.99 108Z"/><path class="vis" d="M676.99 124.57L681.84 124.57L681.84 108L676.99 108Z"/><path class="solid" d="M719.01 229.82L720.22 229.82L720.22 209.62L719.01 209.62Z"/><path class="paper" d="M714.16 228L719.01 228L719.01 211.43L714.16 211.43Z"/><path class="vis" d="M714.16 228L719.01 228L719.01 211.43L714.16 211.43Z"/><path class="solid" d="M675.78 229.82L676.99 229.82L676.99 209.62L675.78 209.62Z"/><path class="paper" d="M676.99 228L681.84 228L681.84 211.43L676.99 211.43Z"/><path class="vis" d="M676.99 228L681.84 228L681.84 211.43L676.99 211.43Z"/></g><g data-part="23"><path class="paper" d="M714.16 105.58L720.22 105.58L720.22 100.12L714.16 100.12Z"/><path fill="url(#h-rubber-45)" d="M714.16 105.58L720.22 105.58L720.22 100.12L714.16 100.12Z"/><path class="vis" d="M714.16 105.58L720.22 105.58L720.22 100.12L714.16 100.12Z"/><path class="paper" d="M675.78 105.58L681.84 105.58L681.84 100.12L675.78 100.12Z"/><path fill="url(#h-rubber-45)" d="M675.78 105.58L681.84 105.58L681.84 100.12L675.78 100.12Z"/><path class="vis" d="M675.78 105.58L681.84 105.58L681.84 100.12L675.78 100.12Z"/><path class="paper" d="M714.16 235.88L720.22 235.88L720.22 230.42L714.16 230.42Z"/><path fill="url(#h-rubber-45)" d="M714.16 235.88L720.22 235.88L720.22 230.42L714.16 230.42Z"/><path class="vis" d="M714.16 235.88L720.22 235.88L720.22 230.42L714.16 230.42Z"/><path class="paper" d="M675.78 235.88L681.84 235.88L681.84 230.42L675.78 230.42Z"/><path fill="url(#h-rubber-45)" d="M675.78 235.88L681.84 235.88L681.84 230.42L675.78 230.42Z"/><path class="vis" d="M675.78 235.88L681.84 235.88L681.84 230.42L675.78 230.42Z"/></g><path class="ctr" d="M698 264.97L698 71.03"/><path class="ctr" d="M627.29 168L768.71 168"/><path class="ctr" d="M639.95 168L651 168"/><path class="ctr" d="M645.47 173.53L645.47 162.47"/><path class="ctr" d="M745 168L756.05 168"/><path class="ctr" d="M750.53 173.53L750.53 162.47"/></g><g data-role="label"><path class="ctr" d="M629.31 168L766.69 168"/><path class="vis" d="M629.31 168L641.31 168M766.69 168L754.69 168"/><path class="thin" d="M633.31 168L633.31 177"/><path class="thin" d="M762.69 168L762.69 177"/><path class="head" d="M633.31 184L631.56 177L635.06 177ZM762.69 184L760.94 177L764.44 177Z"/><text class="t t-lg" x="624.31" y="181" text-anchor="middle">A</text><text class="t t-lg" x="771.69" y="181" text-anchor="middle">A</text></g><g data-role="balloon" data-target="23" data-at="678.81 102.55"><path class="thin" d="M658.5 85.47L678.81 102.55"/><circle class="dot" cx="678.81" cy="102.55" r="1.5"/><circle class="balloon" cx="652" cy="80" r="8.5"/><text class="t" x="652" y="83.3" text-anchor="middle">23</text></g><g data-role="balloon" data-target="22" data-at="679.41 220.53"><path class="thin" d="M657.02 251.14L679.41 220.53"/><circle class="dot" cx="679.41" cy="220.53" r="1.5"/><circle class="balloon" cx="652" cy="258" r="8.5"/><text class="t" x="652" y="261.3" text-anchor="middle">22</text></g><g data-role="label"><text class="t t-lg" x="698" y="290" text-anchor="middle">SECTION B-B</text><text class="t t-sm" x="698" y="302" text-anchor="middle">ACROSS THE SPINDLE · 1:1</text></g><g data-geom="E"><g data-role="phantom"><path class="phan" d="M127.98 788.22L342.12 788.22L342.12 766L127.98 766Z"/><path class="phan" d="M330.55 764.48L395.64 585.65L387.29 582.61L322.2 761.44L323.17 763.51Z"/><path class="phan" d="M356.67 692.72L356.83 692.45L357.09 692.27L357.39 692.19L357.71 692.24L368.34 696.11L368.61 696.27L368.79 696.53L368.87 696.83L368.82 697.15L351.75 744.03L351.59 744.3L351.34 744.49L351.03 744.57L350.72 744.52L340.09 740.65L339.82 740.48L339.63 740.23L339.56 739.92L339.6 739.61Z"/><path class="phan" d="M300.58 722.99L299.88 723.09L299.27 723.46L298.85 724.03L298.68 724.71L298.78 725.42L299.14 726.03L299.71 726.45L300.4 726.62L350.84 729.21L351.54 729.11L352.15 728.75L352.57 728.18L352.75 727.49L352.64 726.79L352.28 726.18L351.71 725.75L351.02 725.58Z"/><path class="phan" d="M278.25 763.31L278.09 763.84L278.14 764.39L278.4 764.88L278.83 765.23L279.35 765.39L279.9 765.33L280.39 765.07L280.74 764.65L301.74 725.48L301.9 724.95L301.85 724.4L301.59 723.91L301.16 723.56L300.63 723.4L300.08 723.45L299.6 723.71L299.25 724.14Z"/></g><g data-part="18"><path class="paper" d="M283.54 766L283.69 765.97L283.82 765.88L283.91 765.75L283.94 765.6L283.94 762.57L283.91 762.41L283.82 762.28L283.69 762.19L283.54 762.16L275.45 762.16L275.3 762.19L275.17 762.28L275.08 762.41L275.05 762.57L275.05 765.6L275.08 765.75L275.17 765.88L275.3 765.97L275.45 766Z"/><path class="vis" d="M283.54 766L283.69 765.97L283.82 765.88L283.91 765.75L283.94 765.6L283.94 762.57L283.91 762.41L283.82 762.28L283.69 762.19L283.54 762.16L275.45 762.16L275.3 762.19L275.17 762.28L275.08 762.41L275.05 762.57L275.05 765.6L275.08 765.75L275.17 765.88L275.3 765.97L275.45 766Z"/><path class="paper" d="M280.3 763.98L280.24 763.67L280.07 763.41L279.8 763.23L279.49 763.17L279.19 763.23L278.92 763.41L278.75 763.67L278.69 763.98L278.75 764.29L278.92 764.55L279.19 764.73L279.49 764.79L279.8 764.73L280.07 764.55L280.24 764.29Z"/><path class="vis" d="M280.3 763.98L280.24 763.67L280.07 763.41L279.8 763.23L279.49 763.17L279.19 763.23L278.92 763.41L278.75 763.67L278.69 763.98L278.75 764.29L278.92 764.55L279.19 764.73L279.49 764.79L279.8 764.73L280.07 764.55L280.24 764.29Z"/></g><g id="plan-mv"><g data-part="21"><path class="paper" d="M328.38 766L138.08 766L138.08 774.89L328.38 774.89L330 773.27Z"/><path class="vis" d="M328.38 766L138.08 766L138.08 774.89L328.38 774.89L330 773.27Z"/></g><g data-part="1"><path class="paper" d="M252.02 766L251.71 765.94L251.45 765.76L251.27 765.5L251.21 765.19L251.21 753.88L251.27 753.57L251.45 753.31L251.71 753.13L252.02 753.07L301.92 753.07L302.23 753.13L302.49 753.31L302.67 753.57L302.73 753.88L302.73 765.19L302.67 765.5L302.49 765.76L302.23 765.94L301.92 766Z"/><path class="vis" d="M252.02 766L251.71 765.94L251.45 765.76L251.27 765.5L251.21 765.19L251.21 753.88L251.27 753.57L251.45 753.31L251.71 753.13L252.02 753.07L301.92 753.07L302.23 753.13L302.49 753.31L302.67 753.57L302.73 753.88L302.73 765.19L302.67 765.5L302.49 765.76L302.23 765.94L301.92 766Z"/></g><g data-part="17"><path class="paper" d="M279.13 765.35L279.68 765.38L280.2 765.2L280.62 764.84L280.86 764.34L280.9 763.79L280.72 763.27L280.35 762.86L279.86 762.61L236.91 751.18L236.36 751.14L235.84 751.32L235.42 751.69L235.18 752.18L235.14 752.73L235.32 753.25L235.69 753.67L236.18 753.91Z"/><path class="vis" d="M279.13 765.35L279.68 765.38L280.2 765.2L280.62 764.84L280.86 764.34L280.9 763.79L280.72 763.27L280.35 762.86L279.86 762.61L236.91 751.18L236.36 751.14L235.84 751.32L235.42 751.69L235.18 752.18L235.14 752.73L235.32 753.25L235.69 753.67L236.18 753.91Z"/></g><g data-part="16"><path class="paper" d="M236.8 750.74L236.09 750.78L235.45 751.09L234.98 751.62L234.75 752.29L234.79 753L235.1 753.64L235.63 754.11L236.3 754.35L286.31 761.34L287.02 761.3L287.66 760.99L288.13 760.46L288.37 759.79L288.33 759.08L288.02 758.44L287.49 757.97L286.82 757.73Z"/><path class="vis" d="M236.8 750.74L236.09 750.78L235.45 751.09L234.98 751.62L234.75 752.29L234.79 753L235.1 753.64L235.63 754.11L236.3 754.35L286.31 761.34L287.02 761.3L287.66 760.99L288.13 760.46L288.37 759.79L288.33 759.08L288.02 758.44L287.49 757.97L286.82 757.73Z"/></g><g data-part="20"><path class="paper" d="M237.35 752.54L237.29 752.24L237.12 751.97L236.86 751.8L236.55 751.74L236.24 751.8L235.98 751.97L235.8 752.24L235.74 752.54L235.8 752.85L235.98 753.12L236.24 753.29L236.55 753.35L236.86 753.29L237.12 753.12L237.29 752.85Z"/><path class="vis" d="M237.35 752.54L237.29 752.24L237.12 751.97L236.86 751.8L236.55 751.74L236.24 751.8L235.98 751.97L235.8 752.24L235.74 752.54L235.8 752.85L235.98 753.12L236.24 753.29L236.55 753.35L236.86 753.29L237.12 753.12L237.29 752.85Z"/></g><g data-part="19"><path class="paper" d="M287.58 759.54L287.53 759.22L287.38 758.94L287.16 758.72L286.88 758.57L286.57 758.53L286.25 758.57L285.97 758.72L285.75 758.94L285.6 759.22L285.56 759.54L285.6 759.85L285.75 760.13L285.97 760.35L286.25 760.5L286.57 760.55L286.88 760.5L287.16 760.35L287.38 760.13L287.53 759.85Z"/><path class="vis" d="M287.58 759.54L287.53 759.22L287.38 758.94L287.16 758.72L286.88 758.57L286.57 758.53L286.25 758.57L285.97 758.72L285.75 758.94L285.6 759.22L285.56 759.54L285.6 759.85L285.75 760.13L285.97 760.35L286.25 760.5L286.57 760.55L286.88 760.5L287.16 760.35L287.38 760.13L287.53 759.85Z"/></g></g><path class="ctr" d="M324.17 766L335.83 766"/><path class="ctr" d="M330 771.83L330 760.17"/></g><g id="theta-wrap"><g data-role="dim" id="dim-theta"><path class="thin" d="M180.56 753.02L180.14 759.5L180 766L180.14 772.5L180.56 778.98M180.56 753.02L181.35 745.93L182.47 738.89L183.92 731.92L185.71 725.02L187.82 718.21"/><path class="head" d="M180 766L178.25 759L181.75 759ZM180 766L181.75 773L178.25 773Z"/><text class="t" x="175.23" y="737.6" text-anchor="middle">θ=0°</text></g></g><g id="plan-b"><g data-role="balloon" data-target="21" data-at="263.33 770.44"><path class="thin" d="M407.4 653.36L263.33 770.44"/><circle class="dot" cx="263.33" cy="770.44" r="1.5"/><circle class="balloon" cx="414" cy="648" r="8.5"/><text class="t" x="414" y="651.3" text-anchor="middle">21</text></g><g data-role="balloon" data-target="16" data-at="255.55 755.2"><path class="thin" d="M406.4 679.8L255.55 755.2"/><circle class="dot" cx="255.55" cy="755.2" r="1.5"/><circle class="balloon" cx="414" cy="676" r="8.5"/><text class="t" x="414" y="679.3" text-anchor="middle">16</text></g><g data-role="balloon" data-target="17" data-at="258.02 758.26"><path class="thin" d="M405.97 706.79L258.02 758.26"/><circle class="dot" cx="258.02" cy="758.26" r="1.5"/><circle class="balloon" cx="414" cy="704" r="8.5"/><text class="t" x="414" y="707.3" text-anchor="middle">17</text></g><g data-role="balloon" data-target="20" data-at="236.95 752.34"><path class="thin" d="M405.56 732.97L236.95 752.34"/><circle class="dot" cx="236.95" cy="752.34" r="1.5"/><circle class="balloon" cx="414" cy="732" r="8.5"/><text class="t" x="414" y="735.3" text-anchor="middle">20</text></g><g data-role="balloon" data-target="19" data-at="286.87 759.23"><path class="thin" d="M405.5 759.95L286.87 759.23"/><circle class="dot" cx="286.87" cy="759.23" r="1.5"/><circle class="balloon" cx="414" cy="760" r="8.5"/><text class="t" x="414" y="763.3" text-anchor="middle">19</text></g></g><g data-role="balloon" data-target="18" data-at="282.53 765.19"><path class="thin" d="M405.65 788.42L282.53 765.19"/><circle class="dot" cx="282.53" cy="765.19" r="1.5"/><circle class="balloon" cx="414" cy="790" r="8.5"/><text class="t" x="414" y="793.3" text-anchor="middle">18</text></g><g data-role="label"><text class="t t-lg" x="230" y="802" text-anchor="middle">PLAN E</text><text class="t t-sm" x="230" y="814" text-anchor="middle">DOOR AND ARM FROM ABOVE · HEAD REMOVED · 1:10</text></g><g data-role="chart"><rect class="paper" x="846" y="50" width="314" height="186"/><path class="thin grid-line" d="M846 236H1160M846 198.8H1160M846 161.6H1160M846 124.4H1160M846 87.2H1160M846 50H1160M846 50V236M866.93 50V236M887.87 50V236M908.8 50V236M929.73 50V236M950.67 50V236M971.6 50V236M992.53 50V236M1013.47 50V236M1034.4 50V236M1055.33 50V236M1076.27 50V236M1097.2 50V236M1118.13 50V236M1139.07 50V236M1160 50V236"/><path class="hid" d="M846 211H1160"/><path id="c1-prev" class="thin" d=""/><path id="c1-push" class="vis" d=""/><path id="c1-close" class="vis accent" d=""/><path id="c1-marks" class="head" d=""/><path id="c1-due" class="hid" d=""/><circle id="c1-dot" class="accent-fill" cx="846" cy="236" r="2.6"/><rect class="vis" x="846" y="50" width="314" height="186"/><text class="t t-sm" x="840" y="238.7" text-anchor="end">0</text><text class="t t-sm" x="840" y="201.5" text-anchor="end">20</text><text class="t t-sm" x="840" y="164.3" text-anchor="end">40</text><text class="t t-sm" x="840" y="127.1" text-anchor="end">60</text><text class="t t-sm" x="840" y="89.9" text-anchor="end">80</text><text class="t t-sm" x="840" y="52.7" text-anchor="end">100</text><text class="t t-sm" x="846" y="247" text-anchor="middle">0</text><text class="t t-sm" x="908.8" y="247" text-anchor="middle">3</text><text class="t t-sm" x="971.6" y="247" text-anchor="middle">6</text><text class="t t-sm" x="1034.4" y="247" text-anchor="middle">9</text><text class="t t-sm" x="1097.2" y="247" text-anchor="middle">12</text><text class="t t-sm" x="1160" y="247" text-anchor="middle">15</text><text class="t t-sm t-mute" x="1003" y="260" text-anchor="middle">TIME t, s</text><text class="t t-sm t-mute" x="816" y="143" text-anchor="middle" transform="rotate(-90 816 143)">DOOR θ, °</text></g><g data-role="label"><text class="t t-lg" x="1003" y="282" text-anchor="middle">DIAGRAM 1</text><text class="t t-sm" x="1003" y="294" text-anchor="middle">▼ PUSH · THICK: HELD · ACCENT: OIL CLOSING · DASHED: LATCH DUE</text></g><g data-role="chart"><rect class="paper" x="636" y="336" width="124" height="142"/><path class="thin grid-line" d="M636 478H760M636 457.71H760M636 437.43H760M636 417.14H760M636 396.86H760M636 376.57H760M636 356.29H760M636 336H760M636 336V478M647.27 336V478M658.55 336V478M669.82 336V478M681.09 336V478M692.36 336V478M703.64 336V478M714.91 336V478M726.18 336V478M737.45 336V478M748.73 336V478M760 336V478"/><path class="hid" d="M651.15 336V478"/><path class="vis" d="M636 478L637.13 471.68L638.25 465.96L639.38 460.66L640.51 455.96L641.64 454.26L642.76 452.9L643.89 451.59L645.02 450.33L646.15 449.1L647.27 447.9L648.4 446.71L649.53 445.55L650.65 444.4L651.78 443.26L652.91 442.14L654.04 441.03L655.16 439.93L656.29 438.83L657.42 437.75L658.55 436.67L659.67 435.61L660.8 434.54L661.93 433.49L663.05 432.44L664.18 431.39L665.31 430.35L666.44 429.32L667.56 428.29L668.69 427.27L669.82 426.25L670.95 425.23L672.07 424.22L673.2 423.21L674.33 422.21L675.45 421.21L676.58 420.21L677.71 419.22L678.84 418.23L679.96 417.24L681.09 416.26L682.22 415.28L683.35 414.3L684.47 413.33L685.6 412.36L686.73 411.39L687.85 410.42L688.98 409.46L690.11 408.5L691.24 407.54L692.36 406.59L693.49 405.64L694.62 404.69L695.75 403.74L696.87 402.8L698 401.86L699.13 400.92L700.25 399.98L701.38 399.05L702.51 398.12L703.64 397.19L704.76 396.26L705.89 395.34L707.02 394.42L708.15 393.5L709.27 392.58L710.4 391.66L711.53 390.75L712.65 389.84L713.78 388.93L714.91 388.02L716.04 387.12L717.16 386.22L718.29 385.32L719.42 384.42L720.55 383.52L721.67 382.63L722.8 381.74L723.93 380.85L725.05 379.96L726.18 379.07L727.31 378.19L728.44 377.31L729.56 376.42L730.69 375.55L731.82 374.67L732.95 373.8L734.07 372.92L735.2 372.05L736.33 371.18L737.45 370.32L738.58 369.45L739.71 368.59L740.84 367.73L741.96 366.87L743.09 366.01L744.22 365.15L745.35 364.3L746.47 363.45L747.6 362.6L748.73 361.75L749.85 360.9L750.98 360.05L752.11 359.21L753.24 358.37L754.36 357.53L755.49 356.69L756.62 355.85L757.75 355.02L758.87 354.19L760 353.35"/><circle id="d2-dot" class="accent-fill" cx="636" cy="478" r="2.6"/><rect class="vis" x="636" y="336" width="124" height="142"/><text class="t t-sm" x="630" y="480.7" text-anchor="end">0</text><text class="t t-sm" x="630" y="460.41" text-anchor="end">1</text><text class="t t-sm" x="630" y="440.13" text-anchor="end">2</text><text class="t t-sm" x="630" y="419.84" text-anchor="end">3</text><text class="t t-sm" x="630" y="399.56" text-anchor="end">4</text><text class="t t-sm" x="630" y="379.27" text-anchor="end">5</text><text class="t t-sm" x="630" y="358.99" text-anchor="end">6</text><text class="t t-sm" x="630" y="338.7" text-anchor="end">7</text><text class="t t-sm" x="636" y="489" text-anchor="middle">0</text><text class="t t-sm" x="692.36" y="489" text-anchor="middle">50</text><text class="t t-sm" x="748.73" y="489" text-anchor="middle">100</text><text class="t t-sm t-mute" x="698" y="502" text-anchor="middle">LEFT AT θ, °</text><text class="t t-sm t-mute" x="608" y="407" text-anchor="middle" transform="rotate(-90 608 407)">QUIET NEEDED, s</text></g><g data-role="label"><text class="t t-lg" x="690" y="526" text-anchor="middle">DIAGRAM 2</text><text class="t t-sm" x="690" y="538" text-anchor="middle">TIME TO LATCH FROM θ</text></g><g data-role="notes"><text class="t t-head" x="448" y="612">NOTES</text><text class="t t-sm" x="448" y="627">1. SPRING 7 DRIVES PISTON 5; OIL EXITS ONLY VIA NEEDLES 11, 12.</text><text class="t t-sm" x="448" y="640">2. NEEDLE = ORIFICE: Q = Cd·A·√(2p/ρ), Cd 0.62, ρ 870 kg/m³.</text><text class="t t-sm" x="448" y="653">3. p = F/A = 8.6–14.7 bar. BELOW 13° THE PISTON SHUTS THE SWEEP</text><text class="t t-sm" x="448" y="666">4. PORT AND ONLY NEEDLE 12 (LATCH) PASSES OIL.</text><text class="t t-sm" x="448" y="679">5. OPENING, BALL 9 LIFTS AND THE OIL RETURNS FREE.</text><text class="t t-sm" x="448" y="692">6. EVERY PUSH RESTARTS THE CLOSING: FROM 90° IT LATCHES 5.3 s AFTER</text><text class="t t-sm" x="448" y="705">7. THE LAST PUSH, NOT BEFORE.</text><text class="t t-sm" x="448" y="718">8. CLOSING MOMENT 24 N·m AT 0° (EN 1154 SIZE 3: ≥ 18 N·m).</text><text class="t t-sm" x="448" y="731">9. SCREWS, BALLS, ROLLERS AND SPINDLE NOT CUT LENGTHWISE.</text></g><g data-role="bom"><rect class="paper" x="776" y="322" width="400" height="386"/><path class="thin" d="M806 322V708M1002 322V708M1146 322V708M776 338H1176M776 354H1176M776 370H1176M776 386H1176M776 402H1176M776 418H1176M776 434H1176M776 450H1176M776 466H1176M776 482H1176M776 498H1176M776 514H1176M776 530H1176M776 546H1176M776 562H1176M776 578H1176M776 594H1176M776 610H1176M776 626H1176M776 642H1176M776 658H1176M776 674H1176M776 690H1176"/><rect class="vis" x="776" y="322" width="400" height="386"/><text class="t t-sm t-head" x="791" y="702.5" text-anchor="middle">ITEM</text><text class="t t-sm" x="791" y="685.2" text-anchor="middle">1</text><text class="t t-sm" x="791" y="669.2" text-anchor="middle">2</text><text class="t t-sm" x="791" y="653.2" text-anchor="middle">3</text><text class="t t-sm" x="791" y="637.2" text-anchor="middle">4</text><text class="t t-sm" x="791" y="621.2" text-anchor="middle">5</text><text class="t t-sm" x="791" y="605.2" text-anchor="middle">6</text><text class="t t-sm" x="791" y="589.2" text-anchor="middle">7</text><text class="t t-sm" x="791" y="573.2" text-anchor="middle">8</text><text class="t t-sm" x="791" y="557.2" text-anchor="middle">9</text><text class="t t-sm" x="791" y="541.2" text-anchor="middle">10</text><text class="t t-sm" x="791" y="525.2" text-anchor="middle">11</text><text class="t t-sm" x="791" y="509.2" text-anchor="middle">12</text><text class="t t-sm" x="791" y="493.2" text-anchor="middle">13</text><text class="t t-sm" x="791" y="477.2" text-anchor="middle">14</text><text class="t t-sm" x="791" y="461.2" text-anchor="middle">15</text><text class="t t-sm" x="791" y="445.2" text-anchor="middle">16</text><text class="t t-sm" x="791" y="429.2" text-anchor="middle">17</text><text class="t t-sm" x="791" y="413.2" text-anchor="middle">18</text><text class="t t-sm" x="791" y="397.2" text-anchor="middle">19</text><text class="t t-sm" x="791" y="381.2" text-anchor="middle">20</text><text class="t t-sm" x="791" y="365.2" text-anchor="middle">21</text><text class="t t-sm" x="791" y="349.2" text-anchor="middle">22</text><text class="t t-sm" x="791" y="333.2" text-anchor="middle">23</text><text class="t t-sm t-head" x="810" y="702.5" text-anchor="start">DESCRIPTION</text><text class="t t-sm" x="810" y="685.2" text-anchor="start">BODY, BORE Ø40</text><text class="t t-sm" x="810" y="669.2" text-anchor="start">END PLUG M42×1.5, SPRING SIDE</text><text class="t t-sm" x="810" y="653.2" text-anchor="start">END PLUG M42×1.5, VALVE SIDE</text><text class="t t-sm" x="810" y="637.2" text-anchor="start">O-RING 37×2</text><text class="t t-sm" x="810" y="621.2" text-anchor="start">PISTON WITH RACK m2.5</text><text class="t t-sm" x="810" y="605.2" text-anchor="start">PISTON RING Ø40×1.5</text><text class="t t-sm" x="810" y="589.2" text-anchor="start">CLOSING SPRING Ø6×Ø37, 14 COILS</text><text class="t t-sm" x="810" y="573.2" text-anchor="start">PINION SPINDLE z10 m2.5</text><text class="t t-sm" x="810" y="557.2" text-anchor="start">CHECK BALL Ø4 G10</text><text class="t t-sm" x="810" y="541.2" text-anchor="start">PIN Ø1.5×10 ISO 8734</text><text class="t t-sm" x="810" y="525.2" text-anchor="start">REGULATING SCREW 1, SWEEP M5×0.5</text><text class="t t-sm" x="810" y="509.2" text-anchor="start">REGULATING SCREW 2, LATCH M5×0.5</text><text class="t t-sm" x="810" y="493.2" text-anchor="start">O-RING 2.4×0.6</text><text class="t t-sm" x="810" y="477.2" text-anchor="start">SEALING BALL Ø2.5, PRESSED</text><text class="t t-sm" x="810" y="461.2" text-anchor="start">HYDRAULIC OIL ISO VG 15</text><text class="t t-sm" x="810" y="445.2" text-anchor="start">MAIN ARM 250</text><text class="t t-sm" x="810" y="429.2" text-anchor="start">FOREARM 220</text><text class="t t-sm" x="810" y="413.2" text-anchor="start">ARM SHOE</text><text class="t t-sm" x="810" y="397.2" text-anchor="start">ARM SCREW M6×16 ISO 4762</text><text class="t t-sm" x="810" y="381.2" text-anchor="start">ELBOW RIVET Ø8</text><text class="t t-sm" x="810" y="365.2" text-anchor="start">DOOR LEAF 950×44 (REF.)</text><text class="t t-sm" x="810" y="349.2" text-anchor="start">NEEDLE BEARING HK 1610</text><text class="t t-sm" x="810" y="333.2" text-anchor="start">SHAFT SEAL 16×22×3</text><text class="t t-sm t-head" x="1006" y="702.5" text-anchor="start">MATERIAL</text><text class="t t-sm" x="1006" y="685.2" text-anchor="start">EN AC-46000 (AlSi9Cu3)</text><text class="t t-sm" x="1006" y="669.2" text-anchor="start">11SMnPb30</text><text class="t t-sm" x="1006" y="653.2" text-anchor="start">11SMnPb30</text><text class="t t-sm" x="1006" y="637.2" text-anchor="start">NBR 70</text><text class="t t-sm" x="1006" y="621.2" text-anchor="start">42CrMo4, RACK HARDENED</text><text class="t t-sm" x="1006" y="605.2" text-anchor="start">PTFE + 25% BRONZE</text><text class="t t-sm" x="1006" y="589.2" text-anchor="start">EN 10270-1 SH</text><text class="t t-sm" x="1006" y="573.2" text-anchor="start">42CrMo4</text><text class="t t-sm" x="1006" y="557.2" text-anchor="start">100Cr6</text><text class="t t-sm" x="1006" y="541.2" text-anchor="start">STEEL, HARDENED</text><text class="t t-sm" x="1006" y="525.2" text-anchor="start">CuZn39Pb3</text><text class="t t-sm" x="1006" y="509.2" text-anchor="start">CuZn39Pb3</text><text class="t t-sm" x="1006" y="493.2" text-anchor="start">FKM 75</text><text class="t t-sm" x="1006" y="477.2" text-anchor="start">100Cr6</text><text class="t t-sm" x="1006" y="461.2" text-anchor="start">HV 15</text><text class="t t-sm" x="1006" y="445.2" text-anchor="start">DC01 PRESSED</text><text class="t t-sm" x="1006" y="429.2" text-anchor="start">DC01 PRESSED</text><text class="t t-sm" x="1006" y="413.2" text-anchor="start">ZP5 (EN 12844)</text><text class="t t-sm" x="1006" y="397.2" text-anchor="start">STEEL 8.8</text><text class="t t-sm" x="1006" y="381.2" text-anchor="start">C15</text><text class="t t-sm" x="1006" y="365.2" text-anchor="start">BY OTHERS</text><text class="t t-sm" x="1006" y="349.2" text-anchor="start">BOUGHT OUT</text><text class="t t-sm" x="1006" y="333.2" text-anchor="start">NBR 70</text><text class="t t-sm t-head" x="1161" y="702.5" text-anchor="middle">QTY</text><text class="t t-sm" x="1161" y="685.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="669.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="653.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="637.2" text-anchor="middle">2</text><text class="t t-sm" x="1161" y="621.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="605.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="589.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="573.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="557.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="541.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="525.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="509.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="493.2" text-anchor="middle">2</text><text class="t t-sm" x="1161" y="477.2" text-anchor="middle">2</text><text class="t t-sm" x="1161" y="461.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="445.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="429.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="413.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="397.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="381.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="365.2" text-anchor="middle">1</text><text class="t t-sm" x="1161" y="349.2" text-anchor="middle">2</text><text class="t t-sm" x="1161" y="333.2" text-anchor="middle">2</text></g><g data-role="title"><rect class="paper" x="776" y="708" width="400" height="116"/><rect class="thin" x="776" y="708" width="290" height="32"/><text class="t t-cap" x="780" y="717">TITLE</text><text class="t t-xl" x="780" y="733">DOOR CLOSER · SECTION A-A</text><rect class="thin" x="1066" y="708" width="110" height="32"/><text class="t t-cap" x="1070" y="717">DWG NO</text><text class="t t-xl" x="1070" y="733">BP-007</text><rect class="thin" x="776" y="740" width="64" height="25"/><text class="t t-cap" x="780" y="749">SCALE</text><text class="t" x="780" y="760">1:1</text><rect class="thin" x="840" y="740" width="50" height="25"/><text class="t t-cap" x="844" y="749">SIZE</text><text class="t" x="844" y="760">A2</text><rect class="thin" x="890" y="740" width="56" height="25"/><text class="t t-cap" x="894" y="749">SHEET</text><text class="t" x="894" y="760">1 / 1</text><rect class="thin" x="946" y="740" width="110" height="25"/><text class="t t-cap" x="950" y="749">DRAWN</text><text class="t" x="950" y="760">CLAUDE</text><rect class="thin" x="1056" y="740" width="120" height="25"/><text class="t t-cap" x="1060" y="749">DATE</text><text class="t" x="1060" y="760">2026-10-15</text><rect class="thin" x="776" y="765" width="140" height="25"/><text class="t t-cap" x="780" y="774">MATERIAL</text><text class="t" x="780" y="785">SEE PARTS LIST</text><rect class="thin" x="916" y="765" width="120" height="25"/><text class="t t-cap" x="920" y="774">GENERAL TOL.</text><text class="t" x="920" y="785">ISO 2768-m</text><rect class="thin" x="1036" y="765" width="140" height="25"/><text class="t t-cap" x="1040" y="774">UNITS</text><text class="t" x="1040" y="785">mm · bar · s</text><rect class="thin" x="776" y="790" width="400" height="34"/><text class="t t-cap" x="780" y="799">LIVE · SPACE OR CLICK PUSHES THE DOOR · DRAG IT IN PLAN E · S SLOW</text><text class="t" x="780" y="819" id="readout"></text><rect class="vis" x="776" y="708" width="400" height="116"/></g><rect class="hit" data-drag="plan" x="130" y="566" width="280" height="212"/><rect class="hit" data-push="main" x="56.46" y="105.35" width="515.15" height="129.29"/></svg>
+<figcaption class="bp-bar"><span><kbd>Space</kbd> or click the closer: push the door · drag the door in plan E · <kbd>R</kbd> shut it · <kbd>S</kbd> slow</span><span class="bp-themes" role="group" aria-label="Theme"><button type="button" data-theme-pick="blueprint">blueprint</button><button type="button" data-theme-pick="paper">paper</button><button type="button" data-theme-pick="dark">dark</button></span><span id="sr" class="bp-sr" aria-live="polite"></span></figcaption>
+</figure>
+</main>
+<script>
+"use strict";
+const K = (() => {
+// Blueprint drafting kit: orthographic views, sections, hatching, dimensions and sheet furniture.
+// Every function here is pure and returns SVG markup strings, so the same code runs in the build
+// and, inlined, in the page (live dimensions, moving springs, needles).
+//
+// Units. World geometry is in millimetres of the real object: u to the right, v up (a front view),
+// or u right, v away from the viewer (a plan view). The sheet is an A2 drawing, 594 mm wide, drawn
+// 1200 units wide; a view maps world mm to sheet units through its drawing scale.
+
+const SHEET = { w: 1200, h: 848 };
+const PX_PER_MM = SHEET.w / 594;
+
+// ISO 128 line widths and ISO 3098 lettering, in sheet units (A2: 0.5 / 0.25 mm lines, 3.5 mm text).
+const THICK = 1.15;
+const THIN = 0.55;
+const TEXT = 9.5;
+const ARROW = 7;
+const GAP = 2.2; // extension lines start this far from the object
+const OVER = 3.5; // and run this far past the dimension line
+
+const r2 = (n) => Math.round(n * 100) / 100;
+
+function fmt(n, digits = 1) {
+  const near = Math.round(n);
+  if (Math.abs(n - near) < 0.05) return String(near);
+  return n.toFixed(digits);
+}
+
+// ---------------------------------------------------------------- views
+
+// A view is a window from world mm onto the sheet. scale is the drawing scale (1/2.5 for "1:2.5").
+function view({ x, y, scale, name = "" }) {
+  const k = scale * PX_PER_MM;
+  return { x, y, scale, k, name, p: ([u, v]) => [r2(x + u * k), r2(y - v * k)] };
+}
+
+const scaleLabel = (scale) => (scale >= 1 ? `${fmt(scale)}:1` : `1:${fmt(1 / scale)}`);
+
+function d(V, pts, closed = true) {
+  let out = "";
+  for (let i = 0; i < pts.length; i++) {
+    const [x, y] = V.p(pts[i]);
+    out += `${i ? "L" : "M"}${x} ${y}`;
+  }
+  return closed ? out + "Z" : out;
+}
+
+// ---------------------------------------------------------------- world geometry (point lists)
+
+const rect = (u0, v0, u1, v1) => [[u0, v0], [u1, v0], [u1, v1], [u0, v1]];
+
+function arc(cu, cv, r, a0, a1, steps) {
+  const n = steps ?? Math.max(3, Math.ceil(Math.abs(a1 - a0) / 7.5));
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const a = ((a0 + ((a1 - a0) * i) / n) * Math.PI) / 180;
+    out.push([cu + r * Math.cos(a), cv + r * Math.sin(a)]);
+  }
+  return out;
+}
+
+const circle = (cu, cv, r, steps = 48) => arc(cu, cv, r, 0, 360 - 360 / steps, steps - 1);
+
+// A rectangle with filleted corners.
+function rrect(u0, v0, u1, v1, r, steps = 4) {
+  const q = Math.min(r, (u1 - u0) / 2, (v1 - v0) / 2);
+  return [
+    ...arc(u1 - q, v0 + q, q, -90, 0, steps),
+    ...arc(u1 - q, v1 - q, q, 0, 90, steps),
+    ...arc(u0 + q, v1 - q, q, 90, 180, steps),
+    ...arc(u0 + q, v0 + q, q, 180, 270, steps),
+  ];
+}
+
+const move = (pts, du, dv) => pts.map(([u, v]) => [u + du, v + dv]);
+const flipU = (pts, about = 0) => pts.map(([u, v]) => [2 * about - u, v]).reverse();
+const flipV = (pts, about = 0) => pts.map(([u, v]) => [u, 2 * about - v]).reverse();
+
+function inside([u, v], poly) {
+  let hit = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ui, vi] = poly[i];
+    const [uj, vj] = poly[j];
+    if (vi > v !== vj > v && u < ((uj - ui) * (v - vi)) / (vj - vi) + ui) hit = !hit;
+  }
+  return hit;
+}
+
+// A body of revolution cut through its axis.
+// loop is the half-profile as [r, s] pairs: r >= 0 measured from the axis, s along the axis.
+// axis "v" is a vertical axis at u = at; axis "u" a horizontal axis at v = at.
+// Returns the cut faces (hatched) and the edges seen through the bore behind the cutting plane:
+// every circle on an inner surface shows edge-on as a straight line across the bore.
+function revolve(loop, { axis = "v", at = 0 } = {}) {
+  const place = axis === "v" ? (r, s) => [at + r, s] : (r, s) => [s, at + r];
+  const n = loop.length;
+  const onAxis = loop.findIndex(([r], i) => r === 0 && loop[(i + 1) % n][0] === 0);
+  let cuts;
+  if (onAxis >= 0) {
+    const chain = Array.from({ length: n }, (_, j) => loop[(onAxis + 1 + j) % n]);
+    const right = chain.map(([r, s]) => place(r, s));
+    const left = chain.slice(1, -1).reverse().map(([r, s]) => place(-r, s));
+    cuts = [[...right, ...left]];
+  } else {
+    cuts = [loop.map(([r, s]) => place(r, s)), loop.map(([r, s]) => place(-r, s)).reverse()];
+  }
+  const eps = 1e-3;
+  const across = new Map();
+  const clear = (r, s) => [0.02, 0.25, 0.5, 0.75, 0.98].every((t) => !inside([t * r, s], loop));
+  for (const [r, s] of loop) {
+    if (r <= 0) continue;
+    if (clear(r, s + eps) && clear(r, s - eps)) across.set(s, Math.max(across.get(s) ?? 0, r));
+  }
+  const edges = [...across].map(([s, r]) => [place(-r, s), place(r, s)]);
+  return { cuts, edges };
+}
+
+// ---------------------------------------------------------------- hatching
+
+// ANSI/ISO-style material hatches. Spacing is in sheet units and never scales with the view,
+// so a detail at 2:1 shows the same density as the main view, as on a real drawing.
+const MATERIALS = {
+  steel: { kind: "lines", gap: 3.4 },
+  iron: { kind: "lines", gap: 5.6 },
+  alu: { kind: "pairs", gap: 5.2, pair: 1.5 },
+  brass: { kind: "dashed", gap: 4.6 },
+  bronze: { kind: "dashed", gap: 3.6 },
+  rubber: { kind: "cross", gap: 3.2 },
+  plastic: { kind: "lines", gap: 2.3 },
+  foam: { kind: "dots", gap: 2.6 },
+  wood: { kind: "grain", gap: 4 },
+};
+const ANGLES = [45, 135, 30, 60];
+
+function hatchDefs() {
+  let out = "";
+  for (const [name, m] of Object.entries(MATERIALS)) {
+    for (const angle of ANGLES) {
+      const g = m.gap;
+      let body = "";
+      if (m.kind === "lines") body = `<path class="hl" d="M0 -1V${g + 1}"/>`;
+      if (m.kind === "pairs") body = `<path class="hl" d="M0 -1V${g + 1}M${m.pair} -1V${g + 1}"/>`;
+      if (m.kind === "dashed") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl hl-dash" d="M${g / 2} -1V${g + 1}"/>`;
+      if (m.kind === "cross") body = `<path class="hl" d="M0 -1V${g + 1}M-1 0H${g + 1}"/>`;
+      if (m.kind === "dots") body = `<circle class="hd" cx="${g / 2}" cy="${g / 2}" r="0.42"/>`;
+      if (m.kind === "grain") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl" d="M${g * 0.55} -1C${g * 0.75} ${g * 0.3} ${g * 0.35} ${g * 0.7} ${g * 0.55} ${g + 1}"/>`;
+      out += `<pattern id="h-${name}-${angle}" patternUnits="userSpaceOnUse" width="${g}" height="${g}" patternTransform="rotate(${angle})">${body}</pattern>`;
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- drawing parts
+
+// A cut face: paper underneath (it hides what is behind), the material hatch, a thick outline.
+// mat "solid" blacks the section in, the ISO convention for sections too thin to hatch.
+function cut(V, pts, { mat = "steel", angle = 45 } = {}) {
+  const dd = d(V, pts);
+  if (mat === "solid") return `<path class="solid" d="${dd}"/>`;
+  return `<path class="paper" d="${dd}"/><path fill="url(#h-${mat}-${angle})" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+// A body of revolution in section, with the edges behind the cut.
+function section(V, rev, opts) {
+  return rev.cuts.map((c) => cut(V, c, opts)).join("") + rev.edges.map((e) => line(V, e)).join("");
+}
+
+// An unsectioned solid (shafts, rods, pins, balls, nuts and ribs are never hatched in a section).
+function body(V, pts) {
+  const dd = d(V, pts);
+  return `<path class="paper" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+const line = (V, pts, cls = "vis", closed = false) => `<path class="${cls}" d="${d(V, pts, closed)}"/>`;
+const lines = (V, list, cls = "vis") => `<path class="${cls}" d="${list.map((pts) => d(V, pts, false)).join("")}"/>`;
+
+// A centre line, run a little past the outline at both ends.
+function centerline(V, a, b, over = 6) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  return `<path class="ctr" d="M${r2(ax - ux * over)} ${r2(ay - uy * over)}L${r2(bx + ux * over)} ${r2(by + uy * over)}"/>`;
+}
+
+// Centre mark for a circle in a view: two crossed centre lines.
+function centerMark(V, [cu, cv], r, over = 5) {
+  return centerline(V, [cu - r, cv], [cu + r, cv], over) + centerline(V, [cu, cv - r], [cu, cv + r], over);
+}
+
+// A compression spring cut along its axis: wire sections (blacked in) on both sides, half a pitch
+// apart, joined by the back half of each turn. from/to are positions along the axis.
+function springSection(V, { from, to, radius, wire, turns, axis = "u", at = 0 }) {
+  const place = axis === "u" ? (s, r) => [s, at + r] : (s, r) => [at + r, s];
+  const pitch = (to - from - wire) / turns;
+  const start = from + wire / 2;
+  const back = [];
+  let sections = "";
+  for (let i = 0; i <= turns; i++) {
+    const sTop = start + i * pitch;
+    sections += cut(V, circle(...place(sTop, radius), wire / 2, 12), { mat: "solid" });
+    if (i < turns) {
+      const sBot = sTop + pitch / 2;
+      sections += cut(V, circle(...place(sBot, -radius), wire / 2, 12), { mat: "solid" });
+      back.push([place(sTop, radius), place(sBot, -radius)]);
+    }
+  }
+  return lines(V, back, "vis spring") + sections;
+}
+
+// ---------------------------------------------------------------- annotation
+
+function arrowHead([x, y], [dx, dy]) {
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const bx = x - ux * ARROW;
+  const by = y - uy * ARROW;
+  const half = ARROW * 0.25;
+  return `M${r2(x)} ${r2(y)}L${r2(bx - uy * half)} ${r2(by + ux * half)}L${r2(bx + uy * half)} ${r2(by - ux * half)}Z`;
+}
+
+const textWidth = (s, size = TEXT) => String(s).length * size * 0.6;
+
+// A linear dimension between two world points, measured along dir ("h" or "v").
+// off is the sheet distance from point a to the dimension line (negative: up or left).
+// The value is measured from the geometry unless text is given, so a dimension cannot lie.
+function dim(V, a, b, { dir = "h", off = 18, text, prefix = "", suffix = "", id = "", cls = "" } = {}) {
+  const A = V.p(a);
+  const B = V.p(b);
+  const value = text ?? prefix + fmt(Math.abs(dir === "h" ? b[0] - a[0] : b[1] - a[1])) + suffix;
+  const h = dir === "h";
+  const main = h ? 0 : 1; // the axis the dimension measures along
+  const side = 1 - main;
+  const at = A[side] + off; // where the dimension line sits
+  const pt = (m, s) => (h ? [m, s] : [s, m]);
+  let ext = "";
+  for (const P of [A, B]) {
+    const gapTo = at - P[side];
+    if (Math.abs(gapTo) <= GAP) continue;
+    const sgn = Math.sign(gapTo);
+    const [x1, y1] = pt(P[main], P[side] + sgn * GAP);
+    const [x2, y2] = pt(P[main], at + sgn * OVER);
+    ext += `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+  }
+  const lo = Math.min(A[main], B[main]);
+  const hi = Math.max(A[main], B[main]);
+  const span = hi - lo;
+  const tw = textWidth(value);
+  const arrowsIn = span >= ARROW * 2 + 3;
+  const textIn = span >= tw + ARROW * 2 + 6;
+  let lineD;
+  let heads;
+  let tm; // text position along the measured axis
+  let anchor = "middle";
+  if (arrowsIn) {
+    const [x1, y1] = pt(lo, at);
+    const [x2, y2] = pt(hi, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(-1, 0)) + arrowHead(pt(hi, at), pt(1, 0));
+  } else {
+    const [x1, y1] = pt(lo - ARROW - 7, at);
+    const [x2, y2] = pt(hi + ARROW + 7, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(1, 0)) + arrowHead(pt(hi, at), pt(-1, 0));
+  }
+  if (textIn) tm = (lo + hi) / 2;
+  else {
+    tm = hi + ARROW + 10 + tw / 2;
+    const [x2, y2] = pt(tm + tw / 2, at);
+    lineD += `L${r2(x2)} ${r2(y2)}`;
+  }
+  // ISO: text sits just above a horizontal line and reads from the right on a vertical one.
+  const [tx, ty] = pt(tm, at - 3);
+  const textEl = h
+    ? `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}">${value}</text>`
+    : `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}" transform="rotate(-90 ${r2(tx)} ${r2(ty)})">${value}</text>`;
+  return `<g data-role="dim"${id ? ` id="${id}"` : ""}${cls ? ` class="${cls}"` : ""}><path class="thin" d="${ext}${lineD}"/><path class="head" d="${heads}"/>${textEl}</g>`;
+}
+
+// A part balloon: a dot on the part, a thin leader, a circled item number.
+function balloon(V, at, [bx, by], n, { target = "", r = 8.5 } = {}) {
+  const [ax, ay] = V.p(at);
+  const a = Math.atan2(ay - by, ax - bx);
+  const ex = r2(bx + r * Math.cos(a));
+  const ey = r2(by + r * Math.sin(a));
+  return (
+    `<g data-role="balloon" data-target="${target}" data-at="${ax} ${ay}">` +
+    `<path class="thin" d="M${ex} ${ey}L${ax} ${ay}"/><circle class="dot" cx="${ax}" cy="${ay}" r="1.5"/>` +
+    `<circle class="balloon" cx="${bx}" cy="${by}" r="${r}"/>` +
+    `<text class="t" x="${bx}" y="${r2(by + 3.3)}" text-anchor="middle">${n}</text></g>`
+  );
+}
+
+// A view title: SECTION A-A over its scale, centred under the view.
+function viewLabel(x, y, title, sub = "") {
+  return (
+    `<g data-role="label"><text class="t t-lg" x="${x}" y="${y}" text-anchor="middle">${title}</text>` +
+    (sub ? `<text class="t t-sm" x="${x}" y="${y + 12}" text-anchor="middle">${sub}</text>` : "") +
+    `</g>`
+  );
+}
+
+// The circle that marks a detail in its parent view, with its letter.
+function detailMark(V, [cu, cv], r, letter, angle = 45) {
+  const [x, y] = V.p([cu, cv]);
+  const R = r * V.k;
+  const a = (-angle * Math.PI) / 180;
+  const lx = r2(x + (R + 9) * Math.cos(a));
+  const ly = r2(y + (R + 9) * Math.sin(a) + 4);
+  return `<g data-role="label"><circle class="thin mark" cx="${x}" cy="${y}" r="${r2(R)}"/><text class="t t-lg" x="${lx}" y="${ly}" text-anchor="middle">${letter}</text></g>`;
+}
+
+// A viewing-direction arrow (VIEW C): a thick-tipped arrow pointing at the surface, with its letter.
+function viewArrow(V, at, [dx, dy], letter, len = 26) {
+  const [x, y] = V.p(at);
+  const n = Math.hypot(dx, dy) || 1;
+  const ux = dx / n;
+  const uy = dy / n;
+  const sx = r2(x - ux * len);
+  const sy = r2(y - uy * len);
+  return (
+    `<g data-role="label"><path class="vis" d="M${sx} ${sy}L${r2(x - ux * ARROW)} ${r2(y - uy * ARROW)}"/>` +
+    `<path class="head" d="${arrowHead([x, y], [ux, uy])}"/>` +
+    `<text class="t t-lg" x="${r2(sx - uy * 10)}" y="${r2(sy + ux * 10 + 4)}" text-anchor="middle">${letter}</text></g>`
+  );
+}
+
+// A long-break line across a part (thin, with one zigzag), for parts that run out of the view.
+function breakLine(V, a, b) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const mx = (ax + bx) / 2;
+  const my = (ay + by) / 2;
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  const z = 3.5;
+  const p = (t, s) => `${r2(mx + ux * t - uy * s)} ${r2(my + uy * t + ux * s)}`;
+  return `<path class="thin" d="M${r2(ax - ux * 4)} ${r2(ay - uy * 4)}L${p(-z, 0)}L${p(-z / 2, z * 1.6)}L${p(z / 2, -z * 1.6)}L${p(z, 0)}L${r2(bx + ux * 4)} ${r2(by + uy * 4)}"/>`;
+}
+
+// ---------------------------------------------------------------- sheet furniture
+
+// The drawing frame: trimmed edge, a thick border, zone references and centring marks.
+function frame({ w = SHEET.w, h = SHEET.h, trim = 8, m = 24, cols = 8, rows = 6 } = {}) {
+  let out = `<g data-role="frame"><rect class="thin" x="${trim}" y="${trim}" width="${w - trim * 2}" height="${h - trim * 2}"/>`;
+  out += `<rect class="vis" x="${m}" y="${m}" width="${w - m * 2}" height="${h - m * 2}"/>`;
+  const cw = (w - m * 2) / cols;
+  const rh = (h - m * 2) / rows;
+  let ticks = "";
+  let labels = "";
+  for (let i = 0; i <= cols; i++) {
+    const x = r2(m + i * cw);
+    if (i > 0 && i < cols) ticks += `M${x} ${trim}V${m}M${x} ${h - m}V${h - trim}`;
+    if (i < cols) {
+      const cx = r2(m + (i + 0.5) * cw);
+      labels += `<text class="t t-sm" x="${cx}" y="${r2((trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+      labels += `<text class="t t-sm" x="${cx}" y="${r2(h - (trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+    }
+  }
+  for (let j = 0; j <= rows; j++) {
+    const y = r2(m + j * rh);
+    if (j > 0 && j < rows) ticks += `M${trim} ${y}H${m}M${w - m} ${y}H${w - trim}`;
+    if (j < rows) {
+      const cy = r2(m + (j + 0.5) * rh + 3);
+      const letter = String.fromCharCode(65 + j);
+      labels += `<text class="t t-sm" x="${r2((trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+      labels += `<text class="t t-sm" x="${r2(w - (trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+    }
+  }
+  const cm = `M${w / 2} ${trim}V${m + 10}M${w / 2} ${h - trim}V${h - m - 10}M${trim} ${h / 2}H${m + 10}M${w - trim} ${h / 2}H${w - m - 10}`;
+  out += `<path class="thin" d="${ticks}"/><path class="vis" d="${cm}"/>${labels}</g>`;
+  return out;
+}
+
+// A ruled table (parts list). cols: [{ w, align, title }]. rows: arrays of cell strings.
+// Item numbers count up from the bottom, as a parts list sits on top of the title block.
+function table(x, y, cols, rows, { rowH = 16, role = "bom", headH = 18 } = {}) {
+  const w = cols.reduce((s, c) => s + c.w, 0);
+  const h = headH + rows.length * rowH;
+  let rules = "";
+  let text = "";
+  let cx = x;
+  for (const [i, c] of cols.entries()) {
+    if (i > 0) rules += `M${r2(cx)} ${y}V${y + h}`;
+    const tx = c.align === "center" ? cx + c.w / 2 : c.align === "right" ? cx + c.w - 4 : cx + 4;
+    const anchor = c.align === "center" ? "middle" : c.align === "right" ? "end" : "start";
+    text += `<text class="t t-sm t-head" x="${r2(tx)}" y="${y + h - 5.5}" text-anchor="${anchor}">${c.title}</text>`;
+    rows.forEach((row, j) => {
+      text += `<text class="t t-sm" x="${r2(tx)}" y="${r2(y + (rows.length - 1 - j) * rowH + rowH - 4.8)}" text-anchor="${anchor}">${row[i]}</text>`;
+    });
+    cx += c.w;
+  }
+  for (let j = 1; j <= rows.length; j++) rules += `M${x} ${r2(y + j * rowH)}H${x + w}`;
+  return `<g data-role="${role}"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/><path class="thin" d="${rules}"/><rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/>${text}</g>`;
+}
+
+// A title-block cell: a small caption over a value. size: "sm" | "md" | "lg".
+function cell({ x, y, w, h, label, value = "", size = "md", id = "" }) {
+  const cls = size === "lg" ? "t t-xl" : size === "sm" ? "t t-sm" : "t";
+  const vy = size === "lg" ? y + h - 7 : y + h - 5;
+  return (
+    `<rect class="thin" x="${x}" y="${y}" width="${w}" height="${h}"/>` +
+    `<text class="t t-cap" x="${x + 4}" y="${y + 9}">${label}</text>` +
+    `<text class="${cls}" x="${x + 4}" y="${vy}"${id ? ` id="${id}"` : ""}>${value}</text>`
+  );
+}
+
+function titleBlock(x, y, w, h, cells) {
+  return `<g data-role="title"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/>${cells.map((c) => cell({ ...c, x: x + c.x, y: y + c.y })).join("")}<rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/></g>`;
+}
+
+// A notes block: a heading and numbered lines.
+function notes(x, y, heading, items, lead = 13) {
+  let out = `<g data-role="notes"><text class="t t-head" x="${x}" y="${y}">${heading}</text>`;
+  items.forEach((s, i) => {
+    out += `<text class="t t-sm" x="${x}" y="${r2(y + lead * (i + 1) + 2)}">${i + 1}. ${s}</text>`;
+  });
+  return out + `</g>`;
+}
+
+return { SHEET, PX_PER_MM, THICK, THIN, TEXT, ARROW, GAP, OVER, r2, fmt, view, scaleLabel, d, rect, arc, circle, rrect, move, flipU, flipV, inside, revolve, MATERIALS, ANGLES, hatchDefs, cut, section, body, line, lines, centerline, centerMark, springSection, textWidth, dim, balloon, viewLabel, detailMark, viewArrow, breakLine, frame, table, cell, titleBlock, notes };
+})();
+
+const L = (() => {
+// Live runtime for a blueprint sheet: one time-based loop, an idle tour, input wake-ups,
+// offscreen and hidden-tab pauses, reduced motion, and deterministic frames for checks.
+//
+// URL parameters (all optional):
+//   ?t=6.5            render the tour at 6.5 s, deterministically, and stop (for screenshots)
+//   ?theme=paper      blueprint | paper | dark
+//   ?zoom=x,y,w,h     show only this sheet region, filling the window (for 4x close-ups)
+//   ?check=1          run the layout self-check after the first frame (see selfcheck.mjs)
+
+function params() {
+  const q = new URLSearchParams(location.search);
+  return {
+    t: q.has("t") ? Number(q.get("t")) : null,
+    theme: q.get("theme"),
+    zoom: q.get("zoom"),
+    check: q.has("check"),
+  };
+}
+
+const THEMES = ["blueprint", "paper", "dark"];
+
+function setupPage(svg) {
+  const q = params();
+  const pick = (name) => {
+    if (!THEMES.includes(name)) return;
+    document.documentElement.dataset.theme = name;
+    for (const b of document.querySelectorAll("[data-theme-pick]")) b.setAttribute("aria-pressed", String(b.dataset.themePick === name));
+    try {
+      localStorage.setItem("bp-theme", name);
+    } catch {}
+  };
+  let saved = null;
+  try {
+    saved = localStorage.getItem("bp-theme");
+  } catch {}
+  pick(q.theme ?? saved ?? "blueprint");
+  for (const b of document.querySelectorAll("[data-theme-pick]")) b.addEventListener("click", () => pick(b.dataset.themePick));
+  if (q.zoom) {
+    const box = q.zoom.split(",").map(Number);
+    if (box.length === 4 && box.every(Number.isFinite)) {
+      svg.setAttribute("viewBox", box.join(" "));
+      document.body.classList.add("bp-zoom");
+    }
+  }
+  return q;
+}
+
+// Critically damped follow toward a target: calm, no overshoot, frame-rate independent.
+function follow(at, want, rate, dt) {
+  return want + (at - want) * Math.exp(-rate * dt);
+}
+
+const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, t)));
+
+// run({ root, step, render, idleAfter })
+//   step(dt, live) advances the model; live.touring says whether the idle tour drives it.
+//   It returns true while something is still settling, so a reduced-motion page can sleep.
+//   render(live) writes attributes; it never rebuilds static geometry.
+function run({ root, step, render, idleAfter = 4, onFrozen }) {
+  const q = params();
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const live = { clock: 0, slow: 1, lastInput: -Infinity, reduced, touring: !reduced, frozen: q.t != null };
+  live.input = () => {
+    live.lastInput = live.clock;
+    live.touring = false;
+    wake();
+  };
+
+  if (live.frozen) {
+    const dt = 1 / 240;
+    for (let t = 0; t < q.t; t += dt) {
+      live.clock = t;
+      live.touring = true;
+      step(dt, live);
+    }
+    render(live);
+    onFrozen?.(live);
+    return live;
+  }
+
+  let raf = 0;
+  let last = 0;
+  let visible = true;
+  function frame(now) {
+    raf = 0;
+    const real = last ? Math.min(0.05, (now - last) / 1000) : 0;
+    last = now;
+    live.clock += real;
+    live.touring = !reduced && live.clock - live.lastInput > idleAfter;
+    const busy = step(real * live.slow, live);
+    render(live);
+    if (visible && !document.hidden && (!reduced || busy)) raf = requestAnimationFrame(frame);
+    else last = 0;
+  }
+  function wake() {
+    if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame);
+  }
+  live.wake = wake;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) wake();
+    }).observe(root);
+  }
+  document.addEventListener("visibilitychange", wake);
+  render(live);
+  wake();
+  return live;
+}
+
+// Vertical drag on an element, reported as a sheet-unit delta since the press.
+function dragY(svg, el, { start, move, end }) {
+  let id = null;
+  let y0 = 0;
+  const toSheet = (e) => {
+    const m = svg.getScreenCTM();
+    return m ? (e.clientY - m.f) / m.d : e.clientY;
+  };
+  el.addEventListener("pointerdown", (e) => {
+    id = e.pointerId;
+    el.setPointerCapture(id);
+    y0 = toSheet(e);
+    start?.();
+    e.preventDefault();
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (e.pointerId === id) move(toSheet(e) - y0);
+  });
+  const stop = (e) => {
+    if (e.pointerId !== id) return;
+    id = null;
+    end?.();
+  };
+  el.addEventListener("pointerup", stop);
+  el.addEventListener("pointercancel", stop);
+}
+
+// Announce a readout to screen readers at most every `every` seconds.
+function announcer(el, every = 1.5) {
+  let lastAt = -Infinity;
+  let lastText = "";
+  return (text, clock) => {
+    if (text === lastText || clock - lastAt < every) return;
+    lastAt = clock;
+    lastText = text;
+    el.textContent = text;
+  };
+}
+
+return { params, THEMES, setupPage, follow, ease, run, dragY, announcer };
+})();
+
+const C = (() => {
+// Layout self-check, run in the page with ?check=1 (scripts/check.mjs drives it headlessly).
+// It writes a JSON report into <pre id="bp-check"> and to the console. A clean sheet reports
+// zero failures in every category.
+//
+//   text-overlap      two pieces of lettering touch
+//   text-on-geometry  lettering sits on a part or on another annotation's lines
+//   outside-frame     an annotation or a view crosses the drawing frame
+//   balloon-target    a balloon's dot is not on the part it names
+//   balloon-on-geom   a balloon circle sits on a part
+//   hard-colour       a fill or stroke is a literal colour instead of a token
+//   sideways-scroll   the page scrolls horizontally
+
+const roleOf = (el) => el.closest("[data-role]")?.dataset.role ?? "";
+
+// A clipped group's box is its clip region's box (getBoundingClientRect ignores clipping).
+function clippedBox(el) {
+  const ref = el.getAttribute("clip-path")?.match(/url\(#([^)]+)\)/)?.[1];
+  const shape = ref && document.getElementById(ref)?.firstElementChild;
+  if (!shape) return el.getBoundingClientRect();
+  const b = shape.getBBox();
+  const m = shape.ownerSVGElement.getScreenCTM();
+  const x0 = m.a * b.x + m.e;
+  const y0 = m.d * b.y + m.f;
+  return { left: x0, top: y0, right: x0 + m.a * b.width, bottom: y0 + m.d * b.height };
+}
+
+function selfCheck(svg) {
+  const fails = [];
+  const fail = (kind, what) => fails.push({ kind, what });
+  const label = (el) => {
+    const g = el.closest("[data-role],[data-part],[data-geom]");
+    const name = g?.id || g?.dataset.part || g?.dataset.target || g?.dataset.role || g?.dataset.geom || el.tagName;
+    return `${name}: "${(el.textContent || "").trim().slice(0, 24)}"`;
+  };
+  const shown = (el) => {
+    const b = el.getBoundingClientRect();
+    if (b.width < 0.5 || b.height < 0.5) return false;
+    const cs = getComputedStyle(el);
+    return cs.visibility !== "hidden" && cs.display !== "none" && Number(cs.opacity) > 0.05;
+  };
+  const texts = [...svg.querySelectorAll("text")].filter(shown);
+  const boxes = texts.map((t) => t.getBoundingClientRect());
+  const grow = 0.4;
+  const hit = (a, b) => a.left < b.right - grow && b.left < a.right - grow && a.top < b.bottom - grow && b.top < a.bottom - grow;
+
+  for (let i = 0; i < texts.length; i++)
+    for (let j = i + 1; j < texts.length; j++) if (hit(boxes[i], boxes[j])) fail("text-overlap", `${label(texts[i])} × ${label(texts[j])}`);
+
+  const geomOf = (el) => el.closest("[data-geom]");
+  for (const [i, t] of texts.entries()) {
+    const role = roleOf(t);
+    if (role === "engraved" || role === "frame") continue;
+    const own = t.closest("[data-role]");
+    const b = boxes[i];
+    const seen = new Set();
+    for (let ix = 0; ix < 4; ix++)
+      for (let iy = 0; iy < 2; iy++) {
+        const x = b.left + b.width * (0.15 + ix * 0.233);
+        const y = b.top + b.height * (0.3 + iy * 0.4);
+        for (const el of document.elementsFromPoint(x, y)) {
+          if (el === t || el.tagName === "text" || el.tagName === "svg" || el.closest("defs")) continue;
+          if (el.classList.contains("tint") || el.classList.contains("hit") || el.closest('[data-role="phantom"]')) continue;
+          if (own && own.contains(el)) continue;
+          const g = geomOf(el);
+          const other = el.closest("[data-role]");
+          const bad = (g && !g.contains(t)) || (other && other !== own && other.dataset.role !== "frame" && other.dataset.role !== "chart-bg");
+          if (bad && !el.classList.contains("sheet-bg") && !el.classList.contains("grid")) {
+            const key = el.closest("[data-part],[data-role],[data-geom]");
+            if (!seen.has(key)) {
+              seen.add(key);
+              fail("text-on-geometry", `${label(t)} on ${key?.dataset.part || key?.id || key?.dataset.role || key?.dataset.geom || el.tagName}`);
+            }
+          }
+        }
+      }
+  }
+
+  const frameRect = svg.querySelector('[data-role="frame"] rect.vis')?.getBoundingClientRect();
+  if (frameRect) {
+    for (const el of svg.querySelectorAll("[data-role]:not([data-role=frame]), [data-geom]")) {
+      if (el.parentElement?.closest("[data-role]:not([data-role=frame]), [data-geom]")) continue;
+      if (!shown(el)) continue;
+      const b = clippedBox(el);
+      const tol = 0.5;
+      if (b.left < frameRect.left - tol || b.right > frameRect.right + tol || b.top < frameRect.top - tol || b.bottom > frameRect.bottom + tol)
+        fail("outside-frame", el.id || el.dataset.geom || el.dataset.role);
+    }
+  }
+
+  for (const g of svg.querySelectorAll('[data-role="balloon"]')) {
+    if (!shown(g)) continue;
+    const dot = g.querySelector("circle.dot").getBoundingClientRect();
+    const x = dot.left + dot.width / 2;
+    const y = dot.top + dot.height / 2;
+    const target = g.dataset.target;
+    const under = document.elementsFromPoint(x, y).some((el) => el.closest(`[data-part="${target}"]`));
+    if (!under) fail("balloon-target", `balloon ${g.textContent.trim()} → ${target}`);
+    const c = g.querySelector("circle.balloon").getBoundingClientRect();
+    const pts = [
+      [c.left + c.width * 0.5, c.top + c.height * 0.5],
+      [c.left + c.width * 0.2, c.top + c.height * 0.5],
+      [c.left + c.width * 0.8, c.top + c.height * 0.5],
+      [c.left + c.width * 0.5, c.top + c.height * 0.2],
+      [c.left + c.width * 0.5, c.top + c.height * 0.8],
+    ];
+    if (pts.some(([px, py]) => document.elementsFromPoint(px, py).some((el) => geomOf(el) && !el.classList.contains("tint") && !el.closest('[data-role="phantom"]'))))
+      fail("balloon-on-geom", `balloon ${g.textContent.trim()}`);
+  }
+
+  for (const el of svg.querySelectorAll("[fill],[stroke]")) {
+    if (el.closest("defs") && el.tagName !== "path" && el.tagName !== "circle") continue;
+    for (const a of ["fill", "stroke"]) {
+      const v = el.getAttribute(a);
+      if (v && v !== "none" && !v.startsWith("url(") && v !== "currentColor") fail("hard-colour", `${el.tagName} ${a}=${v}`);
+    }
+  }
+
+  if (document.documentElement.scrollWidth > window.innerWidth + 1) fail("sideways-scroll", `${document.documentElement.scrollWidth} > ${window.innerWidth}`);
+
+  const kinds = ["text-overlap", "text-on-geometry", "outside-frame", "balloon-target", "balloon-on-geom", "hard-colour", "sideways-scroll"];
+  const counts = Object.fromEntries(kinds.map((k) => [k, fails.filter((f) => f.kind === k).length]));
+  const report = { ok: fails.length === 0, counts, fails, texts: texts.length, parts: svg.querySelectorAll("[data-part]").length };
+  let pre = document.getElementById("bp-check");
+  if (!pre) {
+    pre = document.createElement("pre");
+    pre.id = "bp-check";
+    pre.hidden = true;
+    document.body.append(pre);
+  }
+  pre.textContent = JSON.stringify(report);
+  console.log("bp-check", JSON.stringify(report.counts));
+  return report;
+}
+
+return { selfCheck };
+})();
+
+const M = (() => {
+// Truth first: an overhead door closer, rack and pinion, EN 1154 size 3. Pure, no imports, no DOM.
+// The geometry, the dimensions, the readout, the plan view and the chart all read this.
+//
+// Kinematics. Plan view, hinge axis at the origin, the closed door pointing to -u, opening into +v.
+// The pinion spindle rides on the door; the main arm (L1) and forearm (L2) tie it to a shoe on the
+// frame head. Opening the door turns the spindle by φ relative to the body; the pinion drives the
+// rack and the piston x = r·φ into the spring.
+//
+// Hydraulics. Closing, the spring drives the piston back and pushes oil out of the pressure chamber.
+// The oil can only return to the spring side through two needle valves: SWEEP (its port is in the
+// bore and the piston face covers it in the last ~15°) and LATCH (its port is never covered). Each
+// is a sharp-edged orifice, Q = Cd·A·√(2p/ρ), and p = F_spring / A_piston, so the piston speed and
+// the door speed follow from the spring and the valve settings. Opening, the ball check valve in
+// the piston lets the oil back freely.
+//
+// The debounce. A push reopens the door and restarts the whole closing. The door latches only after
+// a quiet spell as long as the closing time from where it was left.
+
+const rad = Math.PI / 180;
+
+// ---------------------------------------------------------------- linkage (plan, mm)
+const DOOR_W = 950; // leaf width, EN 1154 size 3: doors up to 950 mm
+const DOOR_T = 44;
+const SPINDLE_A = 215; // spindle from the hinge axis, along the leaf
+const SPINDLE_S = 32; // spindle from the leaf face (half the body depth)
+const L1 = 250; // main arm, spindle to elbow
+const L2 = 220; // forearm, elbow to shoe
+const SHOE = [-250, 10]; // forearm shoe on the frame head
+const THETA_MAX = 110; // door stop, degrees
+const PUSH_TO = 90; // a push opens the door this far
+
+// ---------------------------------------------------------------- body, bore, piston (section, mm)
+const BORE = 40;
+const R_BORE = BORE / 2;
+const AREA = Math.PI * R_BORE ** 2; // mm², the pressure face of the piston
+const MODULE = 2.5;
+const Z = 10;
+const R_P = (MODULE * Z) / 2; // pinion pitch radius, 12.5 mm
+const SHIFT = 0.3; // profile shift: ten teeth would undercut without it
+const FACE_R = 62; // the piston's pressure face at x = 0 (door shut)
+const PLUG_R = 67; // inner face of the pressure-side end plug
+const PLUG_L = -160; // inner face of the spring-side end plug
+const HEAD_L = -32; // the piston's spring face at x = 0
+
+// ---------------------------------------------------------------- spring
+const WIRE = 6; // EN 10270-1 SH
+const COIL_D = 31; // mean diameter
+const COILS = 14; // active
+const G = 79300; // N/mm²
+const K = (G * WIRE ** 4) / (8 * COIL_D ** 3 * COILS); // N/mm
+const PRELOAD = 35; // compression at x = 0, mm
+const springForce = (x) => K * (PRELOAD + x); // N
+const springLength = (x) => HEAD_L - x - PLUG_L;
+
+// ---------------------------------------------------------------- oil and valves
+const RHO = 870; // kg/m³, ISO VG 15 hydraulic oil
+const CD = 0.62;
+const SEAT_D = 2.5; // needle seat, the end of the Ø2.5 drilling
+const NEEDLE_HALF = 8; // needle half-angle, degrees
+const PITCH = 0.5; // M5×0.5 regulating screws
+const PORT_D = 2.5;
+const SWEEP_U = 59.5; // sweep port centre: the piston face covers it near the end
+const LATCH_U = 64.5; // latch port centre: between the piston and the plug, never covered
+const SWEEP_SEAT = 56; // seat edges (where Ø3.5 steps to Ø2.5)
+const LATCH_SEAT = 60;
+const SWEEP_TURNS = 0.24; // screw 1 backed off from shut
+const LATCH_TURNS = 0.1; // screw 2
+
+// The annular throat between a cone of half-angle α lifted h off a sharp seat of diameter d.
+function needleArea(h, d = SEAT_D, a = NEEDLE_HALF * rad) {
+  if (h <= 0) return 0;
+  const s = h * Math.sin(a);
+  return Math.PI * s * (d - s * Math.cos(a));
+}
+const lift = (turns) => turns * PITCH;
+
+// The part of a port of radius r whose centre is c to the left of the piston face that the face
+// leaves open (the circular segment on the pressure side).
+function portOpen(c, r = PORT_D / 2) {
+  if (c >= r) return Math.PI * r * r;
+  if (c <= -r) return 0;
+  const k = -c;
+  return r * r * Math.acos(k / r) - k * Math.sqrt(r * r - k * k);
+}
+
+const faceU = (x) => FACE_R - x;
+
+// Flow areas (mm²) at piston position x: the latch valve always, the sweep valve while its port is
+// open, the port and needle in series.
+function areas(x, sweepTurns = SWEEP_TURNS, latchTurns = LATCH_TURNS) {
+  const aS = needleArea(lift(sweepTurns));
+  const aL = needleArea(lift(latchTurns));
+  const port = portOpen(SWEEP_U - faceU(x));
+  const sweep = port > 1e-9 && aS > 0 ? 1 / Math.sqrt(1 / aS ** 2 + 1 / port ** 2) : 0;
+  return { sweep, latch: aL, total: sweep + aL, port };
+}
+
+const pressure = (x) => springForce(x) / AREA; // N/mm² = MPa
+// Oil flow out of the pressure chamber, mm³/s, per valve and in total.
+function flow(x, sweepTurns, latchTurns) {
+  const a = areas(x, sweepTurns, latchTurns);
+  const v = Math.sqrt((2 * pressure(x) * 1e6) / RHO) * 1000; // jet speed, mm/s
+  return { sweep: CD * a.sweep * v, latch: CD * a.latch * v, total: CD * a.total * v, jet: v / 1000 };
+}
+
+// ---------------------------------------------------------------- linkage
+function rawLink(theta, prevE) {
+  const t = theta * rad;
+  const d = [-Math.cos(t), Math.sin(t)];
+  const n = [Math.sin(t), Math.cos(t)];
+  const S = [SPINDLE_A * d[0] + SPINDLE_S * n[0], SPINDLE_A * d[1] + SPINDLE_S * n[1]];
+  const dx = SHOE[0] - S[0];
+  const dy = SHOE[1] - S[1];
+  const D = Math.hypot(dx, dy);
+  const a = (L1 * L1 - L2 * L2 + D * D) / (2 * D);
+  const h = Math.sqrt(Math.max(0, L1 * L1 - a * a));
+  const mx = S[0] + (a * dx) / D;
+  const my = S[1] + (a * dy) / D;
+  const E1 = [mx + (h * dy) / D, my - (h * dx) / D];
+  const E2 = [mx - (h * dy) / D, my + (h * dx) / D];
+  const near = (E) => (prevE ? Math.hypot(E[0] - prevE[0], E[1] - prevE[1]) : -E[1]);
+  const E = near(E1) <= near(E2) ? E1 : E2;
+  return { S, E, d, n, armDeg: Math.atan2(E[1] - S[1], E[0] - S[0]) / rad };
+}
+
+// Tabulate once (0.05° steps), following the elbow continuously from the shut door.
+const STEP = 0.05;
+const TABLE = (() => {
+  const out = [];
+  let prev = null;
+  let last = null;
+  for (let th = 0; th <= THETA_MAX + 1e-9; th += STEP) {
+    const L = rawLink(th, prev);
+    let rel = L.armDeg + th; // arm angle relative to the leaf (whose world angle is 180° − θ)
+    if (last != null) {
+      while (rel - last > 180) rel -= 360;
+      while (rel - last < -180) rel += 360;
+    }
+    last = rel;
+    prev = L.E;
+    out.push(rel);
+  }
+  const r0 = out[0];
+  return out.map((v) => v - r0);
+})();
+
+// Spindle rotation φ (degrees) for a door angle θ (degrees), and its slope dφ/dθ.
+function phi(theta) {
+  const f = Math.min(TABLE.length - 1.001, Math.max(0, theta / STEP));
+  const i = Math.floor(f);
+  return TABLE[i] + (TABLE[i + 1] - TABLE[i]) * (f - i);
+}
+function ratio(theta) {
+  const t = Math.min(THETA_MAX - 0.1, Math.max(0.05, theta));
+  return (phi(t + 0.05) - phi(t - 0.05)) / 0.1;
+}
+// The inverse: door angle for a spindle rotation.
+function thetaOf(phiDeg) {
+  let lo = 0;
+  let hi = THETA_MAX;
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    if (phi(mid) < phiDeg) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+const xOf = (theta) => R_P * phi(theta) * rad; // rack travel, mm
+const X_MAX = xOf(THETA_MAX);
+
+// Elbow and spindle in plan for a door angle.
+function link(theta) {
+  let prev = null;
+  // follow the branch from shut in coarse steps so the elbow is the same one the table used
+  for (let th = 0; th < theta; th += 5) prev = rawLink(th, prev).E;
+  return rawLink(theta, prev);
+}
+
+// Closing moment at the door, N·m: spring force on the pinion pitch circle, through the linkage.
+const springTorque = (x) => (springForce(x) * R_P) / 1000;
+const doorMoment = (theta) => springTorque(xOf(theta)) * ratio(theta);
+
+// Door speed while closing, deg/s (negative): piston speed from the oil flow, through r and dφ/dθ.
+function closingRate(theta, sweepTurns, latchTurns) {
+  const x = xOf(theta);
+  const v = flow(x, sweepTurns, latchTurns).total / AREA; // mm/s
+  const dphi = v / R_P / rad; // deg/s at the spindle
+  return -dphi / ratio(theta);
+}
+
+// Time to shut from θ with no further pushes (the debounce interval), s. Tabulated.
+const CLOSE = (() => {
+  const out = [0];
+  let t = 0;
+  const h = 0.05;
+  for (let th = h; th <= THETA_MAX + 1e-9; th += h) {
+    const mid = th - h / 2;
+    t += h / -closingRate(Math.max(0.02, mid));
+    out.push(t);
+  }
+  return out;
+})();
+function closeTime(theta) {
+  const f = Math.min(CLOSE.length - 1.001, Math.max(0, theta / 0.05));
+  const i = Math.floor(f);
+  return CLOSE[i] + (CLOSE[i + 1] - CLOSE[i]) * (f - i);
+}
+// The angle at which the piston face starts to cover the sweep port (the latch zone below it).
+const LATCH_ZONE = (() => {
+  const xs = FACE_R - SWEEP_U + PORT_D / 2;
+  return thetaOf((xs / R_P) / rad);
+})();
+
+// ---------------------------------------------------------------- the door, stepped in time
+function door() {
+  return { theta: 0, x: 0, push: false, sinceStop: 0, latched: true, q: { sweep: 0, latch: 0, total: 0 }, p: 0, opening: 0 };
+}
+
+// Advance h seconds. want: the angle a hand holds the door at, or null when nobody touches it.
+function advance(s, h, want, rate = 260) {
+  const before = s.theta;
+  if (want != null && want > s.theta - 0.01) {
+    // a hand opens the door (or holds it): the check valve lets the oil back, no damping
+    s.theta = Math.min(want, s.theta + rate * h);
+    if (want < s.theta) s.theta = want;
+    s.q = { sweep: 0, latch: 0, total: 0, jet: 0 };
+  } else if (s.theta > 0) {
+    const r = closingRate(s.theta);
+    s.theta = Math.max(0, s.theta + r * h);
+    if (want != null) s.theta = Math.max(s.theta, want);
+    s.q = flow(xOf(s.theta));
+  } else {
+    s.q = { sweep: 0, latch: 0, total: 0, jet: 0 };
+  }
+  s.theta = Math.min(THETA_MAX, s.theta);
+  s.x = xOf(s.theta);
+  s.opening = (s.theta - before) / h; // deg/s, + opening
+  s.p = s.theta > 0 && s.opening <= 0 ? pressure(s.x) : 0;
+  s.latched = s.theta <= 0;
+  return s;
+}
+
+return { DOOR_W, DOOR_T, SPINDLE_A, SPINDLE_S, L1, L2, SHOE, THETA_MAX, PUSH_TO, BORE, R_BORE, AREA, MODULE, Z, R_P, SHIFT, FACE_R, PLUG_R, PLUG_L, HEAD_L, WIRE, COIL_D, COILS, G, K, PRELOAD, springForce, springLength, RHO, CD, SEAT_D, NEEDLE_HALF, PITCH, PORT_D, SWEEP_U, LATCH_U, SWEEP_SEAT, LATCH_SEAT, SWEEP_TURNS, LATCH_TURNS, needleArea, lift, portOpen, faceU, areas, pressure, flow, phi, ratio, thetaOf, xOf, X_MAX, link, springTorque, doorMoment, closingRate, closeTime, LATCH_ZONE, door, advance };
+})();
+
+const X = (() => {
+// Local helpers the shared kit lacks: an involute pinion, a rack, an angular dimension and a
+// cutting-plane line. Pure, world mm in, SVG strings or point lists out, like kit/draft.mjs.
+
+
+const rad = Math.PI / 180;
+const inv = (a) => Math.tan(a) - a;
+
+// Spur gear outline (world points), z teeth of module m, 20° pressure angle, centre (cu, cv),
+// one tooth centred at angle rot (degrees, counter-clockwise). shift: profile shift coefficient;
+// the tip stays at rp + m (tip shortened), the root moves out with the shift.
+function gear(cu, cv, z, m, rot = 90, shift = 0, steps = 6) {
+  const rp = (m * z) / 2;
+  const rb = rp * Math.cos(20 * rad);
+  const ra = rp + m;
+  const rf = rp - (1.25 - shift) * m;
+  const half = (r) => Math.PI / (2 * z) + (2 * shift * Math.tan(20 * rad)) / z + inv(20 * rad) - inv(Math.acos(Math.min(1, rb / r)));
+  const pts = [];
+  const at = (r, a) => [cu + r * Math.cos(a), cv + r * Math.sin(a)];
+  const pitch = (2 * Math.PI) / z;
+  for (let i = 0; i < z; i++) {
+    const c = rot * rad + i * pitch;
+    const hb = half(rb);
+    // root arc from the middle of the gap before this tooth
+    const g0 = c - pitch / 2;
+    for (let j = 0; j <= 2; j++) pts.push(at(rf, g0 + ((c - hb - g0) * j) / 2));
+    // right flank up (clockwise side), tip, left flank down
+    for (let j = 0; j <= steps; j++) {
+      const r = rb + ((ra - rb) * j) / steps;
+      pts.push(at(r, c - half(r)));
+    }
+    for (let j = steps; j >= 0; j--) {
+      const r = rb + ((ra - rb) * j) / steps;
+      pts.push(at(r, c + half(r)));
+    }
+    for (let j = 0; j <= 2; j++) pts.push(at(rf, c + hb + ((c + pitch / 2 - c - hb) * j) / 2));
+  }
+  return pts;
+}
+
+// A rack along u, teeth pointing to -v (toward a pinion below), pitch line at v = vp.
+// Returns the toothed edge from u0 to u1 on the root line, gaps centred at u = 0 + k·p.
+function rackEdge(u0, u1, vp, m) {
+  const p = Math.PI * m;
+  const tan = Math.tan(20 * rad);
+  const ha = m;
+  const hf = 1.25 * m;
+  const tipHalf = p / 4 - ha * tan;
+  const rootHalf = p / 4 + hf * tan;
+  const out = [[u0, vp + hf]];
+  for (let k = Math.floor(u0 / p) - 1; k <= Math.ceil(u1 / p) + 1; k++) {
+    const c = p / 2 + k * p; // tooth centre
+    if (c - rootHalf < u0 + 0.3 || c + rootHalf > u1 - 0.3) continue;
+    out.push([c - rootHalf, vp + hf], [c - tipHalf, vp - ha], [c + tipHalf, vp - ha], [c + rootHalf, vp + hf]);
+  }
+  out.push([u1, vp + hf]);
+  return out;
+}
+
+// An angular dimension: an arc of sheet radius R about world point c from world angle a0 to a1
+// (degrees, counter-clockwise), arrows at both ends, text centred outside the arc. When the arc is
+// too short the arrows go outside pointing in and the text sits beyond a1.
+function angleDim(V, c, R, a0, a1, text, { id = "" } = {}) {
+  // text that does not fit goes beyond the a0 end
+  const [cx, cy] = V.p(c);
+  const pt = (a, r = R) => [K.r2(cx + r * Math.cos(-a * rad)), K.r2(cy + r * Math.sin(-a * rad))];
+  const lo = Math.min(a0, a1);
+  const hi = Math.max(a0, a1);
+  const span = ((hi - lo) * rad) * R;
+  const tw = K.textWidth(text);
+  const inside = span >= K.ARROW * 2 + 4;
+  const textIn = span >= tw + K.ARROW * 2 + 10;
+  const arcPts = (from, to) => {
+    const n = Math.max(2, Math.ceil(Math.abs(to - from) / 3));
+    let s = "";
+    for (let i = 0; i <= n; i++) {
+      const [x, y] = pt(from + ((to - from) * i) / n);
+      s += `${i ? "L" : "M"}${x} ${y}`;
+    }
+    return s;
+  };
+  const ext = (K.ARROW + 6) / R / rad;
+  const textGap = (tw / 2 + K.ARROW + 12) / R / rad;
+  let path = inside ? arcPts(lo, hi) : arcPts(lo - ext, hi + ext);
+  const head = (a, dir) => {
+    // tangent direction on the sheet for increasing angle is (-sin, -cos) of the world angle
+    const [x, y] = pt(a);
+    const t = [-Math.sin(a * rad) * dir, -Math.cos(a * rad) * dir];
+    const ux = t[0];
+    const uy = t[1];
+    const bx = x - ux * K.ARROW;
+    const by = y - uy * K.ARROW;
+    const h = K.ARROW * 0.25;
+    return `M${x} ${y}L${K.r2(bx - uy * h)} ${K.r2(by + ux * h)}L${K.r2(bx + uy * h)} ${K.r2(by - ux * h)}Z`;
+  };
+  const heads = inside ? head(lo, -1) + head(hi, 1) : head(lo, 1) + head(hi, -1);
+  let ta = (lo + hi) / 2;
+  if (!textIn) {
+    const sgn = a0 <= a1 ? -1 : 1;
+    ta = a0 + sgn * textGap;
+    path += arcPts(a0 + sgn * ext, ta + sgn * textGap * 0.6);
+  }
+  const [tx, ty] = pt(ta, R + 8);
+  return (
+    `<g data-role="dim"${id ? ` id="${id}"` : ""}><path class="thin" d="${path}"/><path class="head" d="${heads}"/>` +
+    `<text class="t" x="${tx}" y="${K.r2(ty + 3.4)}" text-anchor="middle">${text}</text></g>`
+  );
+}
+
+// A cutting-plane line across a view: thin chain, thick at the ends, arrows giving the direction
+// of view, a letter at each end. a, b: world end points; dir: the sheet direction of the arrows.
+function cuttingPlane(V, a, b, [dx, dy], letter) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const len = Math.hypot(bx - ax, by - ay);
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  const thick = 12;
+  const arrowLen = 16;
+  let out = `<path class="ctr" d="M${ax} ${ay}L${bx} ${by}"/>`;
+  out += `<path class="vis" d="M${ax} ${ay}L${K.r2(ax + ux * thick)} ${K.r2(ay + uy * thick)}M${bx} ${by}L${K.r2(bx - ux * thick)} ${K.r2(by - uy * thick)}"/>`;
+  let heads = "";
+  let letters = "";
+  for (const [x, y, end] of [[ax + ux * 4, ay + uy * 4, -1], [bx - ux * 4, by - uy * 4, 1]]) {
+    const tx = x + dx * arrowLen;
+    const ty = y + dy * arrowLen;
+    out += `<path class="thin" d="M${K.r2(x)} ${K.r2(y)}L${K.r2(tx - dx * K.ARROW)} ${K.r2(ty - dy * K.ARROW)}"/>`;
+    const h = K.ARROW * 0.25;
+    const bx2 = tx - dx * K.ARROW;
+    const by2 = ty - dy * K.ARROW;
+    heads += `M${K.r2(tx)} ${K.r2(ty)}L${K.r2(bx2 - dy * h)} ${K.r2(by2 + dx * h)}L${K.r2(bx2 + dy * h)} ${K.r2(by2 - dx * h)}Z`;
+    // the letter sits beside the arrow, beyond the end of the line
+    letters += `<text class="t t-lg" x="${K.r2(x + dx * arrowLen * 0.55 + ux * end * 9)}" y="${K.r2(y + dy * arrowLen * 0.55 + uy * end * 9 + 4.2)}" text-anchor="middle">${letter}</text>`;
+  }
+  return `<g data-role="label">${out}<path class="head" d="${heads}"/>${letters}</g>`;
+}
+
+// A bar of width w between two world points with round ends (an arm seen from above).
+function bar(a, b, w, steps = 8) {
+  const ang = Math.atan2(b[1] - a[1], b[0] - a[0]) / rad;
+  return [...K.arc(b[0], b[1], w / 2, ang - 90, ang + 90, steps), ...K.arc(a[0], a[1], w / 2, ang + 90, ang + 270, steps)];
+}
+
+// Rotate world points about a centre (degrees, counter-clockwise).
+function rotate(pts, [cu, cv], deg) {
+  const c = Math.cos(deg * rad);
+  const s = Math.sin(deg * rad);
+  return pts.map(([u, v]) => [cu + (u - cu) * c - (v - cv) * s, cv + (u - cu) * s + (v - cv) * c]);
+}
+
+return { gear, rackEdge, angleDim, cuttingPlane, bar, rotate };
+})();
+
+const P = (() => {
+// The door closer's parts, in world mm.
+// SECTION A-A is a plan section through the cylinder axis: u along the axis (+u toward the valve
+// end and the hinge), v across the body (+v away from the door face), the spindle axis at (0, 0).
+// Each function draws one part into a view and returns SVG, so the section, Detail C and Detail F
+// draw the same geometry at their own scale. The piston is drawn at x = 0 (door shut) and moved
+// with a transform; only parts whose shape changes (spring, pinion angle, needles, ball) are
+// redrawn.
+
+
+
+
+const part = (id, inner, extra = "") => `<g data-part="${id}"${extra}>${inner}</g>`;
+
+const rad = Math.PI / 180;
+const BODY = { u0: -175, u1: 80, v: 32, w: 34 };
+const DRILL_V = 26; // the valve drillings and galleries, both sides
+const GAL = 1.25; // Ø2.5 gallery
+const STEM_BORE = 1.75; // Ø3.5 needle bore
+const THREAD = 2.5; // M5
+const PR = M.PORT_D / 2;
+
+// ---------------------------------------------------------------- body (cut)
+
+// One wall of the body, drawn for +v; the other side is the same with its own seat and port.
+function wall(seat, port) {
+  const g0 = DRILL_V - GAL;
+  const g1 = DRILL_V + GAL;
+  const s0 = DRILL_V - STEM_BORE;
+  const s1 = DRILL_V + STEM_BORE;
+  const t0 = DRILL_V - THREAD;
+  const t1 = DRILL_V + THREAD;
+  const { u0, u1, v } = BODY;
+  return [
+    [[u0, g1], [seat, g1], [seat, s1], [70, s1], [70, t1], [u1, t1], [u1, v - 1], [u1 - 1, v], [u0 + 1, v], [u0, v - 1]],
+    [[u0, 21], [-166, 21], [-166, 20], [-159, 20], [-149, g0], [u0, g0]],
+    [[-156.5, 20], [port - PR, 20], [port - PR, s0], [seat, s0], [seat, g0], [-146.5, g0]],
+    [[port + PR, 20], [71, 20], [71, 21], [u1, 21], [u1, t0], [70, t0], [70, s0], [port + PR, s0]],
+  ];
+}
+const flip = (pts) => K.flipV(pts, 0);
+
+function body(V) {
+  const up = wall(M.LATCH_SEAT, M.LATCH_U);
+  const down = wall(M.SWEEP_SEAT, M.SWEEP_U).map(flip);
+  const cuts = [...up, ...down].map((p) => K.cut(V, p, { mat: "alu", angle: 45 })).join("");
+  // tapped holes for the plugs and screws: the minor diameter is hidden by the thread in them
+  return part(1, cuts);
+}
+
+// ---------------------------------------------------------------- end plugs, O-rings
+
+const plugLoop = (inner, dir) => {
+  // dir +1: plug on the right (valve end), -1: on the left (spring end)
+  const s = (d) => inner + dir * d;
+  const len = dir > 0 ? 13 : 15;
+  const spig = dir > 0 ? 4 : 6;
+  const g0 = dir > 0 ? 1 : 1.6;
+  return [[0, s(0)], [20, s(0)], [20, s(g0)], [18.4, s(g0)], [18.4, s(g0 + 2.4)], [20, s(g0 + 2.4)], [20, s(spig)], [21, s(spig)], [21, s(len)], [5.8, s(len)], [5.8, s(len - 5)], [0, s(len - 5)]];
+};
+
+function plug(V, n, inner, dir, angle) {
+  const loop = plugLoop(inner, dir);
+  const rev = K.revolve(loop, { axis: "u", at: 0 });
+  const spig = dir > 0 ? 4 : 6;
+  const len = dir > 0 ? 13 : 15;
+  const a = inner + dir * (spig + 0.4);
+  const b = inner + dir * len;
+  const roots = [[[a, 20.2], [b, 20.2]], [[a, -20.2], [b, -20.2]]];
+  return part(n, K.section(V, { ...rev, edges: [] }, { mat: "steel", angle }) + K.lines(V, roots, "thin") +
+    // the bottom of the hex socket, seen through it
+    K.line(V, [[inner + dir * (len - 5), -5.8], [inner + dir * (len - 5), 5.8]], "vis"));
+}
+const plugL = (V) => plug(V, 2, M.PLUG_L, -1, 135);
+const plugR = (V) => plug(V, 3, M.PLUG_R, 1, 135);
+
+function plugOrings(V) {
+  const ring = (inner, dir) => {
+    const g0 = dir > 0 ? 1 : 1.6;
+    const a = inner + dir * g0;
+    const b = inner + dir * (g0 + 2.4);
+    const s0 = Math.min(a, b) + 0.15;
+    const s1 = Math.max(a, b) - 0.15;
+    return [K.rrect(s0, 18.4, s1, 20, 0.7), K.rrect(s0, -20, s1, -18.4, 0.7)];
+  };
+  return part(4, [...ring(M.PLUG_L, -1), ...ring(M.PLUG_R, 1)].map((p) => K.cut(V, p, { mat: "rubber" })).join(""));
+}
+
+// ---------------------------------------------------------------- piston (drawn at x = 0)
+
+const RACK_VP = M.R_P + M.SHIFT * M.MODULE; // the rack's reference line, for the shifted pinion
+const RACK_ROOT = RACK_VP + 1.25 * M.MODULE;
+const WIN = { l: -17, r: 45, back: -16.6 };
+const CHECK = { seat: 50, pin: 56, cham: 57, face: M.FACE_R, r0: 1.25, r1: 2.2, ball: 2 };
+const ballSeatU = CHECK.seat + Math.sqrt(CHECK.ball ** 2 - CHECK.r0 ** 2);
+
+function pistonLoops() {
+  const F = M.FACE_R;
+  const H = M.HEAD_L;
+  const { l, r, back } = WIN;
+  const c = CHECK;
+  const rack = X.rackEdge(l, r, RACK_VP, M.MODULE);
+  const upper = [
+    [H, 9.5], [l, 9.5], ...rack, [r, c.r0], [c.seat, c.r0], [c.seat, c.r1], [c.cham, c.r1], [c.cham, c.r0], [F, c.r0],
+    [F, 19.2], [F - 0.8, 20], [57, 20], [57, 18.5], [53, 18.5], [53, 20], [H + 0.8, 20], [H, 19.2],
+  ];
+  const mid = K.rect(H, -4.5, l, 4.5);
+  const lower = [
+    [H, -19.2], [H + 0.8, -20], [53, -20], [53, -18.5], [57, -18.5], [57, -20], [F - 0.8, -20], [F, -19.2],
+    [F, -c.r0], [c.cham, -c.r0], [c.cham, -c.r1], [c.seat, -c.r1], [c.seat, -c.r0], [r, -c.r0], [r, back], [l, back], [l, -9.5], [H, -9.5],
+  ];
+  return { upper, mid, lower };
+}
+
+function piston(V) {
+  const { upper, mid, lower } = pistonLoops();
+  const o = { mat: "steel", angle: 135 };
+  return part(5, K.cut(V, upper, o) + K.cut(V, mid, o) + K.cut(V, lower, o));
+}
+
+function pistonRing(V) {
+  return part(6, [K.rect(53, 18.5, 57, 20), K.rect(53, -20, 57, -18.5)].map((p) => K.cut(V, p, { mat: "plastic", angle: 45 })).join(""));
+}
+
+function ball(V, lift = 0) {
+  return part(9, K.body(V, K.circle(ballSeatU + lift, 0, CHECK.ball, 40)));
+}
+
+function pin(V) {
+  return part(10, K.cut(V, K.circle(CHECK.pin, 0, 0.75, 20), { mat: "steel", angle: 45 }));
+}
+
+// ---------------------------------------------------------------- spring (redrawn)
+
+function spring(V, x) {
+  return part(7, K.springSection(V, { from: M.PLUG_L, to: M.HEAD_L - x, radius: M.COIL_D / 2, wire: M.WIRE, turns: M.COILS, axis: "u", at: 0 }));
+}
+
+// ---------------------------------------------------------------- pinion (cut across, rotates)
+
+function pinion(V, phiDeg = 0) {
+  const g = X.gear(0, 0, M.Z, M.MODULE, 90 + phiDeg, M.SHIFT);
+  return part(8, K.cut(V, g, { mat: "steel", angle: 30 }));
+}
+
+// ---------------------------------------------------------------- regulating screws (not cut)
+
+// The screw along v = side·26, its needle seat at `seat`, backed off by `lift` mm. The cone seals on
+// the sharp edge of the Ø2.5 drilling; a neck behind it leaves the port room to feed the seat.
+const NEEDLE = { tipR: 0.3, coneR: 1.5, neckR: 1.0, neck: 4, stemR: 1.65 };
+function needleScrew(V, n, side, seat, lift) {
+  const a = M.NEEDLE_HALF * rad;
+  const N = NEEDLE;
+  const apex = seat - GAL / Math.tan(a) + lift;
+  const tip = apex + N.tipR / Math.tan(a);
+  const cone = apex + N.coneR / Math.tan(a);
+  const e = 80.5 + lift;
+  const c = side * DRILL_V;
+  const prof = [
+    [tip, N.tipR], [cone, N.coneR], [cone + 0.3, N.neckR], [cone + N.neck - 0.3, N.neckR], [cone + N.neck, N.stemR],
+    [66.5, N.stemR], [66.5, 1.15], [68.5, 1.15], [68.5, N.stemR], [70.2, N.stemR], [70.6, 2.5],
+    [e - 0.3, 2.5], [e, 2.2], [e, 0.4], [e - 1.2, 0.4],
+  ];
+  const pts = [...prof.map(([u, r]) => [u, c + r]), ...prof.slice().reverse().map(([u, r]) => [u, c - r])];
+  const roots = [[[71.2, c + 2.1], [e - 0.4, c + 2.1]], [[71.2, c - 2.1], [e - 0.4, c - 2.1]]];
+  return part(n, K.body(V, pts) + K.lines(V, roots, "thin"));
+}
+
+const sweepScrew = (V, lift = M.lift(M.SWEEP_TURNS)) => needleScrew(V, 11, -1, M.SWEEP_SEAT, lift);
+const latchScrew = (V, lift = M.lift(M.LATCH_TURNS)) => needleScrew(V, 12, 1, M.LATCH_SEAT, lift);
+
+function screwOrings(V) {
+  const ring = (side) => {
+    const c = side * DRILL_V;
+    return [K.rect(66.65, c + 1.15, 68.35, c + 1.75), K.rect(66.65, c - 1.75, 68.35, c - 1.15)];
+  };
+  return part(13, [...ring(1), ...ring(-1)].map((p) => K.cut(V, p, { mat: "solid" })).join(""));
+}
+
+function sealBalls(V) {
+  return part(14, K.body(V, K.circle(BODY.u0 + GAL, DRILL_V, GAL, 24)) + K.body(V, K.circle(BODY.u0 + GAL, -DRILL_V, GAL, 24)));
+}
+
+// ---------------------------------------------------------------- oil
+
+// The pressure chamber and everything open to it, at piston position x.
+function oilHigh(x) {
+  const f = M.faceU(x);
+  const c = CHECK;
+  return [
+    K.rect(f - 0.01, -20, M.PLUG_R + 0.01, 20),
+    K.rect(M.LATCH_U - PR, 19.99, M.LATCH_U + PR, DRILL_V),
+    K.rect(M.LATCH_SEAT, DRILL_V - STEM_BORE, 70.01, DRILL_V + STEM_BORE),
+    K.rect(M.SWEEP_U - PR, -DRILL_V, M.SWEEP_U + PR, -19.99),
+    K.rect(M.SWEEP_SEAT, -DRILL_V - STEM_BORE, 70.01, -DRILL_V + STEM_BORE),
+    K.rect(c.seat - x, -c.r1, f + 0.01, c.r1),
+  ];
+}
+
+// The spring side: spring chamber, the window round the pinion, the galleries back from the seats.
+function oilLow(x) {
+  const H = M.HEAD_L - x;
+  const sh = (u) => u - x;
+  return [
+    K.rect(M.PLUG_L - 0.01, -20, H + 0.01, 20),
+    K.rect(H, 4.5, sh(WIN.l), 9.5),
+    K.rect(H, -9.5, sh(WIN.l), -4.5),
+    K.rect(sh(WIN.l) - 0.01, WIN.back, sh(WIN.r) + 0.01, RACK_ROOT),
+    K.rect(sh(WIN.r) - 0.01, -CHECK.r0, sh(CHECK.seat) + 0.01, CHECK.r0),
+    K.rect(BODY.u0 + 2 * GAL, DRILL_V - GAL, M.LATCH_SEAT + 0.01, DRILL_V + GAL),
+    K.rect(BODY.u0 + 2 * GAL, -DRILL_V - GAL, M.SWEEP_SEAT + 0.01, -DRILL_V + GAL),
+    [[-159, 20.01], [-156.5, 20.01], [-146.5, DRILL_V - GAL + 0.01], [-149, DRILL_V - GAL + 0.01]],
+    [[-159, -20.01], [-149, -DRILL_V + GAL - 0.01], [-146.5, -DRILL_V + GAL - 0.01], [-156.5, -20.01]],
+  ];
+}
+
+const oilPath = (V, shapes) => shapes.map((s) => K.d(V, s)).join("");
+
+// The way the oil goes when the door closes, through each needle (accent flow lines).
+// Each runs from the pressure chamber down its port, over the needle's neck, through the throat at
+// the seat, along the cone and the gallery, and back into the spring chamber.
+function flowPath(side, seat, port, start) {
+  const s = side;
+  const D = DRILL_V;
+  const a = M.NEEDLE_HALF * rad;
+  const apex = seat - GAL / Math.tan(a);
+  const gap = (u) => Math.min(GAL - 0.25, (u - apex) * Math.tan(a) + 0.25);
+  return [
+    start, [port, s * 18.5], [port, s * (D - STEM_BORE - 0.3)], [seat + 1.4, s * (D - STEM_BORE - 0.3)], [seat, s * (D - GAL + 0.06)],
+    [seat - 3, s * (D - gap(seat - 3))], [seat - 6, s * (D - gap(seat - 6))], [apex - 1, s * D], [-146.5, s * D], [-148, s * 24.6], [-157.6, s * 20.2],
+  ];
+}
+const flowSweep = (x) => flowPath(-1, M.SWEEP_SEAT, M.SWEEP_U, [M.faceU(x) + 2.4, -11]);
+const flowLatch = () => flowPath(1, M.LATCH_SEAT, M.LATCH_U, [M.LATCH_U, 11]);
+
+// ---------------------------------------------------------------- PLAN E (door and arm from above)
+
+// Door-frame coordinates: along the leaf from the hinge (a), out of the pull face (n).
+function doorFrame(theta) {
+  const t = theta * rad;
+  const d = [-Math.cos(t), Math.sin(t)];
+  const n = [Math.sin(t), Math.cos(t)];
+  return ([a, s]) => [a * d[0] + s * n[0], a * d[1] + s * n[1]];
+}
+
+function leaf(theta) {
+  const P = doorFrame(theta);
+  return [[8, 0], [M.DOOR_W, 0], [M.DOOR_W, -M.DOOR_T], [8, -M.DOOR_T], [0, -M.DOOR_T + 8]].map(P);
+}
+
+function closerTop(theta) {
+  const P = doorFrame(theta);
+  // the body from above: valve end toward the hinge
+  return K.rrect(M.SPINDLE_A - BODY.u1, 0, M.SPINDLE_A - BODY.u0, 2 * BODY.v, 4).map(P);
+}
+
+function planMoving(V, theta) {
+  const L = M.link(theta);
+  const S = L.S;
+  const E = L.E;
+  const F = M.SHOE;
+  let out = "";
+  out += part(21, K.body(V, leaf(theta)));
+  out += part(1, K.body(V, closerTop(theta)));
+  out += part(17, K.body(V, X.bar(E, F, 14)));
+  out += part(16, K.body(V, X.bar(S, E, 18)));
+  out += part(20, K.body(V, K.circle(E[0], E[1], 4, 16)));
+  out += part(19, K.body(V, K.circle(S[0], S[1], 5, 20)));
+  return out;
+}
+
+function planPhantom(V, theta) {
+  const L = M.link(theta);
+  return (
+    K.line(V, leaf(theta), "phan", true) +
+    K.line(V, closerTop(theta), "phan", true) +
+    K.line(V, X.bar(L.S, L.E, 18), "phan", true) +
+    K.line(V, X.bar(L.E, M.SHOE, 14), "phan", true)
+  );
+}
+
+function shoe(V) {
+  const [u, v] = M.SHOE;
+  return part(18, K.body(V, K.rrect(u - 22, 0, u + 22, v + 9, 2)) + K.body(V, K.circle(u, v, 4, 16)));
+}
+
+// ---------------------------------------------------------------- SECTION B-B: across the cylinder at the spindle
+
+// In SECTION B-B, world (v, w): v to the right, w (height) up, the spindle axis vertical at v = 0.
+// A cut face with holes in it (galleries cut across), filled even-odd.
+function cutWithHoles(V, outer, holes, { mat, angle }) {
+  const dd = K.d(V, outer) + holes.map((h) => K.d(V, h)).join("");
+  return `<path class="paper" fill-rule="evenodd" d="${dd}"/><path fill="url(#h-${mat}-${angle})" fill-rule="evenodd" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+const BRG = { r: 11, cup: 0.6, roller: 2.4, w0: 20.6, w1: 30.6, seal: 33.6 };
+const SP = { journal: 8, square: 5.5, face: 12, top: 46, shoulder: 35 };
+
+function bodyB(V) {
+  const { v, w } = BODY;
+  const yb = Math.sqrt(M.R_BORE ** 2 - BRG.r ** 2);
+  const a0 = (Math.atan2(yb, -BRG.r) * 180) / Math.PI;
+  const left = [
+    [-BRG.r, w], [-v + 1, w], [-v, w - 1], [-v, -w + 1], [-v + 1, -w], [-BRG.r, -w], [-BRG.r, -yb],
+    ...K.arc(0, 0, M.R_BORE, 360 - a0, a0, 24),
+    [-BRG.r, yb],
+  ];
+  const hole = (c) => K.circle(c, 0, GAL, 20);
+  return part(1, cutWithHoles(V, left, [hole(-DRILL_V)], { mat: "alu", angle: 45 }) + cutWithHoles(V, K.flipU(left), [hole(DRILL_V)], { mat: "alu", angle: 45 }));
+}
+
+function pistonB(V) {
+  const seg = (v0, side) => {
+    const h = Math.sqrt(M.R_BORE ** 2 - v0 ** 2);
+    const a = (Math.atan2(h, v0) * 180) / Math.PI;
+    return side > 0 ? [[v0, -h], ...K.arc(0, 0, M.R_BORE, -a, a, 10), [v0, h]] : [[v0, h], ...K.arc(0, 0, M.R_BORE, 180 - a, 180 + a, 10), [v0, -h]];
+  };
+  const o = { mat: "steel", angle: 135 };
+  return part(5, K.cut(V, seg(RACK_ROOT, 1), o) + K.cut(V, seg(WIN.back, -1), o));
+}
+
+function spindleB(V) {
+  const s = SP;
+  const right = [[s.square, s.top], [s.square, s.shoulder], [s.journal, s.shoulder], [s.journal, s.face], [M.R_P + M.MODULE - 0.5, s.face], [M.R_P + M.MODULE, s.face - 0.5]];
+  const half = [...right, ...K.flipV(right, 0).map(([a, b]) => [a, b])];
+  const outline = [...half, ...K.flipU(half, 0)];
+  const rf = M.R_P - (1.25 - M.SHIFT) * M.MODULE;
+  const roots = [[[rf, -s.face], [rf, s.face]], [[-rf, -s.face], [-rf, s.face]]];
+  return part(8, K.body(V, outline) + K.lines(V, roots, "thin"));
+}
+
+function bearingsB(V) {
+  let out = "";
+  for (const sw of [1, -1])
+    for (const sv of [1, -1]) {
+      const cup = K.rect(sv > 0 ? BRG.r - BRG.cup : -BRG.r, sw > 0 ? BRG.w0 : -BRG.w1, sv > 0 ? BRG.r : -BRG.r + BRG.cup, sw > 0 ? BRG.w1 : -BRG.w0);
+      const rv0 = sv > 0 ? SP.journal : -BRG.r + BRG.cup;
+      const roller = K.rect(rv0, sw > 0 ? BRG.w0 + 0.9 : -BRG.w1 + 0.9, rv0 + BRG.roller, sw > 0 ? BRG.w1 - 0.9 : -BRG.w0 - 0.9);
+      out += K.cut(V, cup, { mat: "solid" }) + K.body(V, roller);
+    }
+  return part(22, out);
+}
+
+function sealsB(V) {
+  let out = "";
+  for (const sw of [1, -1])
+    for (const sv of [1, -1]) {
+      const r = K.rect(sv > 0 ? SP.journal : -BRG.r, sw > 0 ? BRG.w1 + 0.3 : -BRG.seal, sv > 0 ? BRG.r : -SP.journal, sw > 0 ? BRG.seal : -BRG.w1 - 0.3);
+      out += K.cut(V, r, { mat: "rubber" });
+    }
+  return part(23, out);
+}
+
+function oilB() {
+  return [K.circle(0, 0, M.R_BORE - 0.01, 72)];
+}
+
+return { part, BODY, DRILL_V, body, plugL, plugR, plugOrings, WIN, CHECK, ballSeatU, pistonLoops, piston, pistonRing, ball, pin, spring, pinion, NEEDLE, needleScrew, sweepScrew, latchScrew, screwOrings, sealBalls, oilHigh, oilLow, oilPath, flowSweep, flowLatch, doorFrame, leaf, closerTop, planMoving, planPhantom, shoe, SP, bodyB, pistonB, spindleB, bearingsB, sealsB, oilB };
+})();
+
+// Page code for debounce.html. K (kit), L (runtime), C (self-check), M (model), X (helpers) and
+// P (parts) are inlined above this script as namespaces.
+
+const svg = document.querySelector(".bp-sheet");
+const q = L.setupPage(svg);
+const specs = JSON.parse(svg.dataset.views);
+const VM = K.view(specs.main);
+const VC = K.view(specs.C);
+const VF = K.view(specs.F);
+const VE = K.view(specs.E);
+const CH = {"x0":846,"x1":1160,"y0":50,"y1":236,"tMax":15,"aMax":100};
+const D2 = {"x0":636,"x1":760,"y0":336,"y1":478,"aMax":110,"tMax":7};
+const $ = (id) => document.getElementById(id);
+
+const el = {
+  mv: [["main", VM], ["C", VC]].map(([id, V]) => [$(`mv-${id}`), V]),
+  mvb: $("mvb-main"),
+  balls: [["main", VM], ["C", VC], ["F", VF]].map(([id, V]) => [$(`ball-${id}`), V]),
+  oilHi: [["main", VM], ["C", VC]].map(([id, V]) => [$(`oil-hi-${id}`), V]),
+  oilLo: [["main", VM], ["C", VC]].map(([id, V]) => [$(`oil-lo-${id}`), V]),
+  oilHiF: $("oil-hi-F"),
+  flowS: [["main", VM], ["C", VC]].map(([id, V]) => [$(`flow-s-${id}`), V]),
+  flowL: [$("flow-l-main"), $("flow-l-C")],
+  spring: $("spring-main"),
+  pinion: $("pinion-main"),
+  dimX: $("dim-x-wrap"),
+  plan: $("plan-mv"),
+  planB: $("plan-b"),
+  theta: $("theta-wrap"),
+  c1prev: $("c1-prev"),
+  c1push: $("c1-push"),
+  c1close: $("c1-close"),
+  c1marks: $("c1-marks"),
+  c1due: $("c1-due"),
+  c1dot: $("c1-dot"),
+  d2dot: $("d2-dot"),
+  readout: $("readout"),
+};
+const say = L.announcer($("sr"), 2.5);
+const [pcx, pcy] = VM.p([0, 0]);
+
+// ---------------------------------------------------------------- state
+const s = M.door();
+let hand = null; // the angle a hand holds the door at, or null
+let push = null; // a push in progress: { phase: "open" | "hold", t }
+let dragging = false;
+let lift = 0; // check ball off its seat, mm
+let offS = 0; // flow-line dash offsets, from the volume through each needle
+let offL = 0;
+let quiet = 0; // seconds since the last touch
+let chartT = 0; // time on DIAGRAM 1
+let now = [];
+let prev = [];
+let marks = [];
+let held = false;
+
+// The tour: three quick pushes 2.4 s apart, then quiet; the door shuts, waits, and it repeats.
+const PERIOD = 15;
+const PUSHES = [0.5, 2.9, 5.3];
+let tourT = 0;
+let wasTouring = true;
+
+function startPush() {
+  push = { phase: "open", t: 0 };
+  marks.push(chartT);
+  quiet = 0;
+}
+
+function shutNow() {
+  s.theta = 0;
+  M.advance(s, 1e-3, null);
+  push = null;
+  hand = null;
+}
+
+// ---------------------------------------------------------------- step
+function step(dt, live) {
+  const n = Math.max(1, Math.ceil(dt * 480));
+  const h = dt / n;
+  if (live.touring && !wasTouring) {
+    // the tour takes over again: start its cycle and the diagram afresh
+    tourT = 0;
+    chartT = 0;
+    prev = now;
+    now = [];
+    marks = [];
+  }
+  wasTouring = live.touring;
+  for (let i = 0; i < n; i++) {
+    if (live.touring && !dragging) {
+      const before = tourT;
+      tourT += h;
+      if (tourT >= PERIOD) {
+        tourT -= PERIOD;
+        chartT = 0;
+        prev = now;
+        now = [];
+        marks = [];
+      }
+      for (const tp of PUSHES) if (before < tp && tourT >= tp) startPush();
+    }
+    // a push opens the door to PUSH_TO, holds it a moment and lets go
+    if (push) {
+      push.t += h;
+      if (push.phase === "open" && s.theta >= M.PUSH_TO - 0.05) push = { phase: "hold", t: 0 };
+      else if (push.phase === "hold" && push.t > 0.25) push = null;
+    }
+    const want = dragging ? hand : push ? M.PUSH_TO : null;
+    M.advance(s, h, want);
+    held = want != null;
+    if (held) quiet = 0;
+    else quiet += h;
+    lift = L.follow(lift, s.opening > 1 ? Math.min(1, s.opening / 120) : 0, s.opening > 1 ? 50 : 25, h);
+    const sc = 0.004; // sheet units of dash travel per mm³ of oil
+    offS += s.q.sweep * h * sc;
+    offL += s.q.latch * h * sc;
+    chartT += h;
+  }
+  if (!live.touring && chartT >= PERIOD) {
+    chartT -= PERIOD;
+    prev = now;
+    now = [];
+    marks = [];
+  }
+  const mode = held ? 1 : s.theta > 0 ? 2 : 0;
+  const last = now[now.length - 1];
+  if (!last || chartT - last[0] > 0.03 || last[2] !== mode) now.push([chartT, s.theta, mode]);
+  return held || s.theta > 0 || lift > 1e-3;
+}
+
+// ---------------------------------------------------------------- render
+const cx = (t) => K.r2(CH.x0 + (Math.min(CH.tMax, t) / CH.tMax) * (CH.x1 - CH.x0));
+const cy = (a) => K.r2(CH.y1 - (Math.min(CH.aMax, Math.max(0, a)) / CH.aMax) * (CH.y1 - CH.y0));
+function tracePaths(list) {
+  // split the trace into held (thick ink) and oil-closing (accent) runs; shut runs go with closing
+  let push = "";
+  let close = "";
+  for (let i = 1; i < list.length; i++) {
+    const [t0, a0] = list[i - 1];
+    const [t1, a1, m1] = list[i];
+    if (t1 < t0) continue;
+    const seg = `M${cx(t0)} ${cy(a0)}L${cx(t1)} ${cy(a1)}`;
+    if (m1 === 1) push += seg;
+    else close += seg;
+  }
+  return { push, close };
+}
+const all = (list) => list.map(([t, a], i) => `${i ? "L" : "M"}${cx(t)} ${cy(a)}`).join("");
+
+let shown = { theta: -1, x: -1, lift: -1 };
+function render(live) {
+  const x = s.x;
+  const phi = M.phi(s.theta);
+  if (Math.abs(x - shown.x) > 1e-4) {
+    for (const [node, V] of el.mv) node.setAttribute("transform", `translate(${K.r2(-x * V.k)} 0)`);
+    el.mvb.setAttribute("transform", `translate(${K.r2(-x * VM.k)} 0)`);
+    el.spring.innerHTML = P.spring(VM, x);
+    el.pinion.setAttribute("transform", `rotate(${K.r2(-phi)} ${pcx} ${pcy})`);
+    for (const [node, V] of el.oilHi) node.setAttribute("d", P.oilPath(V, P.oilHigh(x)));
+    for (const [node, V] of el.oilLo) node.setAttribute("d", P.oilPath(V, P.oilLow(x)));
+    for (const [node, V] of el.flowS) node.setAttribute("d", K.d(V, P.flowSweep(x), false));
+    el.dimX.innerHTML = K.dim(VM, [M.FACE_R, 20], [M.FACE_R - x, 20], { dir: "h", off: -40, text: `x=${x.toFixed(1)}`, id: "dim-x" });
+    shown.x = x;
+  }
+  if (Math.abs(s.theta - shown.theta) > 1e-3) {
+    el.plan.innerHTML = P.planMoving(VE, s.theta);
+    el.theta.innerHTML = X.angleDim(VE, [0, 0], 150, 180 - s.theta, 180, `θ=${Math.round(s.theta)}°`, { id: "dim-theta" });
+    el.planB.innerHTML = planBalloons(s.theta);
+    shown.theta = s.theta;
+  }
+  if (Math.abs(lift - shown.lift) > 0.003) {
+    for (const [node, V] of el.balls) node.innerHTML = P.ball(V, lift);
+    shown.lift = lift;
+  }
+  const pMax = M.pressure(M.X_MAX);
+  const op = K.r2(0.16 + 0.84 * Math.min(1, s.p / pMax));
+  for (const [node] of el.oilHi) node.setAttribute("fill-opacity", op);
+  el.oilHiF.setAttribute("fill-opacity", op);
+  const qs = M.flow(M.X_MAX).sweep;
+  const ql = M.flow(M.X_MAX).latch;
+  for (const [node] of el.flowS) {
+    node.setAttribute("stroke-opacity", K.r2(Math.min(1, s.q.sweep / (0.6 * qs))));
+    node.style.strokeDashoffset = K.r2(-offS);
+  }
+  for (const node of el.flowL) {
+    node.setAttribute("stroke-opacity", K.r2(Math.min(1, s.q.latch / (0.6 * ql))));
+    node.style.strokeDashoffset = K.r2(-offL);
+  }
+
+  // DIAGRAM 1
+  const tp = tracePaths(now);
+  el.c1push.setAttribute("d", tp.push);
+  el.c1close.setAttribute("d", tp.close);
+  el.c1prev.setAttribute("d", all(prev.filter(([t]) => t > chartT + 0.4)));
+  el.c1marks.setAttribute("d", marks.map((t) => `M${cx(t)} ${CH.y0 - 1.5}l-3.2 -5.6h6.4Z`).join(""));
+  el.c1dot.setAttribute("cx", cx(chartT));
+  el.c1dot.setAttribute("cy", cy(s.theta));
+  const left = M.closeTime(s.theta);
+  const due = chartT + left;
+  el.c1due.setAttribute("d", !held && s.theta > 0 && due <= CH.tMax ? `M${cx(due)} ${CH.y0}V${CH.y1}` : "");
+  // DIAGRAM 2
+  el.d2dot.setAttribute("cx", K.r2(D2.x0 + (s.theta / D2.aMax) * (D2.x1 - D2.x0)));
+  el.d2dot.setAttribute("cy", K.r2(D2.y1 - (left / D2.tMax) * (D2.y1 - D2.y0)));
+
+  const state = held ? "HELD" : s.theta > 0.05 ? (s.x < M.FACE_R - M.SWEEP_U + M.PORT_D / 2 ? "LATCH" : "SWEEP") : "SHUT";
+  const qcm = s.q.total / 1000;
+  const text =
+    s.theta > 0.05
+      ? `θ ${Math.round(s.theta)}° · x ${x.toFixed(1)} mm · p ${(s.p * 10).toFixed(1)} bar · Q ${qcm.toFixed(1)} cm³/s · ${state} · SHUT IN ${held ? "—" : left.toFixed(1) + " s"}`
+      : `SHUT · QUIET ${Math.min(99, quiet).toFixed(1)} s · SPRING ${Math.round(M.springForce(0))} N · ${Math.round(M.doorMoment(0))} N·m`;
+  el.readout.textContent = text;
+  say(s.theta > 0 ? `Door at ${Math.round(s.theta)} degrees, ${held ? "held open" : `shuts in ${left.toFixed(1)} seconds`}.` : "Door shut.", live.clock);
+}
+
+const PB = [[21,648],[16,676],[17,704],[20,732],[19,760]];
+function planBalloons(theta) {
+  const Lk = M.link(theta);
+  const along = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  const at = {
+    21: P.doorFrame(theta)([330, -22]),
+    16: along(Lk.S, Lk.E, 0.62),
+    17: along(Lk.E, M.SHOE, 0.5),
+    20: [Lk.E[0] + 2, Lk.E[1] + 1],
+    19: [Lk.S[0] + 1.5, Lk.S[1] + 1.5],
+  };
+  return PB.map(([n, y]) => K.balloon(VE, at[n], [414, y], n, { target: n })).join("");
+}
+
+// ---------------------------------------------------------------- input
+const live = L.run({
+  root: svg,
+  step,
+  render,
+  idleAfter: 8,
+  onFrozen: () => q.check && C.selfCheck(svg),
+});
+
+if (live.reduced && !live.frozen) {
+  // A still, true moment: the tour played to 6.4 s (after the last push, closing), drawn once.
+  const fake = { touring: true, reduced: false, clock: 0 };
+  for (let t = 0; t < 6.4; t += 1 / 240) step(1 / 240, fake);
+  render(live);
+}
+
+const toSheet = (e) => {
+  const m = svg.getScreenCTM();
+  if (!m) return [0, 0];
+  const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+  return [p.x, p.y];
+};
+const [hx, hy] = VE.p([0, 0]);
+const angleAt = (e) => {
+  const [x, y] = toSheet(e);
+  const a = (Math.atan2(hy - y, hx - x) * 180) / Math.PI;
+  return Math.min(M.THETA_MAX, Math.max(0, a < -90 ? a + 360 : a));
+};
+
+const planHit = svg.querySelector('[data-drag="plan"]');
+let pid = null;
+planHit.addEventListener("pointerdown", (e) => {
+  pid = e.pointerId;
+  planHit.setPointerCapture(pid);
+  dragging = true;
+  push = null;
+  hand = angleAt(e);
+  if (hand > s.theta + 0.5) marks.push(chartT);
+  live.input();
+  e.preventDefault();
+});
+planHit.addEventListener("pointermove", (e) => {
+  if (e.pointerId !== pid) return;
+  hand = angleAt(e);
+  live.input();
+});
+const release = (e) => {
+  if (e.pointerId !== pid) return;
+  pid = null;
+  dragging = false;
+  hand = null;
+  live.input();
+};
+planHit.addEventListener("pointerup", release);
+planHit.addEventListener("pointercancel", release);
+
+svg.querySelector("[data-push]").addEventListener("click", () => {
+  startPush();
+  live.input();
+});
+
+svg.addEventListener("keydown", (e) => {
+  const k = e.key;
+  if (k === " " || k === "Enter") startPush();
+  else if (k === "r" || k === "R") shutNow();
+  else if (k === "s" || k === "S") live.slow = live.slow === 1 ? 0.25 : live.slow === 0.25 ? 0.06 : 1;
+  else return;
+  e.preventDefault();
+  live.input();
+});
+
+if (q.check && !live.frozen) setTimeout(() => C.selfCheck(svg), 400);
+
+</script>
+</body>
+</html>

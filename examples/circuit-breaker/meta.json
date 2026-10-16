@@ -1,0 +1,27 @@
+{
+  "slug": "circuit-breaker",
+  "dwg": "BP-009",
+  "title": "Circuit breaker",
+  "object": "B16 miniature circuit breaker (EN 60898-1) cut on its centre plane",
+  "idea": "The circuit breaker pattern: closed, open, half-open",
+  "summary": "A bimetal heated by its own I²R bends until it knocks the latch out, so an overload trips after seconds along an inverse-time curve, while above 4 × In the coil's plunger strikes at once. After a trip the latch only holds a reset once the strip has cooled: open, then half-open, then closed again, or straight back to open if the fault is still there.",
+  "usedFor": [
+    "Electrical installation courses: thermal and magnetic trips, type B curves, arc quenching",
+    "Product pages and datasheets for protective devices",
+    "Explaining the software circuit-breaker pattern (closed, open, half-open) with the real object"
+  ],
+  "domain": "Electrical protection",
+  "parts": 30,
+  "views": [
+    "Section A-A on the centre plane 2:1",
+    "View E front 1:1 (with cutting plane A-A)",
+    "Detail B contacts and arc chute 5:1",
+    "Detail C latch 5:1, with a local break-out",
+    "Detail D thermal and magnetic trip 5:1",
+    "Time–current curve (log-log)",
+    "State diagram"
+  ],
+  "controls": "Drag the handle · ↑ ↓ on/off · 1 2 3 normal, overload, short · ← → current · Space tour · S slow",
+  "checkTimes": "0,2,5,9,10.95,11.3,14,18,19.6,20.3,23.55,23.8,26,27.2,28.5,30,33,45",
+  "shotT": 9
+}

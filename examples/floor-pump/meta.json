@@ -1,0 +1,15 @@
+{
+  "slug": "floor-pump",
+  "dwg": "BP-001",
+  "title": "Floor pump",
+  "object": "Bicycle floor pump in axial section",
+  "idea": "Positive-displacement compression through two one-way valves",
+  "summary": "Boyle's law in a barrel. The cup seal folds in on the upstroke because it is the inlet valve; the check ball lifts when the chamber passes tyre pressure because it is the outlet. The P–s diagram flattens the moment the valve opens.",
+  "usedFor": ["Physics teaching: Boyle's law, dead volume, compression ratio", "Product documentation for pumps and compressors", "Explaining one-way valves and back-pressure"],
+  "domain": "Pneumatics",
+  "parts": 21,
+  "views": ["Axial section 1:2.5", "Detail B check valve 2:1", "Detail D piston 2:1", "View C gauge 1:1", "P–s diagram"],
+  "controls": "Drag the handle · Space pumps · R lets the tyre down · S slow motion",
+  "checkTimes": "0,0.4,0.8,1.2,1.6,2.4,3.3,5,7.5,10,13,16,20",
+  "shotT": 1.0
+}

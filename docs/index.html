@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blueprint · a skill for Claude Code</title>
+<meta name="description" content="Name a mechanism, or an idea, and Claude drafts the live engineering drawing that explains it. 21 example sheets, all live.">
+<meta property="og:title" content="Blueprint · a skill for Claude Code">
+<meta property="og:description" content="Live engineering drawings: sectioned, dimensioned and ballooned sheets whose parts move from one physical model.">
+<meta property="og:image" content="og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#f3f0e7; --paper:#fbf9f3; --ink:#1b2430; --soft:#3b4655; --muted:#6a7380; --rule:#d9d3c3;
+  --blue:#1d4f8f; --blue-soft:#e3eaf3; --accent:#c8442b; --code:#ece7da; --grid:rgba(29,79,143,.06);
+  --sans:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace; --serif:"IBM Plex Serif",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:#0d1116; --paper:#131922; --ink:#e3e8ee; --soft:#b9c2cd; --muted:#8892a0; --rule:#26303c;
+  --blue:#7fb0ef; --blue-soft:#17263a; --accent:#f08a5d; --code:#18202b; --grid:rgba(127,176,239,.05); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --page:#0d1116; --paper:#131922; --ink:#e3e8ee; --soft:#b9c2cd; --muted:#8892a0; --rule:#26303c;
+  --blue:#7fb0ef; --blue-soft:#17263a; --accent:#f08a5d; --code:#18202b; --grid:rgba(127,176,239,.05); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--page);color:var(--ink);font:17px/1.62 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--blue);text-underline-offset:3px}
+code,kbd,pre{font-family:var(--mono);font-size:.86em}
+code{background:var(--code);padding:1px 5px;border-radius:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+.prose{max-width:720px}
+header.top{border-bottom:1px solid var(--rule);background:var(--page);position:sticky;top:0;z-index:5}
+header.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;height:52px;font:13px var(--mono);letter-spacing:.03em}
+header.top a{color:var(--ink);text-decoration:none}
+header.top nav{display:flex;gap:18px;flex-wrap:wrap}
+header.top nav a{color:var(--muted)} header.top nav a:hover{color:var(--ink)}
+.mark{display:inline-flex;align-items:center;gap:9px;font-weight:500}
+.mark svg{width:18px;height:18px}
+.hero{padding:64px 0 28px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+.eyebrow{font:13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+h1{font-weight:500;font-size:clamp(40px,7vw,76px);line-height:1.02;letter-spacing:-.025em;margin:0 0 18px}
+.tag{font-size:clamp(20px,2.6vw,27px);line-height:1.35;max-width:760px;margin:0 0 28px;color:var(--soft)}
+.tag em{font-family:var(--serif);font-style:italic;color:var(--ink)}
+.minis{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 22px}
+.mini{display:flex;flex-direction:column;gap:6px;width:160px;color:var(--soft);text-decoration:none;font:12px var(--mono)}
+.mini img{width:160px;height:auto;border:1px solid var(--rule);border-radius:3px;display:block;background:var(--paper)}
+.mini:hover span{color:var(--ink)}
+.meta{display:flex;gap:6px 22px;flex-wrap:wrap;font:13px var(--mono);color:var(--muted);margin:0}
+.meta a{color:var(--ink)}
+.figure{margin:30px 0 8px}
+.frame{border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:#0a2747;aspect-ratio:1200/900}
+.frame iframe{display:block;width:100%;height:100%;border:0}
+.caption{font-size:14px;color:var(--muted);margin:10px 0 0}
+.toc{columns:2 260px;gap:32px;list-style:none;padding:20px 0;margin:36px 0 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font:14px var(--mono)}
+.toc li{padding:3px 0;break-inside:avoid}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--blue)}
+.toc span{color:var(--muted);display:inline-block;width:34px}
+section{padding:56px 0 8px}
+h2{font-weight:500;font-size:clamp(28px,4vw,40px);letter-spacing:-.015em;line-height:1.1;margin:0 0 22px;scroll-margin-top:72px}
+.sn{font:14px var(--mono);color:var(--accent);vertical-align:top;margin-right:14px;letter-spacing:.04em}
+h3{font-size:18px;font-weight:600;margin:0 0 6px;line-height:1.3}
+blockquote{margin:26px 0;padding:4px 0 4px 22px;border-left:3px solid var(--accent);font-family:var(--serif);font-style:italic;font-size:26px;line-height:1.3}
+.pairs{list-style:none;padding:0;margin:26px 0 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.pairs a{display:block;height:100%;padding:13px 15px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);text-decoration:none;color:var(--ink)}
+.pairs a:hover{background:var(--blue-soft)}
+.pairs b{display:block;font-weight:600;font-size:15px}
+.pairs span{display:block;color:var(--muted);font-size:14px;line-height:1.4;margin-top:2px}
+pre{background:var(--code);padding:14px 16px;border-radius:5px;overflow-x:auto;line-height:1.55;margin:14px 0}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px}
+.box{background:var(--paper);border:1px solid var(--rule);border-radius:5px;padding:16px 18px}
+.box p{margin:0;font-size:15px;color:var(--soft)}
+.box code{font-size:13px}
+.steps{list-style:none;padding:0;margin:20px 0}
+.steps li{display:flex;gap:16px;padding:11px 0;border-top:1px solid var(--rule)}
+.steps .n{font:13px var(--mono);color:var(--accent);padding-top:3px;min-width:22px}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:18px 0}
+th,td{text-align:left;padding:9px 12px 9px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:22px}
+.rule{border-top:2px solid var(--ink);padding-top:10px}
+.rule p{margin:0;font-size:15px;color:var(--soft)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:22px;margin-top:26px}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;scroll-margin-top:72px}
+.card-img{display:block;background:#0a2747;border-bottom:1px solid var(--rule)}
+.card-img img{display:block;width:100%;height:auto}
+.card-body{padding:14px 16px 16px}
+.card-body p{margin:0 0 9px;font-size:15px;color:var(--soft)}
+.card-meta{display:flex;gap:4px 12px;flex-wrap:wrap;font:12px var(--mono)!important;color:var(--muted)!important;letter-spacing:.03em}
+.card-meta span:first-child{color:var(--accent)}
+.card h3 a{color:var(--ink);text-decoration:none}
+.card h3 a:hover{color:var(--blue)}
+.card-object{color:var(--muted)!important;font-size:14px!important}
+.card-idea{font-family:var(--serif);font-style:italic;color:var(--ink)!important;font-size:17px!important;line-height:1.35}
+.card h4{font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px;font-weight:500}
+.used{margin:0;padding-left:18px;font-size:14px;color:var(--soft)}
+.used li{margin:2px 0}
+details summary{cursor:pointer;font-size:14px;color:var(--blue)}
+details ul{font-size:14px;color:var(--soft);margin:6px 0;padding-left:18px}
+.card-controls{font:12px var(--mono)!important;color:var(--muted)!important}
+.uses{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px 30px;margin-top:22px}
+.use p{margin:0 0 8px;font-size:15px;color:var(--soft)}
+.use-links{font-size:14px!important}
+.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:20px}
+.themes figure{margin:0}
+.themes img{width:100%;height:auto;display:block;border:1px solid var(--rule);border-radius:4px}
+.themes figcaption{font:13px var(--mono);color:var(--muted);margin-top:6px}
+.cmd{display:flex;gap:10px;align-items:center;background:var(--ink);color:var(--page);border-radius:6px;padding:14px 16px;font:16px var(--mono);margin:16px 0;flex-wrap:wrap}
+.cmd code{background:none;padding:0;font-size:inherit;flex:1;min-width:0;overflow-wrap:anywhere}
+.cmd button{font:13px var(--mono);background:transparent;color:inherit;border:1px solid currentColor;border-radius:4px;padding:4px 10px;cursor:pointer;opacity:.8}
+.cmd button:hover{opacity:1}
+.faq{border-top:1px solid var(--rule);padding:12px 0}
+.faq summary{font-size:17px;color:var(--ink);font-weight:500}
+.faq p{margin:8px 0 0;color:var(--soft)}
+footer{margin-top:72px;border-top:1px solid var(--rule);padding:26px 0 48px;font:13px var(--mono);color:var(--muted)}
+footer .wrap{display:flex;gap:10px 26px;flex-wrap:wrap;justify-content:space-between}
+footer a{color:var(--ink)}
+@media (max-width:620px){
+  body{font-size:16px}
+  header.top nav a:not(.keep){display:none}
+  .hero{padding-top:40px}
+  .cards{grid-template-columns:1fr}
+  .mini{width:calc(50% - 6px)} .mini img{width:100%}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="mark" href="#"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="1" y="1" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M1 12h16M12 1v16" stroke="currentColor" stroke-width=".8"/><circle cx="6.5" cy="6.5" r="2.6" fill="none" stroke="var(--accent)" stroke-width="1.4"/></svg>Blueprint</a>
+<nav aria-label="Sections"><a href="#sheets" class="keep">Sheets</a><a href="#uses">Uses</a><a href="#code">Code</a><a href="#install" class="keep">Install</a><a href="https://github.com/hariFED/blueprint">GitHub</a></nav>
+</div></header>
+
+<main>
+<div class="hero"><div class="wrap">
+<p class="eyebrow">Blueprint · a skill for Claude Code</p>
+<h1>The cut is the<br>explanation.</h1>
+<p class="tag">Name a mechanism, or an idea, and Claude drafts <em>the engineering drawing</em> that explains it. Sectioned, dimensioned and ballooned, and every part moves.</p>
+<div class="minis"><a class="mini" href="sheets/four-stroke.html"><img src="thumbs/four-stroke.png" alt="" width="160" height="113" loading="lazy"><span>Four-stroke engine</span></a><a class="mini" href="sheets/escapement.html"><img src="thumbs/escapement.png" alt="" width="160" height="113" loading="lazy"><span>Lever escapement</span></a><a class="mini" href="sheets/pin-tumbler.html"><img src="thumbs/pin-tumbler.png" alt="" width="160" height="113" loading="lazy"><span>Pin tumbler cylinder</span></a><a class="mini" href="sheets/token-bucket.html"><img src="thumbs/token-bucket.png" alt="" width="160" height="113" loading="lazy"><span>Cistern token bucket</span></a><a class="mini" href="sheets/debounce.html"><img src="thumbs/debounce.png" alt="" width="160" height="113" loading="lazy"><span>Door closer</span></a><a class="mini" href="sheets/circuit-breaker.html"><img src="thumbs/circuit-breaker.png" alt="" width="160" height="113" loading="lazy"><span>Circuit breaker</span></a></div>
+<p class="meta"><span>21 sheets, all live</span><span>508 drawn parts</span><span>by hariFED</span><span>15 October 2026</span><a href="#install">Install ↓</a></p>
+</div></div>
+
+<div class="wrap">
+<figure class="figure">
+<div class="frame"><iframe src="sheets/floor-pump.html" title="Live drawing: bicycle floor pump in axial section" loading="lazy"></iframe></div>
+<figcaption class="caption">BP-001, a bicycle floor pump in axial section. Drag the handle, or press <kbd>Space</kbd> to pump. The cup seal folds on the upstroke, the ball lifts when the chamber passes tyre pressure, and the stroke dimension measures itself. <a href="sheets/floor-pump.html">Open full size</a>.</figcaption>
+</figure>
+
+<ol class="toc"><li><a href="#cut"><span>01</span>The cut is the explanation</a></li><li><a href="#prompt"><span>02</span>Writing a prompt</a></li><li><a href="#does"><span>03</span>What Claude does</a></li><li><a href="#rules"><span>04</span>Anatomy of a sheet</a></li><li><a href="#sheets"><span>05</span>21 sheets</a></li><li><a href="#uses"><span>06</span>Where it's useful</a></li><li><a href="#themes"><span>07</span>Three themes</a></li><li><a href="#code"><span>08</span>In your code</a></li><li><a href="#install"><span>09</span>Install</a></li><li><a href="#limits"><span>10</span>Limits</a></li><li><a href="#faq"><span>11</span>Questions</a></li></ol>
+
+<section><h2 id="cut"><span class="sn">01</span>The cut is the explanation</h2>
+<div class="prose">
+<p>Most explanations of how something works are boxes and arrows. A drafting office never drew boxes. It drew the thing itself, cut open along the plane where the mechanism lives, with every part named, measured and made of something.</p>
+<p>Blueprint asks Claude to do the same. Pick the real object whose mechanism <em>is</em> the idea, then pick the one cut that shows it: the bore, the seat, the spring, the passage. Then make it move, from a model honest enough that the readout, the dial, the chart and the drawing can never disagree.</p>
+</div>
+<blockquote>Choose the real object whose mechanism is the idea, then choose the cut that exposes it.</blockquote>
+<p class="prose">Abstract ideas become mechanisms first. A rate limiter is a cistern with a fixed refill. Debounce is a door closer. A circuit breaker is, well, a circuit breaker.</p>
+<ul class="pairs"><li><a href="sheets/floor-pump.html"><b>Floor pump</b><span>Positive-displacement compression through two one-way valves</span></a></li>
+<li><a href="sheets/four-stroke.html"><b>Four-stroke engine</b><span>Turning heat into rotation through a four-phase cycle</span></a></li>
+<li><a href="sheets/governor.html"><b>Porter governor</b><span>Negative-feedback proportional control: the speed sets the opening, so more load is carried at a lower speed (droop)</span></a></li>
+<li><a href="sheets/escapement.html"><b>Lever escapement</b><span>Turning stored energy into equal ticks: a clock-driven scheduler, a rate-limited event loop</span></a></li>
+<li><a href="sheets/bottle-jack.html"><b>Bottle jack</b><span>Force multiplication by area ratio (Pascal's principle)</span></a></li>
+<li><a href="sheets/token-bucket.html"><b>Cistern token bucket</b><span>Token bucket rate limiting (API rate limits)</span></a></li>
+<li><a href="sheets/debounce.html"><b>Door closer</b><span>Debounce: act only once the input has stopped for long enough</span></a></li>
+<li><a href="sheets/pin-tumbler.html"><b>Pin tumbler cylinder</b><span>Authentication by matching a secret: every factor must match (AND)</span></a></li>
+<li><a href="sheets/circuit-breaker.html"><b>Circuit breaker</b><span>The circuit breaker pattern: closed, open, half-open</span></a></li>
+<li><a href="sheets/thermostat.html"><b>Wax thermostat</b><span>A setpoint controller with no electronics: negative feedback through melting wax</span></a></li>
+<li><a href="sheets/relief-valve.html"><b>Relief valve</b><span>A spring-set threshold with hysteresis: pop open, blow down, reseat</span></a></li>
+<li><a href="sheets/differential.html"><b>Open differential</b><span>Splitting one input between two outputs that may run at different speeds: load balancing</span></a></li>
+<li><a href="sheets/shock-absorber.html"><b>Shock absorber</b><span>Smoothing a noisy input: the suspension as a low-pass filter</span></a></li>
+<li><a href="sheets/click-pen.html"><b>Click pen</b><span>A toggle (finite state machine) built from geometry</span></a></li>
+<li><a href="sheets/centrifugal-pump.html"><b>Centrifugal pump</b><span>Converting rotation into pressure, and the operating point where supply meets demand</span></a></li>
+<li><a href="sheets/gear-pump.html"><b>External gear pump</b><span>Positive displacement: a conveyor of fixed-size batches</span></a></li>
+<li><a href="sheets/carburettor.html"><b>Carburettor</b><span>Bernoulli's principle: one flow metering another</span></a></li>
+<li><a href="sheets/pressure-cooker.html"><b>Pressure cooker</b><span>Raising the boiling point with pressure; a safety interlock that cannot open while the resource is in use</span></a></li>
+<li><a href="sheets/solenoid-valve.html"><b>Solenoid valve</b><span>A small signal controlling a big flow: servo amplification through a pilot</span></a></li>
+<li><a href="sheets/stirling.html"><b>Stirling engine</b><span>Heat flowing from hot to cold does work: the Stirling cycle</span></a></li>
+<li><a href="sheets/disc-brake.html"><b>Hydraulic disc brake</b><span>Hydraulic force transmission; a master–replica pair where one piston writes and the other follows</span></a></li></ul>
+</section>
+
+<section><h2 id="prompt"><span class="sn">02</span>Writing a prompt</h2>
+<div class="prose">
+<p>Type <code>/blueprint</code> and describe the thing. Name a real object if you know one; name an idea if you don't, and Claude will find the mechanism.</p>
+<pre>/blueprint explain how a pin tumbler lock opens
+/blueprint draw debounce as a real mechanism
+/blueprint a hydraulic bottle jack, paper theme
+/blueprint a set: the four-stroke engine, head and bottom end on separate sheets</pre>
+</div>
+<div class="grid3">
+<div class="box"><h3>Sheet</h3><p>The default. One assembly, 15–30 parts, 3–5 views, a model, a tour and the checks. Around an hour of Claude's time.</p></div>
+<div class="box"><h3>Set</h3><p>Several sheets: an assembly and its sub-assemblies, each on its own A2. Claude proposes the first sheet before starting.</p></div>
+<div class="box"><h3><code>paper</code> · <code>dark</code></h3><p>Every sheet ships with all three themes. Name one to make it the default.</p></div>
+</div>
+</section>
+
+<section><h2 id="does"><span class="sn">03</span>What Claude does</h2>
+<p class="prose">The skill is a workflow, a drafting kit and a checker. Claude works in this order, and writes the model and the parts list before it draws a single line.</p>
+<ol class="steps"><li><span class="n">01</span><div><b>Size it.</b> A Sheet is one assembly, 15–30 parts, 3–5 views. A Set is several sheets. Sheets are built without asking; a Set is proposed first.</div></li>
+<li><span class="n">02</span><div><b>Truth first.</b> A small model with real dimensions and real physics, pure functions, no DOM. Everything on the sheet reads it.</div></li>
+<li><span class="n">03</span><div><b>Choose the object and the cut.</b> One sentence: what moves, what that motion means, and which cutting plane shows it.</div></li>
+<li><span class="n">04</span><div><b>Parts list.</b> Every part numbered, with its standard size, a real material grade and a quantity.</div></li>
+<li><span class="n">05</span><div><b>Plan the sheet.</b> Main view at a standard scale, details where the mechanism is small, a view in a named direction, a diagram. Laid out in sheet units first.</div></li>
+<li><span class="n">06</span><div><b>Geometry once.</b> Each part is a function that draws into any view, in millimetres of the real object, so a detail is the same code at a larger scale.</div></li>
+<li><span class="n">07</span><div><b>Draw by the rules.</b> Thick visible edges, thin everything else, hatching by material, shafts and balls left unhatched, thin walls blacked in.</div></li>
+<li><span class="n">08</span><div><b>Annotate.</b> Dimensions measured from the geometry, a balloon on every part, words only where a drafter would put them.</div></li>
+<li><span class="n">09</span><div><b>One accent.</b> Exactly one thing carries colour: the thing to watch, usually the working fluid, its density following pressure.</div></li>
+<li><span class="n">10</span><div><b>Make it live.</b> Critically damped motion, an idle tour, drag and keys, live dimensions, a readout in the title block, stillness under reduced motion.</div></li>
+<li><span class="n">11</span><div><b>Check it like a checker.</b> A headless browser plays the tour to a dozen moments and fails on any collision; then Claude reads 4× close-ups of every junction.</div></li></ol>
+<table>
+<thead><tr><th>Size</th><th>What it is</th><th>Parts</th><th>Time</th></tr></thead>
+<tbody>
+<tr><td>Sheet</td><td>One A2 drawing: main section, details, a view, a diagram, parts list, title block</td><td>15–30</td><td>~1 h</td></tr>
+<tr><td>Set</td><td>Several sheets of one machine, one sub-assembly per sheet</td><td>40+</td><td>several hours</td></tr>
+</tbody>
+</table>
+</section>
+
+<section><h2 id="rules"><span class="sn">04</span>Anatomy of a sheet</h2>
+<p class="prose">These are the rules a drafting checker would mark you down for, from ISO 128, 129, 5455 and 7200. The kit makes them easy; the check makes them hard to break.</p>
+<div class="rules"><div class="rule"><h3>One cut</h3><p>The plane goes through the mechanism. If the reader can't see it, it isn't explained.</p></div>
+<div class="rule"><h3>Two weights</h3><p>Visible edges thick, everything else thin, in a ratio of 2:1. Hidden, centre and phantom lines by ISO 128.</p></div>
+<div class="rule"><h3>Hatch by material</h3><p>Steel, cast iron, aluminium, brass, rubber, plastic each have a pattern; touching parts never share an angle.</p></div>
+<div class="rule"><h3>Some things aren't cut</h3><p>Shafts, pins, bolts, nuts, balls and ribs are drawn whole, as a drafter would.</p></div>
+<div class="rule"><h3>Measured, not typed</h3><p>Every dimension is computed from the points it spans. A live one re-measures every frame.</p></div>
+<div class="rule"><h3>Balloons on parts</h3><p>A dot on the part, a leader, a number, and a parts-list row. The check fails if a dot misses its part.</p></div>
+<div class="rule"><h3>One accent</h3><p>Colour only for the subject: the air, the oil, the steam. The chart's curve is the same colour.</p></div>
+<div class="rule"><h3>True numbers</h3><p>The readout, the dial, the curve and the drawing all read one model, so they can't disagree.</p></div></div>
+</section>
+
+<section><h2 id="sheets"><span class="sn">05</span>21 sheets</h2>
+<p class="prose">Every sheet below was drafted by Claude with this skill, passes the layout check at a dozen moments of its tour and at phone width, and runs live. Open one, drag the moving part, and watch the numbers.</p>
+<div class="cards"><article class="card" id="floor-pump">
+<a class="card-img" href="sheets/floor-pump.html"><img src="thumbs/floor-pump.png" alt="Floor pump: Bicycle floor pump in axial section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-001</span><span>Pneumatics</span><span>21 parts · 5 views</span></p>
+<h3><a href="sheets/floor-pump.html">Floor pump</a></h3>
+<p class="card-object">Bicycle floor pump in axial section</p>
+<p class="card-idea">Positive-displacement compression through two one-way valves</p>
+<p>Boyle's law in a barrel. The cup seal folds in on the upstroke because it is the inlet valve; the check ball lifts when the chamber passes tyre pressure because it is the outlet. The P–s diagram flattens the moment the valve opens.</p>
+<details><summary>Views and controls</summary><ul><li>Axial section 1:2.5</li><li>Detail B check valve 2:1</li><li>Detail D piston 2:1</li><li>View C gauge 1:1</li><li>P–s diagram</li></ul><p class="card-controls">Drag the handle · Space pumps · R lets the tyre down · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Physics teaching: Boyle's law, dead volume, compression ratio</li><li>Product documentation for pumps and compressors</li><li>Explaining one-way valves and back-pressure</li></ul>
+</div>
+</article>
+<article class="card" id="four-stroke">
+<a class="card-img" href="sheets/four-stroke.html"><img src="thumbs/four-stroke.png" alt="Four-stroke engine: 125 cc air-cooled DOHC single in section through the cylinder and valve axes" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-002</span><span>Thermodynamics</span><span>29 parts · 5 views</span></p>
+<h3><a href="sheets/four-stroke.html">Four-stroke engine</a></h3>
+<p class="card-object">125 cc air-cooled DOHC single in section through the cylinder and valve axes</p>
+<p class="card-idea">Turning heat into rotation through a four-phase cycle</p>
+<p>An Otto cycle in a finned cylinder. The cams, turning at half crank speed, open each valve by the lift their profile gives; a computed cycle at 6000 rpm (CR 9.2, 58 bar peak) sets the gas, which changes from fresh charge to a flame growing from the plug to burned gas. The P–V diagram traces the loop as the crank turns, with the pumping loop visible on its log scale.</p>
+<details><summary>Views and controls</summary><ul><li>Axial section 1:1</li><li>Detail C chamber, seats and plug 2:1</li><li>Detail B ring pack 2:1</li><li>Diagram 1 P–V (log p)</li><li>Diagram 2 valve lift against crank angle</li></ul><p class="card-controls">Drag the crank · ← → turn · Space runs · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Engineering and physics courses: the Otto cycle, valve timing, slider-crank kinematics</li><li>Product and service documentation for small engines and motorcycles</li><li>A software-concept explainer: a four-stage pipeline (fetch, decode, execute, writeback) with overlapping stages</li></ul>
+</div>
+</article>
+<article class="card" id="governor">
+<a class="card-img" href="sheets/governor.html"><img src="thumbs/governor.png" alt="Porter governor: Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-003</span><span>Control / steam</span><span>28 parts · 6 views</span></p>
+<h3><a href="sheets/governor.html">Porter governor</a></h3>
+<p class="card-object">Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section</p>
+<p class="card-idea">Negative-feedback proportional control: the speed sets the opening, so more load is carried at a lower speed (droop)</p>
+<p>Two iron balls on equal arms lift a weighted sleeve as the spindle speeds up, and the sleeve shuts a balanced double-beat valve through a bell crank. When the load steps up the engine slows, the balls drop, the valve opens, and the engine settles at a new, slightly lower speed. That offset is the droop of a proportional controller, plotted against the governor's own characteristic.</p>
+<details><summary>Views and controls</summary><ul><li>Axial section 1:2.5</li><li>Detail B double-beat valve 1:1</li><li>Detail C swivel collar and crank slot 1:1</li><li>View D from above 1:5</li><li>Diagram 1 governor characteristic</li><li>Diagram 2 speed and valve opening against time</li></ul><p class="card-controls">Drag up or down for load · ↑ ↓ load · Space steps light/heavy · S slow</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Control engineering teaching: feedback, proportional control, droop and lag</li><li>Steam and mill-engine history and museum interpretation</li><li>A software-concept explainer for autoscaling and proportional controllers</li></ul>
+</div>
+</article>
+<article class="card" id="escapement">
+<a class="card-img" href="sheets/escapement.html"><img src="thumbs/escapement.png" alt="Lever escapement: Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-004</span><span>Horology</span><span>22 parts · 5 views</span></p>
+<h3><a href="sheets/escapement.html">Lever escapement</a></h3>
+<p class="card-object">Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings</p>
+<p class="card-idea">Turning stored energy into equal ticks: a clock-driven scheduler, a rate-limited event loop</p>
+<p>A balance and hairspring swing at 4 Hz whatever the mainspring does; the escapement only lets the train move when the balance says so. Each beat the fork unlocks a stone, the club tooth pushes the stone and the fork pushes the impulse jewel, then the tooth drops onto the other stone and locks, so the escape wheel advances one tooth every two beats. The diagram marks every impulse on the balance's swing.</p>
+<details><summary>Views and controls</summary><ul><li>Plan view from dial side 20:1</li><li>Detail B pallets 50:1</li><li>Section A-A balance staff and bearings 20:1</li><li>Detail C upper bearing 50:1</li><li>Diagram 1 balance angle against time</li></ul><p class="card-controls">Drag the balance and let it go · ← → kick · Space pause · S speed · R restart</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Horology teaching: lock, unlock, impulse, drop, draw and lift angle</li><li>Product pages and documentation for mechanical watches</li><li>Explaining a clock-driven scheduler or rate limiter: an independent oscillator releases stored work in fixed quanta</li></ul>
+</div>
+</article>
+<article class="card" id="bottle-jack">
+<a class="card-img" href="sheets/bottle-jack.html"><img src="thumbs/bottle-jack.png" alt="Bottle jack: 2-tonne hydraulic bottle jack in axial section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-005</span><span>Hydraulics</span><span>29 parts · 5 views</span></p>
+<h3><a href="sheets/bottle-jack.html">Bottle jack</a></h3>
+<p class="card-object">2-tonne hydraulic bottle jack in axial section</p>
+<p class="card-idea">Force multiplication by area ratio (Pascal's principle)</p>
+<p>Pascal's principle in a cast base. Each 25 mm stroke of the Ø12 plunger pushes 2.83 cm³ of oil past the delivery ball and lifts the Ø32 ram 3.52 mm, so 138 N on the handle holds 1.5 t. Section A-A puts the two bores side by side, and cracking the release screw lets the load drive the oil back to the reservoir.</p>
+<details><summary>Views and controls</summary><ul><li>Axial section 1:1</li><li>Section A-A plan through the base 1:1</li><li>Detail B pump valves 2:1</li><li>Detail D release valve 2:1</li><li>Ram lift against pump strokes diagram</li></ul><p class="card-controls">Drag the handle · ↑ ↓ stroke · Space pumps · O opens the release valve · L changes the load · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Physics teaching: Pascal's principle, area ratio, work in equals work out</li><li>Product documentation for hydraulic jacks, presses and pumps</li><li>A metaphor for leverage and amortisation: many small strokes buy one large lift</li></ul>
+</div>
+</article>
+<article class="card" id="token-bucket">
+<a class="card-img" href="sheets/token-bucket.html"><img src="thumbs/token-bucket.png" alt="Cistern token bucket: Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-006</span><span>Hydraulics / software concepts</span><span>26 parts · 6 views</span></p>
+<h3><a href="sheets/token-bucket.html">Cistern token bucket</a></h3>
+<p class="card-object">Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section</p>
+<p class="card-idea">Token bucket rate limiting (API rate limits)</p>
+<p>The water is the tokens. A fixed Ø3.5 jet at mains pressure refills at 0.146 L/s whatever the level, which is a constant token rate, and the float shuts it at capacity. Each pull of the knob takes one 1.5 L dose; below one token the dose float rests on its stop and the pull is refused, and the overflow tube is the hard cap if the float is held down.</p>
+<details><summary>Views and controls</summary><ul><li>Section A-A 1:2.5</li><li>Detail B fill valve 2:1</li><li>Detail D drop valve seat 1:1</li><li>View C plan, lid removed 1:2.5</li><li>Diagram 1 tokens against time</li><li>Table 1 token bucket and cistern</li></ul><p class="card-controls">Pull (click or drag up) the knob or Space sends a request · H holds the float down (overflow) · R refills · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Explaining API rate limits, bursts and HTTP 429 in a software-concepts course</li><li>A physical analogy for token bucket and leaky bucket algorithms in system design teaching</li><li>Plumbing training: diaphragm float valves, orifice flow and Torricelli drain</li></ul>
+</div>
+</article>
+<article class="card" id="debounce">
+<a class="card-img" href="sheets/debounce.html"><img src="thumbs/debounce.png" alt="Door closer: Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-007</span><span>Hydraulics</span><span>23 parts · 7 views</span></p>
+<h3><a href="sheets/debounce.html">Door closer</a></h3>
+<p class="card-object">Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section</p>
+<p class="card-idea">Debounce: act only once the input has stopped for long enough</p>
+<p>A spring drives the piston back and the oil can only leave through two needle valves, so the door shuts at a pace set by the orifice equation. Every push reopens the door and starts the whole closing again; it latches only after a quiet spell as long as the closing time from where it was left.</p>
+<details><summary>Views and controls</summary><ul><li>Section A-A 1:1</li><li>Section B-B 1:1</li><li>Detail C sweep needle 10:1</li><li>Detail F check valve 5:1</li><li>Plan E door and arm 1:10</li><li>Diagram 1 θ–t</li><li>Diagram 2 time to latch</li></ul><p class="card-controls">Space or click the closer pushes the door · drag the door in plan E · R shuts it · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Software-concept explainer: debounce and restartable timers drawn as hardware</li><li>Hydraulics teaching: orifice flow, check valves, rack-and-pinion conversion</li><li>Product documentation for door closers and their sweep and latch adjustment</li></ul>
+</div>
+</article>
+<article class="card" id="pin-tumbler">
+<a class="card-img" href="sheets/pin-tumbler.html"><img src="thumbs/pin-tumbler.png" alt="Pin tumbler cylinder: Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-008</span><span>Mechanical security</span><span>16 parts · 5 views</span></p>
+<h3><a href="sheets/pin-tumbler.html">Pin tumbler cylinder</a></h3>
+<p class="card-object">Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section</p>
+<p class="card-idea">Authentication by matching a secret: every factor must match (AND)</p>
+<p>Each key pin is cut for one depth of the key, so the right key lifts every crown exactly to the shear line between plug and body. The key is cut in 0.5 mm steps; a key one cut wrong leaves pin 3 a millimetre low, its driver straddles the line and the plug will not turn. Only when all five gaps sit on the line does the plug, and its cam, turn.</p>
+<details><summary>Views and controls</summary><ul><li>Section A-A 5:1</li><li>Detail D shear line at pins 2–4 10:1</li><li>View B front face 5:1</li><li>Section C-C across pin 3 10:1</li><li>Diagram 1 pin offsets from the shear line</li></ul><p class="card-controls">Drag the key · ← → insert · drag View B or ↑ ↓ turn · K other key · Space tour · S slow</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Security-concept explainers: shared secrets, multi-factor checks as a logical AND</li><li>Locksmith and security-hardware training: bitting codes, depth steps, shear line</li><li>Product pages and documentation for lock cylinders</li></ul>
+</div>
+</article>
+<article class="card" id="circuit-breaker">
+<a class="card-img" href="sheets/circuit-breaker.html"><img src="thumbs/circuit-breaker.png" alt="Circuit breaker: B16 miniature circuit breaker (EN 60898-1) cut on its centre plane" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-009</span><span>Electrical protection</span><span>30 parts · 7 views</span></p>
+<h3><a href="sheets/circuit-breaker.html">Circuit breaker</a></h3>
+<p class="card-object">B16 miniature circuit breaker (EN 60898-1) cut on its centre plane</p>
+<p class="card-idea">The circuit breaker pattern: closed, open, half-open</p>
+<p>A bimetal heated by its own I²R bends until it knocks the latch out, so an overload trips after seconds along an inverse-time curve, while above 4 × In the coil's plunger strikes at once. After a trip the latch only holds a reset once the strip has cooled: open, then half-open, then closed again, or straight back to open if the fault is still there.</p>
+<details><summary>Views and controls</summary><ul><li>Section A-A on the centre plane 2:1</li><li>View E front 1:1 (with cutting plane A-A)</li><li>Detail B contacts and arc chute 5:1</li><li>Detail C latch 5:1, with a local break-out</li><li>Detail D thermal and magnetic trip 5:1</li><li>Time–current curve (log-log)</li><li>State diagram</li></ul><p class="card-controls">Drag the handle · ↑ ↓ on/off · 1 2 3 normal, overload, short · ← → current · Space tour · S slow</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Electrical installation courses: thermal and magnetic trips, type B curves, arc quenching</li><li>Product pages and datasheets for protective devices</li><li>Explaining the software circuit-breaker pattern (closed, open, half-open) with the real object</li></ul>
+</div>
+</article>
+<article class="card" id="thermostat">
+<a class="card-img" href="sheets/thermostat.html"><img src="thumbs/thermostat.png" alt="Wax thermostat: Automotive wax-pellet coolant thermostat (opens at 88 °C) in section, in its housing between engine and radiator" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-010</span><span>Thermal control</span><span>24 parts · 5 views</span></p>
+<h3><a href="sheets/thermostat.html">Wax thermostat</a></h3>
+<p class="card-object">Automotive wax-pellet coolant thermostat (opens at 88 °C) in section, in its housing between engine and radiator</p>
+<p class="card-idea">A setpoint controller with no electronics: negative feedback through melting wax</p>
+<p>Paraffin in a brass cup gains 12 % in volume as it melts, squeezes a rubber sleeve and pushes the pin against the bridge, so the cup moves down: the valve opens to the radiator and the bypass disc shuts. The engine's heat balance closes the loop, and the coolant settles a little above 88 °C, higher under load. Wax freezes 2 K below where it melts, so the lift–temperature diagram traces a hysteresis loop.</p>
+<details><summary>Views and controls</summary><ul><li>Section A-A 2:1</li><li>Detail B pellet 5:1</li><li>Detail D jiggle valve and seat 5:1</li><li>View C from above 1:1</li><li>Lift–temperature diagram</li></ul><p class="card-controls">Drag up/down sets engine load · ↑ ↓ load · H hill · R cold start · S speed</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Automotive technician training: cooling systems, thermostat faults, bypass and jiggle valve</li><li>Control engineering teaching: proportional control, droop, hysteresis and feedback without electronics</li><li>Product documentation for wax-element actuators and thermostatic valves</li></ul>
+</div>
+</article>
+<article class="card" id="relief-valve">
+<a class="card-img" href="sheets/relief-valve.html"><img src="thumbs/relief-valve.png" alt="Relief valve: DN25 spring-loaded safety relief valve in axial section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-011</span><span>Pneumatics, process safety</span><span>23 parts · 6 views</span></p>
+<h3><a href="sheets/relief-valve.html">Relief valve</a></h3>
+<p class="card-object">DN25 spring-loaded safety relief valve in axial section</p>
+<p class="card-idea">A spring-set threshold with hysteresis: pop open, blow down, reseat</p>
+<p>The spring's preload over the seat area sets the opening pressure. Once the disc cracks open, gas fills the huddling chamber and acts on a larger area, so the valve pops to high lift and stays open until the pressure has fallen about 10 %, then snaps shut. A compressor refills the receiver and the cycle repeats, tracing the hysteresis loop in Diagram 1.</p>
+<details><summary>Views and controls</summary><ul><li>Axial section 1:2</li><li>Detail B nozzle, disc and guide 2:1</li><li>Detail C setting and lifting gear 1:1</li><li>Diagram 1 lift against pressure</li><li>Diagram 2 receiver pressure against time</li><li>Diagram 3 discharge against lift</li></ul><p class="card-controls">Drag up/down for vessel pressure · ↑ ↓ pressure · ← → adjusting screw · Space compressor · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Process safety training: set pressure, simmer, blowdown and chatter</li><li>Product documentation for safety valves to ISO 4126 / ASME VIII</li><li>Explaining back-pressure, load shedding and hysteresis thresholds in queues</li></ul>
+</div>
+</article>
+<article class="card" id="differential">
+<a class="card-img" href="sheets/differential.html"><img src="thumbs/differential.png" alt="Open differential: Rear-axle open bevel-gear differential in plan section, with the car in a turn" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-012</span><span>Automotive drivetrain</span><span>25 parts · 5 views</span></p>
+<h3><a href="sheets/differential.html">Open differential</a></h3>
+<p class="card-object">Rear-axle open bevel-gear differential in plan section, with the car in a turn</p>
+<p class="card-idea">Splitting one input between two outputs that may run at different speeds: load balancing</p>
+<p>The crown wheel turns the carrier, and the carrier always turns at the mean of the two wheels. The spider gears stay still on their pin when the car runs straight and spin only when the wheels differ, in a turn or with one wheel on ice. Because a spider pushes equally on both side gears, the torque splits equally, so the wheel on ice sets what both wheels get.</p>
+<details><summary>Views and controls</summary><ul><li>Plan section through axle and pinion axes 1:2.5</li><li>Detail E carrier bearing 2:1</li><li>View D gear cluster riding with the carrier 1:1</li><li>Plan of the car in a turn 1:50</li><li>Wheel speed–time diagram</li></ul><p class="card-controls">Drag the plan view sideways to steer · ←→ steer · ↑↓ speed · I right wheel on ice · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Automotive engineering and mechanics courses: differential kinematics, ωC = (ωL + ωR)/2</li><li>Product and service documentation for axles and final drives</li><li>A software-concept explainer for load balancing and equal-share schedulers</li></ul>
+</div>
+</article>
+<article class="card" id="shock-absorber">
+<a class="card-img" href="sheets/shock-absorber.html"><img src="thumbs/shock-absorber.png" alt="Shock absorber: Monotube gas-charged automotive damper (de Carbon type) in axial section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-013</span><span>Hydraulics</span><span>25 parts · 7 views</span></p>
+<h3><a href="sheets/shock-absorber.html">Shock absorber</a></h3>
+<p class="card-object">Monotube gas-charged automotive damper (de Carbon type) in axial section</p>
+<p class="card-idea">Smoothing a noisy input: the suspension as a low-pass filter</p>
+<p>A quarter car drives over a speed hump on a rough road. The oil is forced through the piston ports and bends the shim stacks, which is why the force–velocity curve is steep at low speed and flattens past the knee; the nitrogen behind the floating piston takes up the rod's volume and keeps the oil from cavitating. With the valves bypassed the body keeps bouncing, so the two passes on the body chart show what the damper filters out.</p>
+<details><summary>Views and controls</summary><ul><li>Axial section 1:2</li><li>Detail B piston valving 5:1</li><li>Detail C rod guide 2:1</li><li>Section A-A piston 2:1</li><li>F–v diagram</li><li>Body displacement–time diagram</li><li>Quarter-car diagram</li></ul><p class="card-controls">Drag the rod eye · ↑ ↓ stroke · Space drives over a hump · D damping on/off · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Vehicle dynamics teaching: quarter-car model, damping ratio, digressive valving</li><li>Product documentation for dampers and suspension components</li><li>Explaining low-pass filtering and exponential smoothing with a physical object</li></ul>
+</div>
+</article>
+<article class="card" id="click-pen">
+<a class="card-img" href="sheets/click-pen.html"><img src="thumbs/click-pen.png" alt="Click pen: Retractable ballpoint pen in longitudinal section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-014</span><span>Mechanisms</span><span>17 parts · 7 views</span></p>
+<h3><a href="sheets/click-pen.html">Click pen</a></h3>
+<p class="card-object">Retractable ballpoint pen in longitudinal section</p>
+<p class="card-idea">A toggle (finite state machine) built from geometry</p>
+<p>A push-push cam as a state machine. Each press drives the rotator's lugs below the guide's ridge teeth and the plunger tooth turns them 30°; on release the ridge tooth turns them another 30°, into a long slot (retracted) or a short slot (extended), alternately. The developed cam track shows the lug's path, and the section shows the lug change sides with every click.</p>
+<details><summary>Views and controls</summary><ul><li>Longitudinal section 2:1</li><li>Detail D cam mechanism 5:1</li><li>Developed view E cam track 10:1</li><li>Section B-B at the lugs 10:1</li><li>Detail F ball and socket 20:1</li><li>Diagram 1 state machine</li><li>Diagram 2 spring force</li></ul><p class="card-controls">Drag the button in · Space clicks · ← → press and release · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Product design teaching: cams, indexing and snap-fit mechanisms</li><li>Software-concept explainer: a toggle or T flip-flop as a finite state machine</li><li>Product documentation for retractable pens and push-push latches</li></ul>
+</div>
+</article>
+<article class="card" id="centrifugal-pump">
+<a class="card-img" href="sheets/centrifugal-pump.html"><img src="thumbs/centrifugal-pump.png" alt="Centrifugal pump: ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-015</span><span>Fluid machinery</span><span>30 parts · 7 views</span></p>
+<h3><a href="sheets/centrifugal-pump.html">Centrifugal pump</a></h3>
+<p class="card-object">ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute</p>
+<p class="card-idea">Converting rotation into pressure, and the operating point where supply meets demand</p>
+<p>The impeller flings water outwards and the volute turns its speed into pressure, so the stipple thickens from the suction eye to the discharge. The affinity laws scale the pump curve with speed, the globe valve steepens the system curve as it throttles, and the duty point sits where the two cross; below 1674 rpm the pump cannot lift the 12 m static head and nothing flows.</p>
+<details><summary>Views and controls</summary><ul><li>Section A-A through the shaft 1:2</li><li>Section B-B through the volute 1:2</li><li>Detail C mechanical seal 2:1</li><li>Detail D wear ring clearance 5:1</li><li>Discharge valve axial section 1:2</li><li>Diagram 1 H–Q</li><li>Diagram 2 η and P against Q</li></ul><p class="card-controls">Drag the pump: speed · drag the handwheel: valve · ↑ ↓ speed · ← → valve · Space tour · S slow</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Process-industry and maintenance training: reading a pump curve, throttling against speed control</li><li>Product documentation for pump and valve makers</li><li>Explaining an equilibrium point, supply meeting demand, as a software or economics metaphor</li></ul>
+</div>
+</article>
+<article class="card" id="gear-pump">
+<a class="card-img" href="sheets/gear-pump.html"><img src="thumbs/gear-pump.png" alt="External gear pump: Group 2 external gear pump, 8 cm³/rev, cut across and along its shafts" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-016</span><span>Hydraulics</span><span>15 parts · 7 views</span></p>
+<h3><a href="sheets/gear-pump.html">External gear pump</a></h3>
+<p class="card-object">Group 2 external gear pump, 8 cm³/rev, cut across and along its shafts</p>
+<p class="card-idea">Positive displacement: a conveyor of fixed-size batches</p>
+<p>Two involute gears carry oil round the outside of the bore in sealed tooth spaces, 24 batches of 0.33 cm³ per revolution, and the mesh squeezes them out at the outlet. Flow is displacement × speed less a laminar leak that grows with pressure, so the volumetric efficiency falls as pressure rises, and falls further at low speed. Each space's pressure builds over the last two pitches before the outlet.</p>
+<details><summary>Views and controls</summary><ul><li>Section A-A across the shafts 2:1</li><li>Section B-B along the shafts (stepped) 1:1</li><li>Detail C the mesh 5:1</li><li>Detail D shaft seal 5:1</li><li>View F shaft end 2:1</li><li>Diagram 1 flow and ηv against pressure</li><li>Diagram 2 pressure in one tooth space</li></ul><p class="card-controls">Drag the gears · ↑↓ pressure · ←→ speed · Space pauses · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Fluid power courses: displacement, volumetric efficiency, leakage and torque</li><li>Product pages and data sheets for hydraulic gear pumps</li><li>Explaining batching and positive displacement in software, such as fixed-size work queues</li></ul>
+</div>
+</article>
+<article class="card" id="carburettor">
+<a class="card-img" href="sheets/carburettor.html"><img src="thumbs/carburettor.png" alt="Carburettor: Fixed-jet float-bowl carburettor, 26 mm bore, in axial section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-017</span><span>Fluid mechanics</span><span>26 parts · 6 views</span></p>
+<h3><a href="sheets/carburettor.html">Carburettor</a></h3>
+<p class="card-object">Fixed-jet float-bowl carburettor, 26 mm bore, in axial section</p>
+<p class="card-idea">Bernoulli's principle: one flow metering another</p>
+<p>Air speeding through the venturi throat loses ½ρv² of pressure, and because the float bowl is vented that depression lifts petrol through the main jet, so fuel follows air in proportion. Below the threshold the pilot circuit takes over through the idle and progression ports; the float drops as the jets draw, and its needle opens to refill the bowl.</p>
+<details><summary>Views and controls</summary><ul><li>Axial section 2:1</li><li>Detail B float needle valve 5:1</li><li>Detail D idle and progression ports 5:1</li><li>View C from the air horn 1:1</li><li>Diagram 1 AFR against throttle</li><li>Diagram 2 throat depression and fuel against air flow</li></ul><p class="card-controls">Drag the throttle plate · ← → throttle · C choke · [ ] mixture screw · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Engine and motorcycle courses: venturi depression, jetting, idle and progression circuits</li><li>Workshop and product documentation for small-engine carburettors</li><li>Explaining proportional control, where one flow meters another</li></ul>
+</div>
+</article>
+<article class="card" id="pressure-cooker">
+<a class="card-img" href="sheets/pressure-cooker.html"><img src="thumbs/pressure-cooker.png" alt="Pressure cooker: 6 L stovetop pressure cooker (EN 12778) in axial section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-018</span><span>Thermodynamics</span><span>24 parts · 7 views</span></p>
+<h3><a href="sheets/pressure-cooker.html">Pressure cooker</a></h3>
+<p class="card-object">6 L stovetop pressure cooker (EN 12778) in axial section</p>
+<p class="card-idea">Raising the boiling point with pressure; a safety interlock that cannot open while the resource is in use</p>
+<p>Water boils where its vapour pressure meets the pressure above it, so a 62 g weight on a Ø3 bore holds 0.86 bar and the water boils at 118 °C instead of 100. The lock pin rises at 3 kPa, seals its own vent and blocks the lid's slide, so the lid cannot be turned while the pot is pressurised. The operating point climbs the saturation curve, sits on the weight while the steam vents, and slides back down when the hob goes off.</p>
+<details><summary>Views and controls</summary><ul><li>Section A-A 1:2</li><li>Detail B valves 2:1</li><li>Detail C bayonet lug, gasket and window 5:1</li><li>Detail D lock pin and slide 5:1</li><li>View E lid from above, broken 1:2.5</li><li>Diagram 1 saturation curve</li><li>Table 1 saturated steam</li></ul><p class="card-controls">Space hob on/off · drag the weight or ↑ ↓ to vent by hand · B blocks the vent (safety valve) · R refills · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Thermodynamics teaching: vapour pressure, the Antoine equation, latent heat and boiling point against pressure</li><li>Product documentation and safety training for pressure cookers and autoclaves</li><li>Explaining a lock that guards a resource: the lid stays locked for as long as the pressure (the work in progress) holds</li></ul>
+</div>
+</article>
+<article class="card" id="solenoid-valve">
+<a class="card-img" href="sheets/solenoid-valve.html"><img src="thumbs/solenoid-valve.png" alt="Solenoid valve: 2/2-way normally closed pilot-operated solenoid valve, G1/2, in axial section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-019</span><span>Hydraulics and electromagnetics</span><span>21 parts · 5 views</span></p>
+<h3><a href="sheets/solenoid-valve.html">Solenoid valve</a></h3>
+<p class="card-object">2/2-way normally closed pilot-operated solenoid valve, G1/2, in axial section</p>
+<p class="card-idea">A small signal controlling a big flow: servo amplification through a pilot</p>
+<p>A 10 W coil lifts an 11 mm plunger only 3.2 mm, and that opens a 1.6 mm pilot. The pilot drains the chamber above the diaphragm faster than the 0.8 mm bleed refills it, so water pressure lifts the diaphragm after the plunger and 35 L/min flows. Switched off, the bleed lets the diaphragm down slowly enough (0.72 s) that the surge in the pipe stays below 1 bar.</p>
+<details><summary>Views and controls</summary><ul><li>Axial section 2:1</li><li>Detail P pilot and bleed 5:1</li><li>View C from above 2:1</li><li>Diagram 1 current, lift and flow against time</li><li>Diagram 2 magnet pull against air gap</li></ul><p class="card-controls">Space or tap switches the coil · ↑ ↓ or drag sets supply pressure · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Industrial automation and fluid-power training: pilot operation, MOPD, minimum differential pressure, water hammer</li><li>Product documentation for solenoid and diaphragm valves</li><li>Explaining amplification, or a feature flag as a small pilot signal that switches a large flow</li></ul>
+</div>
+</article>
+<article class="card" id="stirling">
+<a class="card-img" href="sheets/stirling.html"><img src="thumbs/stirling.png" alt="Stirling engine: Beta-type Stirling demonstrator with a rhombic drive, in axial section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-020</span><span>Thermodynamics</span><span>25 parts · 5 views</span></p>
+<h3><a href="sheets/stirling.html">Stirling engine</a></h3>
+<p class="card-object">Beta-type Stirling demonstrator with a rhombic drive, in axial section</p>
+<p class="card-idea">Heat flowing from hot to cold does work: the Stirling cycle</p>
+<p>A burner heats the cap, the displacer shuttles one sealed charge of air between the hot cap and the finned cooler through a 1 mm gap regenerator, and the power piston takes work from the pressure swing. A Schmidt model drives everything: the gas is shaded by the temperature of the space it is in, the P–V loop traces live, and turning the burner down shrinks the loop and slows the flywheel towards its stall.</p>
+<details><summary>Views and controls</summary><ul><li>Axial section 1:1</li><li>Detail D hot joint and gap regenerator 5:1</li><li>Detail E piston 2:1</li><li>Rear view with flywheel 1:2.5</li><li>P–V diagram</li></ul><p class="card-controls">Drag the flywheel or gears · ← → turn · ↑ ↓ burner · Space flame on/off · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Thermodynamics teaching: the Stirling cycle, Schmidt analysis, Carnot and the role of the regenerator</li><li>Explaining heat engines and why a temperature difference is needed to do work</li><li>Product or museum pages for demonstrator engines and rhombic drives</li></ul>
+</div>
+</article>
+<article class="card" id="disc-brake">
+<a class="card-img" href="sheets/disc-brake.html"><img src="thumbs/disc-brake.png" alt="Hydraulic disc brake: Bicycle hydraulic disc brake: lever master cylinder and two-piston post-mount caliper in section" width="960" height="679" loading="lazy"></a>
+<div class="card-body">
+<p class="card-meta"><span>BP-021</span><span>Hydraulics</span><span>29 parts · 7 views</span></p>
+<h3><a href="sheets/disc-brake.html">Hydraulic disc brake</a></h3>
+<p class="card-object">Bicycle hydraulic disc brake: lever master cylinder and two-piston post-mount caliper in section</p>
+<p class="card-idea">Hydraulic force transmission; a master–replica pair where one piston writes and the other follows</p>
+<p>Pascal's principle between two pistons. The lever's primary cup first has to pass the timing port before any pressure can build, then the oil pushes the caliper pistons across the pad gap, and only once the pads touch the rotor does the clamp force climb steeply. On release the square seals spring back and pull the pistons off the rotor by exactly the rollback they took.</p>
+<details><summary>Views and controls</summary><ul><li>Section in the plane of the lever 2:1</li><li>Section A-A split clamp 2:1</li><li>Detail D timing port 10:1</li><li>Section B-B caliper 2:1</li><li>Detail E square seal 20:1</li><li>View C rotor 1:2</li><li>Clamp force–finger travel diagram</li></ul><p class="card-controls">Drag the lever · ↑ ↓ pull and release · Space squeezes · S slow motion</p></details>
+<h4>Where it's useful</h4>
+<ul class="used"><li>Cycling mechanics training: bleeding, free stroke, bite point and pad clearance</li><li>Product documentation for hydraulic brakes and clutches</li><li>Explaining a master–replica (leader–follower) pair in software or systems design</li></ul>
+</div>
+</article></div>
+</section>
+
+<section><h2 id="uses"><span class="sn">06</span>Where it's useful</h2>
+<p class="prose">A live section is useful wherever someone needs to see inside something and trust what they see.</p>
+<div class="uses"><div class="use"><h3>Teaching physics and thermodynamics</h3><p>A model you can push. Students change one thing and watch the pressure, the curve and the numbers follow, all from the same equations.</p><p class="use-links"><a href="sheets/floor-pump.html">Floor pump</a>, <a href="sheets/bottle-jack.html">Bottle jack</a>, <a href="sheets/stirling.html">Stirling engine</a>, <a href="sheets/four-stroke.html">Four-stroke engine</a>, <a href="sheets/pressure-cooker.html">Pressure cooker</a>, <a href="sheets/carburettor.html">Carburettor</a></p></div>
+<div class="use"><h3>Explaining software ideas</h3><p>Rate limits, debounce, circuit breakers and back-pressure were mechanisms long before they were code. Draw the machine and the abstraction becomes obvious.</p><p class="use-links"><a href="sheets/token-bucket.html">Cistern token bucket</a>, <a href="sheets/debounce.html">Door closer</a>, <a href="sheets/circuit-breaker.html">Circuit breaker</a>, <a href="sheets/relief-valve.html">Relief valve</a>, <a href="sheets/pin-tumbler.html">Pin tumbler cylinder</a>, <a href="sheets/differential.html">Open differential</a>, <a href="sheets/shock-absorber.html">Shock absorber</a>, <a href="sheets/click-pen.html">Click pen</a>, <a href="sheets/governor.html">Porter governor</a></p></div>
+<div class="use"><h3>Product pages and documentation</h3><p>Show what is inside the product: the seal, the valve, the spring. A live section sells engineering better than a render.</p><p class="use-links"><a href="sheets/disc-brake.html">Hydraulic disc brake</a>, <a href="sheets/solenoid-valve.html">Solenoid valve</a>, <a href="sheets/click-pen.html">Click pen</a>, <a href="sheets/floor-pump.html">Floor pump</a>, <a href="sheets/pressure-cooker.html">Pressure cooker</a></p></div>
+<div class="use"><h3>Technician and apprentice training</h3><p>Real part numbers, real materials, real tolerances. A parts list and balloons that match a teardown.</p><p class="use-links"><a href="sheets/four-stroke.html">Four-stroke engine</a>, <a href="sheets/thermostat.html">Wax thermostat</a>, <a href="sheets/disc-brake.html">Hydraulic disc brake</a>, <a href="sheets/centrifugal-pump.html">Centrifugal pump</a>, <a href="sheets/gear-pump.html">External gear pump</a>, <a href="sheets/relief-valve.html">Relief valve</a>, <a href="sheets/differential.html">Open differential</a></p></div>
+<div class="use"><h3>Control systems and feedback</h3><p>Setpoints, droop, hysteresis and settling, drawn as the governors and valves that first did it.</p><p class="use-links"><a href="sheets/governor.html">Porter governor</a>, <a href="sheets/thermostat.html">Wax thermostat</a>, <a href="sheets/relief-valve.html">Relief valve</a>, <a href="sheets/token-bucket.html">Cistern token bucket</a>, <a href="sheets/escapement.html">Lever escapement</a></p></div>
+<div class="use"><h3>Process and hydraulic engineering</h3><p>Duty points, pump curves, displacement and leakage, at the operating point you choose.</p><p class="use-links"><a href="sheets/centrifugal-pump.html">Centrifugal pump</a>, <a href="sheets/gear-pump.html">External gear pump</a>, <a href="sheets/bottle-jack.html">Bottle jack</a>, <a href="sheets/solenoid-valve.html">Solenoid valve</a>, <a href="sheets/relief-valve.html">Relief valve</a></p></div></div>
+</section>
+
+<section><h2 id="themes"><span class="sn">07</span>Three themes</h2>
+<p class="prose">Colours are tokens, never values, so every sheet has a blueprint, a paper and a dark theme. Pick one in the sheet's bar, or add <code>?theme=</code> to the URL.</p>
+<div class="themes">
+<figure><img src="thumbs/theme-blueprint.png" alt="Floor pump detail in the blueprint theme" width="840" height="594" loading="lazy"><figcaption>blueprint</figcaption></figure>
+<figure><img src="thumbs/theme-paper.png" alt="Floor pump detail in the paper theme" width="840" height="594" loading="lazy"><figcaption>paper</figcaption></figure>
+<figure><img src="thumbs/theme-dark.png" alt="Floor pump detail in the dark theme" width="840" height="594" loading="lazy"><figcaption>dark</figcaption></figure>
+</div>
+</section>
+
+<section><h2 id="code"><span class="sn">08</span>In your code</h2>
+<div class="prose">
+<p>A sheet is a single HTML file: inline SVG, inlined CSS and a few kilobytes of plain JavaScript. No framework, no build step at runtime. Embed one anywhere:</p>
+<pre>&lt;iframe src="floor-pump.html" style="width:100%;aspect-ratio:1200/900;border:0"&gt;&lt;/iframe&gt;</pre>
+<p>The drafting kit is pure functions that return SVG strings, so it runs in Node and in the page. Install the package and use it directly:</p>
+<pre>npm install @harifed/blueprint
+
+import * as K from "@harifed/blueprint/kit/draft";
+
+const V = K.view({ x: 190, y: 780, scale: 1 / 2.5 });
+const barrel = K.revolve([[16, 34], [17.5, 34], [17.5, 384], [16, 384]]);
+svg += K.section(V, barrel, { mat: "alu", angle: 45 });
+svg += K.dim(V, [-17.5, 384], [17.5, 384], { dir: "h", off: -24, prefix: "Ø" });</pre>
+<p>Every sheet understands the same URL parameters:</p>
+</div>
+<table>
+<thead><tr><th>Parameter</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>?t=6.5</code></td><td>Renders the tour at 6.5 s, deterministically. Screenshots and tests use it.</td></tr>
+<tr><td><code>?theme=paper</code></td><td>Blueprint, paper or dark.</td></tr>
+<tr><td><code>?zoom=x,y,w,h</code></td><td>Shows one region of the sheet filling the window, for close-ups.</td></tr>
+<tr><td><code>?check=1</code></td><td>Runs the in-page layout check and writes its findings as JSON.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section><h2 id="install"><span class="sn">09</span>Install</h2>
+<div class="prose">
+<p>One command copies the skill into <code>~/.claude/skills/blueprint</code>:</p>
+<div class="cmd"><code id="cmd">npx @harifed/blueprint</code><button type="button" data-copy="cmd">Copy</button></div>
+<p>Add <code>--project</code> to install into this project's <code>.claude/skills</code> instead, or <code>--no-examples</code> for a smaller install. Or clone it:</p>
+<pre>git clone https://github.com/hariFED/blueprint ~/.claude/skills/blueprint</pre>
+<p>It needs Node.js 20 or later, and Chrome, Chromium or Edge for the checks. Restart Claude Code, then try:</p>
+<pre>/blueprint explain how a mechanical watch keeps time
+/blueprint draw a token bucket rate limiter as a machine
+/blueprint how does a pressure cooker cook faster?
+/blueprint a section through a bicycle disc brake caliper</pre>
+</div>
+</section>
+
+<section><h2 id="limits"><span class="sn">10</span>Limits</h2>
+<div class="prose">
+<p><b>It takes time.</b> A good sheet is about an hour of Claude's work, most of it in the second look: reading close-ups and fixing what a checker would mark down. Ask for a Set only when one sheet isn't enough.</p>
+<p><b>Explanatory, not manufacturing.</b> Proportions, standard parts and materials are real and the physics is a genuine model, but nobody should machine a part from these sheets.</p>
+<p><b>Flat drawings.</b> Blueprint draws orthographic views and sections, deliberately. If you want a 3D object you can turn, a different skill will serve you better.</p>
+<p><b>The first sheet is a draft.</b> Look at it, say what's wrong, and ask for another pass. The checker catches collisions; only you know whether the explanation lands.</p>
+</div>
+</section>
+
+<section><h2 id="faq"><span class="sn">11</span>Questions</h2>
+<div class="prose"><details class="faq"><summary>Do I need a framework?</summary><p>No. A sheet is one standalone HTML file with inline SVG and a few kilobytes of plain JavaScript. Open it from disk, host it anywhere, or drop it in an iframe.</p></details>
+<details class="faq"><summary>Can I edit a sheet afterwards?</summary><p>Yes. The geometry, the model and the page are separate small files. Ask Claude to change a part, a dimension or the tour, then rebuild with <code>node build.mjs</code>.</p></details>
+<details class="faq"><summary>Is it accessible?</summary><p>Each sheet has keyboard controls, a polite screen-reader readout of the live numbers, honours reduced motion by showing a still settled frame, and pauses when off screen.</p></details>
+<details class="faq"><summary>How accurate are the drawings?</summary><p>The proportions and standard parts are real and the physics is a genuine model, but these are explanatory drawings, not manufacturing drawings. Treat tolerances and materials as plausible, not certified.</p></details>
+<details class="faq"><summary>Which themes are there?</summary><p>Blueprint, paper and dark, all from CSS tokens. Add <code>?theme=paper</code> to any sheet's URL.</p></details>
+<details class="faq"><summary>How do I get the best results?</summary><p>Name the real object if you know it, say what you want to watch, and ask for one Sheet first. Then ask for a second look: Claude finds most problems in the close-ups.</p></details>
+<details class="faq"><summary>What licence?</summary><p>MIT, for the skill, the kit and every example sheet.</p></details></div>
+</section>
+</div>
+</main>
+
+<footer><div class="wrap">
+<span>Blueprint 0.1.0 · made by hariFED with Claude Code · IBM Plex</span>
+<span><a href="https://github.com/hariFED/blueprint">GitHub</a> · <a href="https://www.npmjs.com/package/@harifed/blueprint">npm</a> · <a href="https://github.com/hariFED/blueprint/blob/main/LICENSE">MIT licence</a> · inspired by <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a></span>
+</div></footer>
+
+<script>
+document.querySelectorAll("[data-copy]").forEach(function (b) {
+  b.addEventListener("click", function () {
+    var text = document.getElementById(b.dataset.copy).textContent;
+    var done = function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1600); };
+    try { navigator.clipboard.writeText(text).then(done, function () {}); } catch (e) {}
+  });
+});
+</script>
+</body>
+</html>

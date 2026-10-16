@@ -1,0 +1,15 @@
+{
+  "slug": "relief-valve",
+  "dwg": "BP-011",
+  "title": "Relief valve",
+  "object": "DN25 spring-loaded safety relief valve in axial section",
+  "idea": "A spring-set threshold with hysteresis: pop open, blow down, reseat",
+  "summary": "The spring's preload over the seat area sets the opening pressure. Once the disc cracks open, gas fills the huddling chamber and acts on a larger area, so the valve pops to high lift and stays open until the pressure has fallen about 10 %, then snaps shut. A compressor refills the receiver and the cycle repeats, tracing the hysteresis loop in Diagram 1.",
+  "usedFor": ["Process safety training: set pressure, simmer, blowdown and chatter", "Product documentation for safety valves to ISO 4126 / ASME VIII", "Explaining back-pressure, load shedding and hysteresis thresholds in queues"],
+  "domain": "Pneumatics, process safety",
+  "parts": 23,
+  "views": ["Axial section 1:2", "Detail B nozzle, disc and guide 2:1", "Detail C setting and lifting gear 1:1", "Diagram 1 lift against pressure", "Diagram 2 receiver pressure against time", "Diagram 3 discharge against lift"],
+  "controls": "Drag up/down for vessel pressure · ↑ ↓ pressure · ← → adjusting screw · Space compressor · S slow motion",
+  "checkTimes": "0,2,4,5.1,5.4,6,8,8.3,10,13,15.3,18.5,22,27",
+  "shotT": 27
+}

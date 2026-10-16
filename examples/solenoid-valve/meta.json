@@ -1,0 +1,15 @@
+{
+  "slug": "solenoid-valve",
+  "dwg": "BP-019",
+  "title": "Solenoid valve",
+  "object": "2/2-way normally closed pilot-operated solenoid valve, G1/2, in axial section",
+  "idea": "A small signal controlling a big flow: servo amplification through a pilot",
+  "summary": "A 10 W coil lifts an 11 mm plunger only 3.2 mm, and that opens a 1.6 mm pilot. The pilot drains the chamber above the diaphragm faster than the 0.8 mm bleed refills it, so water pressure lifts the diaphragm after the plunger and 35 L/min flows. Switched off, the bleed lets the diaphragm down slowly enough (0.72 s) that the surge in the pipe stays below 1 bar.",
+  "usedFor": ["Industrial automation and fluid-power training: pilot operation, MOPD, minimum differential pressure, water hammer", "Product documentation for solenoid and diaphragm valves", "Explaining amplification, or a feature flag as a small pilot signal that switches a large flow"],
+  "domain": "Hydraulics and electromagnetics",
+  "parts": 21,
+  "views": ["Axial section 2:1", "Detail P pilot and bleed 5:1", "View C from above 2:1", "Diagram 1 current, lift and flow against time", "Diagram 2 magnet pull against air gap"],
+  "controls": "Space or tap switches the coil · ↑ ↓ or drag sets supply pressure · S slow motion",
+  "checkTimes": "0,0.7,1,2,3,5,6,8,10,12,13.9,14.2,16,18,21,27",
+  "shotT": 18
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "bottle-jack",
+  "dwg": "BP-005",
+  "title": "Bottle jack",
+  "object": "2-tonne hydraulic bottle jack in axial section",
+  "idea": "Force multiplication by area ratio (Pascal's principle)",
+  "summary": "Pascal's principle in a cast base. Each 25 mm stroke of the Ø12 plunger pushes 2.83 cm³ of oil past the delivery ball and lifts the Ø32 ram 3.52 mm, so 138 N on the handle holds 1.5 t. Section A-A puts the two bores side by side, and cracking the release screw lets the load drive the oil back to the reservoir.",
+  "usedFor": ["Physics teaching: Pascal's principle, area ratio, work in equals work out", "Product documentation for hydraulic jacks, presses and pumps", "A metaphor for leverage and amortisation: many small strokes buy one large lift"],
+  "domain": "Hydraulics",
+  "parts": 29,
+  "views": ["Axial section 1:1", "Section A-A plan through the base 1:1", "Detail B pump valves 2:1", "Detail D release valve 2:1", "Ram lift against pump strokes diagram"],
+  "controls": "Drag the handle · ↑ ↓ stroke · Space pumps · O opens the release valve · L changes the load · S slow motion",
+  "checkTimes": "0,1.3,3.1,5.5,8.2,11.6,14.9,17.6,18.5,19.6,20.6,21.5,22.6,24",
+  "shotT": 9.45
+}

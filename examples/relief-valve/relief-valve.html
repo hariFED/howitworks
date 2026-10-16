@@ -1,0 +1,1644 @@
+<!doctype html>
+<html lang="en" data-theme="blueprint">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relief Valve Section</title>
+<meta name="description" content="A live engineering drawing of a spring-loaded safety relief valve: a compressor fills the receiver, the disc simmers, pops on its huddling chamber, blows down and reseats.">
+<style>
+/* Blueprint sheet styles. Every colour a drawing uses is one of these tokens. */
+
+:root,
+[data-theme="blueprint"] {
+  --bp-page: #0a2747;
+  --bp-paper: #123b69;
+  --bp-ink: #e9f1ff;
+  --bp-hatch: rgba(214, 230, 255, 0.72);
+  --bp-muted: #95b3da;
+  --bp-grid: rgba(190, 215, 255, 0.07);
+  --bp-accent: #ffc94d;
+  --bp-accent-ink: #ffd77a;
+  --bp-ui: rgba(233, 241, 255, 0.12);
+}
+[data-theme="paper"] {
+  --bp-page: #e4dfd1;
+  --bp-paper: #f7f3e8;
+  --bp-ink: #1c2633;
+  --bp-hatch: rgba(28, 38, 51, 0.78);
+  --bp-muted: #616b78;
+  --bp-grid: rgba(28, 38, 51, 0.045);
+  --bp-accent: #d4472c;
+  --bp-accent-ink: #b8361e;
+  --bp-ui: rgba(28, 38, 51, 0.08);
+}
+[data-theme="dark"] {
+  --bp-page: #0d0f12;
+  --bp-paper: #15181c;
+  --bp-ink: #dde3ea;
+  --bp-hatch: rgba(221, 227, 234, 0.62);
+  --bp-muted: #86919d;
+  --bp-grid: rgba(221, 227, 234, 0.035);
+  --bp-accent: #f29f3d;
+  --bp-accent-ink: #f6b462;
+  --bp-ui: rgba(221, 227, 234, 0.08);
+}
+
+:root {
+  --bp-thick: 1.15px;
+  --bp-thin: 0.55px;
+  --bp-font: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bp-page);
+  color: var(--bp-ink);
+  font-family: var(--bp-font);
+}
+.bp-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  box-sizing: border-box;
+}
+.bp-figure {
+  margin: 0;
+}
+.bp-sheet {
+  display: block;
+  width: 100%;
+  height: auto;
+  outline: none;
+  border-radius: 2px;
+}
+.bp-sheet:focus-visible {
+  box-shadow: 0 0 0 2px var(--bp-accent);
+}
+.bp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--bp-muted);
+  letter-spacing: 0.03em;
+}
+.bp-bar kbd {
+  font: inherit;
+  color: var(--bp-ink);
+  border: 1px solid var(--bp-ui);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+.bp-themes {
+  display: flex;
+  gap: 4px;
+}
+.bp-themes button {
+  font: inherit;
+  color: var(--bp-muted);
+  background: transparent;
+  border: 1px solid var(--bp-ui);
+  border-radius: 3px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.bp-themes button[aria-pressed="true"] {
+  color: var(--bp-ink);
+  background: var(--bp-ui);
+}
+.bp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Zoom mode (?zoom=x,y,w,h): the region fills the window, for close-up checks. */
+body.bp-zoom .bp-page {
+  max-width: none;
+  padding: 0;
+}
+body.bp-zoom .bp-sheet {
+  width: 100vw;
+  height: 100vh;
+}
+body.bp-zoom .bp-bar {
+  display: none;
+}
+
+/* ---- the drawing */
+.bp-sheet .sheet-bg {
+  fill: var(--bp-paper);
+}
+.bp-sheet .grid {
+  fill: none;
+  stroke: var(--bp-grid);
+  stroke-width: 0.5px;
+}
+.bp-sheet .vis,
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  fill: none;
+  stroke: var(--bp-ink);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.bp-sheet .vis {
+  stroke-width: var(--bp-thick);
+}
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .hid {
+  stroke-dasharray: 4 2.2;
+  stroke-linecap: butt;
+}
+.bp-sheet .ctr {
+  stroke-dasharray: 15 2.6 2 2.6;
+  stroke-linecap: butt;
+}
+.bp-sheet .phan {
+  stroke-dasharray: 13 2.4 1.8 2.4 1.8 2.4;
+  stroke-linecap: butt;
+}
+.bp-sheet .vis.spring {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .paper,
+.bp-sheet .balloon {
+  fill: var(--bp-paper);
+}
+.bp-sheet .balloon {
+  stroke: var(--bp-ink);
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .solid,
+.bp-sheet .head,
+.bp-sheet .dot {
+  fill: var(--bp-ink);
+}
+.bp-sheet .hl {
+  fill: none;
+  stroke: var(--bp-hatch);
+  stroke-width: 0.5px;
+}
+.bp-sheet .hl-dash {
+  stroke-dasharray: 1.3 1.3;
+}
+.bp-sheet .hd {
+  fill: var(--bp-hatch);
+}
+.bp-sheet .tint {
+  fill: var(--bp-accent);
+}
+.bp-sheet .accent {
+  stroke: var(--bp-accent);
+}
+.bp-sheet .accent-fill {
+  fill: var(--bp-accent);
+}
+.bp-sheet .t {
+  font-family: var(--bp-font);
+  font-size: 9.5px;
+  fill: var(--bp-ink);
+  letter-spacing: 0.02em;
+}
+.bp-sheet .t-sm {
+  font-size: 7.6px;
+}
+.bp-sheet .t-lg {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-xl {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.bp-sheet .t-cap {
+  font-size: 6.2px;
+  fill: var(--bp-muted);
+  letter-spacing: 0.08em;
+}
+.bp-sheet .t-head {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-mute {
+  fill: var(--bp-muted);
+}
+.bp-sheet .t-accent {
+  fill: var(--bp-accent-ink);
+}
+.bp-sheet [data-drag] {
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.bp-sheet .hit{fill:transparent}.bp-sheet .tint{fill:url(#gas)}.bp-sheet .gas-dot{fill:var(--bp-accent)}.bp-sheet .grid-line{stroke:var(--bp-grid);stroke-width:.6px}
+</style>
+</head>
+<body>
+<main class="bp-page">
+<figure class="bp-figure">
+<svg class="bp-sheet" viewBox="0 0 1200 848" role="img" tabindex="0" aria-label="Engineering drawing of a DN25 spring-loaded safety relief valve cut through its axis. A compressor fills the receiver; the valve simmers, pops open, blows down and reseats. Drag up or down to set the vessel pressure; left and right arrows turn the adjusting screw." data-views='{"main":{"x":215,"y":507,"scale":0.5},"B":{"x":600,"y":605.8383838383838,"scale":2},"C":{"x":520.7272727272727,"y":1302.3232323232323,"scale":1}}'><defs><pattern id="h-steel-45" patternUnits="userSpaceOnUse" width="3.4" height="3.4" patternTransform="rotate(45)"><path class="hl" d="M0 -1V4.4"/></pattern><pattern id="h-steel-135" patternUnits="userSpaceOnUse" width="3.4" height="3.4" patternTransform="rotate(135)"><path class="hl" d="M0 -1V4.4"/></pattern><pattern id="h-steel-30" patternUnits="userSpaceOnUse" width="3.4" height="3.4" patternTransform="rotate(30)"><path class="hl" d="M0 -1V4.4"/></pattern><pattern id="h-steel-60" patternUnits="userSpaceOnUse" width="3.4" height="3.4" patternTransform="rotate(60)"><path class="hl" d="M0 -1V4.4"/></pattern><pattern id="h-iron-45" patternUnits="userSpaceOnUse" width="5.6" height="5.6" patternTransform="rotate(45)"><path class="hl" d="M0 -1V6.6"/></pattern><pattern id="h-iron-135" patternUnits="userSpaceOnUse" width="5.6" height="5.6" patternTransform="rotate(135)"><path class="hl" d="M0 -1V6.6"/></pattern><pattern id="h-iron-30" patternUnits="userSpaceOnUse" width="5.6" height="5.6" patternTransform="rotate(30)"><path class="hl" d="M0 -1V6.6"/></pattern><pattern id="h-iron-60" patternUnits="userSpaceOnUse" width="5.6" height="5.6" patternTransform="rotate(60)"><path class="hl" d="M0 -1V6.6"/></pattern><pattern id="h-alu-45" patternUnits="userSpaceOnUse" width="5.2" height="5.2" patternTransform="rotate(45)"><path class="hl" d="M0 -1V6.2M1.5 -1V6.2"/></pattern><pattern id="h-alu-135" patternUnits="userSpaceOnUse" width="5.2" height="5.2" patternTransform="rotate(135)"><path class="hl" d="M0 -1V6.2M1.5 -1V6.2"/></pattern><pattern id="h-alu-30" patternUnits="userSpaceOnUse" width="5.2" height="5.2" patternTransform="rotate(30)"><path class="hl" d="M0 -1V6.2M1.5 -1V6.2"/></pattern><pattern id="h-alu-60" patternUnits="userSpaceOnUse" width="5.2" height="5.2" patternTransform="rotate(60)"><path class="hl" d="M0 -1V6.2M1.5 -1V6.2"/></pattern><pattern id="h-brass-45" patternUnits="userSpaceOnUse" width="4.6" height="4.6" patternTransform="rotate(45)"><path class="hl" d="M0 -1V5.6"/><path class="hl hl-dash" d="M2.3 -1V5.6"/></pattern><pattern id="h-brass-135" patternUnits="userSpaceOnUse" width="4.6" height="4.6" patternTransform="rotate(135)"><path class="hl" d="M0 -1V5.6"/><path class="hl hl-dash" d="M2.3 -1V5.6"/></pattern><pattern id="h-brass-30" patternUnits="userSpaceOnUse" width="4.6" height="4.6" patternTransform="rotate(30)"><path class="hl" d="M0 -1V5.6"/><path class="hl hl-dash" d="M2.3 -1V5.6"/></pattern><pattern id="h-brass-60" patternUnits="userSpaceOnUse" width="4.6" height="4.6" patternTransform="rotate(60)"><path class="hl" d="M0 -1V5.6"/><path class="hl hl-dash" d="M2.3 -1V5.6"/></pattern><pattern id="h-bronze-45" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(45)"><path class="hl" d="M0 -1V4.6"/><path class="hl hl-dash" d="M1.8 -1V4.6"/></pattern><pattern id="h-bronze-135" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(135)"><path class="hl" d="M0 -1V4.6"/><path class="hl hl-dash" d="M1.8 -1V4.6"/></pattern><pattern id="h-bronze-30" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(30)"><path class="hl" d="M0 -1V4.6"/><path class="hl hl-dash" d="M1.8 -1V4.6"/></pattern><pattern id="h-bronze-60" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(60)"><path class="hl" d="M0 -1V4.6"/><path class="hl hl-dash" d="M1.8 -1V4.6"/></pattern><pattern id="h-rubber-45" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(45)"><path class="hl" d="M0 -1V4.2M-1 0H4.2"/></pattern><pattern id="h-rubber-135" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(135)"><path class="hl" d="M0 -1V4.2M-1 0H4.2"/></pattern><pattern id="h-rubber-30" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(30)"><path class="hl" d="M0 -1V4.2M-1 0H4.2"/></pattern><pattern id="h-rubber-60" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(60)"><path class="hl" d="M0 -1V4.2M-1 0H4.2"/></pattern><pattern id="h-plastic-45" patternUnits="userSpaceOnUse" width="2.3" height="2.3" patternTransform="rotate(45)"><path class="hl" d="M0 -1V3.3"/></pattern><pattern id="h-plastic-135" patternUnits="userSpaceOnUse" width="2.3" height="2.3" patternTransform="rotate(135)"><path class="hl" d="M0 -1V3.3"/></pattern><pattern id="h-plastic-30" patternUnits="userSpaceOnUse" width="2.3" height="2.3" patternTransform="rotate(30)"><path class="hl" d="M0 -1V3.3"/></pattern><pattern id="h-plastic-60" patternUnits="userSpaceOnUse" width="2.3" height="2.3" patternTransform="rotate(60)"><path class="hl" d="M0 -1V3.3"/></pattern><pattern id="h-foam-45" patternUnits="userSpaceOnUse" width="2.6" height="2.6" patternTransform="rotate(45)"><circle class="hd" cx="1.3" cy="1.3" r="0.42"/></pattern><pattern id="h-foam-135" patternUnits="userSpaceOnUse" width="2.6" height="2.6" patternTransform="rotate(135)"><circle class="hd" cx="1.3" cy="1.3" r="0.42"/></pattern><pattern id="h-foam-30" patternUnits="userSpaceOnUse" width="2.6" height="2.6" patternTransform="rotate(30)"><circle class="hd" cx="1.3" cy="1.3" r="0.42"/></pattern><pattern id="h-foam-60" patternUnits="userSpaceOnUse" width="2.6" height="2.6" patternTransform="rotate(60)"><circle class="hd" cx="1.3" cy="1.3" r="0.42"/></pattern><pattern id="h-wood-45" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)"><path class="hl" d="M0 -1V5"/><path class="hl" d="M2.2 -1C3 1.2 1.4 2.8 2.2 5"/></pattern><pattern id="h-wood-135" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(135)"><path class="hl" d="M0 -1V5"/><path class="hl" d="M2.2 -1C3 1.2 1.4 2.8 2.2 5"/></pattern><pattern id="h-wood-30" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(30)"><path class="hl" d="M0 -1V5"/><path class="hl" d="M2.2 -1C3 1.2 1.4 2.8 2.2 5"/></pattern><pattern id="h-wood-60" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(60)"><path class="hl" d="M0 -1V5"/><path class="hl" d="M2.2 -1C3 1.2 1.4 2.8 2.2 5"/></pattern><pattern id="gas" patternUnits="userSpaceOnUse" width="3.2" height="3.2"><circle class="gas-dot" cx="0.8" cy="0.8" r="0.62"/><circle class="gas-dot" cx="2.4" cy="2.4" r="0.62"/></pattern><pattern id="grid" patternUnits="userSpaceOnUse" width="10" height="10"><path class="grid" d="M10 0H0V10"/></pattern><clipPath id="clip-B"><circle cx="600" cy="222" r="178"/></clipPath><clipPath id="clip-C"><rect x="448" y="470" width="145.45" height="266.67" rx="10"/></clipPath></defs><rect class="sheet-bg" width="1200" height="848"/><rect fill="url(#grid)" width="1200" height="848"/><g data-role="frame"><rect class="thin" x="8" y="8" width="1184" height="832"/><rect class="vis" x="24" y="24" width="1152" height="800"/><path class="thin" d="M168 8V24M168 824V840M312 8V24M312 824V840M456 8V24M456 824V840M600 8V24M600 824V840M744 8V24M744 824V840M888 8V24M888 824V840M1032 8V24M1032 824V840M8 157.33H24M1176 157.33H1192M8 290.67H24M1176 290.67H1192M8 424H24M1176 424H1192M8 557.33H24M1176 557.33H1192M8 690.67H24M1176 690.67H1192"/><path class="vis" d="M600 8V34M600 840V814M8 424H34M1192 424H1166"/><text class="t t-sm" x="96" y="19" text-anchor="middle">1</text><text class="t t-sm" x="96" y="835" text-anchor="middle">1</text><text class="t t-sm" x="240" y="19" text-anchor="middle">2</text><text class="t t-sm" x="240" y="835" text-anchor="middle">2</text><text class="t t-sm" x="384" y="19" text-anchor="middle">3</text><text class="t t-sm" x="384" y="835" text-anchor="middle">3</text><text class="t t-sm" x="528" y="19" text-anchor="middle">4</text><text class="t t-sm" x="528" y="835" text-anchor="middle">4</text><text class="t t-sm" x="672" y="19" text-anchor="middle">5</text><text class="t t-sm" x="672" y="835" text-anchor="middle">5</text><text class="t t-sm" x="816" y="19" text-anchor="middle">6</text><text class="t t-sm" x="816" y="835" text-anchor="middle">6</text><text class="t t-sm" x="960" y="19" text-anchor="middle">7</text><text class="t t-sm" x="960" y="835" text-anchor="middle">7</text><text class="t t-sm" x="1104" y="19" text-anchor="middle">8</text><text class="t t-sm" x="1104" y="835" text-anchor="middle">8</text><text class="t t-sm" x="16" y="93.67" text-anchor="middle">A</text><text class="t t-sm" x="1184" y="93.67" text-anchor="middle">A</text><text class="t t-sm" x="16" y="227" text-anchor="middle">B</text><text class="t t-sm" x="1184" y="227" text-anchor="middle">B</text><text class="t t-sm" x="16" y="360.33" text-anchor="middle">C</text><text class="t t-sm" x="1184" y="360.33" text-anchor="middle">C</text><text class="t t-sm" x="16" y="493.67" text-anchor="middle">D</text><text class="t t-sm" x="1184" y="493.67" text-anchor="middle">D</text><text class="t t-sm" x="16" y="627" text-anchor="middle">E</text><text class="t t-sm" x="1184" y="627" text-anchor="middle">E</text><text class="t t-sm" x="16" y="760.33" text-anchor="middle">F</text><text class="t t-sm" x="1184" y="760.33" text-anchor="middle">F</text></g><g data-geom="main"><g data-role="fluid"><path id="gas-out-main" class="tint" fill-opacity="0.1" d="M178.64 448.41L251.36 448.41L251.36 405.99L178.64 405.99ZM178.64 406L189.75 406L189.75 383.77L178.64 383.77ZM240.25 406L251.36 406L251.36 383.77L240.25 383.77ZM251.35 432.76L321.06 432.76L321.06 389.32L251.35 389.32Z"/><path id="gas-hud-main" class="tint" fill-opacity="0.1" d="M199.34 422.15L230.66 422.15L230.66 418.11L199.34 418.11Z"/><path id="gas-in-main" class="tint" fill-opacity="0.8" d="M233.18 507L233.18 476.69L229.65 476.69L226.62 462.56L226.62 418.11L227.63 418.11L227.63 418.11L202.37 418.11L202.37 418.11L203.38 418.11L203.38 462.56L200.35 476.69L196.82 476.69L196.82 507Z"/></g><g data-part="1"><path class="paper" d="M196.82 478.72L194.8 478.72L194.8 454.47L189.75 454.47L189.75 448.41L178.64 448.41L178.64 434.47L170.56 434.47L170.56 448.41L182.68 460.54L182.68 486.8L179.14 486.8L179.14 504.98L180.66 504.98L180.66 507L196.82 507Z"/><path fill="url(#h-steel-45)" d="M196.82 478.72L194.8 478.72L194.8 454.47L189.75 454.47L189.75 448.41L178.64 448.41L178.64 434.47L170.56 434.47L170.56 448.41L182.68 460.54L182.68 486.8L179.14 486.8L179.14 504.98L180.66 504.98L180.66 507L196.82 507Z"/><path class="vis" d="M196.82 478.72L194.8 478.72L194.8 454.47L189.75 454.47L189.75 448.41L178.64 448.41L178.64 434.47L170.56 434.47L170.56 448.41L182.68 460.54L182.68 486.8L179.14 486.8L179.14 504.98L180.66 504.98L180.66 507L196.82 507Z"/><path class="paper" d="M178.64 425.99L178.64 383.77L183.69 383.77L183.69 365.59L177.12 365.59L177.12 359.53L168.59 359.53L168.59 372.66L163.48 375.69L158.38 372.66L158.38 359.53L151.36 359.53L151.36 377.71L166.52 377.71L170.56 381.75L170.56 425.99Z"/><path fill="url(#h-steel-45)" d="M178.64 425.99L178.64 383.77L183.69 383.77L183.69 365.59L177.12 365.59L177.12 359.53L168.59 359.53L168.59 372.66L163.48 375.69L158.38 372.66L158.38 359.53L151.36 359.53L151.36 377.71L166.52 377.71L170.56 381.75L170.56 425.99Z"/><path class="vis" d="M178.64 425.99L178.64 383.77L183.69 383.77L183.69 365.59L177.12 365.59L177.12 359.53L168.59 359.53L168.59 372.66L163.48 375.69L158.38 372.66L158.38 359.53L151.36 359.53L151.36 377.71L166.52 377.71L170.56 381.75L170.56 425.99Z"/><path class="paper" d="M165 486.8L156.92 486.8L156.92 504.98L165 504.98Z"/><path fill="url(#h-steel-45)" d="M165 486.8L156.92 486.8L156.92 504.98L165 504.98Z"/><path class="vis" d="M165 486.8L156.92 486.8L156.92 504.98L165 504.98Z"/><path class="paper" d="M233.18 507L249.34 507L249.34 504.98L250.86 504.98L250.86 486.8L247.32 486.8L247.32 456.49L255.4 444.37L269.65 444.37L269.65 432.76L251.36 432.76L251.36 448.41L240.25 448.41L240.25 454.47L235.2 454.47L235.2 478.72L233.18 478.72Z"/><path fill="url(#h-steel-45)" d="M233.18 507L249.34 507L249.34 504.98L250.86 504.98L250.86 486.8L247.32 486.8L247.32 456.49L255.4 444.37L269.65 444.37L269.65 432.76L251.36 432.76L251.36 448.41L240.25 448.41L240.25 454.47L235.2 454.47L235.2 478.72L233.18 478.72Z"/><path class="vis" d="M233.18 507L249.34 507L249.34 504.98L250.86 504.98L250.86 486.8L247.32 486.8L247.32 456.49L255.4 444.37L269.65 444.37L269.65 432.76L251.36 432.76L251.36 448.41L240.25 448.41L240.25 454.47L235.2 454.47L235.2 478.72L233.18 478.72Z"/><path class="paper" d="M281.57 444.37L300.86 444.37L300.86 457.51L319.04 457.51L319.04 455.48L321.06 455.48L321.06 432.76L281.57 432.76Z"/><path fill="url(#h-steel-45)" d="M281.57 444.37L300.86 444.37L300.86 457.51L319.04 457.51L319.04 455.48L321.06 455.48L321.06 432.76L281.57 432.76Z"/><path class="vis" d="M281.57 444.37L300.86 444.37L300.86 457.51L319.04 457.51L319.04 455.48L321.06 455.48L321.06 432.76L281.57 432.76Z"/><path class="paper" d="M300.86 486.8L319.04 486.8L319.04 475.69L300.86 475.69Z"/><path fill="url(#h-steel-45)" d="M300.86 486.8L319.04 486.8L319.04 475.69L300.86 475.69Z"/><path class="vis" d="M300.86 486.8L319.04 486.8L319.04 475.69L300.86 475.69Z"/><path class="paper" d="M251.36 389.32L321.06 389.32L321.06 366.6L319.04 366.6L319.04 364.58L300.86 364.58L300.86 377.71L278.64 377.71L278.64 359.53L271.62 359.53L271.62 372.66L266.52 375.69L261.41 372.66L261.41 359.53L252.88 359.53L252.88 365.59L246.31 365.59L246.31 383.77L251.36 383.77Z"/><path fill="url(#h-steel-45)" d="M251.36 389.32L321.06 389.32L321.06 366.6L319.04 366.6L319.04 364.58L300.86 364.58L300.86 377.71L278.64 377.71L278.64 359.53L271.62 359.53L271.62 372.66L266.52 375.69L261.41 372.66L261.41 359.53L252.88 359.53L252.88 365.59L246.31 365.59L246.31 383.77L251.36 383.77Z"/><path class="vis" d="M251.36 389.32L321.06 389.32L321.06 366.6L319.04 366.6L319.04 364.58L300.86 364.58L300.86 377.71L278.64 377.71L278.64 359.53L271.62 359.53L271.62 372.66L266.52 375.69L261.41 372.66L261.41 359.53L252.88 359.53L252.88 365.59L246.31 365.59L246.31 383.77L251.36 383.77Z"/><path class="paper" d="M300.86 346.39L319.04 346.39L319.04 335.28L300.86 335.28Z"/><path fill="url(#h-steel-45)" d="M300.86 346.39L319.04 346.39L319.04 335.28L300.86 335.28Z"/><path class="vis" d="M300.86 346.39L319.04 346.39L319.04 335.28L300.86 335.28Z"/><path class="paper" d="M265 504.98L273.08 504.98L273.08 486.8L265 486.8Z"/><path fill="url(#h-steel-45)" d="M265 504.98L273.08 504.98L273.08 486.8L265 486.8Z"/><path class="vis" d="M265 504.98L273.08 504.98L273.08 486.8L265 486.8Z"/><path class="thin" d="M260.45 371.65L260.45 359.53M272.58 371.65L272.58 359.53M169.55 371.65L169.55 359.53M157.42 371.65L157.42 359.53"/></g><g data-part="2"><path class="paper" d="M229.65 476.7L236.21 476.7L236.21 454.47L239.24 454.47L239.24 445.38L238.23 444.37L232.17 444.37L232.17 425.18L229.14 425.18L229.14 419.63L227.63 418.11L226.62 418.11L226.62 462.56Z"/><path fill="url(#h-steel-135)" d="M229.65 476.7L236.21 476.7L236.21 454.47L239.24 454.47L239.24 445.38L238.23 444.37L232.17 444.37L232.17 425.18L229.14 425.18L229.14 419.63L227.63 418.11L226.62 418.11L226.62 462.56Z"/><path class="vis" d="M229.65 476.7L236.21 476.7L236.21 454.47L239.24 454.47L239.24 445.38L238.23 444.37L232.17 444.37L232.17 425.18L229.14 425.18L229.14 419.63L227.63 418.11L226.62 418.11L226.62 462.56Z"/><path class="paper" d="M203.38 462.56L203.38 418.11L202.37 418.11L200.86 419.63L200.86 425.18L197.83 425.18L197.83 444.37L191.77 444.37L190.76 445.38L190.76 454.47L193.79 454.47L193.79 476.7L200.35 476.7Z"/><path fill="url(#h-steel-135)" d="M203.38 462.56L203.38 418.11L202.37 418.11L200.86 419.63L200.86 425.18L197.83 425.18L197.83 444.37L191.77 444.37L190.76 445.38L190.76 454.47L193.79 454.47L193.79 476.7L200.35 476.7Z"/><path class="vis" d="M203.38 462.56L203.38 418.11L202.37 418.11L200.86 419.63L200.86 425.18L197.83 425.18L197.83 444.37L191.77 444.37L190.76 445.38L190.76 454.47L193.79 454.47L193.79 476.7L200.35 476.7Z"/><path class="vis" d="M200.35 476.7L229.65 476.7"/><path class="vis" d="M203.38 418.11L226.62 418.11"/><path class="vis" d="M203.38 462.56L226.62 462.56"/><path class="thin" d="M235.2 475.69L235.2 454.98M231.36 443.36L231.36 426.19M194.8 475.69L194.8 454.98M198.64 443.36L198.64 426.19"/></g><g data-part="3"><path class="paper" d="M232.17 436.29L237.22 436.29L237.22 425.69L235.71 424.17L232.17 424.17Z"/><path fill="url(#h-steel-30)" d="M232.17 436.29L237.22 436.29L237.22 425.69L235.71 424.17L232.17 424.17Z"/><path class="vis" d="M232.17 436.29L237.22 436.29L237.22 425.69L235.71 424.17L232.17 424.17Z"/><path class="paper" d="M197.83 424.17L194.29 424.17L192.78 425.69L192.78 426.49L194.6 426.49L194.6 433.97L192.78 433.97L192.78 436.29L197.83 436.29Z"/><path fill="url(#h-steel-30)" d="M197.83 424.17L194.29 424.17L192.78 425.69L192.78 426.49L194.6 426.49L194.6 433.97L192.78 433.97L192.78 436.29L197.83 436.29Z"/><path class="vis" d="M197.83 424.17L194.29 424.17L192.78 425.69L192.78 426.49L194.6 426.49L194.6 433.97L192.78 433.97L192.78 436.29L197.83 436.29Z"/></g><g data-part="4"><path class="paper" d="M194.6 433.77L189.55 433.77L189.55 435.28L169.95 435.28L169.34 434.68L169.34 425.79L169.95 425.18L189.55 425.18L189.55 426.7L194.6 426.7Z"/><path class="vis" d="M194.6 433.77L189.55 433.77L189.55 435.28L169.95 435.28L169.34 434.68L169.34 425.79L169.95 425.18L189.55 425.18L189.55 426.7L194.6 426.7Z"/><path class="thin" d="M188.74 434.47L170.56 434.47M188.74 425.99L170.56 425.99"/><path class="hid" d="M169.34 432.76L174.6 432.76L174.6 427.71L169.34 427.71Z"/></g><g data-part="23"><path class="paper" d="M266.52 452.45L284.7 452.45L284.7 445.38L282.27 445.38L282.27 434.88L281.67 434.27L269.55 434.27L268.94 434.88L268.94 445.38L266.52 445.38Z"/><path class="vis" d="M266.52 452.45L284.7 452.45L284.7 445.38L282.27 445.38L282.27 434.88L281.67 434.27L269.55 434.27L268.94 434.88L268.94 445.38L266.52 445.38Z"/><path class="thin" d="M269.65 444.37L269.65 435.28M281.57 444.37L281.57 435.28M266.52 448.92L284.7 448.92"/></g><g data-part="7"><path class="paper" d="M222.58 385.79L235.71 385.79L235.71 405.99L240.25 405.99L240.25 365.59L252.37 365.59L252.37 358.01L222.58 358.01Z"/><path fill="url(#h-steel-60)" d="M222.58 385.79L235.71 385.79L235.71 405.99L240.25 405.99L240.25 365.59L252.37 365.59L252.37 358.01L222.58 358.01Z"/><path class="vis" d="M222.58 385.79L235.71 385.79L235.71 405.99L240.25 405.99L240.25 365.59L252.37 365.59L252.37 358.01L222.58 358.01Z"/><path class="paper" d="M207.42 358.01L177.63 358.01L177.63 365.59L189.75 365.59L189.75 405.99L194.29 405.99L194.29 385.79L207.42 385.79Z"/><path fill="url(#h-steel-60)" d="M207.42 358.01L177.63 358.01L177.63 365.59L189.75 365.59L189.75 405.99L194.29 405.99L194.29 385.79L207.42 385.79Z"/><path class="vis" d="M207.42 358.01L177.63 358.01L177.63 365.59L189.75 365.59L189.75 405.99L194.29 405.99L194.29 385.79L207.42 385.79Z"/></g><g data-part="13"><path class="solid" d="M253.38 359.53L259.44 359.53L259.44 358.01L253.38 358.01Z"/><path class="solid" d="M176.62 358.01L170.56 358.01L170.56 359.53L176.62 359.53Z"/><path class="solid" d="M273.59 359.53L277.63 359.53L277.63 358.01L273.59 358.01Z"/><path class="solid" d="M156.41 358.01L152.37 358.01L152.37 359.53L156.41 359.53Z"/></g><g data-part="10"><path class="paper" d="M245.3 358.01L259.44 358.01L259.44 343.87L255.4 343.87L251.36 339.83L251.36 195.89L247.32 191.85L241.26 191.85L241.26 179.73L225.51 179.73L225.51 203.97L245.3 203.97Z"/><path fill="url(#h-steel-135)" d="M245.3 358.01L259.44 358.01L259.44 343.87L255.4 343.87L251.36 339.83L251.36 195.89L247.32 191.85L241.26 191.85L241.26 179.73L225.51 179.73L225.51 203.97L245.3 203.97Z"/><path class="vis" d="M245.3 358.01L259.44 358.01L259.44 343.87L255.4 343.87L251.36 339.83L251.36 195.89L247.32 191.85L241.26 191.85L241.26 179.73L225.51 179.73L225.51 203.97L245.3 203.97Z"/><path class="paper" d="M184.7 203.97L204.49 203.97L204.49 179.73L188.74 179.73L188.74 191.85L182.68 191.85L178.64 195.89L178.64 339.83L174.6 343.87L170.56 343.87L170.56 358.01L184.7 358.01Z"/><path fill="url(#h-steel-135)" d="M184.7 203.97L204.49 203.97L204.49 179.73L188.74 179.73L188.74 191.85L182.68 191.85L178.64 195.89L178.64 339.83L174.6 343.87L170.56 343.87L170.56 358.01L184.7 358.01Z"/><path class="vis" d="M184.7 203.97L204.49 203.97L204.49 179.73L188.74 179.73L188.74 191.85L182.68 191.85L178.64 195.89L178.64 339.83L174.6 343.87L170.56 343.87L170.56 358.01L184.7 358.01Z"/><path class="paper" d="M273.59 358.01L278.64 358.01L278.64 343.87L273.59 343.87Z"/><path fill="url(#h-steel-135)" d="M273.59 358.01L278.64 358.01L278.64 343.87L273.59 343.87Z"/><path class="vis" d="M273.59 358.01L278.64 358.01L278.64 343.87L273.59 343.87Z"/><path class="paper" d="M156.41 343.87L151.36 343.87L151.36 358.01L156.41 358.01Z"/><path fill="url(#h-steel-135)" d="M156.41 343.87L151.36 343.87L151.36 358.01L156.41 358.01Z"/><path class="vis" d="M156.41 343.87L151.36 343.87L151.36 358.01L156.41 358.01Z"/><path class="thin" d="M227.12 203.97L227.12 179.73M240.15 190.84L240.15 180.74M202.88 203.97L202.88 179.73M189.85 190.84L189.85 180.74"/></g><g data-part="11"><path class="paper" d="M260.45 371.65L272.58 371.65L272.58 331.34L271.97 330.74L261.06 330.74L260.45 331.34Z"/><path class="vis" d="M260.45 371.65L272.58 371.65L272.58 331.34L271.97 330.74L261.06 330.74L260.45 331.34Z"/><path class="paper" d="M169.55 331.34L168.94 330.74L158.03 330.74L157.42 331.34L157.42 371.65L169.55 371.65Z"/><path class="vis" d="M169.55 331.34L168.94 330.74L158.03 330.74L157.42 331.34L157.42 371.65L169.55 371.65Z"/><path class="thin" d="M261.41 370.64L261.41 359.53M271.62 370.64L271.62 359.53M168.59 370.64L168.59 359.53M158.38 370.64L158.38 359.53"/></g><g data-part="12"><path class="paper" d="M256.41 343.87L276.62 343.87L276.62 333.97L275.61 332.96L257.42 332.96L256.41 333.97Z"/><path class="vis" d="M256.41 343.87L276.62 343.87L276.62 333.97L275.61 332.96L257.42 332.96L256.41 333.97Z"/><path class="paper" d="M173.59 333.97L172.58 332.96L154.39 332.96L153.38 333.97L153.38 343.87L173.59 343.87Z"/><path class="vis" d="M173.59 333.97L172.58 332.96L154.39 332.96L153.38 333.97L153.38 343.87L173.59 343.87Z"/><path class="thin" d="M259.44 343.87L259.44 332.96M273.59 343.87L273.59 332.96M170.56 343.87L170.56 332.96M156.41 343.87L156.41 332.96"/></g><g data-part="19"><path class="paper" d="M188.74 191.85L182.68 191.85L182.68 98.92L186.72 94.88L243.28 94.88L247.32 98.92L247.32 132.25L239.24 132.25L239.24 102.96L190.76 102.96L190.76 179.73L188.74 179.73Z"/><path fill="url(#h-iron-45)" d="M188.74 191.85L182.68 191.85L182.68 98.92L186.72 94.88L243.28 94.88L247.32 98.92L247.32 132.25L239.24 132.25L239.24 102.96L190.76 102.96L190.76 179.73L188.74 179.73Z"/><path class="vis" d="M188.74 191.85L182.68 191.85L182.68 98.92L186.72 94.88L243.28 94.88L247.32 98.92L247.32 132.25L239.24 132.25L239.24 102.96L190.76 102.96L190.76 179.73L188.74 179.73Z"/><path class="paper" d="M241.26 191.85L247.32 191.85L247.32 144.37L239.24 144.37L239.24 179.73L241.26 179.73Z"/><path fill="url(#h-iron-45)" d="M241.26 191.85L247.32 191.85L247.32 144.37L239.24 144.37L239.24 179.73L241.26 179.73Z"/><path class="vis" d="M241.26 191.85L247.32 191.85L247.32 144.37L239.24 144.37L239.24 179.73L241.26 179.73Z"/></g><g data-part="20"><path class="paper" d="M208.43 141.34L208.43 135.28L203.65 135.28L202.11 133.34L199.96 132.1L197.5 131.76L195.09 132.35L193.07 133.79L191.73 135.88L191.26 138.31L191.73 140.75L193.07 142.84L195.09 144.28L197.5 144.87L199.96 144.52L202.11 143.29L203.65 141.34Z"/><path fill="url(#h-steel-30)" d="M208.43 141.34L208.43 135.28L203.65 135.28L202.11 133.34L199.96 132.1L197.5 131.76L195.09 132.35L193.07 133.79L191.73 135.88L191.26 138.31L191.73 140.75L193.07 142.84L195.09 144.28L197.5 144.87L199.96 144.52L202.11 143.29L203.65 141.34Z"/><path class="vis" d="M208.43 141.34L208.43 135.28L203.65 135.28L202.11 133.34L199.96 132.1L197.5 131.76L195.09 132.35L193.07 133.79L191.73 135.88L191.26 138.31L191.73 140.75L193.07 142.84L195.09 144.28L197.5 144.87L199.96 144.52L202.11 143.29L203.65 141.34Z"/><path class="paper" d="M221.57 141.34L307.93 141.34L307.93 141.34L309.44 140.94L310.55 139.83L310.96 138.31L310.55 136.8L309.44 135.69L307.93 135.28L221.57 135.28Z"/><path fill="url(#h-steel-30)" d="M221.57 141.34L307.93 141.34L307.93 141.34L309.44 140.94L310.55 139.83L310.96 138.31L310.55 136.8L309.44 135.69L307.93 135.28L221.57 135.28Z"/><path class="vis" d="M221.57 141.34L307.93 141.34L307.93 141.34L309.44 140.94L310.55 139.83L310.96 138.31L310.55 136.8L309.44 135.69L307.93 135.28L221.57 135.28Z"/></g><g data-part="21"><path class="paper" d="M201.87 138.31L201.73 137.27L201.33 136.29L200.69 135.46L199.85 134.81L198.87 134.41L197.83 134.27L196.78 134.41L195.81 134.81L194.97 135.46L194.33 136.29L193.93 137.27L193.79 138.31L193.93 139.36L194.33 140.33L194.97 141.17L195.81 141.81L196.78 142.22L197.83 142.35L198.87 142.22L199.85 141.81L200.69 141.17L201.33 140.33L201.73 139.36Z"/><path fill="url(#h-steel-135)" d="M201.87 138.31L201.73 137.27L201.33 136.29L200.69 135.46L199.85 134.81L198.87 134.41L197.83 134.27L196.78 134.41L195.81 134.81L194.97 135.46L194.33 136.29L193.93 137.27L193.79 138.31L193.93 139.36L194.33 140.33L194.97 141.17L195.81 141.81L196.78 142.22L197.83 142.35L198.87 142.22L199.85 141.81L200.69 141.17L201.33 140.33L201.73 139.36Z"/><path class="vis" d="M201.87 138.31L201.73 137.27L201.33 136.29L200.69 135.46L199.85 134.81L198.87 134.41L197.83 134.27L196.78 134.41L195.81 134.81L194.97 135.46L194.33 136.29L193.93 137.27L193.79 138.31L193.93 139.36L194.33 140.33L194.97 141.17L195.81 141.81L196.78 142.22L197.83 142.35L198.87 142.22L199.85 141.81L200.69 141.17L201.33 140.33L201.73 139.36Z"/><path class="ctr" d="M190.79 138.31L204.87 138.31"/><path class="ctr" d="M197.83 145.35L197.83 131.27"/></g><g data-part="18"><path class="paper" d="M227.12 179.73L233.18 179.73L233.18 168.62L232.17 167.61L227.12 167.61Z"/><path class="vis" d="M227.12 179.73L233.18 179.73L233.18 168.62L232.17 167.61L227.12 167.61Z"/><path class="paper" d="M202.88 167.61L197.83 167.61L196.82 168.62L196.82 179.73L202.88 179.73Z"/><path class="vis" d="M202.88 167.61L197.83 167.61L196.82 168.62L196.82 179.73L202.88 179.73Z"/></g><g id="set-main"><g data-part="16"><path class="paper" d="M222.07 223.16L234.7 223.16L234.7 218.11L242.27 218.11L242.27 210.03L222.07 210.03Z"/><path fill="url(#h-steel-30)" d="M222.07 223.16L234.7 223.16L234.7 218.11L242.27 218.11L242.27 210.03L222.07 210.03Z"/><path class="vis" d="M222.07 223.16L234.7 223.16L234.7 218.11L242.27 218.11L242.27 210.03L222.07 210.03Z"/><path class="paper" d="M207.93 210.03L187.73 210.03L187.73 218.11L195.3 218.11L195.3 223.16L207.93 223.16Z"/><path fill="url(#h-steel-30)" d="M207.93 210.03L187.73 210.03L187.73 218.11L195.3 218.11L195.3 223.16L207.93 223.16Z"/><path class="vis" d="M207.93 210.03L187.73 210.03L187.73 218.11L195.3 218.11L195.3 223.16L207.93 223.16Z"/></g><g data-part="17"><path class="paper" d="M222.07 210.03L226.62 210.03L227.12 209.53L227.12 160.54L226.11 159.53L225.1 159.53L225.1 148.01L224.49 147.4L222.07 147.4Z"/><path class="vis" d="M222.07 210.03L226.62 210.03L227.12 209.53L227.12 160.54L226.11 159.53L225.1 159.53L225.1 148.01L224.49 147.4L222.07 147.4Z"/><path class="paper" d="M207.93 147.4L205.51 147.4L204.9 148.01L204.9 159.53L203.89 159.53L202.88 160.54L202.88 209.53L203.38 210.03L207.93 210.03Z"/><path class="vis" d="M207.93 147.4L205.51 147.4L204.9 148.01L204.9 159.53L203.89 159.53L202.88 160.54L202.88 209.53L203.38 210.03L207.93 210.03Z"/><path class="thin" d="M225.51 209.02L225.51 161.55M204.49 209.02L204.49 161.55"/></g></g><g id="spring-main"><g data-part="15"><path class="vis spring" d="M238.23 326.19L191.77 315.69M238.23 305.18L191.77 294.68M238.23 284.17L191.77 273.67M238.23 263.16L191.77 252.66M238.23 242.15L191.77 231.65"/><path class="solid" d="M241.26 326.19L240.86 324.68L239.75 323.57L238.23 323.16L236.72 323.57L235.61 324.68L235.2 326.19L235.61 327.71L236.72 328.82L238.23 329.22L239.75 328.82L240.86 327.71Z"/><path class="solid" d="M194.8 315.69L194.39 314.17L193.28 313.06L191.77 312.66L190.25 313.06L189.14 314.17L188.74 315.69L189.14 317.2L190.25 318.31L191.77 318.72L193.28 318.31L194.39 317.2Z"/><path class="solid" d="M241.26 305.18L240.86 303.67L239.75 302.56L238.23 302.15L236.72 302.56L235.61 303.67L235.2 305.18L235.61 306.7L236.72 307.81L238.23 308.21L239.75 307.81L240.86 306.7Z"/><path class="solid" d="M194.8 294.68L194.39 293.16L193.28 292.05L191.77 291.65L190.25 292.05L189.14 293.16L188.74 294.68L189.14 296.19L190.25 297.3L191.77 297.71L193.28 297.3L194.39 296.19Z"/><path class="solid" d="M241.26 284.17L240.86 282.66L239.75 281.55L238.23 281.14L236.72 281.55L235.61 282.66L235.2 284.17L235.61 285.69L236.72 286.8L238.23 287.2L239.75 286.8L240.86 285.69Z"/><path class="solid" d="M194.8 273.67L194.39 272.15L193.28 271.04L191.77 270.64L190.25 271.04L189.14 272.15L188.74 273.67L189.14 275.18L190.25 276.29L191.77 276.7L193.28 276.29L194.39 275.18Z"/><path class="solid" d="M241.26 263.16L240.86 261.65L239.75 260.54L238.23 260.13L236.72 260.54L235.61 261.65L235.2 263.16L235.61 264.68L236.72 265.79L238.23 266.19L239.75 265.79L240.86 264.68Z"/><path class="solid" d="M194.8 252.66L194.39 251.14L193.28 250.03L191.77 249.63L190.25 250.03L189.14 251.14L188.74 252.66L189.14 254.17L190.25 255.28L191.77 255.69L193.28 255.28L194.39 254.17Z"/><path class="solid" d="M241.26 242.15L240.86 240.64L239.75 239.53L238.23 239.12L236.72 239.53L235.61 240.64L235.2 242.15L235.61 243.67L236.72 244.78L238.23 245.18L239.75 244.78L240.86 243.67Z"/><path class="solid" d="M194.8 231.65L194.39 230.13L193.28 229.02L191.77 228.62L190.25 229.02L189.14 230.13L188.74 231.65L189.14 233.16L190.25 234.27L191.77 234.68L193.28 234.27L194.39 233.16Z"/><path class="solid" d="M241.26 221.14L240.86 219.63L239.75 218.52L238.23 218.11L236.72 218.52L235.61 219.63L235.2 221.14L235.61 222.66L236.72 223.77L238.23 224.17L239.75 223.77L240.86 222.66Z"/></g></g><g id="mv-main"><g data-part="6"><path class="paper" d="M230.66 422.15L234.19 422.15L235.2 421.14L235.2 392.66L234.39 391.85L222.27 391.85L222.27 402.96L223.69 402.96L223.69 404.98L222.27 404.98L222.27 409.02L220.25 409.02L220.25 411.04L230.66 411.04Z"/><path fill="url(#h-steel-135)" d="M230.66 422.15L234.19 422.15L235.2 421.14L235.2 392.66L234.39 391.85L222.27 391.85L222.27 402.96L223.69 402.96L223.69 404.98L222.27 404.98L222.27 409.02L220.25 409.02L220.25 411.04L230.66 411.04Z"/><path class="vis" d="M230.66 422.15L234.19 422.15L235.2 421.14L235.2 392.66L234.39 391.85L222.27 391.85L222.27 402.96L223.69 402.96L223.69 404.98L222.27 404.98L222.27 409.02L220.25 409.02L220.25 411.04L230.66 411.04Z"/><path class="paper" d="M199.34 411.04L209.75 411.04L209.75 409.02L207.73 409.02L207.73 404.98L206.31 404.98L206.31 402.96L207.73 402.96L207.73 391.85L195.61 391.85L194.8 392.66L194.8 421.14L195.81 422.15L199.34 422.15Z"/><path fill="url(#h-steel-135)" d="M199.34 411.04L209.75 411.04L209.75 409.02L207.73 409.02L207.73 404.98L206.31 404.98L206.31 402.96L207.73 402.96L207.73 391.85L195.61 391.85L194.8 392.66L194.8 421.14L195.81 422.15L199.34 422.15Z"/><path class="vis" d="M199.34 411.04L209.75 411.04L209.75 409.02L207.73 409.02L207.73 404.98L206.31 404.98L206.31 402.96L207.73 402.96L207.73 391.85L195.61 391.85L194.8 392.66L194.8 421.14L195.81 422.15L199.34 422.15Z"/></g><g data-part="5"><path class="paper" d="M215 418.11L230.15 418.11L230.15 411.85L229.34 411.04L220.05 411.04L220.05 407L215 407L209.95 407L209.95 411.04L200.66 411.04L199.85 411.85L199.85 418.11Z"/><path fill="url(#h-steel-45)" d="M215 418.11L230.15 418.11L230.15 411.85L229.34 411.04L220.05 411.04L220.05 407L215 407L209.95 407L209.95 411.04L200.66 411.04L199.85 411.85L199.85 418.11Z"/><path class="vis" d="M215 418.11L230.15 418.11L230.15 411.85L229.34 411.04L220.05 411.04L220.05 407L215 407L209.95 407L209.95 411.04L200.66 411.04L199.85 411.85L199.85 418.11Z"/></g><g data-part="9"><path class="paper" d="M220.66 404.88L223.59 404.88L223.59 403.06L220.66 403.06Z"/><path class="vis" d="M220.66 404.88L223.59 404.88L223.59 403.06L220.66 403.06Z"/><path class="paper" d="M209.34 403.06L206.41 403.06L206.41 404.88L209.34 404.88Z"/><path class="vis" d="M209.34 403.06L206.41 403.06L206.41 404.88L209.34 404.88Z"/></g><g data-part="8"><path class="paper" d="M218.03 407L220.56 405.79L220.56 402.96L222.07 402.35L222.07 335.28L221.06 335.28L221.06 123.77L220.45 123.16L209.55 123.16L208.94 123.77L208.94 335.28L207.93 335.28L207.93 402.35L209.44 402.96L209.44 405.79L211.97 407Z"/><path class="vis" d="M218.03 407L220.56 405.79L220.56 402.96L222.07 402.35L222.07 335.28L221.06 335.28L221.06 123.77L220.45 123.16L209.55 123.16L208.94 123.77L208.94 335.28L207.93 335.28L207.93 402.35L209.44 402.96L209.44 405.79L211.97 407Z"/><path class="thin" d="M220.05 141.34L220.05 124.17M209.95 141.34L209.95 124.17"/></g><g data-part="14"><path class="paper" d="M221.26 335.28L242.27 335.28L242.27 329.22L234.7 329.22L234.7 324.17L233.69 323.16L221.26 323.16Z"/><path fill="url(#h-steel-60)" d="M221.26 335.28L242.27 335.28L242.27 329.22L234.7 329.22L234.7 324.17L233.69 323.16L221.26 323.16Z"/><path class="vis" d="M221.26 335.28L242.27 335.28L242.27 329.22L234.7 329.22L234.7 324.17L233.69 323.16L221.26 323.16Z"/><path class="paper" d="M208.74 323.16L196.31 323.16L195.3 324.17L195.3 329.22L187.73 329.22L187.73 335.28L208.74 335.28Z"/><path fill="url(#h-steel-60)" d="M208.74 323.16L196.31 323.16L195.3 324.17L195.3 329.22L187.73 329.22L187.73 335.28L208.74 335.28Z"/><path class="vis" d="M208.74 323.16L196.31 323.16L195.3 324.17L195.3 329.22L187.73 329.22L187.73 335.28L208.74 335.28Z"/></g><g data-part="22"><path class="paper" d="M221.06 133.26L224.09 133.26L224.09 127.81L223.48 127.2L221.06 127.2Z"/><path class="vis" d="M221.06 133.26L224.09 133.26L224.09 127.81L223.48 127.2L221.06 127.2Z"/><path class="paper" d="M208.94 127.2L206.52 127.2L205.91 127.81L205.91 133.26L208.94 133.26Z"/><path class="vis" d="M208.94 127.2L206.52 127.2L205.91 127.81L205.91 133.26L208.94 133.26Z"/></g></g><g data-role="phantom"><path class="phan" d="M248.42 128.14L249.26 134.14L307.28 125.99L307.28 125.99L308.72 125.38L309.67 124.13L309.86 122.57L309.25 121.12L307.99 120.18L306.44 119.99L306.44 119.99L248.42 128.14"/></g><path class="ctr" d="M215 511.04L215 88.82"/><path class="ctr" d="M253.38 411.04L326.11 411.04"/><path class="ctr" d="M163.48 377.71L163.48 329.22"/><path class="ctr" d="M172.07 509.02L172.07 484.78"/><path class="ctr" d="M266.52 377.71L266.52 329.22"/><path class="ctr" d="M257.93 509.02L257.93 484.78"/><path class="ctr" d="M309.95 355.48L309.95 349.42"/><path class="ctr" d="M309.95 472.66L309.95 460.54"/><path class="ctr" d="M167.53 430.23L196.82 430.23"/><path class="ctr" d="M275.61 455.48L275.61 431.24"/></g><g data-role="dim"><path class="thin" d="M178.46 507L46.5 507M184.52 94.88L46.5 94.88M50 94.88L50 507"/><path class="head" d="M50 94.88L51.75 101.88L48.25 101.88ZM50 507L48.25 500L51.75 500Z"/><text class="t" x="47" y="300.94" text-anchor="middle" transform="rotate(-90 47 300.94)">408</text></g><g data-role="dim"><path class="thin" d="M251.54 507L355.5 507M323.26 411.04L355.5 411.04M352 411.04L352 507"/><path class="head" d="M352 411.04L353.75 418.04L350.25 418.04ZM352 507L350.25 500L353.75 500Z"/><text class="t" x="349" y="459.02" text-anchor="middle" transform="rotate(-90 349 459.02)">95</text></g><g data-role="dim"><path class="thin" d="M156.92 507.18L156.92 538.48M273.08 507.18L273.08 538.48M156.92 534.98L273.08 534.98"/><path class="head" d="M156.92 534.98L163.92 533.23L163.92 536.73ZM273.08 534.98L266.08 536.73L266.08 533.23Z"/><text class="t" x="215" y="531.98" text-anchor="middle">Ø115</text></g><g data-role="dim"><path class="thin" d="M215 509.2L215 564.5M321.06 457.68L321.06 564.5M215 561L321.06 561"/><path class="head" d="M215 561L222 559.25L222 562.75ZM321.06 561L314.06 562.75L314.06 559.25Z"/><text class="t" x="268.03" y="558" text-anchor="middle">105</text></g><g id="dim-spring-wrap"><g data-role="dim" id="dim-spring"><path class="thin" d="M185.53 329.22L160.99 329.22M185.53 218.11L160.99 218.11M164.49 218.11L164.49 329.22"/><path class="head" d="M164.49 218.11L166.24 225.11L162.74 225.11ZM164.49 329.22L162.74 322.22L166.24 322.22Z"/><text class="t" x="161.49" y="273.67" text-anchor="middle" transform="rotate(-90 161.49 273.67)">L=110.0</text></g></g><g data-role="balloon" data-target="19" data-at="186.72 118.11"><path class="thin" d="M118.5 117.21L186.72 118.11"/><circle class="dot" cx="186.72" cy="118.11" r="1.5"/><circle class="balloon" cx="110" cy="117.1" r="8.5"/><text class="t" x="110" y="120.4" text-anchor="middle">19</text></g><g data-role="balloon" data-target="10" data-at="181.67 208.01"><path class="thin" d="M117.83 181.02L181.67 208.01"/><circle class="dot" cx="181.67" cy="208.01" r="1.5"/><circle class="balloon" cx="110" cy="177.71" r="8.5"/><text class="t" x="110" y="181.01" text-anchor="middle">10</text></g><g data-role="balloon" data-target="13" data-at="173.59 358.77"><path class="thin" d="M118.38 368.2L173.59 358.77"/><circle class="dot" cx="173.59" cy="358.77" r="1.5"/><circle class="balloon" cx="110" cy="369.63" r="8.5"/><text class="t" x="110" y="372.93" text-anchor="middle">13</text></g><g data-role="balloon" data-target="7" data-at="180.66 362.56"><path class="thin" d="M117.77 390.43L180.66 362.56"/><circle class="dot" cx="180.66" cy="362.56" r="1.5"/><circle class="balloon" cx="110" cy="393.87" r="8.5"/><text class="t" x="110" y="397.17" text-anchor="middle">7</text></g><g data-role="balloon" data-target="4" data-at="170.05 430.23"><path class="thin" d="M118.42 423.28L170.05 430.23"/><circle class="dot" cx="170.05" cy="430.23" r="1.5"/><circle class="balloon" cx="110" cy="422.15" r="8.5"/><text class="t" x="110" y="425.45" text-anchor="middle">4</text></g><g data-role="balloon" data-target="1" data-at="187.73 466.6"><path class="thin" d="M118.43 457.59L187.73 466.6"/><circle class="dot" cx="187.73" cy="466.6" r="1.5"/><circle class="balloon" cx="110" cy="456.49" r="8.5"/><text class="t" x="110" y="459.79" text-anchor="middle">1</text></g><g data-role="balloon" data-target="12" data-at="272.58 338.31"><path class="thin" d="M343.56 330.19L272.58 338.31"/><circle class="dot" cx="272.58" cy="338.31" r="1.5"/><circle class="balloon" cx="352" cy="329.22" r="8.5"/><text class="t" x="352" y="332.52" text-anchor="middle">12</text></g><g data-role="balloon" data-target="11" data-at="266.52 353.46"><path class="thin" d="M343.51 357.11L266.52 353.46"/><circle class="dot" cx="266.52" cy="353.46" r="1.5"/><circle class="balloon" cx="352" cy="357.51" r="8.5"/><text class="t" x="352" y="360.81" text-anchor="middle">11</text></g><g data-role="balloon" data-target="20" data-at="285.71 138.31"><path class="thin" d="M344.5 169.67L285.71 138.31"/><circle class="dot" cx="285.71" cy="138.31" r="1.5"/><circle class="balloon" cx="352" cy="173.67" r="8.5"/><text class="t" x="352" y="176.97" text-anchor="middle">20</text></g><g data-role="balloon" data-target="23" data-at="277.63 450.43"><path class="thin" d="M297.44 513.04L277.63 450.43"/><circle class="dot" cx="277.63" cy="450.43" r="1.5"/><circle class="balloon" cx="300" cy="521.14" r="8.5"/><text class="t" x="300" y="524.44" text-anchor="middle">23</text></g><g id="bal-14"><g data-role="balloon" data-target="14" data-at="240.25 333.77"><path class="thin" d="M343.86 302.39L240.25 333.77"/><circle class="dot" cx="240.25" cy="333.77" r="1.5"/><circle class="balloon" cx="352" cy="299.93" r="8.5"/><text class="t" x="352" y="303.23" text-anchor="middle">14</text></g></g><g id="bal-15"><g data-role="balloon" data-target="15" data-at="191.77 294.68"><path class="thin" d="M343.92 244.99L191.77 294.68"/><circle class="dot" cx="191.77" cy="294.68" r="1.5"/><circle class="balloon" cx="352" cy="242.35" r="8.5"/><text class="t" x="352" y="245.65" text-anchor="middle">15</text></g></g><g data-role="label"><circle class="thin mark" cx="215" cy="411.04" r="44.5"/><path class="thin" d="M170.64 407.49L145.24 405.98"/><text class="t t-lg" x="139.24" y="408.98" text-anchor="middle">B</text></g><g data-role="label"><rect class="thin mark" x="178.64" y="90.84" width="72.72" height="133.33" rx="5"/><text class="t t-lg" x="257.42" y="96.86" text-anchor="middle">C</text></g><g data-role="label"><text class="t t-lg" x="215" y="50" text-anchor="middle">AXIAL SECTION</text><text class="t t-sm" x="215" y="62" text-anchor="middle">SCALE 1:2</text></g><g data-geom="B" clip-path="url(#clip-B)"><circle class="paper" cx="600" cy="222" r="178"/><g data-role="fluid"><path id="gas-out-B" class="tint" fill-opacity="0.1" d="M454.55 371.49L745.45 371.49L745.45 201.8L454.55 201.8ZM454.55 201.84L498.99 201.84L498.99 112.91L454.55 112.91ZM701.01 201.84L745.45 201.84L745.45 112.91L701.01 112.91ZM745.41 308.87L1024.24 308.87L1024.24 135.13L745.41 135.13Z"/><path id="gas-hud-B" class="tint" fill-opacity="0.1" d="M537.37 266.44L662.63 266.44L662.63 250.28L537.37 250.28Z"/><path id="gas-in-B" class="tint" fill-opacity="0.8" d="M672.73 605.84L672.73 484.59L658.59 484.59L646.46 428.06L646.46 250.28L650.51 250.28L650.51 250.28L549.49 250.28L549.49 250.28L553.54 250.28L553.54 428.06L541.41 484.59L527.27 484.59L527.27 605.84Z"/></g><g data-part="1"><path class="paper" d="M527.27 492.71L519.19 492.71L519.19 395.74L498.99 395.74L498.99 371.49L454.55 371.49L454.55 315.74L422.22 315.74L422.22 371.49L470.71 419.98L470.71 525.03L456.57 525.03L456.57 597.76L462.63 597.76L462.63 605.84L527.27 605.84Z"/><path fill="url(#h-steel-45)" d="M527.27 492.71L519.19 492.71L519.19 395.74L498.99 395.74L498.99 371.49L454.55 371.49L454.55 315.74L422.22 315.74L422.22 371.49L470.71 419.98L470.71 525.03L456.57 525.03L456.57 597.76L462.63 597.76L462.63 605.84L527.27 605.84Z"/><path class="vis" d="M527.27 492.71L519.19 492.71L519.19 395.74L498.99 395.74L498.99 371.49L454.55 371.49L454.55 315.74L422.22 315.74L422.22 371.49L470.71 419.98L470.71 525.03L456.57 525.03L456.57 597.76L462.63 597.76L462.63 605.84L527.27 605.84Z"/><path class="paper" d="M454.55 281.8L454.55 112.91L474.75 112.91L474.75 40.18L448.48 40.18L448.48 15.94L414.34 15.94L414.34 68.46L393.94 80.59L373.54 68.46L373.54 15.94L345.45 15.94L345.45 88.67L406.06 88.67L422.22 104.83L422.22 281.8Z"/><path fill="url(#h-steel-45)" d="M454.55 281.8L454.55 112.91L474.75 112.91L474.75 40.18L448.48 40.18L448.48 15.94L414.34 15.94L414.34 68.46L393.94 80.59L373.54 68.46L373.54 15.94L345.45 15.94L345.45 88.67L406.06 88.67L422.22 104.83L422.22 281.8Z"/><path class="vis" d="M454.55 281.8L454.55 112.91L474.75 112.91L474.75 40.18L448.48 40.18L448.48 15.94L414.34 15.94L414.34 68.46L393.94 80.59L373.54 68.46L373.54 15.94L345.45 15.94L345.45 88.67L406.06 88.67L422.22 104.83L422.22 281.8Z"/><path class="paper" d="M400 525.03L367.68 525.03L367.68 597.76L400 597.76Z"/><path fill="url(#h-steel-45)" d="M400 525.03L367.68 525.03L367.68 597.76L400 597.76Z"/><path class="vis" d="M400 525.03L367.68 525.03L367.68 597.76L400 597.76Z"/><path class="paper" d="M672.73 605.84L737.37 605.84L737.37 597.76L743.43 597.76L743.43 525.03L729.29 525.03L729.29 403.82L761.62 355.33L818.59 355.33L818.59 308.87L745.45 308.87L745.45 371.49L701.01 371.49L701.01 395.74L680.81 395.74L680.81 492.71L672.73 492.71Z"/><path fill="url(#h-steel-45)" d="M672.73 605.84L737.37 605.84L737.37 597.76L743.43 597.76L743.43 525.03L729.29 525.03L729.29 403.82L761.62 355.33L818.59 355.33L818.59 308.87L745.45 308.87L745.45 371.49L701.01 371.49L701.01 395.74L680.81 395.74L680.81 492.71L672.73 492.71Z"/><path class="vis" d="M672.73 605.84L737.37 605.84L737.37 597.76L743.43 597.76L743.43 525.03L729.29 525.03L729.29 403.82L761.62 355.33L818.59 355.33L818.59 308.87L745.45 308.87L745.45 371.49L701.01 371.49L701.01 395.74L680.81 395.74L680.81 492.71L672.73 492.71Z"/><path class="paper" d="M866.26 355.33L943.43 355.33L943.43 407.86L1016.16 407.86L1016.16 399.78L1024.24 399.78L1024.24 308.87L866.26 308.87Z"/><path fill="url(#h-steel-45)" d="M866.26 355.33L943.43 355.33L943.43 407.86L1016.16 407.86L1016.16 399.78L1024.24 399.78L1024.24 308.87L866.26 308.87Z"/><path class="vis" d="M866.26 355.33L943.43 355.33L943.43 407.86L1016.16 407.86L1016.16 399.78L1024.24 399.78L1024.24 308.87L866.26 308.87Z"/><path class="paper" d="M943.43 525.03L1016.16 525.03L1016.16 480.59L943.43 480.59Z"/><path fill="url(#h-steel-45)" d="M943.43 525.03L1016.16 525.03L1016.16 480.59L943.43 480.59Z"/><path class="vis" d="M943.43 525.03L1016.16 525.03L1016.16 480.59L943.43 480.59Z"/><path class="paper" d="M745.45 135.13L1024.24 135.13L1024.24 44.22L1016.16 44.22L1016.16 36.14L943.43 36.14L943.43 88.67L854.55 88.67L854.55 15.94L826.46 15.94L826.46 68.46L806.06 80.59L785.66 68.46L785.66 15.94L751.52 15.94L751.52 40.18L725.25 40.18L725.25 112.91L745.45 112.91Z"/><path fill="url(#h-steel-45)" d="M745.45 135.13L1024.24 135.13L1024.24 44.22L1016.16 44.22L1016.16 36.14L943.43 36.14L943.43 88.67L854.55 88.67L854.55 15.94L826.46 15.94L826.46 68.46L806.06 80.59L785.66 68.46L785.66 15.94L751.52 15.94L751.52 40.18L725.25 40.18L725.25 112.91L745.45 112.91Z"/><path class="vis" d="M745.45 135.13L1024.24 135.13L1024.24 44.22L1016.16 44.22L1016.16 36.14L943.43 36.14L943.43 88.67L854.55 88.67L854.55 15.94L826.46 15.94L826.46 68.46L806.06 80.59L785.66 68.46L785.66 15.94L751.52 15.94L751.52 40.18L725.25 40.18L725.25 112.91L745.45 112.91Z"/><path class="paper" d="M943.43 -36.59L1016.16 -36.59L1016.16 -81.03L943.43 -81.03Z"/><path fill="url(#h-steel-45)" d="M943.43 -36.59L1016.16 -36.59L1016.16 -81.03L943.43 -81.03Z"/><path class="vis" d="M943.43 -36.59L1016.16 -36.59L1016.16 -81.03L943.43 -81.03Z"/><path class="paper" d="M800 597.76L832.32 597.76L832.32 525.03L800 525.03Z"/><path fill="url(#h-steel-45)" d="M800 597.76L832.32 597.76L832.32 525.03L800 525.03Z"/><path class="vis" d="M800 597.76L832.32 597.76L832.32 525.03L800 525.03Z"/><path class="thin" d="M781.82 64.42L781.82 15.94M830.3 64.42L830.3 15.94M418.18 64.42L418.18 15.94M369.7 64.42L369.7 15.94"/></g><g data-part="2"><path class="paper" d="M658.59 484.63L684.85 484.63L684.85 395.74L696.97 395.74L696.97 359.37L692.93 355.33L668.69 355.33L668.69 278.57L656.57 278.57L656.57 256.34L650.51 250.28L646.46 250.28L646.46 428.06Z"/><path fill="url(#h-steel-135)" d="M658.59 484.63L684.85 484.63L684.85 395.74L696.97 395.74L696.97 359.37L692.93 355.33L668.69 355.33L668.69 278.57L656.57 278.57L656.57 256.34L650.51 250.28L646.46 250.28L646.46 428.06Z"/><path class="vis" d="M658.59 484.63L684.85 484.63L684.85 395.74L696.97 395.74L696.97 359.37L692.93 355.33L668.69 355.33L668.69 278.57L656.57 278.57L656.57 256.34L650.51 250.28L646.46 250.28L646.46 428.06Z"/><path class="paper" d="M553.54 428.06L553.54 250.28L549.49 250.28L543.43 256.34L543.43 278.57L531.31 278.57L531.31 355.33L507.07 355.33L503.03 359.37L503.03 395.74L515.15 395.74L515.15 484.63L541.41 484.63Z"/><path fill="url(#h-steel-135)" d="M553.54 428.06L553.54 250.28L549.49 250.28L543.43 256.34L543.43 278.57L531.31 278.57L531.31 355.33L507.07 355.33L503.03 359.37L503.03 395.74L515.15 395.74L515.15 484.63L541.41 484.63Z"/><path class="vis" d="M553.54 428.06L553.54 250.28L549.49 250.28L543.43 256.34L543.43 278.57L531.31 278.57L531.31 355.33L507.07 355.33L503.03 359.37L503.03 395.74L515.15 395.74L515.15 484.63L541.41 484.63Z"/><path class="vis" d="M541.41 484.63L658.59 484.63"/><path class="vis" d="M553.54 250.28L646.46 250.28"/><path class="vis" d="M553.54 428.06L646.46 428.06"/><path class="thin" d="M680.81 480.59L680.81 397.76M665.45 351.29L665.45 282.61M519.19 480.59L519.19 397.76M534.55 351.29L534.55 282.61"/></g><g data-part="3"><path class="paper" d="M668.69 323.01L688.89 323.01L688.89 280.59L682.83 274.53L668.69 274.53Z"/><path fill="url(#h-steel-30)" d="M668.69 323.01L688.89 323.01L688.89 280.59L682.83 274.53L668.69 274.53Z"/><path class="vis" d="M668.69 323.01L688.89 323.01L688.89 280.59L682.83 274.53L668.69 274.53Z"/><path class="paper" d="M531.31 274.53L517.17 274.53L511.11 280.59L511.11 283.82L518.38 283.82L518.38 313.72L511.11 313.72L511.11 323.01L531.31 323.01Z"/><path fill="url(#h-steel-30)" d="M531.31 274.53L517.17 274.53L511.11 280.59L511.11 283.82L518.38 283.82L518.38 313.72L511.11 313.72L511.11 323.01L531.31 323.01Z"/><path class="vis" d="M531.31 274.53L517.17 274.53L511.11 280.59L511.11 283.82L518.38 283.82L518.38 313.72L511.11 313.72L511.11 323.01L531.31 323.01Z"/></g><g data-part="4"><path class="paper" d="M518.38 312.91L498.18 312.91L498.18 318.97L419.8 318.97L417.37 316.55L417.37 280.99L419.8 278.57L498.18 278.57L498.18 284.63L518.38 284.63Z"/><path class="vis" d="M518.38 312.91L498.18 312.91L498.18 318.97L419.8 318.97L417.37 316.55L417.37 280.99L419.8 278.57L498.18 278.57L498.18 284.63L518.38 284.63Z"/><path class="thin" d="M494.95 315.74L422.22 315.74M494.95 281.8L422.22 281.8"/><path class="hid" d="M417.37 308.87L438.38 308.87L438.38 288.67L417.37 288.67Z"/></g><g data-part="23"><path class="paper" d="M806.06 387.66L878.79 387.66L878.79 359.37L869.09 359.37L869.09 317.35L866.67 314.93L818.18 314.93L815.76 317.35L815.76 359.37L806.06 359.37Z"/><path class="vis" d="M806.06 387.66L878.79 387.66L878.79 359.37L869.09 359.37L869.09 317.35L866.67 314.93L818.18 314.93L815.76 317.35L815.76 359.37L806.06 359.37Z"/><path class="thin" d="M818.59 355.33L818.59 318.97M866.26 355.33L866.26 318.97M806.06 373.52L878.79 373.52"/></g><g data-part="7"><path class="paper" d="M630.3 120.99L682.83 120.99L682.83 201.8L701.01 201.8L701.01 40.18L749.49 40.18L749.49 9.88L630.3 9.88Z"/><path fill="url(#h-steel-60)" d="M630.3 120.99L682.83 120.99L682.83 201.8L701.01 201.8L701.01 40.18L749.49 40.18L749.49 9.88L630.3 9.88Z"/><path class="vis" d="M630.3 120.99L682.83 120.99L682.83 201.8L701.01 201.8L701.01 40.18L749.49 40.18L749.49 9.88L630.3 9.88Z"/><path class="paper" d="M569.7 9.88L450.51 9.88L450.51 40.18L498.99 40.18L498.99 201.8L517.17 201.8L517.17 120.99L569.7 120.99Z"/><path fill="url(#h-steel-60)" d="M569.7 9.88L450.51 9.88L450.51 40.18L498.99 40.18L498.99 201.8L517.17 201.8L517.17 120.99L569.7 120.99Z"/><path class="vis" d="M569.7 9.88L450.51 9.88L450.51 40.18L498.99 40.18L498.99 201.8L517.17 201.8L517.17 120.99L569.7 120.99Z"/></g><g data-part="13"><path class="solid" d="M753.54 15.94L777.78 15.94L777.78 9.88L753.54 9.88Z"/><path class="solid" d="M446.46 9.88L422.22 9.88L422.22 15.94L446.46 15.94Z"/><path class="solid" d="M834.34 15.94L850.51 15.94L850.51 9.88L834.34 9.88Z"/><path class="solid" d="M365.66 9.88L349.49 9.88L349.49 15.94L365.66 15.94Z"/></g><g data-part="10"><path class="paper" d="M721.21 9.88L777.78 9.88L777.78 -46.69L761.62 -46.69L745.45 -62.85L745.45 -638.61L729.29 -654.77L705.05 -654.77L705.05 -703.25L642.02 -703.25L642.02 -606.28L721.21 -606.28Z"/><path fill="url(#h-steel-135)" d="M721.21 9.88L777.78 9.88L777.78 -46.69L761.62 -46.69L745.45 -62.85L745.45 -638.61L729.29 -654.77L705.05 -654.77L705.05 -703.25L642.02 -703.25L642.02 -606.28L721.21 -606.28Z"/><path class="vis" d="M721.21 9.88L777.78 9.88L777.78 -46.69L761.62 -46.69L745.45 -62.85L745.45 -638.61L729.29 -654.77L705.05 -654.77L705.05 -703.25L642.02 -703.25L642.02 -606.28L721.21 -606.28Z"/><path class="paper" d="M478.79 -606.28L557.98 -606.28L557.98 -703.25L494.95 -703.25L494.95 -654.77L470.71 -654.77L454.55 -638.61L454.55 -62.85L438.38 -46.69L422.22 -46.69L422.22 9.88L478.79 9.88Z"/><path fill="url(#h-steel-135)" d="M478.79 -606.28L557.98 -606.28L557.98 -703.25L494.95 -703.25L494.95 -654.77L470.71 -654.77L454.55 -638.61L454.55 -62.85L438.38 -46.69L422.22 -46.69L422.22 9.88L478.79 9.88Z"/><path class="vis" d="M478.79 -606.28L557.98 -606.28L557.98 -703.25L494.95 -703.25L494.95 -654.77L470.71 -654.77L454.55 -638.61L454.55 -62.85L438.38 -46.69L422.22 -46.69L422.22 9.88L478.79 9.88Z"/><path class="paper" d="M834.34 9.88L854.55 9.88L854.55 -46.69L834.34 -46.69Z"/><path fill="url(#h-steel-135)" d="M834.34 9.88L854.55 9.88L854.55 -46.69L834.34 -46.69Z"/><path class="vis" d="M834.34 9.88L854.55 9.88L854.55 -46.69L834.34 -46.69Z"/><path class="paper" d="M365.66 -46.69L345.45 -46.69L345.45 9.88L365.66 9.88Z"/><path fill="url(#h-steel-135)" d="M365.66 -46.69L345.45 -46.69L345.45 9.88L365.66 9.88Z"/><path class="vis" d="M365.66 -46.69L345.45 -46.69L345.45 9.88L365.66 9.88Z"/><path class="thin" d="M648.48 -606.28L648.48 -703.25M700.61 -658.81L700.61 -699.21M551.52 -606.28L551.52 -703.25M499.39 -658.81L499.39 -699.21"/></g><g data-part="11"><path class="paper" d="M781.82 64.42L830.3 64.42L830.3 -96.79L827.88 -99.21L784.24 -99.21L781.82 -96.79Z"/><path class="vis" d="M781.82 64.42L830.3 64.42L830.3 -96.79L827.88 -99.21L784.24 -99.21L781.82 -96.79Z"/><path class="paper" d="M418.18 -96.79L415.76 -99.21L372.12 -99.21L369.7 -96.79L369.7 64.42L418.18 64.42Z"/><path class="vis" d="M418.18 -96.79L415.76 -99.21L372.12 -99.21L369.7 -96.79L369.7 64.42L418.18 64.42Z"/><path class="thin" d="M785.66 60.38L785.66 15.94M826.46 60.38L826.46 15.94M414.34 60.38L414.34 15.94M373.54 60.38L373.54 15.94"/></g><g data-part="12"><path class="paper" d="M765.66 -46.69L846.46 -46.69L846.46 -86.28L842.42 -90.32L769.7 -90.32L765.66 -86.28Z"/><path class="vis" d="M765.66 -46.69L846.46 -46.69L846.46 -86.28L842.42 -90.32L769.7 -90.32L765.66 -86.28Z"/><path class="paper" d="M434.34 -86.28L430.3 -90.32L357.58 -90.32L353.54 -86.28L353.54 -46.69L434.34 -46.69Z"/><path class="vis" d="M434.34 -86.28L430.3 -90.32L357.58 -90.32L353.54 -86.28L353.54 -46.69L434.34 -46.69Z"/><path class="thin" d="M777.78 -46.69L777.78 -90.32M834.34 -46.69L834.34 -90.32M422.22 -46.69L422.22 -90.32M365.66 -46.69L365.66 -90.32"/></g><g data-part="19"><path class="paper" d="M494.95 -654.77L470.71 -654.77L470.71 -1026.48L486.87 -1042.65L713.13 -1042.65L729.29 -1026.48L729.29 -893.15L696.97 -893.15L696.97 -1010.32L503.03 -1010.32L503.03 -703.25L494.95 -703.25Z"/><path fill="url(#h-iron-45)" d="M494.95 -654.77L470.71 -654.77L470.71 -1026.48L486.87 -1042.65L713.13 -1042.65L729.29 -1026.48L729.29 -893.15L696.97 -893.15L696.97 -1010.32L503.03 -1010.32L503.03 -703.25L494.95 -703.25Z"/><path class="vis" d="M494.95 -654.77L470.71 -654.77L470.71 -1026.48L486.87 -1042.65L713.13 -1042.65L729.29 -1026.48L729.29 -893.15L696.97 -893.15L696.97 -1010.32L503.03 -1010.32L503.03 -703.25L494.95 -703.25Z"/><path class="paper" d="M705.05 -654.77L729.29 -654.77L729.29 -844.67L696.97 -844.67L696.97 -703.25L705.05 -703.25Z"/><path fill="url(#h-iron-45)" d="M705.05 -654.77L729.29 -654.77L729.29 -844.67L696.97 -844.67L696.97 -703.25L705.05 -703.25Z"/><path class="vis" d="M705.05 -654.77L729.29 -654.77L729.29 -844.67L696.97 -844.67L696.97 -703.25L705.05 -703.25Z"/></g><g data-part="20"><path class="paper" d="M573.74 -856.79L573.74 -881.03L554.61 -881.04L548.44 -888.82L539.83 -893.75L530 -895.14L520.36 -892.78L512.29 -887.01L506.93 -878.66L505.05 -868.91L506.93 -859.16L512.29 -850.81L520.36 -845.04L530 -842.68L539.83 -844.07L548.44 -849L554.61 -856.78Z"/><path fill="url(#h-steel-30)" d="M573.74 -856.79L573.74 -881.03L554.61 -881.04L548.44 -888.82L539.83 -893.75L530 -895.14L520.36 -892.78L512.29 -887.01L506.93 -878.66L505.05 -868.91L506.93 -859.16L512.29 -850.81L520.36 -845.04L530 -842.68L539.83 -844.07L548.44 -849L554.61 -856.78Z"/><path class="vis" d="M573.74 -856.79L573.74 -881.03L554.61 -881.04L548.44 -888.82L539.83 -893.75L530 -895.14L520.36 -892.78L512.29 -887.01L506.93 -878.66L505.05 -868.91L506.93 -859.16L512.29 -850.81L520.36 -845.04L530 -842.68L539.83 -844.07L548.44 -849L554.61 -856.78Z"/><path class="paper" d="M626.26 -856.79L971.72 -856.79L971.72 -856.79L977.78 -858.41L982.21 -862.85L983.84 -868.91L982.21 -874.97L977.78 -879.41L971.72 -881.03L626.26 -881.03Z"/><path fill="url(#h-steel-30)" d="M626.26 -856.79L971.72 -856.79L971.72 -856.79L977.78 -858.41L982.21 -862.85L983.84 -868.91L982.21 -874.97L977.78 -879.41L971.72 -881.03L626.26 -881.03Z"/><path class="vis" d="M626.26 -856.79L971.72 -856.79L971.72 -856.79L977.78 -858.41L982.21 -862.85L983.84 -868.91L982.21 -874.97L977.78 -879.41L971.72 -881.03L626.26 -881.03Z"/></g><g data-part="21"><path class="paper" d="M547.47 -868.91L546.92 -873.09L545.31 -876.99L542.74 -880.34L539.39 -882.91L535.5 -884.52L531.31 -885.07L527.13 -884.52L523.23 -882.91L519.89 -880.34L517.32 -876.99L515.7 -873.09L515.15 -868.91L515.7 -864.73L517.32 -860.83L519.89 -857.48L523.23 -854.91L527.13 -853.3L531.31 -852.75L535.5 -853.3L539.39 -854.91L542.74 -857.48L545.31 -860.83L546.92 -864.73Z"/><path fill="url(#h-steel-135)" d="M547.47 -868.91L546.92 -873.09L545.31 -876.99L542.74 -880.34L539.39 -882.91L535.5 -884.52L531.31 -885.07L527.13 -884.52L523.23 -882.91L519.89 -880.34L517.32 -876.99L515.7 -873.09L515.15 -868.91L515.7 -864.73L517.32 -860.83L519.89 -857.48L523.23 -854.91L527.13 -853.3L531.31 -852.75L535.5 -853.3L539.39 -854.91L542.74 -857.48L545.31 -860.83L546.92 -864.73Z"/><path class="vis" d="M547.47 -868.91L546.92 -873.09L545.31 -876.99L542.74 -880.34L539.39 -882.91L535.5 -884.52L531.31 -885.07L527.13 -884.52L523.23 -882.91L519.89 -880.34L517.32 -876.99L515.7 -873.09L515.15 -868.91L515.7 -864.73L517.32 -860.83L519.89 -857.48L523.23 -854.91L527.13 -853.3L531.31 -852.75L535.5 -853.3L539.39 -854.91L542.74 -857.48L545.31 -860.83L546.92 -864.73Z"/><path class="ctr" d="M512.15 -868.91L550.47 -868.91"/><path class="ctr" d="M531.31 -849.75L531.31 -888.07"/></g><g data-part="18"><path class="paper" d="M648.48 -703.25L672.73 -703.25L672.73 -747.7L668.69 -751.74L648.48 -751.74Z"/><path class="vis" d="M648.48 -703.25L672.73 -703.25L672.73 -747.7L668.69 -751.74L648.48 -751.74Z"/><path class="paper" d="M551.52 -751.74L531.31 -751.74L527.27 -747.7L527.27 -703.25L551.52 -703.25Z"/><path class="vis" d="M551.52 -751.74L531.31 -751.74L527.27 -747.7L527.27 -703.25L551.52 -703.25Z"/></g><g id="set-B"><g data-part="16"><path class="paper" d="M628.28 -529.52L678.79 -529.52L678.79 -549.72L709.09 -549.72L709.09 -582.04L628.28 -582.04Z"/><path fill="url(#h-steel-30)" d="M628.28 -529.52L678.79 -529.52L678.79 -549.72L709.09 -549.72L709.09 -582.04L628.28 -582.04Z"/><path class="vis" d="M628.28 -529.52L678.79 -529.52L678.79 -549.72L709.09 -549.72L709.09 -582.04L628.28 -582.04Z"/><path class="paper" d="M571.72 -582.04L490.91 -582.04L490.91 -549.72L521.21 -549.72L521.21 -529.52L571.72 -529.52Z"/><path fill="url(#h-steel-30)" d="M571.72 -582.04L490.91 -582.04L490.91 -549.72L521.21 -549.72L521.21 -529.52L571.72 -529.52Z"/><path class="vis" d="M571.72 -582.04L490.91 -582.04L490.91 -549.72L521.21 -549.72L521.21 -529.52L571.72 -529.52Z"/></g><g data-part="17"><path class="paper" d="M628.28 -582.04L646.46 -582.04L648.48 -584.06L648.48 -780.02L644.44 -784.06L640.4 -784.06L640.4 -830.12L637.98 -832.55L628.28 -832.55Z"/><path class="vis" d="M628.28 -582.04L646.46 -582.04L648.48 -584.06L648.48 -780.02L644.44 -784.06L640.4 -784.06L640.4 -830.12L637.98 -832.55L628.28 -832.55Z"/><path class="paper" d="M571.72 -832.55L562.02 -832.55L559.6 -830.12L559.6 -784.06L555.56 -784.06L551.52 -780.02L551.52 -584.06L553.54 -582.04L571.72 -582.04Z"/><path class="vis" d="M571.72 -832.55L562.02 -832.55L559.6 -830.12L559.6 -784.06L555.56 -784.06L551.52 -780.02L551.52 -584.06L553.54 -582.04L571.72 -582.04Z"/><path class="thin" d="M642.02 -586.08L642.02 -775.98M557.98 -586.08L557.98 -775.98"/></g></g><g id="spring-B"><g data-part="15"><path class="vis spring" d="M692.93 -117.39L507.07 -159.41M692.93 -201.43L507.07 -243.45M692.93 -285.47L507.07 -327.49M692.93 -369.52L507.07 -411.54M692.93 -453.56L507.07 -495.58"/><path class="solid" d="M705.05 -117.39L703.43 -123.45L698.99 -127.89L692.93 -129.52L686.87 -127.89L682.43 -123.45L680.81 -117.39L682.43 -111.33L686.87 -106.9L692.93 -105.27L698.99 -106.9L703.43 -111.33Z"/><path class="solid" d="M519.19 -159.41L517.57 -165.47L513.13 -169.91L507.07 -171.54L501.01 -169.91L496.57 -165.47L494.95 -159.41L496.57 -153.35L501.01 -148.92L507.07 -147.29L513.13 -148.92L517.57 -153.35Z"/><path class="solid" d="M705.05 -201.43L703.43 -207.49L698.99 -211.93L692.93 -213.56L686.87 -211.93L682.43 -207.49L680.81 -201.43L682.43 -195.37L686.87 -190.94L692.93 -189.31L698.99 -190.94L703.43 -195.37Z"/><path class="solid" d="M519.19 -243.45L517.57 -249.52L513.13 -253.95L507.07 -255.58L501.01 -253.95L496.57 -249.52L494.95 -243.45L496.57 -237.39L501.01 -232.96L507.07 -231.33L513.13 -232.96L517.57 -237.39Z"/><path class="solid" d="M705.05 -285.47L703.43 -291.54L698.99 -295.97L692.93 -297.6L686.87 -295.97L682.43 -291.54L680.81 -285.47L682.43 -279.41L686.87 -274.98L692.93 -273.35L698.99 -274.98L703.43 -279.41Z"/><path class="solid" d="M519.19 -327.49L517.57 -333.56L513.13 -337.99L507.07 -339.62L501.01 -337.99L496.57 -333.56L494.95 -327.49L496.57 -321.43L501.01 -317L507.07 -315.37L513.13 -317L517.57 -321.43Z"/><path class="solid" d="M705.05 -369.52L703.43 -375.58L698.99 -380.01L692.93 -381.64L686.87 -380.01L682.43 -375.58L680.81 -369.52L682.43 -363.45L686.87 -359.02L692.93 -357.39L698.99 -359.02L703.43 -363.45Z"/><path class="solid" d="M519.19 -411.54L517.57 -417.6L513.13 -422.03L507.07 -423.66L501.01 -422.03L496.57 -417.6L494.95 -411.54L496.57 -405.47L501.01 -401.04L507.07 -399.41L513.13 -401.04L517.57 -405.47Z"/><path class="solid" d="M705.05 -453.56L703.43 -459.62L698.99 -464.05L692.93 -465.68L686.87 -464.05L682.43 -459.62L680.81 -453.56L682.43 -447.49L686.87 -443.06L692.93 -441.43L698.99 -443.06L703.43 -447.49Z"/><path class="solid" d="M519.19 -495.58L517.57 -501.64L513.13 -506.07L507.07 -507.7L501.01 -506.07L496.57 -501.64L494.95 -495.58L496.57 -489.52L501.01 -485.08L507.07 -483.45L513.13 -485.08L517.57 -489.52Z"/><path class="solid" d="M705.05 -537.6L703.43 -543.66L698.99 -548.09L692.93 -549.72L686.87 -548.09L682.43 -543.66L680.81 -537.6L682.43 -531.54L686.87 -527.1L692.93 -525.47L698.99 -527.1L703.43 -531.54Z"/></g></g><g id="mv-B"><g data-part="6"><path class="paper" d="M662.63 266.44L676.77 266.44L680.81 262.4L680.81 148.46L677.58 145.23L629.09 145.23L629.09 189.68L634.75 189.68L634.75 197.76L629.09 197.76L629.09 213.92L621.01 213.92L621.01 222L662.63 222Z"/><path fill="url(#h-steel-135)" d="M662.63 266.44L676.77 266.44L680.81 262.4L680.81 148.46L677.58 145.23L629.09 145.23L629.09 189.68L634.75 189.68L634.75 197.76L629.09 197.76L629.09 213.92L621.01 213.92L621.01 222L662.63 222Z"/><path class="vis" d="M662.63 266.44L676.77 266.44L680.81 262.4L680.81 148.46L677.58 145.23L629.09 145.23L629.09 189.68L634.75 189.68L634.75 197.76L629.09 197.76L629.09 213.92L621.01 213.92L621.01 222L662.63 222Z"/><path class="paper" d="M537.37 222L578.99 222L578.99 213.92L570.91 213.92L570.91 197.76L565.25 197.76L565.25 189.68L570.91 189.68L570.91 145.23L522.42 145.23L519.19 148.46L519.19 262.4L523.23 266.44L537.37 266.44Z"/><path fill="url(#h-steel-135)" d="M537.37 222L578.99 222L578.99 213.92L570.91 213.92L570.91 197.76L565.25 197.76L565.25 189.68L570.91 189.68L570.91 145.23L522.42 145.23L519.19 148.46L519.19 262.4L523.23 266.44L537.37 266.44Z"/><path class="vis" d="M537.37 222L578.99 222L578.99 213.92L570.91 213.92L570.91 197.76L565.25 197.76L565.25 189.68L570.91 189.68L570.91 145.23L522.42 145.23L519.19 148.46L519.19 262.4L523.23 266.44L537.37 266.44Z"/></g><g data-part="5"><path class="paper" d="M600 250.28L660.61 250.28L660.61 225.23L657.37 222L620.2 222L620.2 205.84L600 205.84L579.8 205.84L579.8 222L542.63 222L539.39 225.23L539.39 250.28Z"/><path fill="url(#h-steel-45)" d="M600 250.28L660.61 250.28L660.61 225.23L657.37 222L620.2 222L620.2 205.84L600 205.84L579.8 205.84L579.8 222L542.63 222L539.39 225.23L539.39 250.28Z"/><path class="vis" d="M600 250.28L660.61 250.28L660.61 225.23L657.37 222L620.2 222L620.2 205.84L600 205.84L579.8 205.84L579.8 222L542.63 222L539.39 225.23L539.39 250.28Z"/></g><g data-part="9"><path class="paper" d="M622.63 197.35L634.34 197.35L634.34 190.08L622.63 190.08Z"/><path class="vis" d="M622.63 197.35L634.34 197.35L634.34 190.08L622.63 190.08Z"/><path class="paper" d="M577.37 190.08L565.66 190.08L565.66 197.35L577.37 197.35Z"/><path class="vis" d="M577.37 190.08L565.66 190.08L565.66 197.35L577.37 197.35Z"/></g><g data-part="8"><path class="paper" d="M612.12 205.84L622.22 200.99L622.22 189.68L628.28 187.25L628.28 -81.03L624.24 -81.03L624.24 -927.09L621.82 -929.52L578.18 -929.52L575.76 -927.09L575.76 -81.03L571.72 -81.03L571.72 187.25L577.78 189.68L577.78 200.99L587.88 205.84Z"/><path class="vis" d="M612.12 205.84L622.22 200.99L622.22 189.68L628.28 187.25L628.28 -81.03L624.24 -81.03L624.24 -927.09L621.82 -929.52L578.18 -929.52L575.76 -927.09L575.76 -81.03L571.72 -81.03L571.72 187.25L577.78 189.68L577.78 200.99L587.88 205.84Z"/><path class="thin" d="M620.2 -856.79L620.2 -925.47M579.8 -856.79L579.8 -925.47"/></g><g data-part="14"><path class="paper" d="M625.05 -81.03L709.09 -81.03L709.09 -105.27L678.79 -105.27L678.79 -125.47L674.75 -129.52L625.05 -129.52Z"/><path fill="url(#h-steel-60)" d="M625.05 -81.03L709.09 -81.03L709.09 -105.27L678.79 -105.27L678.79 -125.47L674.75 -129.52L625.05 -129.52Z"/><path class="vis" d="M625.05 -81.03L709.09 -81.03L709.09 -105.27L678.79 -105.27L678.79 -125.47L674.75 -129.52L625.05 -129.52Z"/><path class="paper" d="M574.95 -129.52L525.25 -129.52L521.21 -125.47L521.21 -105.27L490.91 -105.27L490.91 -81.03L574.95 -81.03Z"/><path fill="url(#h-steel-60)" d="M574.95 -129.52L525.25 -129.52L521.21 -125.47L521.21 -105.27L490.91 -105.27L490.91 -81.03L574.95 -81.03Z"/><path class="vis" d="M574.95 -129.52L525.25 -129.52L521.21 -125.47L521.21 -105.27L490.91 -105.27L490.91 -81.03L574.95 -81.03Z"/></g><g data-part="22"><path class="paper" d="M624.24 -889.11L636.36 -889.11L636.36 -910.93L633.94 -913.35L624.24 -913.35Z"/><path class="vis" d="M624.24 -889.11L636.36 -889.11L636.36 -910.93L633.94 -913.35L624.24 -913.35Z"/><path class="paper" d="M575.76 -913.35L566.06 -913.35L563.64 -910.93L563.64 -889.11L575.76 -889.11Z"/><path class="vis" d="M575.76 -913.35L566.06 -913.35L563.64 -910.93L563.64 -889.11L575.76 -889.11Z"/></g></g><g data-role="phantom"><path class="phan" d="M570.91 120.99L522.42 120.99L519.19 124.22L519.19 238.16L523.23 242.2L537.37 242.2L537.37 197.76L662.63 197.76L662.63 242.2L676.77 242.2L680.81 238.16L680.81 124.22L677.58 120.99L629.09 120.99"/><path class="phan" d="M539.39 226.04L660.61 226.04"/><path class="phan" d="M660.61 226.04L660.61 200.99L657.37 197.76L620.2 197.76"/><path class="phan" d="M579.8 197.76L542.63 197.76L539.39 200.99L539.39 226.04"/></g><path class="ctr" d="M600 403.82L600 40.18"/><path class="ctr" d="M753.54 222L842.42 222"/><path class="ctr" d="M410.1 298.77L527.27 298.77"/><g id="dim-lift-wrap"><g data-role="dim" id="dim-lift"><path class="thin" d="M555.74 250.28L583.3 250.28M555.74 250.28L583.3 250.28M579.8 236.28L579.8 264.28L579.8 301.48"/><path class="head" d="M579.8 250.28L578.05 243.28L581.55 243.28ZM579.8 250.28L581.55 257.28L578.05 257.28Z"/><text class="t" x="576.8" y="284.38" text-anchor="middle" transform="rotate(-90 576.8 284.38)">h=0.00</text></g></g></g><circle class="thin" cx="600" cy="222" r="178"/><g data-role="balloon" data-target="2" data-at="543.43 323.01"><path class="thin" d="M400.49 329.61L543.43 323.01"/><circle class="dot" cx="543.43" cy="323.01" r="1.5"/><circle class="balloon" cx="392" cy="330" r="8.5"/><text class="t" x="392" y="333.3" text-anchor="middle">2</text></g><g data-role="balloon" data-target="3" data-at="525.25 278.57"><path class="thin" d="M400.5 281.78L525.25 278.57"/><circle class="dot" cx="525.25" cy="278.57" r="1.5"/><circle class="balloon" cx="392" cy="282" r="8.5"/><text class="t" x="392" y="285.3" text-anchor="middle">3</text></g><g id="bal-5"><g data-role="balloon" data-target="5" data-at="559.6 236.14"><path class="thin" d="M400.5 232.21L559.6 236.14"/><circle class="dot" cx="559.6" cy="236.14" r="1.5"/><circle class="balloon" cx="392" cy="232" r="8.5"/><text class="t" x="392" y="235.3" text-anchor="middle">5</text></g></g><g id="bal-6"><g data-role="balloon" data-target="6" data-at="527.27 201.8"><path class="thin" d="M400.48 192.61L527.27 201.8"/><circle class="dot" cx="527.27" cy="201.8" r="1.5"/><circle class="balloon" cx="392" cy="192" r="8.5"/><text class="t" x="392" y="195.3" text-anchor="middle">6</text></g></g><g id="bal-9"><g data-role="balloon" data-target="9" data-at="571.72 193.72"><path class="thin" d="M400.28 153.92L571.72 193.72"/><circle class="dot" cx="571.72" cy="193.72" r="1.5"/><circle class="balloon" cx="392" cy="152" r="8.5"/><text class="t" x="392" y="155.3" text-anchor="middle">9</text></g></g><g data-role="label"><text class="t t-lg" x="600" y="420" text-anchor="middle">DETAIL B</text><text class="t t-sm" x="600" y="432" text-anchor="middle">NOZZLE, DISC AND GUIDE · SCALE 2:1</text></g><g data-geom="C" clip-path="url(#clip-C)"><rect class="paper" x="448" y="470" width="145.45" height="266.67"/><g data-role="fluid"><path id="gas-out-C" class="tint" fill-opacity="0.1" d="M448 1185.15L593.45 1185.15L593.45 1100.3L448 1100.3ZM448 1100.32L470.22 1100.32L470.22 1055.86L448 1055.86ZM571.23 1100.32L593.45 1100.32L593.45 1055.86L571.23 1055.86ZM593.43 1153.84L732.85 1153.84L732.85 1066.97L593.43 1066.97Z"/><path id="gas-hud-C" class="tint" fill-opacity="0.1" d="M489.41 1132.63L552.04 1132.63L552.04 1124.55L489.41 1124.55Z"/><path id="gas-in-C" class="tint" fill-opacity="0.8" d="M557.09 1302.32L557.09 1241.7L550.02 1241.7L543.96 1213.43L543.96 1124.55L545.98 1124.55L545.98 1124.55L495.47 1124.55L495.47 1124.55L497.49 1124.55L497.49 1213.43L491.43 1241.7L484.36 1241.7L484.36 1302.32Z"/></g><g data-part="1"><path class="paper" d="M484.36 1245.76L480.32 1245.76L480.32 1197.27L470.22 1197.27L470.22 1185.15L448 1185.15L448 1157.27L431.84 1157.27L431.84 1185.15L456.08 1209.39L456.08 1261.92L449.01 1261.92L449.01 1298.28L452.04 1298.28L452.04 1302.32L484.36 1302.32Z"/><path fill="url(#h-steel-45)" d="M484.36 1245.76L480.32 1245.76L480.32 1197.27L470.22 1197.27L470.22 1185.15L448 1185.15L448 1157.27L431.84 1157.27L431.84 1185.15L456.08 1209.39L456.08 1261.92L449.01 1261.92L449.01 1298.28L452.04 1298.28L452.04 1302.32L484.36 1302.32Z"/><path class="vis" d="M484.36 1245.76L480.32 1245.76L480.32 1197.27L470.22 1197.27L470.22 1185.15L448 1185.15L448 1157.27L431.84 1157.27L431.84 1185.15L456.08 1209.39L456.08 1261.92L449.01 1261.92L449.01 1298.28L452.04 1298.28L452.04 1302.32L484.36 1302.32Z"/><path class="paper" d="M448 1140.3L448 1055.86L458.1 1055.86L458.1 1019.49L444.97 1019.49L444.97 1007.37L427.9 1007.37L427.9 1033.64L417.7 1039.7L407.49 1033.64L407.49 1007.37L393.45 1007.37L393.45 1043.74L423.76 1043.74L431.84 1051.82L431.84 1140.3Z"/><path fill="url(#h-steel-45)" d="M448 1140.3L448 1055.86L458.1 1055.86L458.1 1019.49L444.97 1019.49L444.97 1007.37L427.9 1007.37L427.9 1033.64L417.7 1039.7L407.49 1033.64L407.49 1007.37L393.45 1007.37L393.45 1043.74L423.76 1043.74L431.84 1051.82L431.84 1140.3Z"/><path class="vis" d="M448 1140.3L448 1055.86L458.1 1055.86L458.1 1019.49L444.97 1019.49L444.97 1007.37L427.9 1007.37L427.9 1033.64L417.7 1039.7L407.49 1033.64L407.49 1007.37L393.45 1007.37L393.45 1043.74L423.76 1043.74L431.84 1051.82L431.84 1140.3Z"/><path class="paper" d="M420.73 1261.92L404.57 1261.92L404.57 1298.28L420.73 1298.28Z"/><path fill="url(#h-steel-45)" d="M420.73 1261.92L404.57 1261.92L404.57 1298.28L420.73 1298.28Z"/><path class="vis" d="M420.73 1261.92L404.57 1261.92L404.57 1298.28L420.73 1298.28Z"/><path class="paper" d="M557.09 1302.32L589.41 1302.32L589.41 1298.28L592.44 1298.28L592.44 1261.92L585.37 1261.92L585.37 1201.31L601.54 1177.07L630.02 1177.07L630.02 1153.84L593.45 1153.84L593.45 1185.15L571.23 1185.15L571.23 1197.27L561.13 1197.27L561.13 1245.76L557.09 1245.76Z"/><path fill="url(#h-steel-45)" d="M557.09 1302.32L589.41 1302.32L589.41 1298.28L592.44 1298.28L592.44 1261.92L585.37 1261.92L585.37 1201.31L601.54 1177.07L630.02 1177.07L630.02 1153.84L593.45 1153.84L593.45 1185.15L571.23 1185.15L571.23 1197.27L561.13 1197.27L561.13 1245.76L557.09 1245.76Z"/><path class="vis" d="M557.09 1302.32L589.41 1302.32L589.41 1298.28L592.44 1298.28L592.44 1261.92L585.37 1261.92L585.37 1201.31L601.54 1177.07L630.02 1177.07L630.02 1153.84L593.45 1153.84L593.45 1185.15L571.23 1185.15L571.23 1197.27L561.13 1197.27L561.13 1245.76L557.09 1245.76Z"/><path class="paper" d="M653.86 1177.07L692.44 1177.07L692.44 1203.33L728.81 1203.33L728.81 1199.29L732.85 1199.29L732.85 1153.84L653.86 1153.84Z"/><path fill="url(#h-steel-45)" d="M653.86 1177.07L692.44 1177.07L692.44 1203.33L728.81 1203.33L728.81 1199.29L732.85 1199.29L732.85 1153.84L653.86 1153.84Z"/><path class="vis" d="M653.86 1177.07L692.44 1177.07L692.44 1203.33L728.81 1203.33L728.81 1199.29L732.85 1199.29L732.85 1153.84L653.86 1153.84Z"/><path class="paper" d="M692.44 1261.92L728.81 1261.92L728.81 1239.7L692.44 1239.7Z"/><path fill="url(#h-steel-45)" d="M692.44 1261.92L728.81 1261.92L728.81 1239.7L692.44 1239.7Z"/><path class="vis" d="M692.44 1261.92L728.81 1261.92L728.81 1239.7L692.44 1239.7Z"/><path class="paper" d="M593.45 1066.97L732.85 1066.97L732.85 1021.52L728.81 1021.52L728.81 1017.47L692.44 1017.47L692.44 1043.74L648 1043.74L648 1007.37L633.96 1007.37L633.96 1033.64L623.76 1039.7L613.56 1033.64L613.56 1007.37L596.48 1007.37L596.48 1019.49L583.35 1019.49L583.35 1055.86L593.45 1055.86Z"/><path fill="url(#h-steel-45)" d="M593.45 1066.97L732.85 1066.97L732.85 1021.52L728.81 1021.52L728.81 1017.47L692.44 1017.47L692.44 1043.74L648 1043.74L648 1007.37L633.96 1007.37L633.96 1033.64L623.76 1039.7L613.56 1033.64L613.56 1007.37L596.48 1007.37L596.48 1019.49L583.35 1019.49L583.35 1055.86L593.45 1055.86Z"/><path class="vis" d="M593.45 1066.97L732.85 1066.97L732.85 1021.52L728.81 1021.52L728.81 1017.47L692.44 1017.47L692.44 1043.74L648 1043.74L648 1007.37L633.96 1007.37L633.96 1033.64L623.76 1039.7L613.56 1033.64L613.56 1007.37L596.48 1007.37L596.48 1019.49L583.35 1019.49L583.35 1055.86L593.45 1055.86Z"/><path class="paper" d="M692.44 981.11L728.81 981.11L728.81 958.89L692.44 958.89Z"/><path fill="url(#h-steel-45)" d="M692.44 981.11L728.81 981.11L728.81 958.89L692.44 958.89Z"/><path class="vis" d="M692.44 981.11L728.81 981.11L728.81 958.89L692.44 958.89Z"/><path class="paper" d="M620.73 1298.28L636.89 1298.28L636.89 1261.92L620.73 1261.92Z"/><path fill="url(#h-steel-45)" d="M620.73 1298.28L636.89 1298.28L636.89 1261.92L620.73 1261.92Z"/><path class="vis" d="M620.73 1298.28L636.89 1298.28L636.89 1261.92L620.73 1261.92Z"/><path class="thin" d="M611.64 1031.62L611.64 1007.37M635.88 1031.62L635.88 1007.37M429.82 1031.62L429.82 1007.37M405.58 1031.62L405.58 1007.37"/></g><g data-part="2"><path class="paper" d="M550.02 1241.72L563.15 1241.72L563.15 1197.27L569.21 1197.27L569.21 1179.09L567.19 1177.07L555.07 1177.07L555.07 1138.69L549.01 1138.69L549.01 1127.58L545.98 1124.55L543.96 1124.55L543.96 1213.43Z"/><path fill="url(#h-steel-135)" d="M550.02 1241.72L563.15 1241.72L563.15 1197.27L569.21 1197.27L569.21 1179.09L567.19 1177.07L555.07 1177.07L555.07 1138.69L549.01 1138.69L549.01 1127.58L545.98 1124.55L543.96 1124.55L543.96 1213.43Z"/><path class="vis" d="M550.02 1241.72L563.15 1241.72L563.15 1197.27L569.21 1197.27L569.21 1179.09L567.19 1177.07L555.07 1177.07L555.07 1138.69L549.01 1138.69L549.01 1127.58L545.98 1124.55L543.96 1124.55L543.96 1213.43Z"/><path class="paper" d="M497.49 1213.43L497.49 1124.55L495.47 1124.55L492.44 1127.58L492.44 1138.69L486.38 1138.69L486.38 1177.07L474.26 1177.07L472.24 1179.09L472.24 1197.27L478.3 1197.27L478.3 1241.72L491.43 1241.72Z"/><path fill="url(#h-steel-135)" d="M497.49 1213.43L497.49 1124.55L495.47 1124.55L492.44 1127.58L492.44 1138.69L486.38 1138.69L486.38 1177.07L474.26 1177.07L472.24 1179.09L472.24 1197.27L478.3 1197.27L478.3 1241.72L491.43 1241.72Z"/><path class="vis" d="M497.49 1213.43L497.49 1124.55L495.47 1124.55L492.44 1127.58L492.44 1138.69L486.38 1138.69L486.38 1177.07L474.26 1177.07L472.24 1179.09L472.24 1197.27L478.3 1197.27L478.3 1241.72L491.43 1241.72Z"/><path class="vis" d="M491.43 1241.72L550.02 1241.72"/><path class="vis" d="M497.49 1124.55L543.96 1124.55"/><path class="vis" d="M497.49 1213.43L543.96 1213.43"/><path class="thin" d="M561.13 1239.7L561.13 1198.28M553.45 1175.05L553.45 1140.71M480.32 1239.7L480.32 1198.28M488 1175.05L488 1140.71"/></g><g data-part="3"><path class="paper" d="M555.07 1160.91L565.17 1160.91L565.17 1139.7L562.14 1136.67L555.07 1136.67Z"/><path fill="url(#h-steel-30)" d="M555.07 1160.91L565.17 1160.91L565.17 1139.7L562.14 1136.67L555.07 1136.67Z"/><path class="vis" d="M555.07 1160.91L565.17 1160.91L565.17 1139.7L562.14 1136.67L555.07 1136.67Z"/><path class="paper" d="M486.38 1136.67L479.31 1136.67L476.28 1139.7L476.28 1141.31L479.92 1141.31L479.92 1156.26L476.28 1156.26L476.28 1160.91L486.38 1160.91Z"/><path fill="url(#h-steel-30)" d="M486.38 1136.67L479.31 1136.67L476.28 1139.7L476.28 1141.31L479.92 1141.31L479.92 1156.26L476.28 1156.26L476.28 1160.91L486.38 1160.91Z"/><path class="vis" d="M486.38 1136.67L479.31 1136.67L476.28 1139.7L476.28 1141.31L479.92 1141.31L479.92 1156.26L476.28 1156.26L476.28 1160.91L486.38 1160.91Z"/></g><g data-part="4"><path class="paper" d="M479.92 1155.86L469.82 1155.86L469.82 1158.89L430.63 1158.89L429.41 1157.68L429.41 1139.9L430.63 1138.69L469.82 1138.69L469.82 1141.72L479.92 1141.72Z"/><path class="vis" d="M479.92 1155.86L469.82 1155.86L469.82 1158.89L430.63 1158.89L429.41 1157.68L429.41 1139.9L430.63 1138.69L469.82 1138.69L469.82 1141.72L479.92 1141.72Z"/><path class="thin" d="M468.2 1157.27L431.84 1157.27M468.2 1140.3L431.84 1140.3"/><path class="hid" d="M429.41 1153.84L439.92 1153.84L439.92 1143.74L429.41 1143.74Z"/></g><g data-part="23"><path class="paper" d="M623.76 1193.23L660.12 1193.23L660.12 1179.09L655.27 1179.09L655.27 1158.08L654.06 1156.87L629.82 1156.87L628.61 1158.08L628.61 1179.09L623.76 1179.09Z"/><path class="vis" d="M623.76 1193.23L660.12 1193.23L660.12 1179.09L655.27 1179.09L655.27 1158.08L654.06 1156.87L629.82 1156.87L628.61 1158.08L628.61 1179.09L623.76 1179.09Z"/><path class="thin" d="M630.02 1177.07L630.02 1158.89M653.86 1177.07L653.86 1158.89M623.76 1186.16L660.12 1186.16"/></g><g data-part="7"><path class="paper" d="M535.88 1059.9L562.14 1059.9L562.14 1100.3L571.23 1100.3L571.23 1019.49L595.47 1019.49L595.47 1004.34L535.88 1004.34Z"/><path fill="url(#h-steel-60)" d="M535.88 1059.9L562.14 1059.9L562.14 1100.3L571.23 1100.3L571.23 1019.49L595.47 1019.49L595.47 1004.34L535.88 1004.34Z"/><path class="vis" d="M535.88 1059.9L562.14 1059.9L562.14 1100.3L571.23 1100.3L571.23 1019.49L595.47 1019.49L595.47 1004.34L535.88 1004.34Z"/><path class="paper" d="M505.58 1004.34L445.98 1004.34L445.98 1019.49L470.22 1019.49L470.22 1100.3L479.31 1100.3L479.31 1059.9L505.58 1059.9Z"/><path fill="url(#h-steel-60)" d="M505.58 1004.34L445.98 1004.34L445.98 1019.49L470.22 1019.49L470.22 1100.3L479.31 1100.3L479.31 1059.9L505.58 1059.9Z"/><path class="vis" d="M505.58 1004.34L445.98 1004.34L445.98 1019.49L470.22 1019.49L470.22 1100.3L479.31 1100.3L479.31 1059.9L505.58 1059.9Z"/></g><g data-part="13"><path class="solid" d="M597.49 1007.37L609.62 1007.37L609.62 1004.34L597.49 1004.34Z"/><path class="solid" d="M443.96 1004.34L431.84 1004.34L431.84 1007.37L443.96 1007.37Z"/><path class="solid" d="M637.9 1007.37L645.98 1007.37L645.98 1004.34L637.9 1004.34Z"/><path class="solid" d="M403.56 1004.34L395.47 1004.34L395.47 1007.37L403.56 1007.37Z"/></g><g data-part="10"><path class="paper" d="M581.33 1004.34L609.62 1004.34L609.62 976.06L601.54 976.06L593.45 967.98L593.45 680.1L585.37 672.02L573.25 672.02L573.25 647.78L541.74 647.78L541.74 696.26L581.33 696.26Z"/><path fill="url(#h-steel-135)" d="M581.33 1004.34L609.62 1004.34L609.62 976.06L601.54 976.06L593.45 967.98L593.45 680.1L585.37 672.02L573.25 672.02L573.25 647.78L541.74 647.78L541.74 696.26L581.33 696.26Z"/><path class="vis" d="M581.33 1004.34L609.62 1004.34L609.62 976.06L601.54 976.06L593.45 967.98L593.45 680.1L585.37 672.02L573.25 672.02L573.25 647.78L541.74 647.78L541.74 696.26L581.33 696.26Z"/><path class="paper" d="M460.12 696.26L499.72 696.26L499.72 647.78L468.2 647.78L468.2 672.02L456.08 672.02L448 680.1L448 967.98L439.92 976.06L431.84 976.06L431.84 1004.34L460.12 1004.34Z"/><path fill="url(#h-steel-135)" d="M460.12 696.26L499.72 696.26L499.72 647.78L468.2 647.78L468.2 672.02L456.08 672.02L448 680.1L448 967.98L439.92 976.06L431.84 976.06L431.84 1004.34L460.12 1004.34Z"/><path class="vis" d="M460.12 696.26L499.72 696.26L499.72 647.78L468.2 647.78L468.2 672.02L456.08 672.02L448 680.1L448 967.98L439.92 976.06L431.84 976.06L431.84 1004.34L460.12 1004.34Z"/><path class="paper" d="M637.9 1004.34L648 1004.34L648 976.06L637.9 976.06Z"/><path fill="url(#h-steel-135)" d="M637.9 1004.34L648 1004.34L648 976.06L637.9 976.06Z"/><path class="vis" d="M637.9 1004.34L648 1004.34L648 976.06L637.9 976.06Z"/><path class="paper" d="M403.56 976.06L393.45 976.06L393.45 1004.34L403.56 1004.34Z"/><path fill="url(#h-steel-135)" d="M403.56 976.06L393.45 976.06L393.45 1004.34L403.56 1004.34Z"/><path class="vis" d="M403.56 976.06L393.45 976.06L393.45 1004.34L403.56 1004.34Z"/><path class="thin" d="M544.97 696.26L544.97 647.78M571.03 670L571.03 649.8M496.48 696.26L496.48 647.78M470.42 670L470.42 649.8"/></g><g data-part="11"><path class="paper" d="M611.64 1031.62L635.88 1031.62L635.88 951.01L634.67 949.8L612.85 949.8L611.64 951.01Z"/><path class="vis" d="M611.64 1031.62L635.88 1031.62L635.88 951.01L634.67 949.8L612.85 949.8L611.64 951.01Z"/><path class="paper" d="M429.82 951.01L428.61 949.8L406.79 949.8L405.58 951.01L405.58 1031.62L429.82 1031.62Z"/><path class="vis" d="M429.82 951.01L428.61 949.8L406.79 949.8L405.58 951.01L405.58 1031.62L429.82 1031.62Z"/><path class="thin" d="M613.56 1029.6L613.56 1007.37M633.96 1029.6L633.96 1007.37M427.9 1029.6L427.9 1007.37M407.49 1029.6L407.49 1007.37"/></g><g data-part="12"><path class="paper" d="M603.56 976.06L643.96 976.06L643.96 956.26L641.94 954.24L605.58 954.24L603.56 956.26Z"/><path class="vis" d="M603.56 976.06L643.96 976.06L643.96 956.26L641.94 954.24L605.58 954.24L603.56 956.26Z"/><path class="paper" d="M437.9 956.26L435.88 954.24L399.52 954.24L397.49 956.26L397.49 976.06L437.9 976.06Z"/><path class="vis" d="M437.9 956.26L435.88 954.24L399.52 954.24L397.49 956.26L397.49 976.06L437.9 976.06Z"/><path class="thin" d="M609.62 976.06L609.62 954.24M637.9 976.06L637.9 954.24M431.84 976.06L431.84 954.24M403.56 976.06L403.56 954.24"/></g><g data-part="19"><path class="paper" d="M468.2 672.02L456.08 672.02L456.08 486.16L464.16 478.08L577.29 478.08L585.37 486.16L585.37 552.83L569.21 552.83L569.21 494.24L472.24 494.24L472.24 647.78L468.2 647.78Z"/><path fill="url(#h-iron-45)" d="M468.2 672.02L456.08 672.02L456.08 486.16L464.16 478.08L577.29 478.08L585.37 486.16L585.37 552.83L569.21 552.83L569.21 494.24L472.24 494.24L472.24 647.78L468.2 647.78Z"/><path class="vis" d="M468.2 672.02L456.08 672.02L456.08 486.16L464.16 478.08L577.29 478.08L585.37 486.16L585.37 552.83L569.21 552.83L569.21 494.24L472.24 494.24L472.24 647.78L468.2 647.78Z"/><path class="paper" d="M573.25 672.02L585.37 672.02L585.37 577.07L569.21 577.07L569.21 647.78L573.25 647.78Z"/><path fill="url(#h-iron-45)" d="M573.25 672.02L585.37 672.02L585.37 577.07L569.21 577.07L569.21 647.78L573.25 647.78Z"/><path class="vis" d="M573.25 672.02L585.37 672.02L585.37 577.07L569.21 577.07L569.21 647.78L573.25 647.78Z"/></g><g data-part="20"><path class="paper" d="M507.6 571.01L507.6 558.89L498.03 558.89L494.95 555L490.64 552.53L485.73 551.83L480.91 553.01L476.87 555.9L474.19 560.08L473.25 564.95L474.19 569.82L476.87 574L480.91 576.88L485.73 578.06L490.64 577.37L494.95 574.9L498.03 571.01Z"/><path fill="url(#h-steel-30)" d="M507.6 571.01L507.6 558.89L498.03 558.89L494.95 555L490.64 552.53L485.73 551.83L480.91 553.01L476.87 555.9L474.19 560.08L473.25 564.95L474.19 569.82L476.87 574L480.91 576.88L485.73 578.06L490.64 577.37L494.95 574.9L498.03 571.01Z"/><path class="vis" d="M507.6 571.01L507.6 558.89L498.03 558.89L494.95 555L490.64 552.53L485.73 551.83L480.91 553.01L476.87 555.9L474.19 560.08L473.25 564.95L474.19 569.82L476.87 574L480.91 576.88L485.73 578.06L490.64 577.37L494.95 574.9L498.03 571.01Z"/><path class="paper" d="M533.86 571.01L706.59 571.01L706.59 571.01L709.62 570.2L711.83 567.98L712.65 564.95L711.83 561.92L709.62 559.7L706.59 558.89L533.86 558.89Z"/><path fill="url(#h-steel-30)" d="M533.86 571.01L706.59 571.01L706.59 571.01L709.62 570.2L711.83 567.98L712.65 564.95L711.83 561.92L709.62 559.7L706.59 558.89L533.86 558.89Z"/><path class="vis" d="M533.86 571.01L706.59 571.01L706.59 571.01L709.62 570.2L711.83 567.98L712.65 564.95L711.83 561.92L709.62 559.7L706.59 558.89L533.86 558.89Z"/></g><g data-part="21"><path class="paper" d="M494.46 564.95L494.19 562.86L493.38 560.91L492.1 559.24L490.42 557.95L488.48 557.14L486.38 556.87L484.29 557.14L482.34 557.95L480.67 559.24L479.39 560.91L478.58 562.86L478.3 564.95L478.58 567.04L479.39 568.99L480.67 570.66L482.34 571.95L484.29 572.75L486.38 573.03L488.48 572.75L490.42 571.95L492.1 570.66L493.38 568.99L494.19 567.04Z"/><path fill="url(#h-steel-135)" d="M494.46 564.95L494.19 562.86L493.38 560.91L492.1 559.24L490.42 557.95L488.48 557.14L486.38 556.87L484.29 557.14L482.34 557.95L480.67 559.24L479.39 560.91L478.58 562.86L478.3 564.95L478.58 567.04L479.39 568.99L480.67 570.66L482.34 571.95L484.29 572.75L486.38 573.03L488.48 572.75L490.42 571.95L492.1 570.66L493.38 568.99L494.19 567.04Z"/><path class="vis" d="M494.46 564.95L494.19 562.86L493.38 560.91L492.1 559.24L490.42 557.95L488.48 557.14L486.38 556.87L484.29 557.14L482.34 557.95L480.67 559.24L479.39 560.91L478.58 562.86L478.3 564.95L478.58 567.04L479.39 568.99L480.67 570.66L482.34 571.95L484.29 572.75L486.38 573.03L488.48 572.75L490.42 571.95L492.1 570.66L493.38 568.99L494.19 567.04Z"/><path class="ctr" d="M475.3 564.95L497.46 564.95"/><path class="ctr" d="M486.38 576.03L486.38 553.87"/></g><g data-part="18"><path class="paper" d="M544.97 647.78L557.09 647.78L557.09 625.56L555.07 623.54L544.97 623.54Z"/><path class="vis" d="M544.97 647.78L557.09 647.78L557.09 625.56L555.07 623.54L544.97 623.54Z"/><path class="paper" d="M496.48 623.54L486.38 623.54L484.36 625.56L484.36 647.78L496.48 647.78Z"/><path class="vis" d="M496.48 623.54L486.38 623.54L484.36 625.56L484.36 647.78L496.48 647.78Z"/></g><g id="set-C"><g data-part="16"><path class="paper" d="M534.87 734.65L560.12 734.65L560.12 724.55L575.27 724.55L575.27 708.38L534.87 708.38Z"/><path fill="url(#h-steel-30)" d="M534.87 734.65L560.12 734.65L560.12 724.55L575.27 724.55L575.27 708.38L534.87 708.38Z"/><path class="vis" d="M534.87 734.65L560.12 734.65L560.12 724.55L575.27 724.55L575.27 708.38L534.87 708.38Z"/><path class="paper" d="M506.59 708.38L466.18 708.38L466.18 724.55L481.33 724.55L481.33 734.65L506.59 734.65Z"/><path fill="url(#h-steel-30)" d="M506.59 708.38L466.18 708.38L466.18 724.55L481.33 724.55L481.33 734.65L506.59 734.65Z"/><path class="vis" d="M506.59 708.38L466.18 708.38L466.18 724.55L481.33 724.55L481.33 734.65L506.59 734.65Z"/></g><g data-part="17"><path class="paper" d="M534.87 708.38L543.96 708.38L544.97 707.37L544.97 609.39L542.95 607.37L540.93 607.37L540.93 584.34L539.72 583.13L534.87 583.13Z"/><path class="vis" d="M534.87 708.38L543.96 708.38L544.97 707.37L544.97 609.39L542.95 607.37L540.93 607.37L540.93 584.34L539.72 583.13L534.87 583.13Z"/><path class="paper" d="M506.59 583.13L501.74 583.13L500.53 584.34L500.53 607.37L498.51 607.37L496.48 609.39L496.48 707.37L497.49 708.38L506.59 708.38Z"/><path class="vis" d="M506.59 583.13L501.74 583.13L500.53 584.34L500.53 607.37L498.51 607.37L496.48 609.39L496.48 707.37L497.49 708.38L506.59 708.38Z"/><path class="thin" d="M541.74 706.36L541.74 611.41M499.72 706.36L499.72 611.41"/></g></g><g id="spring-C"><g data-part="15"><path class="vis spring" d="M567.19 940.71L474.26 919.7M567.19 898.69L474.26 877.68M567.19 856.67L474.26 835.66M567.19 814.65L474.26 793.64M567.19 772.63L474.26 751.62"/><path class="solid" d="M573.25 940.71L572.44 937.68L570.22 935.46L567.19 934.65L564.16 935.46L561.94 937.68L561.13 940.71L561.94 943.74L564.16 945.96L567.19 946.77L570.22 945.96L572.44 943.74Z"/><path class="solid" d="M480.32 919.7L479.51 916.67L477.29 914.45L474.26 913.64L471.23 914.45L469.01 916.67L468.2 919.7L469.01 922.73L471.23 924.95L474.26 925.76L477.29 924.95L479.51 922.73Z"/><path class="solid" d="M573.25 898.69L572.44 895.66L570.22 893.44L567.19 892.63L564.16 893.44L561.94 895.66L561.13 898.69L561.94 901.72L564.16 903.94L567.19 904.75L570.22 903.94L572.44 901.72Z"/><path class="solid" d="M480.32 877.68L479.51 874.65L477.29 872.43L474.26 871.62L471.23 872.43L469.01 874.65L468.2 877.68L469.01 880.71L471.23 882.93L474.26 883.74L477.29 882.93L479.51 880.71Z"/><path class="solid" d="M573.25 856.67L572.44 853.64L570.22 851.42L567.19 850.61L564.16 851.42L561.94 853.64L561.13 856.67L561.94 859.7L564.16 861.92L567.19 862.73L570.22 861.92L572.44 859.7Z"/><path class="solid" d="M480.32 835.66L479.51 832.63L477.29 830.41L474.26 829.6L471.23 830.41L469.01 832.63L468.2 835.66L469.01 838.69L471.23 840.91L474.26 841.72L477.29 840.91L479.51 838.69Z"/><path class="solid" d="M573.25 814.65L572.44 811.62L570.22 809.4L567.19 808.59L564.16 809.4L561.94 811.62L561.13 814.65L561.94 817.68L564.16 819.9L567.19 820.71L570.22 819.9L572.44 817.68Z"/><path class="solid" d="M480.32 793.64L479.51 790.61L477.29 788.39L474.26 787.58L471.23 788.39L469.01 790.61L468.2 793.64L469.01 796.67L471.23 798.89L474.26 799.7L477.29 798.89L479.51 796.67Z"/><path class="solid" d="M573.25 772.63L572.44 769.6L570.22 767.38L567.19 766.57L564.16 767.38L561.94 769.6L561.13 772.63L561.94 775.66L564.16 777.87L567.19 778.69L570.22 777.87L572.44 775.66Z"/><path class="solid" d="M480.32 751.62L479.51 748.59L477.29 746.37L474.26 745.56L471.23 746.37L469.01 748.59L468.2 751.62L469.01 754.65L471.23 756.86L474.26 757.68L477.29 756.86L479.51 754.65Z"/><path class="solid" d="M573.25 730.61L572.44 727.58L570.22 725.36L567.19 724.55L564.16 725.36L561.94 727.58L561.13 730.61L561.94 733.64L564.16 735.85L567.19 736.67L570.22 735.85L572.44 733.64Z"/></g></g><g id="mv-C"><g data-part="6"><path class="paper" d="M552.04 1132.63L559.11 1132.63L561.13 1130.61L561.13 1073.64L559.52 1072.02L535.27 1072.02L535.27 1094.24L538.1 1094.24L538.1 1098.28L535.27 1098.28L535.27 1106.36L531.23 1106.36L531.23 1110.4L552.04 1110.4Z"/><path fill="url(#h-steel-135)" d="M552.04 1132.63L559.11 1132.63L561.13 1130.61L561.13 1073.64L559.52 1072.02L535.27 1072.02L535.27 1094.24L538.1 1094.24L538.1 1098.28L535.27 1098.28L535.27 1106.36L531.23 1106.36L531.23 1110.4L552.04 1110.4Z"/><path class="vis" d="M552.04 1132.63L559.11 1132.63L561.13 1130.61L561.13 1073.64L559.52 1072.02L535.27 1072.02L535.27 1094.24L538.1 1094.24L538.1 1098.28L535.27 1098.28L535.27 1106.36L531.23 1106.36L531.23 1110.4L552.04 1110.4Z"/><path class="paper" d="M489.41 1110.4L510.22 1110.4L510.22 1106.36L506.18 1106.36L506.18 1098.28L503.35 1098.28L503.35 1094.24L506.18 1094.24L506.18 1072.02L481.94 1072.02L480.32 1073.64L480.32 1130.61L482.34 1132.63L489.41 1132.63Z"/><path fill="url(#h-steel-135)" d="M489.41 1110.4L510.22 1110.4L510.22 1106.36L506.18 1106.36L506.18 1098.28L503.35 1098.28L503.35 1094.24L506.18 1094.24L506.18 1072.02L481.94 1072.02L480.32 1073.64L480.32 1130.61L482.34 1132.63L489.41 1132.63Z"/><path class="vis" d="M489.41 1110.4L510.22 1110.4L510.22 1106.36L506.18 1106.36L506.18 1098.28L503.35 1098.28L503.35 1094.24L506.18 1094.24L506.18 1072.02L481.94 1072.02L480.32 1073.64L480.32 1130.61L482.34 1132.63L489.41 1132.63Z"/></g><g data-part="5"><path class="paper" d="M520.73 1124.55L551.03 1124.55L551.03 1112.02L549.41 1110.4L530.83 1110.4L530.83 1102.32L520.73 1102.32L510.63 1102.32L510.63 1110.4L492.04 1110.4L490.42 1112.02L490.42 1124.55Z"/><path fill="url(#h-steel-45)" d="M520.73 1124.55L551.03 1124.55L551.03 1112.02L549.41 1110.4L530.83 1110.4L530.83 1102.32L520.73 1102.32L510.63 1102.32L510.63 1110.4L492.04 1110.4L490.42 1112.02L490.42 1124.55Z"/><path class="vis" d="M520.73 1124.55L551.03 1124.55L551.03 1112.02L549.41 1110.4L530.83 1110.4L530.83 1102.32L520.73 1102.32L510.63 1102.32L510.63 1110.4L492.04 1110.4L490.42 1112.02L490.42 1124.55Z"/></g><g data-part="9"><path class="paper" d="M532.04 1098.08L537.9 1098.08L537.9 1094.44L532.04 1094.44Z"/><path class="vis" d="M532.04 1098.08L537.9 1098.08L537.9 1094.44L532.04 1094.44Z"/><path class="paper" d="M509.41 1094.44L503.56 1094.44L503.56 1098.08L509.41 1098.08Z"/><path class="vis" d="M509.41 1094.44L503.56 1094.44L503.56 1098.08L509.41 1098.08Z"/></g><g data-part="8"><path class="paper" d="M526.79 1102.32L531.84 1099.9L531.84 1094.24L534.87 1093.03L534.87 958.89L532.85 958.89L532.85 535.86L531.64 534.65L509.82 534.65L508.61 535.86L508.61 958.89L506.59 958.89L506.59 1093.03L509.62 1094.24L509.62 1099.9L514.67 1102.32Z"/><path class="vis" d="M526.79 1102.32L531.84 1099.9L531.84 1094.24L534.87 1093.03L534.87 958.89L532.85 958.89L532.85 535.86L531.64 534.65L509.82 534.65L508.61 535.86L508.61 958.89L506.59 958.89L506.59 1093.03L509.62 1094.24L509.62 1099.9L514.67 1102.32Z"/><path class="thin" d="M530.83 571.01L530.83 536.67M510.63 571.01L510.63 536.67"/></g><g data-part="14"><path class="paper" d="M533.25 958.89L575.27 958.89L575.27 946.77L560.12 946.77L560.12 936.67L558.1 934.65L533.25 934.65Z"/><path fill="url(#h-steel-60)" d="M533.25 958.89L575.27 958.89L575.27 946.77L560.12 946.77L560.12 936.67L558.1 934.65L533.25 934.65Z"/><path class="vis" d="M533.25 958.89L575.27 958.89L575.27 946.77L560.12 946.77L560.12 936.67L558.1 934.65L533.25 934.65Z"/><path class="paper" d="M508.2 934.65L483.35 934.65L481.33 936.67L481.33 946.77L466.18 946.77L466.18 958.89L508.2 958.89Z"/><path fill="url(#h-steel-60)" d="M508.2 934.65L483.35 934.65L481.33 936.67L481.33 946.77L466.18 946.77L466.18 958.89L508.2 958.89Z"/><path class="vis" d="M508.2 934.65L483.35 934.65L481.33 936.67L481.33 946.77L466.18 946.77L466.18 958.89L508.2 958.89Z"/></g><g data-part="22"><path class="paper" d="M532.85 554.85L538.91 554.85L538.91 543.94L537.7 542.73L532.85 542.73Z"/><path class="vis" d="M532.85 554.85L538.91 554.85L538.91 543.94L537.7 542.73L532.85 542.73Z"/><path class="paper" d="M508.61 542.73L503.76 542.73L502.55 543.94L502.55 554.85L508.61 554.85Z"/><path class="vis" d="M508.61 542.73L503.76 542.73L502.55 543.94L502.55 554.85L508.61 554.85Z"/></g></g><path class="ctr" d="M520.73 736.67L520.73 470"/></g><rect class="thin" x="448" y="470" width="145.45" height="266.67" rx="10"/><g data-role="balloon" data-target="18" data-at="490.42 635.66"><path class="thin" d="M440.46 630.82L490.42 635.66"/><circle class="dot" cx="490.42" cy="635.66" r="1.5"/><circle class="balloon" cx="432" cy="630" r="8.5"/><text class="t" x="432" y="633.3" text-anchor="middle">18</text></g><g data-role="balloon" data-target="21" data-at="486.38 564.95"><path class="thin" d="M440.48 561.62L486.38 564.95"/><circle class="dot" cx="486.38" cy="564.95" r="1.5"/><circle class="balloon" cx="432" cy="561" r="8.5"/><text class="t" x="432" y="564.3" text-anchor="middle">21</text></g><g id="bal-8"><g data-role="balloon" data-target="8" data-at="514.67 577.07"><path class="thin" d="M440.36 590.49L514.67 577.07"/><circle class="dot" cx="514.67" cy="577.07" r="1.5"/><circle class="balloon" cx="432" cy="592" r="8.5"/><text class="t" x="432" y="595.3" text-anchor="middle">8</text></g></g><g id="bal-16"><g data-role="balloon" data-target="16" data-at="476.28 716.46"><path class="thin" d="M440.08 704.64L476.28 716.46"/><circle class="dot" cx="476.28" cy="716.46" r="1.5"/><circle class="balloon" cx="432" cy="702" r="8.5"/><text class="t" x="432" y="705.3" text-anchor="middle">16</text></g></g><g id="bal-17"><g data-role="balloon" data-target="17" data-at="498.51 659.9"><path class="thin" d="M440.48 663.48L498.51 659.9"/><circle class="dot" cx="498.51" cy="659.9" r="1.5"/><circle class="balloon" cx="432" cy="664" r="8.5"/><text class="t" x="432" y="667.3" text-anchor="middle">17</text></g></g><g id="bal-22"><g data-role="balloon" data-target="22" data-at="505.58 548.79"><path class="thin" d="M440.24 532.1L505.58 548.79"/><circle class="dot" cx="505.58" cy="548.79" r="1.5"/><circle class="balloon" cx="432" cy="530" r="8.5"/><text class="t" x="432" y="533.3" text-anchor="middle">22</text></g></g><g data-role="label"><text class="t t-lg" x="520.725" y="756.6700000000001" text-anchor="middle">DETAIL C</text><text class="t t-sm" x="520.725" y="768.6700000000001" text-anchor="middle">SETTING AND LIFTING GEAR · 1:1</text></g><g data-role="chart"><rect class="paper" x="846" y="46" width="304" height="130"/><path class="thin grid-line" d="M846 46V176M879.78 46V176M913.56 46V176M947.33 46V176M981.11 46V176M1014.89 46V176M1048.67 46V176M1082.44 46V176M1116.22 46V176M1150 46V176M846 176H1150M846 156H1150M846 136H1150M846 116H1150M846 96H1150M846 76H1150M846 56H1150"/><path id="d1-stable" class="thin" d="M846 176H1026.62M1026.62,176L1027.61,175.6L1028.6,175.2L1029.58,174.8L1030.57,174.4L1031.56,174L1032.54,173.6L1033.52,173.2L1034.51,172.8L1035.49,172.4L1036.47,172L1037.45,171.6L1038.43,171.2L1039.41,170.8L1040.39,170.4L1041.37,170L1042.34,169.6L1043.32,169.2L1044.29,168.8L1045.27,168.4L1046.24,168L1047.21,167.6L1048.18,167.2L1049.02,166.8M912.61,154.4L913.1,154L913.99,153.6L914.88,153.2L915.77,152.8L916.66,152.4L917.55,152L918.44,151.6L919.33,151.2L920.21,150.8L921.1,150.4L921.98,150L922.87,149.6L923.75,149.2L924.64,148.8L925.52,148.4L926.4,148L927.28,147.6L928.17,147.2L929.05,146.8L929.93,146.4L930.8,146L931.68,145.6L932.56,145.2L933.44,144.8L934.31,144.4L935.19,144L936.07,143.6L936.94,143.2L937.81,142.8L938.69,142.4L939.56,142L940.43,141.6L941.3,141.2L942.17,140.8L943.05,140.4L943.91,140L944.78,139.6L945.65,139.2L946.52,138.8L947.39,138.4L948.25,138L949.12,137.6L949.98,137.2L950.85,136.8L951.71,136.4L952.58,136L953.44,135.6L954.3,135.2L955.16,134.8L956.02,134.4L956.88,134L957.74,133.6L958.6,133.2L959.46,132.8L960.32,132.4L961.17,132L962.03,131.6L962.89,131.2L963.74,130.8L964.59,130.4L965.45,130L966.3,129.6L967.15,129.2L968.01,128.8L968.86,128.4L969.71,128L970.56,127.6L971.41,127.2L972.26,126.8L973.11,126.4L973.95,126L974.8,125.6L975.65,125.2L976.49,124.8L977.34,124.4L978.18,124L979.03,123.6L979.87,123.2L980.71,122.8L981.56,122.4L982.4,122L983.24,121.6L984.08,121.2L984.92,120.8L985.76,120.4L986.6,120L987.44,119.6L988.27,119.2L989.11,118.8L989.95,118.4L990.78,118L991.62,117.6L992.45,117.2L993.29,116.8L994.12,116.4L994.95,116L995.78,115.6L996.62,115.2L997.45,114.8L998.28,114.4L999.11,114L999.94,113.6L1000.76,113.2L1001.59,112.8L1002.42,112.4L1003.25,112L1004.07,111.6L1004.9,111.2L1005.72,110.8L1006.55,110.4L1007.37,110L1008.19,109.6L1009.02,109.2L1009.84,108.8L1010.66,108.4L1011.48,108L1012.3,107.6L1013.12,107.2L1013.94,106.8L1014.76,106.4L1015.58,106L1016.39,105.6L1017.21,105.2L1018.03,104.8L1018.84,104.4L1019.66,104L1020.47,103.6L1021.29,103.2L1022.1,102.8L1022.91,102.4L1023.73,102L1024.54,101.6L1025.35,101.2L1026.16,100.8L1026.97,100.4L1027.78,100L1028.59,99.6L1029.4,99.2L1030.2,98.8L1031.01,98.4L1031.82,98L1032.62,97.6L1033.43,97.2L1034.23,96.8L1035.04,96.4L1035.84,96L1036.64,95.6L1037.45,95.2L1038.25,94.8L1039.05,94.4L1039.85,94L1040.65,93.6L1041.45,93.2L1042.25,92.8L1043.05,92.4L1043.85,92L1044.65,91.6L1045.44,91.2L1046.24,90.8L1047.04,90.4L1047.83,90L1048.63,89.6L1049.42,89.2L1050.21,88.8L1051.01,88.4L1051.8,88L1052.59,87.6L1053.38,87.2L1054.17,86.8L1054.96,86.4L1055.75,86L1056.54,85.6L1057.33,85.2L1058.12,84.8L1058.91,84.4L1059.69,84L1060.48,83.6L1061.27,83.2L1062.05,82.8L1062.84,82.4L1063.62,82L1064.41,81.6L1065.19,81.2L1065.97,80.8L1066.75,80.4L1067.54,80L1068.32,79.6L1069.1,79.2L1069.88,78.8L1070.66,78.4L1071.44,78L1072.21,77.6L1072.99,77.2L1073.77,76.8L1074.55,76.4L1075.32,76L1076.1,75.6L1076.87,75.2L1077.65,74.8L1078.42,74.4L1079.2,74L1079.97,73.6L1080.74,73.2L1081.51,72.8L1082.29,72.4L1083.06,72L1083.83,71.6L1084.6,71.2L1085.37,70.8L1086.14,70.4L1086.9,70L1087.67,69.6L1088.44,69.2L1089.21,68.8L1089.97,68.4L1090.74,68L1091.5,67.6L1092.27,67.2L1093.03,66.8L1093.79,66.4L1094.56,66L1095.32,65.6L1096.08,65.2L1096.84,64.8L1097.6,64.4L1098.37,64L1099.13,63.6L1099.88,63.2L1100.64,62.8L1101.4,62.4L1102.16,62L1102.92,61.6L1103.67,61.2L1104.43,60.8L1105.19,60.4L1105.94,60L1106.7,59.6L1107.45,59.2L1108.2,58.8L1108.96,58.4L1109.71,58L1110.46,57.6L1111.21,57.2L1111.97,56.8L1112.72,56.4L1113.47,56H1150"/><path id="d1-unstable" class="hid" d="M1049.11,166.6L1048.56,166.2L1047.08,165.8L1044.74,165.4L1041.63,165L1037.81,164.6L1033.37,164.2L1028.39,163.8L1022.94,163.4L1017.09,163L1010.93,162.6L1004.52,162.2L997.93,161.8L991.23,161.4L984.48,161L977.74,160.6L971.08,160.2L964.54,159.8L958.18,159.4L952.05,159L946.2,158.6L940.67,158.2L935.51,157.8L930.77,157.4L926.48,157L922.69,156.6L919.44,156.2L916.77,155.8L914.72,155.4L913.34,155L912.67,154.6"/><path id="d1-jumps" class="hid" d="M1049.11 166.6V89.2M912.61 154.4V176"/><polyline id="d1-trace" class="vis accent" points=""/><circle id="d1-dot" class="accent-fill" cx="954.09" cy="176" r="2.6"/><rect class="vis" x="846" y="46" width="304" height="130"/><text class="t t-sm" x="846" y="187" text-anchor="middle">8.5</text><text class="t t-sm" x="913.56" y="187" text-anchor="middle">9.0</text><text class="t t-sm" x="981.11" y="187" text-anchor="middle">9.5</text><text class="t t-sm" x="1048.67" y="187" text-anchor="middle">10.0</text><text class="t t-sm" x="1116.22" y="187" text-anchor="middle">10.5</text><text class="t t-sm" x="841" y="158.7" text-anchor="end">1</text><text class="t t-sm" x="841" y="138.7" text-anchor="end">2</text><text class="t t-sm" x="841" y="118.7" text-anchor="end">3</text><text class="t t-sm" x="841" y="98.7" text-anchor="end">4</text><text class="t t-sm" x="841" y="78.7" text-anchor="end">5</text><text class="t t-sm" x="841" y="58.7" text-anchor="end">6</text><text class="t t-sm t-mute" x="998" y="200" text-anchor="middle">VESSEL PRESSURE p, bar g</text><text class="t t-sm t-mute" x="818" y="111" text-anchor="middle" transform="rotate(-90 818 111)">LIFT h, mm</text><g id="d1-marks"><path class="thin" d="M912.61 61H1049.11M912.61 46V65M1049.11 46V65"/><path class="head" d="M912.61 61L919.61 59.25L919.61 62.75ZM1049.11 61L1042.11 59.25L1042.11 62.75Z"/><text class="t t-sm" x="980.86" y="58" text-anchor="middle">BLOWDOWN 10 %</text><text class="t t-sm" x="908.61" y="172" text-anchor="end">RESEAT 8.99</text><text class="t t-sm" x="1053.11" y="172" text-anchor="start">SET 10.00</text></g></g><g data-role="label"><text class="t t-lg" x="998" y="222" text-anchor="middle">DIAGRAM 1</text><text class="t t-sm" x="998" y="234" text-anchor="middle">LIFT AGAINST PRESSURE · ACCENT: LAST CYCLE · DASHED: UNSTABLE</text></g><g data-role="chart"><rect class="paper" x="82" y="612" width="310" height="100"/><path class="thin grid-line" d="M82 612V712M133.67 612V712M185.33 612V712M237 612V712M288.67 612V712M340.33 612V712M392 612V712M82 712H392M82 687H392M82 662H392M82 637H392M82 612H392"/><path id="d2-set" class="hid" d="M82 636.83H392"/><path id="d2-reseat" class="hid" d="M82 687.35H392"/><polyline id="d2-trace" class="vis accent" points=""/><circle id="d2-dot" class="accent-fill" cx="392" cy="672" r="2.6"/><rect class="vis" x="82" y="612" width="310" height="100"/><text class="t t-sm" x="82" y="723" text-anchor="middle">−30</text><text class="t t-sm" x="133.67" y="723" text-anchor="middle">−25</text><text class="t t-sm" x="185.33" y="723" text-anchor="middle">−20</text><text class="t t-sm" x="237" y="723" text-anchor="middle">−15</text><text class="t t-sm" x="288.67" y="723" text-anchor="middle">−10</text><text class="t t-sm" x="340.33" y="723" text-anchor="middle">−5</text><text class="t t-sm" x="392" y="723" text-anchor="middle">0</text><text class="t t-sm" x="77" y="689.7" text-anchor="end">9.0</text><text class="t t-sm" x="77" y="664.7" text-anchor="end">9.5</text><text class="t t-sm" x="77" y="639.7" text-anchor="end">10.0</text><text class="t t-sm" x="77" y="614.7" text-anchor="end">10.5</text><text class="t t-sm t-mute" x="237" y="736" text-anchor="middle">TIME t, s (NOW AT RIGHT)</text><text class="t t-sm t-mute" x="52" y="662" text-anchor="middle" transform="rotate(-90 52 662)">p, bar g</text></g><g data-role="label"><text class="t t-lg" x="237" y="760" text-anchor="middle">DIAGRAM 2</text><text class="t t-sm" x="237" y="772" text-anchor="middle">RECEIVER PRESSURE · DASHED: SET AND RESEAT</text></g><g data-role="chart"><rect class="paper" x="666" y="478" width="96" height="212"/><path class="thin grid-line" d="M666 478V690M695.54 478V690M725.08 478V690M754.62 478V690M666 690H762M666 631.11H762M666 572.22H762M666 513.33H762"/><path class="hid" d="M747.38 478V690"/><polyline id="d3-set" class="thin" points="666,690 667.48,686.8 668.95,683.6 670.43,680.4 671.91,677.2 673.38,674 674.86,670.8 676.34,667.6 677.82,664.4 679.29,661.19 680.77,657.99 682.25,654.79 683.72,651.59 685.2,648.39 686.68,645.19 688.15,641.99 689.63,638.79 691.11,635.59 692.58,632.39 694.06,629.19 695.54,625.99 697.02,622.79 698.49,619.59 699.97,616.39 701.45,613.19 702.92,609.99 704.4,606.78 705.88,603.58 707.35,600.38 708.83,597.18 710.31,593.98 711.78,590.78 713.26,587.58 714.74,584.38 716.22,581.18 717.69,577.98 719.17,574.78 720.65,571.58 722.12,568.38 723.6,565.18 725.08,561.98 726.55,558.78 728.03,555.58 729.51,552.37 730.98,549.17 732.46,545.97 733.94,542.77 735.42,539.57 736.89,536.37 738.37,533.17 739.85,529.97 741.32,526.77 742.8,523.57 744.28,520.37 745.75,517.17 747.23,513.97 748.71,513.63 750.18,513.63 751.66,513.63 753.14,513.63 754.62,513.63"/><polyline id="d3-now" class="vis accent" points="666,690 667.48,687 668.95,684.01 670.43,681.01 671.91,678.01 673.38,675.02 674.86,672.02 676.34,669.03 677.82,666.03 679.29,663.03 680.77,660.04 682.25,657.04 683.72,654.04 685.2,651.05 686.68,648.05 688.15,645.06 689.63,642.06 691.11,639.06 692.58,636.07 694.06,633.07 695.54,630.07 697.02,627.08 698.49,624.08 699.97,621.09 701.45,618.09 702.92,615.09 704.4,612.1 705.88,609.1 707.35,606.1 708.83,603.11 710.31,600.11 711.78,597.12 713.26,594.12 714.74,591.12 716.22,588.13 717.69,585.13 719.17,582.13 720.65,579.14 722.12,576.14 723.6,573.15 725.08,570.15 726.55,567.15 728.03,564.16 729.51,561.16 730.98,558.16 732.46,555.17 733.94,552.17 735.42,549.18 736.89,546.18 738.37,543.18 739.85,540.19 741.32,537.19 742.8,534.19 744.28,531.2 745.75,528.2 747.23,525.21 748.71,524.89 750.18,524.89 751.66,524.89 753.14,524.89 754.62,524.89"/><circle id="d3-dot" class="accent-fill" cx="666" cy="690" r="2.6"/><rect class="vis" x="666" y="478" width="96" height="212"/><text class="t t-sm" x="666" y="701" text-anchor="middle">0</text><text class="t t-sm" x="695.54" y="701" text-anchor="middle">2</text><text class="t t-sm" x="725.08" y="701" text-anchor="middle">4</text><text class="t t-sm" x="754.62" y="701" text-anchor="middle">6</text><text class="t t-sm" x="661" y="692.7" text-anchor="end">0</text><text class="t t-sm" x="661" y="633.81" text-anchor="end">1000</text><text class="t t-sm" x="661" y="574.92" text-anchor="end">2000</text><text class="t t-sm" x="661" y="516.03" text-anchor="end">3000</text><text class="t t-sm t-mute" x="714" y="714" text-anchor="middle">LIFT h, mm</text><text class="t t-sm t-mute" x="628" y="584" text-anchor="middle" transform="rotate(-90 628 584)">DISCHARGE, kg/h</text><text class="t t-sm" x="744.38" y="684" text-anchor="end">THROAT</text></g><g data-role="label"><text class="t t-lg" x="704" y="756.6700000000001" text-anchor="middle">DIAGRAM 3</text><text class="t t-sm" x="704" y="768.6700000000001" text-anchor="middle">DISCHARGE · THIN: AT SET</text></g><g data-role="notes"><text class="t t-head" x="790" y="256">NOTES</text><text class="t t-sm" x="790" y="271">1. SET 10.0 bar g = PRELOAD 445 N ON SEAT Ø24 (452 mm²); k 26.1 N/mm.</text><text class="t t-sm" x="790" y="284">2. SIMMERS FROM 9.84; GAS IN HUDDLING CHAMBER Ø31 POPS THE DISC.</text><text class="t t-sm" x="790" y="297">3. RESEATS AT 8.99: BLOWDOWN 10 %. FULL LIFT 6 mm ≥ d0/4.</text><text class="t t-sm" x="790" y="310">4. AIR, CHOKED, Kdr 0.77: 3270 kg/h AT +10 %. RECEIVER 500 L,</text><text class="t t-sm" x="790" y="323">5. COMPRESSOR 360 kg/h. SPINDLE, SCREWS, STUDS, NUTS NOT CUT.</text></g><g data-role="bom"><rect class="paper" x="776" y="345" width="400" height="363"/><path class="thin" d="M806 345V708M1004 345V708M1144 345V708M776 360H1176M776 375H1176M776 390H1176M776 405H1176M776 420H1176M776 435H1176M776 450H1176M776 465H1176M776 480H1176M776 495H1176M776 510H1176M776 525H1176M776 540H1176M776 555H1176M776 570H1176M776 585H1176M776 600H1176M776 615H1176M776 630H1176M776 645H1176M776 660H1176M776 675H1176M776 690H1176"/><rect class="vis" x="776" y="345" width="400" height="363"/><text class="t t-sm t-head" x="791" y="702.5" text-anchor="middle">ITEM</text><text class="t t-sm" x="791" y="685.2" text-anchor="middle">1</text><text class="t t-sm" x="791" y="670.2" text-anchor="middle">2</text><text class="t t-sm" x="791" y="655.2" text-anchor="middle">3</text><text class="t t-sm" x="791" y="640.2" text-anchor="middle">4</text><text class="t t-sm" x="791" y="625.2" text-anchor="middle">5</text><text class="t t-sm" x="791" y="610.2" text-anchor="middle">6</text><text class="t t-sm" x="791" y="595.2" text-anchor="middle">7</text><text class="t t-sm" x="791" y="580.2" text-anchor="middle">8</text><text class="t t-sm" x="791" y="565.2" text-anchor="middle">9</text><text class="t t-sm" x="791" y="550.2" text-anchor="middle">10</text><text class="t t-sm" x="791" y="535.2" text-anchor="middle">11</text><text class="t t-sm" x="791" y="520.2" text-anchor="middle">12</text><text class="t t-sm" x="791" y="505.2" text-anchor="middle">13</text><text class="t t-sm" x="791" y="490.2" text-anchor="middle">14</text><text class="t t-sm" x="791" y="475.2" text-anchor="middle">15</text><text class="t t-sm" x="791" y="460.2" text-anchor="middle">16</text><text class="t t-sm" x="791" y="445.2" text-anchor="middle">17</text><text class="t t-sm" x="791" y="430.2" text-anchor="middle">18</text><text class="t t-sm" x="791" y="415.2" text-anchor="middle">19</text><text class="t t-sm" x="791" y="400.2" text-anchor="middle">20</text><text class="t t-sm" x="791" y="385.2" text-anchor="middle">21</text><text class="t t-sm" x="791" y="370.2" text-anchor="middle">22</text><text class="t t-sm" x="791" y="355.2" text-anchor="middle">23</text><text class="t t-sm t-head" x="810" y="702.5" text-anchor="start">DESCRIPTION</text><text class="t t-sm" x="810" y="685.2" text-anchor="start">BODY DN25 PN40 × DN40 PN16</text><text class="t t-sm" x="810" y="670.2" text-anchor="start">NOZZLE d0 23, M42×2</text><text class="t t-sm" x="810" y="655.2" text-anchor="start">ADJUSTING RING M34×1.5</text><text class="t t-sm" x="810" y="640.2" text-anchor="start">RING LOCK SCREW M10×25 ISO 4028</text><text class="t t-sm" x="810" y="625.2" text-anchor="start">DISC Ø30, SEAT Ø24</text><text class="t t-sm" x="810" y="610.2" text-anchor="start">DISC HOLDER, SKIRT Ø31</text><text class="t t-sm" x="810" y="595.2" text-anchor="start">GUIDE</text><text class="t t-sm" x="810" y="580.2" text-anchor="start">SPINDLE Ø14/Ø12</text><text class="t t-sm" x="810" y="565.2" text-anchor="start">SPLIT RING</text><text class="t t-sm" x="810" y="550.2" text-anchor="start">BONNET</text><text class="t t-sm" x="810" y="535.2" text-anchor="start">STUD M12×42 EN 1515-1</text><text class="t t-sm" x="810" y="520.2" text-anchor="start">HEX NUT M12 ISO 4032</text><text class="t t-sm" x="810" y="505.2" text-anchor="start">GASKET Ø124×Ø76×1.5</text><text class="t t-sm" x="810" y="490.2" text-anchor="start">LOWER SPRING PLATE</text><text class="t t-sm" x="810" y="475.2" text-anchor="start">SPRING d6 D46 n5 L0 127</text><text class="t t-sm" x="810" y="460.2" text-anchor="start">UPPER SPRING PLATE</text><text class="t t-sm" x="810" y="445.2" text-anchor="start">ADJUSTING SCREW M24×2</text><text class="t t-sm" x="810" y="430.2" text-anchor="start">LOCK NUT M24×2 ISO 8675</text><text class="t t-sm" x="810" y="415.2" text-anchor="start">CAP</text><text class="t t-sm" x="810" y="400.2" text-anchor="start">LIFTING LEVER</text><text class="t t-sm" x="810" y="385.2" text-anchor="start">LEVER PIN Ø8×40 ISO 2338</text><text class="t t-sm" x="810" y="370.2" text-anchor="start">LIFTING NUT M12 ISO 4035</text><text class="t t-sm" x="810" y="355.2" text-anchor="start">DRAIN PLUG G1/4 DIN 910</text><text class="t t-sm t-head" x="1008" y="702.5" text-anchor="start">MATERIAL</text><text class="t t-sm" x="1008" y="685.2" text-anchor="start">GP240GH (1.0619)</text><text class="t t-sm" x="1008" y="670.2" text-anchor="start">X6CrNiMoTi17-12-2</text><text class="t t-sm" x="1008" y="655.2" text-anchor="start">X2CrNiMo17-12-2</text><text class="t t-sm" x="1008" y="640.2" text-anchor="start">A4-70</text><text class="t t-sm" x="1008" y="625.2" text-anchor="start">X39CrMo17-1</text><text class="t t-sm" x="1008" y="610.2" text-anchor="start">X2CrNiMo17-12-2</text><text class="t t-sm" x="1008" y="595.2" text-anchor="start">X20Cr13</text><text class="t t-sm" x="1008" y="580.2" text-anchor="start">X20Cr13</text><text class="t t-sm" x="1008" y="565.2" text-anchor="start">X10CrNi18-8</text><text class="t t-sm" x="1008" y="550.2" text-anchor="start">GP240GH (1.0619)</text><text class="t t-sm" x="1008" y="535.2" text-anchor="start">25CrMo4</text><text class="t t-sm" x="1008" y="520.2" text-anchor="start">C35E, CLASS 8</text><text class="t t-sm" x="1008" y="505.2" text-anchor="start">GRAPHITE, 316 INSERT</text><text class="t t-sm" x="1008" y="490.2" text-anchor="start">C45E</text><text class="t t-sm" x="1008" y="475.2" text-anchor="start">EN 10270-2 VDSiCr</text><text class="t t-sm" x="1008" y="460.2" text-anchor="start">C45E</text><text class="t t-sm" x="1008" y="445.2" text-anchor="start">X20Cr13</text><text class="t t-sm" x="1008" y="430.2" text-anchor="start">STEEL 05</text><text class="t t-sm" x="1008" y="415.2" text-anchor="start">EN-GJS-400-18</text><text class="t t-sm" x="1008" y="400.2" text-anchor="start">S235JR</text><text class="t t-sm" x="1008" y="385.2" text-anchor="start">C45E</text><text class="t t-sm" x="1008" y="370.2" text-anchor="start">STEEL 04</text><text class="t t-sm" x="1008" y="355.2" text-anchor="start">11SMnPb30</text><text class="t t-sm t-head" x="1160" y="702.5" text-anchor="middle">QTY</text><text class="t t-sm" x="1160" y="685.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="670.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="655.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="640.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="625.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="610.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="595.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="580.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="565.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="550.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="535.2" text-anchor="middle">4</text><text class="t t-sm" x="1160" y="520.2" text-anchor="middle">4</text><text class="t t-sm" x="1160" y="505.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="490.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="475.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="460.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="445.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="430.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="415.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="400.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="385.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="370.2" text-anchor="middle">1</text><text class="t t-sm" x="1160" y="355.2" text-anchor="middle">1</text></g><g data-role="title"><rect class="paper" x="776" y="708" width="400" height="116"/><rect class="thin" x="776" y="708" width="290" height="32"/><text class="t t-cap" x="780" y="717">TITLE</text><text class="t t-xl" x="780" y="733">RELIEF VALVE · AXIAL SECTION</text><rect class="thin" x="1066" y="708" width="110" height="32"/><text class="t t-cap" x="1070" y="717">DWG NO</text><text class="t t-xl" x="1070" y="733">BP-011</text><rect class="thin" x="776" y="740" width="64" height="25"/><text class="t t-cap" x="780" y="749">SCALE</text><text class="t" x="780" y="760">1:2</text><rect class="thin" x="840" y="740" width="50" height="25"/><text class="t t-cap" x="844" y="749">SIZE</text><text class="t" x="844" y="760">A2</text><rect class="thin" x="890" y="740" width="56" height="25"/><text class="t t-cap" x="894" y="749">SHEET</text><text class="t" x="894" y="760">1 / 1</text><rect class="thin" x="946" y="740" width="110" height="25"/><text class="t t-cap" x="950" y="749">DRAWN</text><text class="t" x="950" y="760">CLAUDE</text><rect class="thin" x="1056" y="740" width="120" height="25"/><text class="t t-cap" x="1060" y="749">DATE</text><text class="t" x="1060" y="760">2026-10-15</text><rect class="thin" x="776" y="765" width="140" height="25"/><text class="t t-cap" x="780" y="774">MATERIAL</text><text class="t" x="780" y="785">SEE PARTS LIST</text><rect class="thin" x="916" y="765" width="120" height="25"/><text class="t t-cap" x="920" y="774">GENERAL TOL.</text><text class="t" x="920" y="785">ISO 2768-m</text><rect class="thin" x="1036" y="765" width="140" height="25"/><text class="t t-cap" x="1040" y="774">UNITS</text><text class="t" x="1040" y="785">mm · bar (gauge)</text><rect class="thin" x="776" y="790" width="400" height="34"/><text class="t t-cap" x="780" y="799">LIVE · DRAG = VESSEL PRESSURE · ← → ADJUSTING SCREW · SPACE COMPRESSOR · S SLOW</text><text class="t" x="780" y="819" id="readout"></text><rect class="vis" x="776" y="708" width="400" height="116"/></g><rect class="hit" data-drag="p" x="150.35" y="92.86" width="171.72" height="414.14"/><rect class="hit" data-drag="p" x="846" y="46" width="304" height="130"/><rect class="hit" data-drag="p" x="82" y="612" width="310" height="100"/></svg>
+<figcaption class="bp-bar"><span>Drag ↕ vessel pressure · <kbd>↑</kbd> <kbd>↓</kbd> pressure · <kbd>←</kbd> <kbd>→</kbd> adjusting screw · <kbd>Space</kbd> compressor · <kbd>S</kbd> slow</span><span class="bp-themes" role="group" aria-label="Theme"><button type="button" data-theme-pick="blueprint">blueprint</button><button type="button" data-theme-pick="paper">paper</button><button type="button" data-theme-pick="dark">dark</button></span><span id="sr" class="bp-sr" aria-live="polite"></span></figcaption>
+</figure>
+</main>
+<script>
+"use strict";
+const K = (() => {
+// Blueprint drafting kit: orthographic views, sections, hatching, dimensions and sheet furniture.
+// Every function here is pure and returns SVG markup strings, so the same code runs in the build
+// and, inlined, in the page (live dimensions, moving springs, needles).
+//
+// Units. World geometry is in millimetres of the real object: u to the right, v up (a front view),
+// or u right, v away from the viewer (a plan view). The sheet is an A2 drawing, 594 mm wide, drawn
+// 1200 units wide; a view maps world mm to sheet units through its drawing scale.
+
+const SHEET = { w: 1200, h: 848 };
+const PX_PER_MM = SHEET.w / 594;
+
+// ISO 128 line widths and ISO 3098 lettering, in sheet units (A2: 0.5 / 0.25 mm lines, 3.5 mm text).
+const THICK = 1.15;
+const THIN = 0.55;
+const TEXT = 9.5;
+const ARROW = 7;
+const GAP = 2.2; // extension lines start this far from the object
+const OVER = 3.5; // and run this far past the dimension line
+
+const r2 = (n) => Math.round(n * 100) / 100;
+
+function fmt(n, digits = 1) {
+  const near = Math.round(n);
+  if (Math.abs(n - near) < 0.05) return String(near);
+  return n.toFixed(digits);
+}
+
+// ---------------------------------------------------------------- views
+
+// A view is a window from world mm onto the sheet. scale is the drawing scale (1/2.5 for "1:2.5").
+function view({ x, y, scale, name = "" }) {
+  const k = scale * PX_PER_MM;
+  return { x, y, scale, k, name, p: ([u, v]) => [r2(x + u * k), r2(y - v * k)] };
+}
+
+const scaleLabel = (scale) => (scale >= 1 ? `${fmt(scale)}:1` : `1:${fmt(1 / scale)}`);
+
+function d(V, pts, closed = true) {
+  let out = "";
+  for (let i = 0; i < pts.length; i++) {
+    const [x, y] = V.p(pts[i]);
+    out += `${i ? "L" : "M"}${x} ${y}`;
+  }
+  return closed ? out + "Z" : out;
+}
+
+// ---------------------------------------------------------------- world geometry (point lists)
+
+const rect = (u0, v0, u1, v1) => [[u0, v0], [u1, v0], [u1, v1], [u0, v1]];
+
+function arc(cu, cv, r, a0, a1, steps) {
+  const n = steps ?? Math.max(3, Math.ceil(Math.abs(a1 - a0) / 7.5));
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const a = ((a0 + ((a1 - a0) * i) / n) * Math.PI) / 180;
+    out.push([cu + r * Math.cos(a), cv + r * Math.sin(a)]);
+  }
+  return out;
+}
+
+const circle = (cu, cv, r, steps = 48) => arc(cu, cv, r, 0, 360 - 360 / steps, steps - 1);
+
+// A rectangle with filleted corners.
+function rrect(u0, v0, u1, v1, r, steps = 4) {
+  const q = Math.min(r, (u1 - u0) / 2, (v1 - v0) / 2);
+  return [
+    ...arc(u1 - q, v0 + q, q, -90, 0, steps),
+    ...arc(u1 - q, v1 - q, q, 0, 90, steps),
+    ...arc(u0 + q, v1 - q, q, 90, 180, steps),
+    ...arc(u0 + q, v0 + q, q, 180, 270, steps),
+  ];
+}
+
+const move = (pts, du, dv) => pts.map(([u, v]) => [u + du, v + dv]);
+const flipU = (pts, about = 0) => pts.map(([u, v]) => [2 * about - u, v]).reverse();
+const flipV = (pts, about = 0) => pts.map(([u, v]) => [u, 2 * about - v]).reverse();
+
+function inside([u, v], poly) {
+  let hit = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ui, vi] = poly[i];
+    const [uj, vj] = poly[j];
+    if (vi > v !== vj > v && u < ((uj - ui) * (v - vi)) / (vj - vi) + ui) hit = !hit;
+  }
+  return hit;
+}
+
+// A body of revolution cut through its axis.
+// loop is the half-profile as [r, s] pairs: r >= 0 measured from the axis, s along the axis.
+// axis "v" is a vertical axis at u = at; axis "u" a horizontal axis at v = at.
+// Returns the cut faces (hatched) and the edges seen through the bore behind the cutting plane:
+// every circle on an inner surface shows edge-on as a straight line across the bore.
+function revolve(loop, { axis = "v", at = 0 } = {}) {
+  const place = axis === "v" ? (r, s) => [at + r, s] : (r, s) => [s, at + r];
+  const n = loop.length;
+  const onAxis = loop.findIndex(([r], i) => r === 0 && loop[(i + 1) % n][0] === 0);
+  let cuts;
+  if (onAxis >= 0) {
+    const chain = Array.from({ length: n }, (_, j) => loop[(onAxis + 1 + j) % n]);
+    const right = chain.map(([r, s]) => place(r, s));
+    const left = chain.slice(1, -1).reverse().map(([r, s]) => place(-r, s));
+    cuts = [[...right, ...left]];
+  } else {
+    cuts = [loop.map(([r, s]) => place(r, s)), loop.map(([r, s]) => place(-r, s)).reverse()];
+  }
+  const eps = 1e-3;
+  const across = new Map();
+  const clear = (r, s) => [0.02, 0.25, 0.5, 0.75, 0.98].every((t) => !inside([t * r, s], loop));
+  for (const [r, s] of loop) {
+    if (r <= 0) continue;
+    if (clear(r, s + eps) && clear(r, s - eps)) across.set(s, Math.max(across.get(s) ?? 0, r));
+  }
+  const edges = [...across].map(([s, r]) => [place(-r, s), place(r, s)]);
+  return { cuts, edges };
+}
+
+// ---------------------------------------------------------------- hatching
+
+// ANSI/ISO-style material hatches. Spacing is in sheet units and never scales with the view,
+// so a detail at 2:1 shows the same density as the main view, as on a real drawing.
+const MATERIALS = {
+  steel: { kind: "lines", gap: 3.4 },
+  iron: { kind: "lines", gap: 5.6 },
+  alu: { kind: "pairs", gap: 5.2, pair: 1.5 },
+  brass: { kind: "dashed", gap: 4.6 },
+  bronze: { kind: "dashed", gap: 3.6 },
+  rubber: { kind: "cross", gap: 3.2 },
+  plastic: { kind: "lines", gap: 2.3 },
+  foam: { kind: "dots", gap: 2.6 },
+  wood: { kind: "grain", gap: 4 },
+};
+const ANGLES = [45, 135, 30, 60];
+
+function hatchDefs() {
+  let out = "";
+  for (const [name, m] of Object.entries(MATERIALS)) {
+    for (const angle of ANGLES) {
+      const g = m.gap;
+      let body = "";
+      if (m.kind === "lines") body = `<path class="hl" d="M0 -1V${g + 1}"/>`;
+      if (m.kind === "pairs") body = `<path class="hl" d="M0 -1V${g + 1}M${m.pair} -1V${g + 1}"/>`;
+      if (m.kind === "dashed") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl hl-dash" d="M${g / 2} -1V${g + 1}"/>`;
+      if (m.kind === "cross") body = `<path class="hl" d="M0 -1V${g + 1}M-1 0H${g + 1}"/>`;
+      if (m.kind === "dots") body = `<circle class="hd" cx="${g / 2}" cy="${g / 2}" r="0.42"/>`;
+      if (m.kind === "grain") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl" d="M${g * 0.55} -1C${g * 0.75} ${g * 0.3} ${g * 0.35} ${g * 0.7} ${g * 0.55} ${g + 1}"/>`;
+      out += `<pattern id="h-${name}-${angle}" patternUnits="userSpaceOnUse" width="${g}" height="${g}" patternTransform="rotate(${angle})">${body}</pattern>`;
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- drawing parts
+
+// A cut face: paper underneath (it hides what is behind), the material hatch, a thick outline.
+// mat "solid" blacks the section in, the ISO convention for sections too thin to hatch.
+function cut(V, pts, { mat = "steel", angle = 45 } = {}) {
+  const dd = d(V, pts);
+  if (mat === "solid") return `<path class="solid" d="${dd}"/>`;
+  return `<path class="paper" d="${dd}"/><path fill="url(#h-${mat}-${angle})" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+// A body of revolution in section, with the edges behind the cut.
+function section(V, rev, opts) {
+  return rev.cuts.map((c) => cut(V, c, opts)).join("") + rev.edges.map((e) => line(V, e)).join("");
+}
+
+// An unsectioned solid (shafts, rods, pins, balls, nuts and ribs are never hatched in a section).
+function body(V, pts) {
+  const dd = d(V, pts);
+  return `<path class="paper" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+const line = (V, pts, cls = "vis", closed = false) => `<path class="${cls}" d="${d(V, pts, closed)}"/>`;
+const lines = (V, list, cls = "vis") => `<path class="${cls}" d="${list.map((pts) => d(V, pts, false)).join("")}"/>`;
+
+// A centre line, run a little past the outline at both ends.
+function centerline(V, a, b, over = 6) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  return `<path class="ctr" d="M${r2(ax - ux * over)} ${r2(ay - uy * over)}L${r2(bx + ux * over)} ${r2(by + uy * over)}"/>`;
+}
+
+// Centre mark for a circle in a view: two crossed centre lines.
+function centerMark(V, [cu, cv], r, over = 5) {
+  return centerline(V, [cu - r, cv], [cu + r, cv], over) + centerline(V, [cu, cv - r], [cu, cv + r], over);
+}
+
+// A compression spring cut along its axis: wire sections (blacked in) on both sides, half a pitch
+// apart, joined by the back half of each turn. from/to are positions along the axis.
+function springSection(V, { from, to, radius, wire, turns, axis = "u", at = 0 }) {
+  const place = axis === "u" ? (s, r) => [s, at + r] : (s, r) => [at + r, s];
+  const pitch = (to - from - wire) / turns;
+  const start = from + wire / 2;
+  const back = [];
+  let sections = "";
+  for (let i = 0; i <= turns; i++) {
+    const sTop = start + i * pitch;
+    sections += cut(V, circle(...place(sTop, radius), wire / 2, 12), { mat: "solid" });
+    if (i < turns) {
+      const sBot = sTop + pitch / 2;
+      sections += cut(V, circle(...place(sBot, -radius), wire / 2, 12), { mat: "solid" });
+      back.push([place(sTop, radius), place(sBot, -radius)]);
+    }
+  }
+  return lines(V, back, "vis spring") + sections;
+}
+
+// ---------------------------------------------------------------- annotation
+
+function arrowHead([x, y], [dx, dy]) {
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const bx = x - ux * ARROW;
+  const by = y - uy * ARROW;
+  const half = ARROW * 0.25;
+  return `M${r2(x)} ${r2(y)}L${r2(bx - uy * half)} ${r2(by + ux * half)}L${r2(bx + uy * half)} ${r2(by - ux * half)}Z`;
+}
+
+const textWidth = (s, size = TEXT) => String(s).length * size * 0.6;
+
+// A linear dimension between two world points, measured along dir ("h" or "v").
+// off is the sheet distance from point a to the dimension line (negative: up or left).
+// The value is measured from the geometry unless text is given, so a dimension cannot lie.
+function dim(V, a, b, { dir = "h", off = 18, text, prefix = "", suffix = "", id = "", cls = "" } = {}) {
+  const A = V.p(a);
+  const B = V.p(b);
+  const value = text ?? prefix + fmt(Math.abs(dir === "h" ? b[0] - a[0] : b[1] - a[1])) + suffix;
+  const h = dir === "h";
+  const main = h ? 0 : 1; // the axis the dimension measures along
+  const side = 1 - main;
+  const at = A[side] + off; // where the dimension line sits
+  const pt = (m, s) => (h ? [m, s] : [s, m]);
+  let ext = "";
+  for (const P of [A, B]) {
+    const gapTo = at - P[side];
+    if (Math.abs(gapTo) <= GAP) continue;
+    const sgn = Math.sign(gapTo);
+    const [x1, y1] = pt(P[main], P[side] + sgn * GAP);
+    const [x2, y2] = pt(P[main], at + sgn * OVER);
+    ext += `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+  }
+  const lo = Math.min(A[main], B[main]);
+  const hi = Math.max(A[main], B[main]);
+  const span = hi - lo;
+  const tw = textWidth(value);
+  const arrowsIn = span >= ARROW * 2 + 3;
+  const textIn = span >= tw + ARROW * 2 + 6;
+  let lineD;
+  let heads;
+  let tm; // text position along the measured axis
+  let anchor = "middle";
+  if (arrowsIn) {
+    const [x1, y1] = pt(lo, at);
+    const [x2, y2] = pt(hi, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(-1, 0)) + arrowHead(pt(hi, at), pt(1, 0));
+  } else {
+    const [x1, y1] = pt(lo - ARROW - 7, at);
+    const [x2, y2] = pt(hi + ARROW + 7, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(1, 0)) + arrowHead(pt(hi, at), pt(-1, 0));
+  }
+  if (textIn) tm = (lo + hi) / 2;
+  else {
+    tm = hi + ARROW + 10 + tw / 2;
+    const [x2, y2] = pt(tm + tw / 2, at);
+    lineD += `L${r2(x2)} ${r2(y2)}`;
+  }
+  // ISO: text sits just above a horizontal line and reads from the right on a vertical one.
+  const [tx, ty] = pt(tm, at - 3);
+  const textEl = h
+    ? `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}">${value}</text>`
+    : `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}" transform="rotate(-90 ${r2(tx)} ${r2(ty)})">${value}</text>`;
+  return `<g data-role="dim"${id ? ` id="${id}"` : ""}${cls ? ` class="${cls}"` : ""}><path class="thin" d="${ext}${lineD}"/><path class="head" d="${heads}"/>${textEl}</g>`;
+}
+
+// A part balloon: a dot on the part, a thin leader, a circled item number.
+function balloon(V, at, [bx, by], n, { target = "", r = 8.5 } = {}) {
+  const [ax, ay] = V.p(at);
+  const a = Math.atan2(ay - by, ax - bx);
+  const ex = r2(bx + r * Math.cos(a));
+  const ey = r2(by + r * Math.sin(a));
+  return (
+    `<g data-role="balloon" data-target="${target}" data-at="${ax} ${ay}">` +
+    `<path class="thin" d="M${ex} ${ey}L${ax} ${ay}"/><circle class="dot" cx="${ax}" cy="${ay}" r="1.5"/>` +
+    `<circle class="balloon" cx="${bx}" cy="${by}" r="${r}"/>` +
+    `<text class="t" x="${bx}" y="${r2(by + 3.3)}" text-anchor="middle">${n}</text></g>`
+  );
+}
+
+// A view title: SECTION A-A over its scale, centred under the view.
+function viewLabel(x, y, title, sub = "") {
+  return (
+    `<g data-role="label"><text class="t t-lg" x="${x}" y="${y}" text-anchor="middle">${title}</text>` +
+    (sub ? `<text class="t t-sm" x="${x}" y="${y + 12}" text-anchor="middle">${sub}</text>` : "") +
+    `</g>`
+  );
+}
+
+// The circle that marks a detail in its parent view, with its letter.
+function detailMark(V, [cu, cv], r, letter, angle = 45) {
+  const [x, y] = V.p([cu, cv]);
+  const R = r * V.k;
+  const a = (-angle * Math.PI) / 180;
+  const lx = r2(x + (R + 9) * Math.cos(a));
+  const ly = r2(y + (R + 9) * Math.sin(a) + 4);
+  return `<g data-role="label"><circle class="thin mark" cx="${x}" cy="${y}" r="${r2(R)}"/><text class="t t-lg" x="${lx}" y="${ly}" text-anchor="middle">${letter}</text></g>`;
+}
+
+// A viewing-direction arrow (VIEW C): a thick-tipped arrow pointing at the surface, with its letter.
+function viewArrow(V, at, [dx, dy], letter, len = 26) {
+  const [x, y] = V.p(at);
+  const n = Math.hypot(dx, dy) || 1;
+  const ux = dx / n;
+  const uy = dy / n;
+  const sx = r2(x - ux * len);
+  const sy = r2(y - uy * len);
+  return (
+    `<g data-role="label"><path class="vis" d="M${sx} ${sy}L${r2(x - ux * ARROW)} ${r2(y - uy * ARROW)}"/>` +
+    `<path class="head" d="${arrowHead([x, y], [ux, uy])}"/>` +
+    `<text class="t t-lg" x="${r2(sx - uy * 10)}" y="${r2(sy + ux * 10 + 4)}" text-anchor="middle">${letter}</text></g>`
+  );
+}
+
+// A long-break line across a part (thin, with one zigzag), for parts that run out of the view.
+function breakLine(V, a, b) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const mx = (ax + bx) / 2;
+  const my = (ay + by) / 2;
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  const z = 3.5;
+  const p = (t, s) => `${r2(mx + ux * t - uy * s)} ${r2(my + uy * t + ux * s)}`;
+  return `<path class="thin" d="M${r2(ax - ux * 4)} ${r2(ay - uy * 4)}L${p(-z, 0)}L${p(-z / 2, z * 1.6)}L${p(z / 2, -z * 1.6)}L${p(z, 0)}L${r2(bx + ux * 4)} ${r2(by + uy * 4)}"/>`;
+}
+
+// ---------------------------------------------------------------- sheet furniture
+
+// The drawing frame: trimmed edge, a thick border, zone references and centring marks.
+function frame({ w = SHEET.w, h = SHEET.h, trim = 8, m = 24, cols = 8, rows = 6 } = {}) {
+  let out = `<g data-role="frame"><rect class="thin" x="${trim}" y="${trim}" width="${w - trim * 2}" height="${h - trim * 2}"/>`;
+  out += `<rect class="vis" x="${m}" y="${m}" width="${w - m * 2}" height="${h - m * 2}"/>`;
+  const cw = (w - m * 2) / cols;
+  const rh = (h - m * 2) / rows;
+  let ticks = "";
+  let labels = "";
+  for (let i = 0; i <= cols; i++) {
+    const x = r2(m + i * cw);
+    if (i > 0 && i < cols) ticks += `M${x} ${trim}V${m}M${x} ${h - m}V${h - trim}`;
+    if (i < cols) {
+      const cx = r2(m + (i + 0.5) * cw);
+      labels += `<text class="t t-sm" x="${cx}" y="${r2((trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+      labels += `<text class="t t-sm" x="${cx}" y="${r2(h - (trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+    }
+  }
+  for (let j = 0; j <= rows; j++) {
+    const y = r2(m + j * rh);
+    if (j > 0 && j < rows) ticks += `M${trim} ${y}H${m}M${w - m} ${y}H${w - trim}`;
+    if (j < rows) {
+      const cy = r2(m + (j + 0.5) * rh + 3);
+      const letter = String.fromCharCode(65 + j);
+      labels += `<text class="t t-sm" x="${r2((trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+      labels += `<text class="t t-sm" x="${r2(w - (trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+    }
+  }
+  const cm = `M${w / 2} ${trim}V${m + 10}M${w / 2} ${h - trim}V${h - m - 10}M${trim} ${h / 2}H${m + 10}M${w - trim} ${h / 2}H${w - m - 10}`;
+  out += `<path class="thin" d="${ticks}"/><path class="vis" d="${cm}"/>${labels}</g>`;
+  return out;
+}
+
+// A ruled table (parts list). cols: [{ w, align, title }]. rows: arrays of cell strings.
+// Item numbers count up from the bottom, as a parts list sits on top of the title block.
+function table(x, y, cols, rows, { rowH = 16, role = "bom", headH = 18 } = {}) {
+  const w = cols.reduce((s, c) => s + c.w, 0);
+  const h = headH + rows.length * rowH;
+  let rules = "";
+  let text = "";
+  let cx = x;
+  for (const [i, c] of cols.entries()) {
+    if (i > 0) rules += `M${r2(cx)} ${y}V${y + h}`;
+    const tx = c.align === "center" ? cx + c.w / 2 : c.align === "right" ? cx + c.w - 4 : cx + 4;
+    const anchor = c.align === "center" ? "middle" : c.align === "right" ? "end" : "start";
+    text += `<text class="t t-sm t-head" x="${r2(tx)}" y="${y + h - 5.5}" text-anchor="${anchor}">${c.title}</text>`;
+    rows.forEach((row, j) => {
+      text += `<text class="t t-sm" x="${r2(tx)}" y="${r2(y + (rows.length - 1 - j) * rowH + rowH - 4.8)}" text-anchor="${anchor}">${row[i]}</text>`;
+    });
+    cx += c.w;
+  }
+  for (let j = 1; j <= rows.length; j++) rules += `M${x} ${r2(y + j * rowH)}H${x + w}`;
+  return `<g data-role="${role}"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/><path class="thin" d="${rules}"/><rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/>${text}</g>`;
+}
+
+// A title-block cell: a small caption over a value. size: "sm" | "md" | "lg".
+function cell({ x, y, w, h, label, value = "", size = "md", id = "" }) {
+  const cls = size === "lg" ? "t t-xl" : size === "sm" ? "t t-sm" : "t";
+  const vy = size === "lg" ? y + h - 7 : y + h - 5;
+  return (
+    `<rect class="thin" x="${x}" y="${y}" width="${w}" height="${h}"/>` +
+    `<text class="t t-cap" x="${x + 4}" y="${y + 9}">${label}</text>` +
+    `<text class="${cls}" x="${x + 4}" y="${vy}"${id ? ` id="${id}"` : ""}>${value}</text>`
+  );
+}
+
+function titleBlock(x, y, w, h, cells) {
+  return `<g data-role="title"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/>${cells.map((c) => cell({ ...c, x: x + c.x, y: y + c.y })).join("")}<rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/></g>`;
+}
+
+// A notes block: a heading and numbered lines.
+function notes(x, y, heading, items, lead = 13) {
+  let out = `<g data-role="notes"><text class="t t-head" x="${x}" y="${y}">${heading}</text>`;
+  items.forEach((s, i) => {
+    out += `<text class="t t-sm" x="${x}" y="${r2(y + lead * (i + 1) + 2)}">${i + 1}. ${s}</text>`;
+  });
+  return out + `</g>`;
+}
+
+return { SHEET, PX_PER_MM, THICK, THIN, TEXT, ARROW, GAP, OVER, r2, fmt, view, scaleLabel, d, rect, arc, circle, rrect, move, flipU, flipV, inside, revolve, MATERIALS, ANGLES, hatchDefs, cut, section, body, line, lines, centerline, centerMark, springSection, textWidth, dim, balloon, viewLabel, detailMark, viewArrow, breakLine, frame, table, cell, titleBlock, notes };
+})();
+
+const L = (() => {
+// Live runtime for a blueprint sheet: one time-based loop, an idle tour, input wake-ups,
+// offscreen and hidden-tab pauses, reduced motion, and deterministic frames for checks.
+//
+// URL parameters (all optional):
+//   ?t=6.5            render the tour at 6.5 s, deterministically, and stop (for screenshots)
+//   ?theme=paper      blueprint | paper | dark
+//   ?zoom=x,y,w,h     show only this sheet region, filling the window (for 4x close-ups)
+//   ?check=1          run the layout self-check after the first frame (see selfcheck.mjs)
+
+function params() {
+  const q = new URLSearchParams(location.search);
+  return {
+    t: q.has("t") ? Number(q.get("t")) : null,
+    theme: q.get("theme"),
+    zoom: q.get("zoom"),
+    check: q.has("check"),
+  };
+}
+
+const THEMES = ["blueprint", "paper", "dark"];
+
+function setupPage(svg) {
+  const q = params();
+  const pick = (name) => {
+    if (!THEMES.includes(name)) return;
+    document.documentElement.dataset.theme = name;
+    for (const b of document.querySelectorAll("[data-theme-pick]")) b.setAttribute("aria-pressed", String(b.dataset.themePick === name));
+    try {
+      localStorage.setItem("bp-theme", name);
+    } catch {}
+  };
+  let saved = null;
+  try {
+    saved = localStorage.getItem("bp-theme");
+  } catch {}
+  pick(q.theme ?? saved ?? "blueprint");
+  for (const b of document.querySelectorAll("[data-theme-pick]")) b.addEventListener("click", () => pick(b.dataset.themePick));
+  if (q.zoom) {
+    const box = q.zoom.split(",").map(Number);
+    if (box.length === 4 && box.every(Number.isFinite)) {
+      svg.setAttribute("viewBox", box.join(" "));
+      document.body.classList.add("bp-zoom");
+    }
+  }
+  return q;
+}
+
+// Critically damped follow toward a target: calm, no overshoot, frame-rate independent.
+function follow(at, want, rate, dt) {
+  return want + (at - want) * Math.exp(-rate * dt);
+}
+
+const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, t)));
+
+// run({ root, step, render, idleAfter })
+//   step(dt, live) advances the model; live.touring says whether the idle tour drives it.
+//   It returns true while something is still settling, so a reduced-motion page can sleep.
+//   render(live) writes attributes; it never rebuilds static geometry.
+function run({ root, step, render, idleAfter = 4, onFrozen }) {
+  const q = params();
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const live = { clock: 0, slow: 1, lastInput: -Infinity, reduced, touring: !reduced, frozen: q.t != null };
+  live.input = () => {
+    live.lastInput = live.clock;
+    live.touring = false;
+    wake();
+  };
+
+  if (live.frozen) {
+    const dt = 1 / 240;
+    for (let t = 0; t < q.t; t += dt) {
+      live.clock = t;
+      live.touring = true;
+      step(dt, live);
+    }
+    render(live);
+    onFrozen?.(live);
+    return live;
+  }
+
+  let raf = 0;
+  let last = 0;
+  let visible = true;
+  function frame(now) {
+    raf = 0;
+    const real = last ? Math.min(0.05, (now - last) / 1000) : 0;
+    last = now;
+    live.clock += real;
+    live.touring = !reduced && live.clock - live.lastInput > idleAfter;
+    const busy = step(real * live.slow, live);
+    render(live);
+    if (visible && !document.hidden && (!reduced || busy)) raf = requestAnimationFrame(frame);
+    else last = 0;
+  }
+  function wake() {
+    if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame);
+  }
+  live.wake = wake;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) wake();
+    }).observe(root);
+  }
+  document.addEventListener("visibilitychange", wake);
+  render(live);
+  wake();
+  return live;
+}
+
+// Vertical drag on an element, reported as a sheet-unit delta since the press.
+function dragY(svg, el, { start, move, end }) {
+  let id = null;
+  let y0 = 0;
+  const toSheet = (e) => {
+    const m = svg.getScreenCTM();
+    return m ? (e.clientY - m.f) / m.d : e.clientY;
+  };
+  el.addEventListener("pointerdown", (e) => {
+    id = e.pointerId;
+    el.setPointerCapture(id);
+    y0 = toSheet(e);
+    start?.();
+    e.preventDefault();
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (e.pointerId === id) move(toSheet(e) - y0);
+  });
+  const stop = (e) => {
+    if (e.pointerId !== id) return;
+    id = null;
+    end?.();
+  };
+  el.addEventListener("pointerup", stop);
+  el.addEventListener("pointercancel", stop);
+}
+
+// Announce a readout to screen readers at most every `every` seconds.
+function announcer(el, every = 1.5) {
+  let lastAt = -Infinity;
+  let lastText = "";
+  return (text, clock) => {
+    if (text === lastText || clock - lastAt < every) return;
+    lastAt = clock;
+    lastText = text;
+    el.textContent = text;
+  };
+}
+
+return { params, THEMES, setupPage, follow, ease, run, dragY, announcer };
+})();
+
+const C = (() => {
+// Layout self-check, run in the page with ?check=1 (scripts/check.mjs drives it headlessly).
+// It writes a JSON report into <pre id="bp-check"> and to the console. A clean sheet reports
+// zero failures in every category.
+//
+//   text-overlap      two pieces of lettering touch
+//   text-on-geometry  lettering sits on a part or on another annotation's lines
+//   outside-frame     an annotation or a view crosses the drawing frame
+//   balloon-target    a balloon's dot is not on the part it names
+//   balloon-on-geom   a balloon circle sits on a part
+//   hard-colour       a fill or stroke is a literal colour instead of a token
+//   sideways-scroll   the page scrolls horizontally
+
+const roleOf = (el) => el.closest("[data-role]")?.dataset.role ?? "";
+
+// A clipped group's box is its clip region's box (getBoundingClientRect ignores clipping).
+function clippedBox(el) {
+  const ref = el.getAttribute("clip-path")?.match(/url\(#([^)]+)\)/)?.[1];
+  const shape = ref && document.getElementById(ref)?.firstElementChild;
+  if (!shape) return el.getBoundingClientRect();
+  const b = shape.getBBox();
+  const m = shape.ownerSVGElement.getScreenCTM();
+  const x0 = m.a * b.x + m.e;
+  const y0 = m.d * b.y + m.f;
+  return { left: x0, top: y0, right: x0 + m.a * b.width, bottom: y0 + m.d * b.height };
+}
+
+function selfCheck(svg) {
+  const fails = [];
+  const fail = (kind, what) => fails.push({ kind, what });
+  const label = (el) => {
+    const g = el.closest("[data-role],[data-part],[data-geom]");
+    const name = g?.id || g?.dataset.part || g?.dataset.target || g?.dataset.role || g?.dataset.geom || el.tagName;
+    return `${name}: "${(el.textContent || "").trim().slice(0, 24)}"`;
+  };
+  const shown = (el) => {
+    const b = el.getBoundingClientRect();
+    if (b.width < 0.5 || b.height < 0.5) return false;
+    const cs = getComputedStyle(el);
+    return cs.visibility !== "hidden" && cs.display !== "none" && Number(cs.opacity) > 0.05;
+  };
+  const texts = [...svg.querySelectorAll("text")].filter(shown);
+  const boxes = texts.map((t) => t.getBoundingClientRect());
+  const grow = 0.4;
+  const hit = (a, b) => a.left < b.right - grow && b.left < a.right - grow && a.top < b.bottom - grow && b.top < a.bottom - grow;
+
+  for (let i = 0; i < texts.length; i++)
+    for (let j = i + 1; j < texts.length; j++) if (hit(boxes[i], boxes[j])) fail("text-overlap", `${label(texts[i])} × ${label(texts[j])}`);
+
+  const geomOf = (el) => el.closest("[data-geom]");
+  for (const [i, t] of texts.entries()) {
+    const role = roleOf(t);
+    if (role === "engraved" || role === "frame") continue;
+    const own = t.closest("[data-role]");
+    const b = boxes[i];
+    const seen = new Set();
+    for (let ix = 0; ix < 4; ix++)
+      for (let iy = 0; iy < 2; iy++) {
+        const x = b.left + b.width * (0.15 + ix * 0.233);
+        const y = b.top + b.height * (0.3 + iy * 0.4);
+        for (const el of document.elementsFromPoint(x, y)) {
+          if (el === t || el.tagName === "text" || el.tagName === "svg" || el.closest("defs")) continue;
+          if (el.classList.contains("tint") || el.classList.contains("hit") || el.closest('[data-role="phantom"]')) continue;
+          if (own && own.contains(el)) continue;
+          const g = geomOf(el);
+          const other = el.closest("[data-role]");
+          const bad = (g && !g.contains(t)) || (other && other !== own && other.dataset.role !== "frame" && other.dataset.role !== "chart-bg");
+          if (bad && !el.classList.contains("sheet-bg") && !el.classList.contains("grid")) {
+            const key = el.closest("[data-part],[data-role],[data-geom]");
+            if (!seen.has(key)) {
+              seen.add(key);
+              fail("text-on-geometry", `${label(t)} on ${key?.dataset.part || key?.id || key?.dataset.role || key?.dataset.geom || el.tagName}`);
+            }
+          }
+        }
+      }
+  }
+
+  const frameRect = svg.querySelector('[data-role="frame"] rect.vis')?.getBoundingClientRect();
+  if (frameRect) {
+    for (const el of svg.querySelectorAll("[data-role]:not([data-role=frame]), [data-geom]")) {
+      if (el.parentElement?.closest("[data-role]:not([data-role=frame]), [data-geom]")) continue;
+      if (!shown(el)) continue;
+      const b = clippedBox(el);
+      const tol = 0.5;
+      if (b.left < frameRect.left - tol || b.right > frameRect.right + tol || b.top < frameRect.top - tol || b.bottom > frameRect.bottom + tol)
+        fail("outside-frame", el.id || el.dataset.geom || el.dataset.role);
+    }
+  }
+
+  for (const g of svg.querySelectorAll('[data-role="balloon"]')) {
+    if (!shown(g)) continue;
+    const dot = g.querySelector("circle.dot").getBoundingClientRect();
+    const x = dot.left + dot.width / 2;
+    const y = dot.top + dot.height / 2;
+    const target = g.dataset.target;
+    const under = document.elementsFromPoint(x, y).some((el) => el.closest(`[data-part="${target}"]`));
+    if (!under) fail("balloon-target", `balloon ${g.textContent.trim()} → ${target}`);
+    const c = g.querySelector("circle.balloon").getBoundingClientRect();
+    const pts = [
+      [c.left + c.width * 0.5, c.top + c.height * 0.5],
+      [c.left + c.width * 0.2, c.top + c.height * 0.5],
+      [c.left + c.width * 0.8, c.top + c.height * 0.5],
+      [c.left + c.width * 0.5, c.top + c.height * 0.2],
+      [c.left + c.width * 0.5, c.top + c.height * 0.8],
+    ];
+    if (pts.some(([px, py]) => document.elementsFromPoint(px, py).some((el) => geomOf(el) && !el.classList.contains("tint") && !el.closest('[data-role="phantom"]'))))
+      fail("balloon-on-geom", `balloon ${g.textContent.trim()}`);
+  }
+
+  for (const el of svg.querySelectorAll("[fill],[stroke]")) {
+    if (el.closest("defs") && el.tagName !== "path" && el.tagName !== "circle") continue;
+    for (const a of ["fill", "stroke"]) {
+      const v = el.getAttribute(a);
+      if (v && v !== "none" && !v.startsWith("url(") && v !== "currentColor") fail("hard-colour", `${el.tagName} ${a}=${v}`);
+    }
+  }
+
+  if (document.documentElement.scrollWidth > window.innerWidth + 1) fail("sideways-scroll", `${document.documentElement.scrollWidth} > ${window.innerWidth}`);
+
+  const kinds = ["text-overlap", "text-on-geometry", "outside-frame", "balloon-target", "balloon-on-geom", "hard-colour", "sideways-scroll"];
+  const counts = Object.fromEntries(kinds.map((k) => [k, fails.filter((f) => f.kind === k).length]));
+  const report = { ok: fails.length === 0, counts, fails, texts: texts.length, parts: svg.querySelectorAll("[data-part]").length };
+  let pre = document.getElementById("bp-check");
+  if (!pre) {
+    pre = document.createElement("pre");
+    pre.id = "bp-check";
+    pre.hidden = true;
+    document.body.append(pre);
+  }
+  pre.textContent = JSON.stringify(report);
+  console.log("bp-check", JSON.stringify(report.counts));
+  return report;
+}
+
+return { selfCheck };
+})();
+
+const M = (() => {
+// Truth first: a DN25 spring-loaded safety relief valve on a compressed-air receiver.
+// Pure, no imports, no DOM. The geometry, the dimensions, the readout and the charts read this.
+//
+// Forces on the disc (N; bar·mm² × 0.1 = N):
+//   closing  F_s(h) = F0 + k·h                     the spring, preloaded by the adjusting screw
+//   opening  F_p(p, h) = 0.1·p·A_seat·(1 + c_H·ψ(h) + c_R·h)
+//            A_seat      inlet pressure on the seat circle
+//            c_H·ψ(h)    the huddling chamber: once the disc has cracked open, gas fills the
+//                        annulus between the seat and the holder's skirt and pushes on it too
+//                        (ψ ramps 0 → 1 between H_A and H_B of lift)
+//            c_R·h       reaction of the jet turned down by the skirt, growing with the flow
+// The disc is overdamped: dh/dt = MU·(F_p − F_s), stopped at 0 and at full lift H_MAX.
+// The equilibrium p_eq(h) = F_s / (0.1·A_eff) rises (simmer), falls (the pop: unstable), then
+// rises again (relieving). So the valve opens at the top of the first rise and recloses at the
+// bottom of the dip: the difference is the blowdown, the loop in Diagram 1.
+//
+// Flow: choked air through the smaller of the curtain π·d_seat·h and the nozzle throat A0.
+// The receiver is isothermal: dp/dt = R·T/V · (ṁ_compressor − ṁ_valve).
+
+const P_ATM = 1.01325; // bar absolute
+
+// Nozzle and disc (mm)
+const D0 = 23; // nozzle throat, the flow diameter d0
+const D_SEAT = 24; // seat contact diameter
+const D_HUD = 31; // huddling chamber, inside the holder's skirt
+const A0 = (Math.PI / 4) * D0 ** 2;
+const A_SEAT = (Math.PI / 4) * D_SEAT ** 2;
+const A_HUD = (Math.PI / 4) * D_HUD ** 2;
+const H_MAX = 6; // full lift: the holder strikes the guide (≥ d0/4 = 5.75, full-lift valve)
+const H_A = 0.45; // huddling chamber starts to fill
+const H_B = 1.1; // and is fully effective
+const ETA_H = 0.21; // mean huddling-chamber pressure over the annulus, share of p
+const C_H = ETA_H * (A_HUD / A_SEAT - 1);
+const C_R = 0.0215; // jet reaction, per mm of lift
+const MU = 0.9; // disc mobility, mm/(N·s): an overdamped disc
+
+// Spring: EN 10270-2 oil-tempered wire, closed and ground ends
+const G = 78500; // N/mm²
+const WIRE = 6;
+const COIL_D = 46; // mean coil diameter
+const ACTIVE = 5;
+const K_SPRING = (G * WIRE ** 4) / (8 * COIL_D ** 3 * ACTIVE); // N/mm
+const L_SET = 110; // installed length at the nominal set pressure
+const P_SET_NOM = 10; // bar g
+
+const smooth = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
+const psi = (h) => smooth((h - H_A) / (H_B - H_A));
+const areaRatio = (h) => 1 + C_H * psi(h) + C_R * h;
+const springForce = (F0, h) => F0 + K_SPRING * h;
+const openingForce = (p, h) => 0.1 * p * A_SEAT * areaRatio(h);
+const pEq = (F0, h) => springForce(F0, h) / (0.1 * A_SEAT * areaRatio(h));
+
+// Preload for a set pressure: the set pressure is the top of the simmer rise, at h = H_A.
+const preloadFor = (pSet) => pSet * 0.1 * A_SEAT * areaRatio(H_A) - K_SPRING * H_A;
+const F0_NOM = preloadFor(P_SET_NOM);
+const FREE_LENGTH = L_SET + F0_NOM / K_SPRING;
+const springLength = (F0, h) => FREE_LENGTH - F0 / K_SPRING - h;
+
+// The valve's characteristic pressures for a preload (bar g)
+function characteristic(F0) {
+  let open = 0;
+  let close = Infinity;
+  let hClose = 0;
+  for (let h = 0; h <= H_B; h += 0.005) open = Math.max(open, pEq(F0, h));
+  for (let h = H_A; h <= H_MAX; h += 0.005) {
+    const p = pEq(F0, h);
+    if (p < close) {
+      close = p;
+      hClose = h;
+    }
+  }
+  return { set: open, start: pEq(F0, 0), reseat: close, hReseat: hClose, full: pEq(F0, H_MAX), blowdown: (open - close) / open };
+}
+
+// Flow (air, choked: p0 > 1.89 bar abs)
+const GAMMA = 1.4;
+const R_AIR = 287.05;
+const T0 = 293.15;
+const KD = 0.77; // certified derated coefficient of discharge
+const CHOKE = Math.sqrt(GAMMA / (R_AIR * T0)) * (2 / (GAMMA + 1)) ** ((GAMMA + 1) / (2 * (GAMMA - 1)));
+const flowArea = (h) => Math.min(Math.PI * D_SEAT * Math.max(0, h), A0); // mm²
+const massFlow = (p, h) => KD * flowArea(h) * 1e-6 * (p + P_ATM) * 1e5 * CHOKE; // kg/s
+const H_THROAT = A0 / (Math.PI * D_SEAT); // the lift where the curtain equals the throat
+
+// The receiver and its compressor
+const V_RX = 0.5; // m³, a 500 L receiver
+const M_COMP = 0.1; // kg/s, about 300 m³/h free air
+const dpdt = (mIn, mOut) => ((R_AIR * T0) / V_RX) * (mIn - mOut) * 1e-5; // bar/s
+const P_START = 9.3; // the tour starts here, below set
+
+function valve(p = P_START, F0 = F0_NOM) {
+  return { p, h: 0, v: 0, F0, m: 0, comp: true, t: 0 };
+}
+
+// Advance by dt seconds. If hold is a number the vessel pressure is held there (a hand on it).
+function advance(s, dt, { hold = null, mIn = M_COMP } = {}) {
+  const f = openingForce(s.p, s.h) - springForce(s.F0, s.h);
+  let h = s.h + MU * f * dt;
+  h = Math.min(H_MAX, Math.max(0, h));
+  s.v = (h - s.h) / dt;
+  s.h = h;
+  s.m = massFlow(s.p, h);
+  if (hold == null) s.p = Math.max(0, s.p + dpdt(s.comp ? mIn : 0, s.m) * dt);
+  else s.p = hold;
+  s.t += dt;
+  return s;
+}
+
+function state(s) {
+  if (s.h < 0.004) return "SHUT";
+  if (s.v > 4) return "POPPING";
+  if (s.v < -4) return "RESEATING";
+  if (s.h < H_A + 0.02) return "SIMMER";
+  return "RELIEVING";
+}
+
+return { P_ATM, D0, D_SEAT, D_HUD, A0, A_SEAT, A_HUD, H_MAX, H_A, H_B, ETA_H, C_H, C_R, MU, G, WIRE, COIL_D, ACTIVE, K_SPRING, L_SET, P_SET_NOM, psi, areaRatio, springForce, openingForce, pEq, preloadFor, F0_NOM, FREE_LENGTH, springLength, characteristic, GAMMA, R_AIR, T0, KD, flowArea, massFlow, H_THROAT, V_RX, M_COMP, dpdt, P_START, valve, advance, state };
+})();
+
+const P = (() => {
+// The relief valve's parts, in world mm: u right, v up, the valve's axis at u = 0, the inlet
+// flange face at v = 0, the outlet on the right. Each function draws one part into a view and
+// returns SVG, so the section and both details draw the same geometry at their own scale.
+// The disc assembly (disc, holder, split ring, spindle, lower spring plate, lifting nut) is drawn
+// seated (h = 0) and lifted with a transform; the adjusting screw and upper spring plate are drawn
+// at the nominal set and moved with a transform; only the spring is redrawn.
+
+
+
+const part = (id, inner, extra = "") => `<g data-part="${id}"${extra}>${inner}</g>`;
+const L = (pts) => pts.map(([r, v]) => [-r, v]).reverse(); // a right-hand outline mirrored left
+const both = (V, pts, opts) => K.cut(V, pts, opts) + K.cut(V, L(pts), opts);
+const bothBody = (V, pts) => K.body(V, pts) + K.body(V, L(pts));
+const mirrorLines = (list) => [...list, ...list.map((pts) => pts.map(([r, v]) => [-r, v]))];
+
+// Key heights (mm)
+const SEAT_V = 88; // seat plane
+const PLATE_V = 176; // lower spring plate face, seated
+const SPRING_TOP = PLATE_V + M.L_SET; // upper spring plate face at nominal set
+const OUT_V = 95; // outlet axis
+const OUT_R = 21.5; // outlet bore
+const OUT_FACE = 105; // outlet flange face, from the valve axis
+const PIN = [-17, 365]; // lever pivot
+const STUD_R = 51;
+
+// ---------------------------------------------------------------- body, cut through both axes
+
+function body(V) {
+  const s = { mat: "steel", angle: 45 };
+  // left: below and above the ring lock screw's tapped hole (M10, minor Ø8.4 at v = 76)
+  const lowLeft = [[18, 0], [34, 0], [34, 2], [35.5, 2], [35.5, 20], [32, 20], [32, 46], [44, 58], [44, 71.8], [36, 71.8], [36, 58], [25, 58], [25, 52], [20, 52], [20, 28], [18, 28]];
+  const highLeft = [[44, 80.2], [44, 124], [48, 128], [63, 128], [63, 146], [56.05, 146], [56.05, 133], [51, 130], [45.95, 133], [45.95, 146], [37.5, 146], [37.5, 140], [31, 140], [31, 122], [36, 122], [36, 80.2]];
+  const ring = [[49.5, 2], [57.5, 2], [57.5, 20], [49.5, 20]];
+  // right: below the outlet (split by the drain), above it, and the outlet flange beyond its holes
+  const lowRight = [[18, 0], [34, 0], [34, 2], [35.5, 2], [35.5, 20], [32, 20], [32, 50], [40, 62], [54.1, 62], [54.1, 73.5], [36, 73.5], [36, 58], [25, 58], [25, 52], [20, 52], [20, 28], [18, 28]];
+  const outletLow = [[65.9, 62], [85, 62], [85, 49], [103, 49], [103, 51], [105, 51], [105, 73.5], [65.9, 73.5]];
+  const outletFoot = [[85, 20], [103, 20], [103, 31], [85, 31]];
+  const highRight = [
+    [36, 116.5], [105, 116.5], [105, 139], [103, 139], [103, 141], [85, 141], [85, 128], [63, 128], [63, 146],
+    [56.05, 146], [56.05, 133], [51, 130], [45.95, 133], [45.95, 146], [37.5, 146], [37.5, 140], [31, 140], [31, 122], [36, 122],
+  ];
+  const outletTop = [[85, 159], [103, 159], [103, 170], [85, 170]];
+  const pieces = [L(lowLeft), L(highLeft), L(ring), lowRight, outletLow, outletFoot, highRight, outletTop, ring];
+  // thread majors (thin) in the tapped stud holes, M12
+  const threads = mirrorLines([[[45, 134], [45, 146]], [[57, 134], [57, 146]]]);
+  return part(1, pieces.map((p) => K.cut(V, p, s)).join("") + K.lines(V, threads, "thin"));
+}
+
+function nozzle(V) {
+  const loop = [[14.5, 30], [21, 30], [21, 52], [24, 52], [24, 61], [23, 62], [17, 62], [17, 81], [14, 81], [14, 86.5], [12.5, 88], [11.5, 88], [11.5, 44]];
+  const rev = K.revolve(loop);
+  const roots = mirrorLines([[[20, 31], [20, 51.5]], [[16.2, 63], [16.2, 80]]]);
+  return part(2, K.section(V, rev, { mat: "steel", angle: 135 }) + K.lines(V, roots, "thin"));
+}
+
+// The blowdown ring on the nozzle; the lock screw's dog point sits in a gap between its teeth.
+function ring(V) {
+  const right = [[17, 70], [22, 70], [22, 80.5], [20.5, 82], [17, 82]];
+  const left = [[17, 70], [22, 70], [22, 72.3], [20.2, 72.3], [20.2, 79.7], [22, 79.7], [22, 80.5], [20.5, 82], [17, 82]];
+  const s = { mat: "steel", angle: 30 };
+  return part(3, K.cut(V, right, s) + K.cut(V, L(left), s));
+}
+
+function lockScrew(V) {
+  const pts = [[-20.2, 72.5], [-25.2, 72.5], [-25.2, 71], [-44.6, 71], [-45.2, 71.6], [-45.2, 80.4], [-44.6, 81], [-25.2, 81], [-25.2, 79.5], [-20.2, 79.5]];
+  return part(
+    4,
+    K.body(V, pts) +
+      K.lines(V, [[[-26, 71.8], [-44, 71.8]], [[-26, 80.2], [-44, 80.2]]], "thin") +
+      K.line(V, K.rect(-45.2, 73.5, -40, 78.5), "hid", true)
+  );
+}
+
+function drainPlug(V) {
+  const pts = [[51, 54], [69, 54], [69, 61], [66.6, 61], [66.6, 71.4], [66, 72], [54, 72], [53.4, 71.4], [53.4, 61], [51, 61]];
+  return part(23, K.body(V, pts) + K.lines(V, [[[54.1, 62], [54.1, 71]], [[65.9, 62], [65.9, 71]], [[51, 57.5], [69, 57.5]]], "thin"));
+}
+
+// ---------------------------------------------------------------- disc assembly (moves with lift)
+
+function disc(V) {
+  const rev = K.revolve([[0, 88], [15, 88], [15, 94.2], [14.2, 95], [5, 95], [5, 99], [0, 99]]);
+  return part(5, K.section(V, rev, { mat: "steel", angle: 45 }));
+}
+
+const holderLoop = [[15.5, 84], [19, 84], [20, 85], [20, 113.2], [19.2, 114], [7.2, 114], [7.2, 103], [8.6, 103], [8.6, 101], [7.2, 101], [7.2, 97], [5.2, 97], [5.2, 95], [15.5, 95]];
+
+function holder(V) {
+  return part(6, K.section(V, { ...K.revolve(holderLoop), edges: [] }, { mat: "steel", angle: 135 }));
+}
+
+function splitRing(V) {
+  return part(9, bothBody(V, K.rect(5.6, 101.1, 8.5, 102.9)));
+}
+
+const spindleR = [[3, 99], [5.5, 100.2], [5.5, 103], [7, 103.6], [7, 170], [6, 170], [6, 379.4], [5.4, 380]];
+function spindle(V) {
+  const pts = [...spindleR, ...L(spindleR)];
+  return part(8, K.body(V, pts) + K.lines(V, mirrorLines([[[5, 362], [5, 379]]]), "thin"));
+}
+
+function lowerPlate(V) {
+  const rev = K.revolve([[6.2, 170], [27, 170], [27, PLATE_V], [19.5, PLATE_V], [19.5, 181], [18.5, 182], [6.2, 182]]);
+  return part(14, K.section(V, { ...rev, edges: [] }, { mat: "steel", angle: 60 }));
+}
+
+function liftingNut(V) {
+  const pts = [[6, 370], [9, 370], [9, 375.4], [8.4, 376], [6, 376]];
+  return part(22, bothBody(V, pts));
+}
+
+const discAssembly = (V) => holder(V) + disc(V) + splitRing(V) + spindle(V) + lowerPlate(V) + liftingNut(V);
+
+// The disc and holder at full lift, in phantom lines.
+function discPhantom(V) {
+  const up = (pts) => K.move(pts, 0, M.H_MAX);
+  const discR = [[15, 88], [15, 94.2], [14.2, 95], [5, 95]];
+  const out = [[15.5, 95], ...holderLoop.slice(0, 6)].map(([r, v]) => [r, v]);
+  return (
+    K.line(V, up([...L(out), ...out]), "phan") +
+    K.line(V, up([[-15, 88], [15, 88]]), "phan") +
+    K.line(V, up(discR), "phan") +
+    K.line(V, up(L(discR)), "phan")
+  );
+}
+
+// ---------------------------------------------------------------- guide, bonnet, studs
+
+function guide(V) {
+  const rev = K.revolve([[7.5, 120], [20.5, 120], [20.5, 100], [25, 100], [25, 140], [37, 140], [37, 147.5], [7.5, 147.5]]);
+  return part(7, K.section(V, { ...rev, edges: [] }, { mat: "steel", angle: 60 }));
+}
+
+function gasket(V) {
+  return part(13, both(V, K.rect(38, 146, 44, 147.5), { mat: "solid" }) + both(V, K.rect(58, 146, 62, 147.5), { mat: "solid" }));
+}
+
+function bonnet(V) {
+  const main = [[30, 147.5], [44, 147.5], [44, 161.5], [40, 161.5], [36, 165.5], [36, 308], [32, 312], [26, 312], [26, 324], [10.4, 324], [10.4, 300], [30, 300]];
+  const rim = [[58, 147.5], [63, 147.5], [63, 161.5], [58, 161.5]];
+  const s = { mat: "steel", angle: 135 };
+  const threads = mirrorLines([[[12, 300], [12, 324]], [[24.9, 313], [24.9, 323]]]);
+  return part(10, both(V, main, s) + both(V, rim, s) + K.lines(V, threads, "thin"));
+}
+
+function studs(V) {
+  const pts = [[45, 134], [57, 134], [57, 173.9], [56.4, 174.5], [45.6, 174.5], [45, 173.9]];
+  const roots = [[[45.95, 135], [45.95, 146]], [[56.05, 135], [56.05, 146]]];
+  return part(11, K.body(V, pts) + K.body(V, K.flipU(pts)) + K.lines(V, mirrorLines(roots), "thin"));
+}
+
+function nuts(V) {
+  const pts = [[41, 161.5], [61, 161.5], [61, 171.3], [60, 172.3], [42, 172.3], [41, 171.3]];
+  return part(12, K.body(V, pts) + K.body(V, K.flipU(pts)) + K.lines(V, mirrorLines([[[44, 161.5], [44, 172.3]], [[58, 161.5], [58, 172.3]]]), "thin"));
+}
+
+// ---------------------------------------------------------------- spring and its setting
+
+// dz: the upper plate's offset from its nominal position (down is negative), from the preload.
+const screwOffset = (F0) => (M.F0_NOM - F0) / M.K_SPRING;
+
+function spring(V, h, F0) {
+  const from = PLATE_V + h;
+  const to = PLATE_V + h + M.springLength(F0, h);
+  return part(15, K.springSection(V, { from, to, radius: M.COIL_D / 2, wire: M.WIRE, turns: M.ACTIVE, axis: "v", at: 0 }));
+}
+
+// A point on the spring's second wire section on the left, for its balloon.
+function springDot(h, F0) {
+  const from = PLATE_V + h;
+  const len = M.springLength(F0, h);
+  const pitch = (len - M.WIRE) / M.ACTIVE;
+  return [-M.COIL_D / 2, from + M.WIRE / 2 + pitch / 2 + pitch];
+}
+
+function upperPlate(V) {
+  const b = SPRING_TOP;
+  const rev = K.revolve([[7, b - 5], [19.5, b - 5], [19.5, b], [27, b], [27, b + 8], [7, b + 8]]);
+  return part(16, K.section(V, { ...rev, edges: [] }, { mat: "steel", angle: 30 }));
+}
+
+function screw(V) {
+  const b = SPRING_TOP + 8;
+  const pts = [[7, b], [11.5, b], [12, b + 0.5], [12, 343], [11, 344], [10, 344], [10, 355.4], [9.4, 356], [7, 356]];
+  return part(17, bothBody(V, pts) + K.lines(V, mirrorLines([[[10.4, b + 1], [10.4, 342]]]), "thin"));
+}
+
+function lockNut(V) {
+  const pts = [[12, 324], [18, 324], [18, 335], [17, 336], [12, 336]];
+  return part(18, bothBody(V, pts));
+}
+
+// ---------------------------------------------------------------- cap and lifting gear
+
+function cap(V) {
+  const main = [[-26, 312], [-32, 312], [-32, 404], [-28, 408], [28, 408], [32, 404], [32, 371], [24, 371], [24, 400], [-24, 400], [-24, 324], [-26, 324]];
+  const low = [[26, 312], [32, 312], [32, 359], [24, 359], [24, 324], [26, 324]];
+  const s = { mat: "iron", angle: 45 };
+  return part(19, K.cut(V, main, s) + K.cut(V, low, s));
+}
+
+const leverOutline = () => {
+  const [pu, pv] = PIN;
+  const left = [[-6.5, 362], [-6.5, 368], ...K.arc(pu, pv, 6.5, 27.5, 332.5, 14)];
+  const right = [[6.5, 362], [92, 362], ...K.arc(92, 365, 3, -90, 90, 6), [6.5, 368]];
+  return { left, right };
+};
+
+function lever(V) {
+  const { left, right } = leverOutline();
+  const s = { mat: "steel", angle: 30 };
+  return part(20, K.cut(V, left, s) + K.cut(V, right, s));
+}
+
+function pin(V) {
+  return part(21, K.cut(V, K.circle(PIN[0], PIN[1], 4, 24), { mat: "steel", angle: 135 }) + K.centerMark(V, PIN, 4, 3));
+}
+
+const rot = ([u, v], deg) => {
+  const a = (deg * Math.PI) / 180;
+  const du = u - PIN[0];
+  const dv = v - PIN[1];
+  return [PIN[0] + du * Math.cos(a) - dv * Math.sin(a), PIN[1] + du * Math.sin(a) + dv * Math.cos(a)];
+};
+
+// The lever raised for a test lift (8°), in phantom lines.
+function leverPhantom(V) {
+  const out = [[34, 368], [34, 362], [92, 362], ...K.arc(92, 365, 3, -90, 90, 6), [92, 368], [34, 368]];
+  return K.line(V, out.map((p) => rot(p, 8)), "phan");
+}
+
+// ---------------------------------------------------------------- the gas
+
+// The vessel side: inlet bore, nozzle bore, and the curtain between seat and disc.
+function inletGas(h) {
+  const top = SEAT_V + h;
+  const r = [[18, 0], [18, 30.01], [14.5, 30.01], [11.5, 44], [11.5, SEAT_V], [12.5, SEAT_V], [12.5, top]];
+  return [[...r, ...L(r)]];
+}
+
+// The huddling chamber: under the disc, inside the skirt.
+const huddleGas = (h) => [K.rect(-15.5, 84 + h, 15.5, SEAT_V + h)];
+
+// The discharge side: body cavity around the nozzle and the outlet bore.
+const outletGas = [
+  K.rect(-36, 58, 36, 100),
+  K.rect(-36, 99.99, -25, 122),
+  K.rect(25, 99.99, 36, 122),
+  K.rect(35.99, 73.5, OUT_FACE, 116.5),
+];
+
+const gasPath = (V, shapes) => shapes.map((s) => K.d(V, s)).join("");
+
+// ---------------------------------------------------------------- static assemblies
+
+const fixedParts = (V) =>
+  body(V) + nozzle(V) + ring(V) + lockScrew(V) + drainPlug(V) + guide(V) + gasket(V) + bonnet(V) + studs(V) + nuts(V) + cap(V) + lever(V) + pin(V) + lockNut(V);
+
+const setParts = (V) => upperPlate(V) + screw(V);
+
+// ---------------------------------------------------------------- dots for the balloons that move
+
+// Where the balloon dots sit on the moving parts, for a lift h and a preload F0.
+function movingDots(h, F0) {
+  const dz = screwOffset(F0);
+  return {
+    15: springDot(h, F0),
+    14: [25, 171.5 + h],
+    5: [-10, 91.5 + h],
+    6: [-18, 100 + h],
+    9: [-7, 102 + h],
+    8: [-3, 359 + h],
+    22: [-7.5, 373 + h],
+    16: [-22, 290 + dz],
+    17: [-11, 318 + dz],
+  };
+}
+
+return { part, SEAT_V, PLATE_V, SPRING_TOP, OUT_V, OUT_R, OUT_FACE, PIN, STUD_R, body, nozzle, ring, lockScrew, drainPlug, disc, holderLoop, holder, splitRing, spindle, lowerPlate, liftingNut, discAssembly, discPhantom, guide, gasket, bonnet, studs, nuts, screwOffset, spring, springDot, upperPlate, screw, lockNut, cap, lever, pin, leverPhantom, inletGas, huddleGas, outletGas, gasPath, fixedParts, setParts, movingDots };
+})();
+
+const G = (() => {
+// The three diagrams' frames and curves. Pure: the build draws them, the page redraws the
+// curves that depend on the set pressure and the live traces.
+
+
+
+// Diagram 1: lift against vessel pressure (the hysteresis loop)
+const D1 = { x0: 846, x1: 1150, y0: 46, y1: 176, p0: 8.5, p1: 10.75, h1: 6.5 };
+// Diagram 2: vessel pressure against time (the last 30 s)
+const D2 = { x0: 82, x1: 392, y0: 612, y1: 712, p0: 8.5, p1: 10.5, span: 30 };
+// Diagram 3: discharge against lift, at the present pressure
+const D3 = { x0: 666, x1: 762, y0: 478, y1: 690, h1: 6.5, q1: 3600 };
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const x1 = (p) => K.r2(D1.x0 + ((clamp(p, D1.p0, D1.p1) - D1.p0) / (D1.p1 - D1.p0)) * (D1.x1 - D1.x0));
+const y1 = (h) => K.r2(D1.y1 - (clamp(h, 0, D1.h1) / D1.h1) * (D1.y1 - D1.y0));
+const x2 = (age) => K.r2(D2.x1 - (clamp(age, 0, D2.span) / D2.span) * (D2.x1 - D2.x0));
+const y2 = (p) => K.r2(D2.y1 - ((clamp(p, D2.p0, D2.p1) - D2.p0) / (D2.p1 - D2.p0)) * (D2.y1 - D2.y0));
+const x3 = (h) => K.r2(D3.x0 + (clamp(h, 0, D3.h1) / D3.h1) * (D3.x1 - D3.x0));
+const y3 = (q) => K.r2(D3.y1 - (clamp(q, 0, D3.q1) / D3.q1) * (D3.y1 - D3.y0));
+
+// The static equilibrium p_eq(h) split into its stable and unstable parts.
+function loopPaths(F0) {
+  const ch = M.characteristic(F0);
+  let hPop = 0;
+  for (let h = 0; h <= M.H_B; h += 0.005) if (M.pEq(F0, h) >= ch.set - 1e-9) hPop = h;
+  const pts = (a, b) => {
+    const out = [];
+    for (let h = a; h <= b + 1e-9; h += 0.02) out.push(`${x1(M.pEq(F0, h))},${y1(h)}`);
+    return out.join(" ");
+  };
+  const stable =
+    `M${x1(D1.p0)} ${y1(0)}H${x1(ch.start)}` + // seated
+    `M${pts(0, hPop).replace(/ /g, "L")}` + // simmer
+    `M${pts(ch.hReseat, M.H_MAX).replace(/ /g, "L")}H${x1(D1.p1)}`; // relieving, then on the stop
+  const unstable = `M${pts(hPop, ch.hReseat).replace(/ /g, "L")}`;
+  const jumps = `M${x1(ch.set)} ${y1(hPop)}V${y1(upperLift(F0, ch.set))}M${x1(ch.reseat)} ${y1(ch.hReseat)}V${y1(0)}`;
+  return { stable, unstable, jumps, ch };
+}
+
+// The lift on the relieving branch at a pressure.
+function upperLift(F0, p) {
+  const ch = M.characteristic(F0);
+  for (let h = ch.hReseat; h <= M.H_MAX; h += 0.01) if (M.pEq(F0, h) >= p) return h;
+  return M.H_MAX;
+}
+
+function flowPath(p) {
+  const out = [];
+  for (let h = 0; h <= M.H_MAX + 1e-9; h += 0.1) out.push(`${x3(h)},${y3(M.massFlow(p, h) * 3600)}`);
+  return out.join(" ");
+}
+
+// The set and reseat pressures and the blowdown between them.
+function d1Marks(c) {
+  const xs = x1(c.set);
+  const xr = x1(c.reseat);
+  const y = D1.y0 + 15;
+  const head = (x, dir) => `M${x} ${y}L${K.r2(x - dir * 7)} ${K.r2(y - 1.75)}L${K.r2(x - dir * 7)} ${K.r2(y + 1.75)}Z`;
+  return (
+    `<path class="thin" d="M${xr} ${y}H${xs}M${xr} ${D1.y0}V${y + 4}M${xs} ${D1.y0}V${y + 4}"/><path class="head" d="${head(xr, -1)}${head(xs, 1)}"/>` +
+    `<text class="t t-sm" x="${K.r2((xr + xs) / 2)}" y="${y - 3}" text-anchor="middle">BLOWDOWN ${(c.blowdown * 100).toFixed(0)} %</text>` +
+    `<text class="t t-sm" x="${xr - 4}" y="${D1.y1 - 4}" text-anchor="end">RESEAT ${c.reseat.toFixed(2)}</text>` +
+    `<text class="t t-sm" x="${xs + 4}" y="${D1.y1 - 4}" text-anchor="start">SET ${c.set.toFixed(2)}</text>`
+  );
+}
+
+return { D1, D2, D3, x1, y1, x2, y2, x3, y3, loopPaths, upperLift, flowPath, d1Marks };
+})();
+
+// Page code for relief-valve.html. K (kit), L (runtime), C (self-check), M (model), P (parts) and
+// G (charts) are inlined above this script as namespaces.
+
+const svg = document.querySelector(".bp-sheet");
+const q = L.setupPage(svg);
+const specs = JSON.parse(svg.dataset.views);
+const V = { main: K.view(specs.main), B: K.view(specs.B), C: K.view(specs.C) };
+const BAL = {"5":{"view":"B","b":[392,232]},"6":{"view":"B","b":[392,192]},"8":{"view":"C","b":[432,592]},"9":{"view":"B","b":[392,152]},"14":{"view":"main","b":[352,299.93]},"15":{"view":"main","b":[352,242.35]},"16":{"view":"C","b":[432,702]},"17":{"view":"C","b":[432,664]},"22":{"view":"C","b":[432,530]}};
+const $ = (id) => document.getElementById(id);
+const views = ["main", "B", "C"];
+
+const el = {
+  mv: views.map((id) => [$(`mv-${id}`), V[id]]),
+  set: views.map((id) => [$(`set-${id}`), V[id]]),
+  spring: views.map((id) => [$(`spring-${id}`), V[id]]),
+  gasIn: views.map((id) => [$(`gas-in-${id}`), V[id]]),
+  gasHud: views.map((id) => [$(`gas-hud-${id}`), V[id]]),
+  gasOut: views.map((id) => $(`gas-out-${id}`)),
+  dimSpring: $("dim-spring-wrap"),
+  dimLift: $("dim-lift-wrap"),
+  balloons: Object.keys(BAL).map((n) => [n, $(`bal-${n}`)]),
+  d1: { trace: $("d1-trace"), dot: $("d1-dot"), stable: $("d1-stable"), unstable: $("d1-unstable"), jumps: $("d1-jumps"), marks: $("d1-marks") },
+  d2: { trace: $("d2-trace"), dot: $("d2-dot"), set: $("d2-set"), reseat: $("d2-reseat") },
+  d3: { now: $("d3-now"), dot: $("d3-dot"), set: $("d3-set") },
+  readout: $("readout"),
+};
+const say = L.announcer($("sr"), 2);
+
+// ---------------------------------------------------------------- state
+const s = M.valve();
+let F0 = M.F0_NOM; // spring preload, follows the adjusting screw
+let F0want = M.F0_NOM;
+let ch = M.characteristic(F0);
+let chF0 = F0;
+let dragging = false;
+let holdWant = s.p;
+let hist1 = []; // [p, h] at 30 Hz, the last 11 s
+let hist2 = []; // [t, p] at 10 Hz, the last 30 s
+let acc1 = 0;
+let acc2 = 0;
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+function step(dt, live) {
+  const n = Math.max(1, Math.ceil(dt * 960));
+  const h = dt / n;
+  if (live.touring && !dragging) {
+    s.comp = true;
+    F0want = M.F0_NOM;
+  }
+  for (let i = 0; i < n; i++) {
+    F0 = L.follow(F0, F0want, 6, h);
+    s.F0 = F0;
+    const hold = dragging ? L.follow(s.p, holdWant, 10, h) : null;
+    M.advance(s, h, { hold });
+    acc1 += h;
+    acc2 += h;
+    if (acc1 >= 1 / 30) {
+      acc1 = 0;
+      hist1.push([s.p, s.h]);
+      if (hist1.length > 330) hist1.shift();
+    }
+    if (acc2 >= 0.1) {
+      acc2 = 0;
+      hist2.push([s.t, s.p]);
+      if (hist2.length > 301) hist2.shift();
+    }
+  }
+  if (Math.abs(F0 - chF0) > 0.05) {
+    ch = M.characteristic(F0);
+    chF0 = F0;
+  }
+  return dragging || (s.comp && !live.reduced) || Math.abs(s.v) > 0.01 || Math.abs(F0 - F0want) > 0.05;
+}
+
+// ---------------------------------------------------------------- render
+let shown = { h: -1, F0: -1, p: -1, ch: -1 };
+
+function render(live) {
+  const h = s.h;
+  const dz = P.screwOffset(F0);
+  for (const [node, Vw] of el.mv) node.setAttribute("transform", `translate(0 ${K.r2(-h * Vw.k)})`);
+  for (const [node, Vw] of el.set) node.setAttribute("transform", `translate(0 ${K.r2(-dz * Vw.k)})`);
+  if (Math.abs(h - shown.h) > 0.002 || Math.abs(F0 - shown.F0) > 0.05) {
+    for (const [node, Vw] of el.spring) node.innerHTML = P.spring(Vw, h, F0);
+    for (const [node, Vw] of el.gasIn) node.setAttribute("d", P.gasPath(Vw, P.inletGas(h)));
+    for (const [node, Vw] of el.gasHud) node.setAttribute("d", P.gasPath(Vw, P.huddleGas(h)));
+    el.dimSpring.innerHTML = K.dim(V.main, [-27, P.PLATE_V + h], [-27, P.PLATE_V + h + M.springLength(F0, h)], {
+      dir: "v",
+      off: V.main.p([-50, 0])[0] - V.main.p([-27, 0])[0],
+      text: `L=${M.springLength(F0, h).toFixed(1)}`,
+      id: "dim-spring",
+    });
+    el.dimLift.innerHTML = K.dim(V.B, [-11.5, P.SEAT_V], [-11.5, P.SEAT_V + h], { dir: "v", off: V.B.p([-5, 0])[0] - V.B.p([-11.5, 0])[0], text: `h=${h.toFixed(2)}`, id: "dim-lift" });
+    const dots = P.movingDots(h, F0);
+    for (const [n, node] of el.balloons) node.innerHTML = K.balloon(V[BAL[n].view], dots[n], BAL[n].b, n, { target: n });
+    shown.h = h;
+    shown.F0 = F0;
+  }
+  // the gas: inlet density follows vessel pressure, the discharge side follows the flow
+  const out = 0.08 + 0.72 * clamp(s.m / 0.6, 0, 1);
+  const inl = 0.2 + 0.7 * clamp(s.p / 10.5, 0, 1);
+  const hud = out + (inl - out) * M.ETA_H * 2.4 * M.psi(h) + (h > 0.004 && h < M.H_A ? 0.25 : 0);
+  for (const node of el.gasOut) node.setAttribute("fill-opacity", K.r2(out));
+  for (const [node] of el.gasIn) node.setAttribute("fill-opacity", K.r2(inl));
+  for (const [node] of el.gasHud) node.setAttribute("fill-opacity", K.r2(Math.min(inl, hud)));
+
+  // Diagram 1
+  if (chF0 !== shown.ch) {
+    const lp = G.loopPaths(F0);
+    el.d1.stable.setAttribute("d", lp.stable);
+    el.d1.unstable.setAttribute("d", lp.unstable);
+    el.d1.jumps.setAttribute("d", lp.jumps);
+    el.d1.marks.innerHTML = G.d1Marks(lp.ch);
+    el.d2.set.setAttribute("d", `M${G.D2.x0} ${G.y2(ch.set)}H${G.D2.x1}`);
+    el.d2.reseat.setAttribute("d", `M${G.D2.x0} ${G.y2(ch.reseat)}H${G.D2.x1}`);
+    el.d3.set.setAttribute("points", G.flowPath(ch.set));
+    shown.ch = chF0;
+  }
+  el.d1.trace.setAttribute("points", hist1.map(([p, hh]) => `${G.x1(p)},${G.y1(hh)}`).join(" "));
+  el.d1.dot.setAttribute("cx", G.x1(s.p));
+  el.d1.dot.setAttribute("cy", G.y1(h));
+  // Diagram 2
+  el.d2.trace.setAttribute("points", hist2.filter(([t]) => s.t - t <= G.D2.span).map(([t, p]) => `${G.x2(s.t - t)},${G.y2(p)}`).join(" "));
+  el.d2.dot.setAttribute("cy", G.y2(s.p));
+  // Diagram 3
+  if (Math.abs(s.p - shown.p) > 0.005) {
+    el.d3.now.setAttribute("points", G.flowPath(s.p));
+    shown.p = s.p;
+  }
+  el.d3.dot.setAttribute("cx", G.x3(h));
+  el.d3.dot.setAttribute("cy", G.y3(s.m * 3600));
+
+  const st = M.state(s);
+  const kgh = Math.round(s.m * 3600);
+  el.readout.textContent = `p ${s.p.toFixed(2)} bar · SET ${ch.set.toFixed(1)} · h ${h.toFixed(2)} mm · ${kgh} kg/h · ${st}`;
+  say(`Vessel ${s.p.toFixed(1)} bar, set ${ch.set.toFixed(1)}, lift ${h.toFixed(1)} millimetres, discharge ${kgh} kilograms per hour, ${st.toLowerCase()}.`, live.clock);
+}
+
+// ---------------------------------------------------------------- input
+const live = L.run({
+  root: svg,
+  step,
+  render,
+  idleAfter: 6,
+  onFrozen: () => q.check && C.selfCheck(svg),
+});
+
+if (live.reduced && !live.frozen) {
+  // A still, true moment: the tour played to 7 s, the valve relieving, drawn once.
+  const fake = { touring: true, reduced: false, clock: 0 };
+  for (let t = 0; t < 7; t += 1 / 240) step(1 / 240, fake);
+  s.comp = false;
+  render(live);
+}
+
+for (const hit of svg.querySelectorAll("[data-drag]")) {
+  let p0 = 0;
+  L.dragY(svg, hit, {
+    start: () => {
+      dragging = true;
+      p0 = s.p;
+      holdWant = s.p;
+      live.input();
+    },
+    move: (dy) => {
+      holdWant = clamp(p0 - dy / 40, 7.5, 11);
+      live.input();
+    },
+    end: () => {
+      dragging = false;
+      live.input();
+    },
+  });
+}
+
+svg.addEventListener("keydown", (e) => {
+  const k = e.key;
+  const setNow = M.characteristic(F0want).set;
+  if (k === "ArrowUp" || k === "ArrowDown") s.p = clamp(s.p + (k === "ArrowUp" ? 0.1 : -0.1), 7.5, 11);
+  else if (k === "ArrowLeft" || k === "ArrowRight") F0want = M.preloadFor(clamp(setNow + (k === "ArrowRight" ? 0.25 : -0.25), 8.5, 11.5));
+  else if (k === " ") s.comp = !s.comp;
+  else if (k === "s" || k === "S") live.slow = live.slow === 1 ? 0.2 : live.slow === 0.2 ? 0.05 : 1;
+  else return;
+  e.preventDefault();
+  live.input();
+});
+
+if (q.check && !live.frozen) setTimeout(() => C.selfCheck(svg), 400);
+
+</script>
+</body>
+</html>
