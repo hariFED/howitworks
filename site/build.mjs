@@ -307,11 +307,11 @@ footer a{color:var(--ink)}
 
 <section>${S.prompt}
 <div class="prose">
-<p>Type <code>/blueprint</code> and describe the thing. Name a real object if you know one; name an idea if you don't, and Claude will find the mechanism.</p>
-<pre>/blueprint explain how a pin tumbler lock opens
-/blueprint draw debounce as a real mechanism
-/blueprint a hydraulic bottle jack, paper theme
-/blueprint a set: the four-stroke engine, head and bottom end on separate sheets</pre>
+<p>Type <code>/blueprint-drawings</code> and describe the thing. Name a real object if you know one; name an idea if you don't, and Claude will find the mechanism.</p>
+<pre>/blueprint-drawings explain how a pin tumbler lock opens
+/blueprint-drawings draw debounce as a real mechanism
+/blueprint-drawings a hydraulic bottle jack, paper theme
+/blueprint-drawings a set: the four-stroke engine, head and bottom end on separate sheets</pre>
 </div>
 <div class="grid3">
 <div class="box"><h3>Sheet</h3><p>The default. One assembly, 15–30 parts, 3–5 views, a model, a tour and the checks. Around an hour of Claude's time.</p></div>
@@ -384,15 +384,15 @@ svg += K.dim(V, [-17.5, 384], [17.5, 384], { dir: "h", off: -24, prefix: "Ø" })
 
 <section>${S.install}
 <div class="prose">
-<p>One command copies the skill into <code>~/.claude/skills/blueprint</code>:</p>
+<p>One command copies the skill into <code>~/.claude/skills/blueprint-drawings</code>:</p>
 <div class="cmd"><code id="cmd">npx @harifed/blueprint</code><button type="button" data-copy="cmd">Copy</button></div>
 <p>Add <code>--project</code> to install into this project's <code>.claude/skills</code> instead, or <code>--no-examples</code> for a smaller install. Or clone it:</p>
-<pre>git clone https://github.com/hariFED/blueprint ~/.claude/skills/blueprint</pre>
+<pre>git clone https://github.com/hariFED/blueprint ~/.claude/skills/blueprint-drawings</pre>
 <p>It needs Node.js 20 or later, and Chrome, Chromium or Edge for the checks. Restart Claude Code, then try:</p>
-<pre>/blueprint explain how a mechanical watch keeps time
-/blueprint draw a token bucket rate limiter as a machine
-/blueprint how does a pressure cooker cook faster?
-/blueprint a section through a bicycle disc brake caliper</pre>
+<pre>/blueprint-drawings explain how a mechanical watch keeps time
+/blueprint-drawings draw a token bucket rate limiter as a machine
+/blueprint-drawings how does a pressure cooker cook faster?
+/blueprint-drawings a section through a bicycle disc brake caliper</pre>
 </div>
 </section>
 

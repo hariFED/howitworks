@@ -9,7 +9,7 @@
   "homepage": "https://harifed.github.io/blueprint/",
   "repository": { "type": "git", "url": "git+https://github.com/hariFED/blueprint.git" },
   "bugs": "https://github.com/hariFED/blueprint/issues",
-  "bin": { "blueprint": "bin/install.mjs" },
+  "bin": { "blueprint-drawings": "bin/install.mjs" },
   "exports": {
     "./kit/draft": "./kit/draft.mjs",
     "./kit/live": "./kit/live.mjs",

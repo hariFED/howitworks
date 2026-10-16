@@ -10,17 +10,17 @@
 npx @harifed/blueprint
 ```
 
-This copies the skill into `~/.claude/skills/blueprint`. Options: `--project` installs into `./.claude/skills` instead, `--no-examples` skips the example sheets, and `--force` replaces an existing install. You can also clone it:
+This copies the skill into `~/.claude/skills/blueprint-drawings`. Options: `--project` installs into `./.claude/skills` instead, `--no-examples` skips the example sheets, and `--force` replaces an existing install. You can also clone it:
 
 ```
-git clone https://github.com/hariFED/blueprint ~/.claude/skills/blueprint
+git clone https://github.com/hariFED/blueprint ~/.claude/skills/blueprint-drawings
 ```
 
 Requires Node.js 20+, plus Chrome, Chromium or Edge for the checks. Restart Claude Code, then:
 
 ```
-/blueprint explain how a pin tumbler lock opens
-/blueprint draw debounce as a real mechanism
+/blueprint-drawings explain how a pin tumbler lock opens
+/blueprint-drawings draw debounce as a real mechanism
 ```
 
 ## The idea

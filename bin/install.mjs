@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // npx @harifed/blueprint [--project] [--dir <path>] [--force] [--no-examples]
-// Copies the Blueprint skill into ~/.claude/skills/blueprint (or ./.claude/skills/blueprint).
+// Copies the Blueprint skill into ~/.claude/skills/blueprint-drawings (or ./.claude/skills/blueprint-drawings).
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve, relative } from "node:path";
@@ -16,13 +16,13 @@ if (has("--help") || has("-h")) {
 
 Usage: npx @harifed/blueprint [options]
 
-  (no options)     install into ~/.claude/skills/blueprint
-  --project        install into ./.claude/skills/blueprint (this project only)
-  --dir <path>     install into <path>/blueprint
+  (no options)     install into ~/.claude/skills/blueprint-drawings
+  --project        install into ./.claude/skills/blueprint-drawings (this project only)
+  --dir <path>     install into <path>/blueprint-drawings
   --force          replace an existing install
   --no-examples    skip the example sheets (smaller install)
 
-Then, in Claude Code:  /blueprint explain how a bicycle floor pump works`);
+Then, in Claude Code:  /blueprint-drawings explain how a bicycle floor pump works`);
   process.exit(0);
 }
 
@@ -30,7 +30,7 @@ const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const base = val("--dir") ? resolve(val("--dir"))
   : has("--project") ? resolve(".claude", "skills")
   : join(homedir(), ".claude", "skills");
-const dest = join(base, "blueprint");
+const dest = join(base, "blueprint-drawings");
 
 if (existsSync(dest)) {
   if (!has("--force")) {
@@ -62,5 +62,5 @@ console.log(`Blueprint ${pkg.version} installed in ${dest}
   ${count(dest)} files, ${examples} example sheet${examples === 1 ? "" : "s"}
 
 Restart Claude Code, then try:
-  /blueprint explain how a pin tumbler lock opens
-  /blueprint draw a rate limiter as a real mechanism`);
+  /blueprint-drawings explain how a pin tumbler lock opens
+  /blueprint-drawings draw a rate limiter as a real mechanism`);
