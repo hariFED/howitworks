@@ -1,0 +1,23 @@
+{
+  "1": { "name": "Valve body", "spec": "G1/2, DN13 seat", "material": "CW617N brass, hot-forged", "qty": "1", "note": "Carries the water from inlet to outlet past the DN13 main seat. The diaphragm closes on that seat." },
+  "2": { "name": "Diaphragm", "spec": "Ø35, fabric insert", "material": "EPDM 70", "qty": "1", "note": "The main valve. Water pressure above it holds it on the seat; when that pressure drains away, the inlet pressure lifts it. Its Ø0.8 bleed lets the chamber refill." },
+  "3": { "name": "Pilot sleeve", "spec": "Orifice Ø1.6", "material": "CW614N brass", "qty": "1", "note": "Carries the Ø1.6 pilot orifice, which drains the chamber above the diaphragm when the plunger lifts. It drains faster than the bleed refills it." },
+  "4": { "name": "Support washer", "spec": "Ø12 × 1", "material": "CW614N brass", "qty": "1", "note": "Backs the centre of the diaphragm round the pilot sleeve, so the pressure does not push it through." },
+  "5": { "name": "Bleed bush", "spec": "Orifice Ø0.8", "material": "1.4305 stainless", "qty": "1", "note": "The Ø0.8 bleed through the diaphragm. It lets inlet water into the chamber above, and its slow refill sets the closing time." },
+  "6": { "name": "Cover", "spec": "50 × 50", "material": "CW617N brass", "qty": "1", "note": "Clamps the diaphragm rim and closes the chamber above it. That chamber is where the pilot pressure acts." },
+  "7": { "name": "Cap screw", "spec": "M5 × 16, ISO 4762", "material": "A2-70 stainless", "qty": "4", "note": "Four screws that hold the cover down on the body and the diaphragm." },
+  "8": { "name": "O-ring", "spec": "20 × 1.8, ISO 3601", "material": "EPDM 70", "qty": "1", "note": "Seals the tube base to the cover, so water cannot leak up round the armature tube." },
+  "9": { "name": "Tube base", "spec": "M18 × 1", "material": "CW614N brass", "qty": "1", "note": "Screws into the cover and holds the armature tube above the pilot." },
+  "10": { "name": "Armature tube", "spec": "Ø13 × 0.5", "material": "1.4306 stainless", "qty": "1", "note": "A thin non-magnetic tube that holds the water in and guides the plunger. The magnetic flux crosses its wall." },
+  "11": { "name": "Pole piece", "spec": "With stud M6", "material": "1.4105", "qty": "1", "note": "The fixed magnetic core at the top of the tube. The plunger is pulled up to it, closing the air gap." },
+  "12": { "name": "Plunger", "spec": "Ø11.2", "material": "1.4105", "qty": "1", "note": "The moving core. The coil pulls it up 3.2 mm, a small stroke that is the only mechanical movement of the signal." },
+  "13": { "name": "Pilot seal", "spec": "Ø4 × 2", "material": "FKM 75", "qty": "1", "note": "Soft face at the foot of the plunger. It shuts the Ø1.6 pilot when the coil is off, and the pilot pressure helps hold it there." },
+  "14": { "name": "Plunger spring", "spec": "Ø0.4 wire, 8 turns", "material": "EN 10270-3 1.4310", "qty": "1", "note": "Pushes the plunger down onto the pilot when the coil is off, so the valve is normally closed." },
+  "15": { "name": "Coil bobbin", "spec": "", "material": "PA66-GF30", "qty": "1", "note": "The former the winding is wound on, and it insulates the wire from the tube." },
+  "16": { "name": "Winding", "spec": "2700 turns, Ø0.28", "material": "Cu-ETP, grade 2", "qty": "1", "note": "The 24 V DC coil, about 10 W. Its current makes the flux that pulls the plunger in." },
+  "17": { "name": "Yoke frame", "spec": "2 mm", "material": "DC01 steel", "qty": "1", "note": "A steel strap that returns the flux round the outside of the coil, so it is not lost to the air." },
+  "18": { "name": "Yoke plate", "spec": "3 mm", "material": "DC01 steel", "qty": "1", "note": "Closes the magnetic circuit at the bottom of the coil. The flux crosses the tube wall into the plunger here." },
+  "19": { "name": "Coil housing", "spec": "Overmoulded", "material": "PA6-GF30", "qty": "1", "note": "A moulded shell that encapsulates the coil and yoke, and carries the connector." },
+  "20": { "name": "Washer", "spec": "6.4, ISO 7089", "material": "A2 stainless", "qty": "1", "note": "Spreads the clamping load of the nut on the coil housing." },
+  "21": { "name": "Hex nut", "spec": "M6, ISO 4032", "material": "A2-70 stainless", "qty": "1", "note": "Threads on the pole piece stud and clamps the coil assembly onto the tube." }
+}

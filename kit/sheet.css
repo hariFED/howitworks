@@ -263,3 +263,27 @@ body.bp-zoom .bp-bar {
   cursor: ns-resize;
   touch-action: none;
 }
+
+/* ---- part cards (kit/info.mjs): hover, tap or focus a balloon */
+[data-role="balloon"][tabindex], #ov g[data-part] { cursor: pointer; }
+#ov g[data-part] { pointer-events: auto; }
+[data-role="balloon"]:hover .balloon, [data-role="balloon"]:focus .balloon, #ov g[data-part]:hover .balloon { stroke: var(--bp-accent); stroke-width: 1.6px; }
+[data-role="balloon"]:focus { outline: none; }
+.bp-hl .vis, .bp-hl .thin, .bp-hl path, .bp-hl circle, .bp-hl polygon, .bp-hl rect { stroke: var(--bp-accent) !important; }
+.bp-hl .vis { stroke-width: calc(var(--bp-thick) * 1.8) !important; }
+.bp-card {
+  position: absolute; z-index: 50; max-width: 280px; padding: 10px 12px 11px; box-sizing: border-box;
+  background: var(--bp-paper); color: var(--bp-ink); border: 1px solid var(--bp-ink); border-radius: 3px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .14); font: 12px/1.45 var(--bp-font); pointer-events: auto;
+}
+.bp-card[hidden] { display: none; }
+.bp-card-h { display: flex; gap: 8px; align-items: center; }
+.bp-card-h b { font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: 11.5px; }
+.bp-card-n { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--bp-ink); border-radius: 50%; font-size: 10.5px; }
+.bp-card-s { margin: 4px 0 0 28px; color: var(--bp-muted); font-size: 10.5px; letter-spacing: .02em; }
+.bp-card p { margin: 7px 0 0; font-size: 11.5px; line-height: 1.5; }
+.bp-card-x { margin-top: 7px; color: var(--bp-muted); font-size: 9.5px; letter-spacing: .03em; }
+
+/* ---- the sheet's link to its 3D view */
+.bp-3d { font: inherit; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 4px 10px; letter-spacing: .03em; white-space: nowrap; }
+.bp-3d:hover, .bp-3d:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }

@@ -273,6 +273,30 @@ body.bp-zoom .bp-bar {
   touch-action: none;
 }
 
+/* ---- part cards (kit/info.mjs): hover, tap or focus a balloon */
+[data-role="balloon"][tabindex], #ov g[data-part] { cursor: pointer; }
+#ov g[data-part] { pointer-events: auto; }
+[data-role="balloon"]:hover .balloon, [data-role="balloon"]:focus .balloon, #ov g[data-part]:hover .balloon { stroke: var(--bp-accent); stroke-width: 1.6px; }
+[data-role="balloon"]:focus { outline: none; }
+.bp-hl .vis, .bp-hl .thin, .bp-hl path, .bp-hl circle, .bp-hl polygon, .bp-hl rect { stroke: var(--bp-accent) !important; }
+.bp-hl .vis { stroke-width: calc(var(--bp-thick) * 1.8) !important; }
+.bp-card {
+  position: absolute; z-index: 50; max-width: 280px; padding: 10px 12px 11px; box-sizing: border-box;
+  background: var(--bp-paper); color: var(--bp-ink); border: 1px solid var(--bp-ink); border-radius: 3px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .14); font: 12px/1.45 var(--bp-font); pointer-events: auto;
+}
+.bp-card[hidden] { display: none; }
+.bp-card-h { display: flex; gap: 8px; align-items: center; }
+.bp-card-h b { font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: 11.5px; }
+.bp-card-n { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--bp-ink); border-radius: 50%; font-size: 10.5px; }
+.bp-card-s { margin: 4px 0 0 28px; color: var(--bp-muted); font-size: 10.5px; letter-spacing: .02em; }
+.bp-card p { margin: 7px 0 0; font-size: 11.5px; line-height: 1.5; }
+.bp-card-x { margin-top: 7px; color: var(--bp-muted); font-size: 9.5px; letter-spacing: .03em; }
+
+/* ---- the sheet's link to its 3D view */
+.bp-3d { font: inherit; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 4px 10px; letter-spacing: .03em; white-space: nowrap; }
+.bp-3d:hover, .bp-3d:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }
+
 /* 3D mode page layout (writePage3d). Colours are the tokens of sheet.css, including --bp3-*. */
 html, body { height: 100%; overflow: hidden; }
 .v3 { display: flex; flex-direction: column; height: 100%; }
@@ -1134,7 +1158,7 @@ const FRAG = /* glsl */ `
 uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash, uLayer, uLayerBias;
 uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
 uniform vec2 uProf[64]; uniform int uProfN, uProfKind; uniform vec3 uAxisP, uAxisD, uPA, uPB; uniform vec2 uRange;
-uniform float uLiftFrom, uLift; uniform mat4 uInv; uniform vec3 uShift;
+uniform float uLiftFrom, uLift, uHi; uniform mat4 uInv; uniform vec3 uShift;
 uniform sampler2D tIds; uniform vec2 uRes;
 varying vec3 vW; varying vec3 vN;
 #ifdef DECAL
@@ -1263,6 +1287,8 @@ void main() {
 #endif
 #endif
   }
+  // a part named by its card (kit/info.mjs) is tinted toward the accent
+  if (uHi > 0.5 && role != 2) col = mix(col, uAccent, cap ? 0.3 : 0.5);
   gl_FragColor = vec4(col, alpha);
   gl_FragDepth = cap ? capZ : gl_FragCoord.z - (role == 2 ? uCapBias : 0.0);
 }`;
@@ -1602,6 +1628,7 @@ function create({ scene, title = "" } = {}) {
         uInv: { value: new THREE.Matrix4() },
         uShift: { value: new THREE.Vector3() },
         uLayer: { value: s.layer ?? 0 },
+        uHi: { value: 0 },
         uProf: { value: Array.from({ length: PROF_MAX }, (_, i) => new THREE.Vector2(...(prof?.loop[i] ?? [0, 0]))) },
         uProfN: { value: prof ? prof.loop.length : 0 },
         uProfKind: { value: prof ? prof.kind : 0 },
@@ -1652,6 +1679,7 @@ function create({ scene, title = "" } = {}) {
     rec.edges.add(edge);
     const geo = geometryOf(s);
     const mesh = new THREE.Mesh(geo, material(s, edge));
+    rec.mats.push(mesh.material);
     syncInv(mesh);
     inner.add(mesh);
     let lines = null;
@@ -1672,7 +1700,7 @@ function create({ scene, title = "" } = {}) {
     inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
     group.add(inner);
     root.add(group);
-    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
+    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), mats: [], live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
     const shared = ++edgeSeq;
     spec.solids.forEach((s, k) => addSolid(rec, s, k, shared));
     PARTS.set(spec.id, rec);
@@ -1744,6 +1772,12 @@ function create({ scene, title = "" } = {}) {
     redraw();
   }
   new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  // part cards (kit/info.mjs) name a part by its balloon number; tint it while the card shows
+  document.addEventListener("bp:part", (e) => {
+    const id = e.detail?.id;
+    for (const rec of PARTS.values()) for (const m of rec.mats) m.uniforms.uHi.value = id != null && String(rec.id) === String(id) ? 1 : 0;
+    redraw();
+  });
 
   // ---- view state
   const start = VIEWS[q.view] ?? VIEWS.iso;
@@ -3575,6 +3609,136 @@ V.test("pads close on the rotor at full pull", () => {
 
 V.run({ step, render, overlay, still: 3.2 });
 
+</script>
+<script>
+"use strict";
+const BP_CARDS = (() => {
+// Part cards: hover, tap or focus a balloon and a small card names the part, gives its size and
+// material, and says in a sentence what it does. The part it points to lights up in the accent.
+//
+// Works on both pages: a 2D sheet's balloons are <g data-role="balloon" data-target="n">, a 3D page's
+// are <g data-part="n"> in its overlay (re-drawn every frame, so everything here is delegated and
+// keyed on the number, never on the element). The data comes from examples/<slug>/info.json, which
+// kit/page.mjs inlines as BP_INFO when it exists:
+//   { "4": { "name": "O-ring", "spec": "33 × 2", "material": "NBR 70", "note": "Seals the barrel..." } }
+// 2D: the part's [data-part] groups get the class bp-hl.  3D: a "bp:part" event (detail.id, or null)
+// that kit/solid3d.mjs answers by tinting the part.
+
+function attach({ info, root = document }) {
+  if (!info || !Object.keys(info).length) return null;
+  const card = document.createElement("div");
+  card.className = "bp-card";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-live", "polite");
+  card.hidden = true;
+  document.body.appendChild(card);
+
+  let shown = null;
+  let pinned = false;
+
+  const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  // the balloon under an element, and its part number
+  const balloonOf = (el) => el?.closest?.('[data-role="balloon"], #ov [data-part], .v3-stage [data-part]');
+  const numberOf = (b) => {
+    if (!b) return null;
+    const raw = String(b.dataset.target || b.dataset.part || b.querySelector("text")?.textContent || "").trim();
+    // a second copy of a part ("3u" in a 3D scene) shares its card with the item number it starts with
+    const n = info[raw] ? raw : raw.match(/^\d+/)?.[0];
+    return n && info[n] ? n : null;
+  };
+
+  function light(id) {
+    for (const el of document.querySelectorAll(".bp-hl")) el.classList.remove("bp-hl");
+    if (id != null) for (const el of document.querySelectorAll(`svg [data-part="${CSS.escape(id)}"]`)) if (!el.closest("#ov")) el.classList.add("bp-hl");
+    document.dispatchEvent(new CustomEvent("bp:part", { detail: { id } }));
+  }
+
+  function place(x, y) {
+    const pad = 12;
+    const w = card.offsetWidth;
+    const h = card.offsetHeight;
+    let left = x + 16;
+    let top = y + 16;
+    if (left + w > innerWidth - pad) left = x - w - 16;
+    if (left < pad) left = pad;
+    if (top + h > innerHeight - pad) top = y - h - 16;
+    if (top < pad) top = pad;
+    card.style.left = `${left + scrollX}px`;
+    card.style.top = `${top + scrollY}px`;
+  }
+
+  function show(id, x, y) {
+    const p = info[id];
+    if (!p) return hide();
+    if (shown !== id) {
+      const sub = [p.spec, p.material, p.qty && p.qty !== "1" ? `× ${p.qty}` : ""].filter(Boolean).map(esc).join(" · ");
+      card.innerHTML =
+        `<div class="bp-card-h"><span class="bp-card-n">${esc(id)}</span><b>${esc(p.name)}</b></div>` +
+        (sub ? `<div class="bp-card-s">${sub}</div>` : "") +
+        (p.note ? `<p>${esc(p.note)}</p>` : "") +
+        (pinned ? `<div class="bp-card-x">Esc or click elsewhere to close</div>` : "");
+      card.hidden = false;
+      shown = id;
+      light(id);
+    }
+    place(x, y);
+  }
+
+  function hide() {
+    card.hidden = true;
+    shown = null;
+    pinned = false;
+    light(null);
+  }
+
+  // hover (pointer): follow whatever balloon is under the pointer; the 3D overlay is re-drawn each
+  // frame, so ask the document what is under the pointer rather than trusting enter/leave events
+  addEventListener("pointermove", (e) => {
+    if (pinned || e.pointerType === "touch") return;
+    const id = numberOf(balloonOf(document.elementFromPoint(e.clientX, e.clientY)));
+    if (id) show(id, e.clientX, e.clientY);
+    else if (shown) hide();
+  }, { passive: true });
+
+  // click or tap pins the card; it must not start an orbit or a drag underneath
+  addEventListener("pointerdown", (e) => {
+    const b = balloonOf(document.elementFromPoint(e.clientX, e.clientY));
+    const id = numberOf(b);
+    if (id) {
+      e.stopPropagation();
+      e.preventDefault();
+      pinned = false;
+      shown = null;
+      pinned = true;
+      show(id, e.clientX, e.clientY);
+    } else if (pinned && !card.contains(e.target)) hide();
+  }, true);
+
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && shown) hide();
+  });
+
+  // keyboard: static (2D) balloons are focusable buttons; Enter or focus shows the card
+  for (const b of root.querySelectorAll('[data-role="balloon"]')) {
+    const id = numberOf(b);
+    if (!id) continue;
+    b.setAttribute("tabindex", "0");
+    b.setAttribute("role", "button");
+    b.setAttribute("aria-label", `Part ${id}: ${info[id].name}`);
+    const at = () => { const r = b.getBoundingClientRect(); return [r.right, r.top]; };
+    b.addEventListener("focus", () => show(id, ...at()));
+    b.addEventListener("blur", () => { if (!pinned) hide(); });
+    b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pinned = true; shown = null; show(id, ...at()); } });
+  }
+
+  addEventListener("scroll", () => { if (shown && !pinned) hide(); }, { passive: true });
+  return { show, hide };
+}
+
+return { attach };
+})();
+
+BP_CARDS.attach({ info: {"1":{"name":"Lever body","spec":"","material":"EN AW-6061-T6","qty":"1","note":"Holds the master cylinder bore, the reservoir and the lever pivot."},"2":{"name":"Clamp half","spec":"Ø22.2","material":"EN AW-6061-T6","qty":"1","note":"Closes the lever body round the Ø22.2 handlebar, with the two clamp screws."},"3":{"name":"Lever blade","spec":"","material":"EN AW-7075-T6","qty":"1","note":"The lever you pull. The finger point is 80 mm from the pivot and the pushrod 22 mm, so it multiplies your force."},"4":{"name":"Pivot pin","spec":"Ø6","material":"1.4305 stainless","qty":"1","note":"The pivot the lever blade turns on."},"5":{"name":"Barrel nut","spec":"M4","material":"CuZn39Pb3 brass","qty":"1","note":"Holds the pushrod in the lever. It sits 22 mm from the pivot and sets the lever's reach."},"6":{"name":"Pushrod","spec":"M4, ball Ø4.8","material":"1.4305 stainless","qty":"1","note":"Passes the lever's movement to the master piston, with a ball end so it can follow the lever's arc."},"7":{"name":"Master piston","spec":"Ø10","material":"EN AW-2011","qty":"1","note":"The piston that writes the pressure. Its 78.5 mm² face pushes the oil towards the caliper."},"8":{"name":"Primary cup","spec":"Ø10","material":"HNBR 70","qty":"1","note":"The seal on the piston face. Until its lip passes the timing port no pressure can build, which is the free stroke."},"9":{"name":"Secondary seal","spec":"Ø10","material":"HNBR 70","qty":"1","note":"Seals the rear of the master piston so oil cannot escape past it."},"10":{"name":"Return spring","spec":"5 turns","material":"EN 10270-3, Ø0.6 wire","qty":"1","note":"Pushes the piston and lever back when you let go."},"11":{"name":"Circlip","spec":"10, DIN 472","material":"C75S spring steel","qty":"1","note":"Holds the piston assembly in the bore against the return spring."},"12":{"name":"Dust boot","spec":"","material":"EPDM 50","qty":"1","note":"Keeps grit and water out of the bore round the pushrod."},"13":{"name":"Reservoir cap","spec":"","material":"PA6-GF30","qty":"1","note":"Closes the oil reservoir and holds the bladder."},"14":{"name":"Bladder","spec":"","material":"HNBR 50","qty":"1","note":"A flexible diaphragm that lets the oil level change without letting air in as the pads wear."},"15":{"name":"Mineral brake oil","spec":"ISO VG 7","material":"Mineral oil","qty":"25 ml","note":"The fluid that carries the force. It does not compress, so what moves at the master piston moves at the caliper."},"16":{"name":"Compression nut","spec":"M8 × 0.75","material":"CuZn39Pb3 brass","qty":"2","note":"Screws into the lever body or the caliper and squeezes the olive onto the hose."},"17":{"name":"Olive","spec":"Ø5","material":"CuZn37 brass","qty":"2","note":"A brass ring that the nut crushes onto the hose to seal it."},"18":{"name":"Hose insert","spec":"Ø2.1","material":"1.4305 stainless","qty":"2","note":"A tube pressed into the hose end so the olive can grip it without closing the bore."},"19":{"name":"Hose","spec":"Ø5 × 2.1, 1000 long","material":"PA12 / aramid","qty":"1","note":"Carries the oil from lever to caliper. It swells a little under load, which adds to the softness of the lever after the pads touch."},"20":{"name":"Caliper half, inboard","spec":"","material":"EN AW-6061-T6","qty":"1","note":"The half of the caliper on the frame side, with one Ø22 piston bore."},"21":{"name":"Caliper half, outboard","spec":"","material":"EN AW-6061-T6","qty":"1","note":"The wheel-side half, with the other Ø22 bore. Oil passes between the halves across the sealed joint."},"22":{"name":"Caliper piston","spec":"Ø22","material":"PF phenolic","qty":"2","note":"The replica piston, one each side. Its 380 mm² face is about 4.8 times the master's, so a small stroke becomes a larger force."},"23":{"name":"Square seal","spec":"Ø22","material":"HNBR 70","qty":"2","note":"Seals each piston and is its return spring. It flexes as the piston moves, then pulls it back by the rollback, which sets the pad gap."},"24":{"name":"Pad","spec":"Resin on steel","material":"DC01 + resin","qty":"2","note":"Friction lining on a steel back plate. The pistons press them onto the rotor."},"25":{"name":"Pad spring","spec":"t0.4","material":"1.4310 stainless","qty":"1","note":"Pushes the pads apart so they do not drag on the rotor when you release."},"26":{"name":"Pad pin","spec":"Ø3, M3","material":"1.4305 stainless","qty":"1","note":"Holds the pads and spring in the caliper while letting the pads slide."},"27":{"name":"Rotor","spec":"Ø160 × 1.8","material":"X46Cr13 stainless","qty":"1","note":"The disc bolted to the wheel. The pads clamp it, and the friction turns the wheel's motion into heat."},"28":{"name":"O-ring","spec":"3 × 1","material":"HNBR 70","qty":"1","note":"Seals the oil passage between the two caliper halves."},"29":{"name":"Clamp screw","spec":"M5 × 16, ISO 4762","material":"Steel 8.8","qty":"2","note":"Closes the clamp half onto the handlebar."}} });
 </script>
 </body>
 </html>

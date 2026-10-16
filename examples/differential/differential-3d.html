@@ -273,6 +273,30 @@ body.bp-zoom .bp-bar {
   touch-action: none;
 }
 
+/* ---- part cards (kit/info.mjs): hover, tap or focus a balloon */
+[data-role="balloon"][tabindex], #ov g[data-part] { cursor: pointer; }
+#ov g[data-part] { pointer-events: auto; }
+[data-role="balloon"]:hover .balloon, [data-role="balloon"]:focus .balloon, #ov g[data-part]:hover .balloon { stroke: var(--bp-accent); stroke-width: 1.6px; }
+[data-role="balloon"]:focus { outline: none; }
+.bp-hl .vis, .bp-hl .thin, .bp-hl path, .bp-hl circle, .bp-hl polygon, .bp-hl rect { stroke: var(--bp-accent) !important; }
+.bp-hl .vis { stroke-width: calc(var(--bp-thick) * 1.8) !important; }
+.bp-card {
+  position: absolute; z-index: 50; max-width: 280px; padding: 10px 12px 11px; box-sizing: border-box;
+  background: var(--bp-paper); color: var(--bp-ink); border: 1px solid var(--bp-ink); border-radius: 3px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .14); font: 12px/1.45 var(--bp-font); pointer-events: auto;
+}
+.bp-card[hidden] { display: none; }
+.bp-card-h { display: flex; gap: 8px; align-items: center; }
+.bp-card-h b { font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: 11.5px; }
+.bp-card-n { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--bp-ink); border-radius: 50%; font-size: 10.5px; }
+.bp-card-s { margin: 4px 0 0 28px; color: var(--bp-muted); font-size: 10.5px; letter-spacing: .02em; }
+.bp-card p { margin: 7px 0 0; font-size: 11.5px; line-height: 1.5; }
+.bp-card-x { margin-top: 7px; color: var(--bp-muted); font-size: 9.5px; letter-spacing: .03em; }
+
+/* ---- the sheet's link to its 3D view */
+.bp-3d { font: inherit; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 4px 10px; letter-spacing: .03em; white-space: nowrap; }
+.bp-3d:hover, .bp-3d:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }
+
 /* 3D mode page layout (writePage3d). Colours are the tokens of sheet.css, including --bp3-*. */
 html, body { height: 100%; overflow: hidden; }
 .v3 { display: flex; flex-direction: column; height: 100%; }
@@ -1134,7 +1158,7 @@ const FRAG = /* glsl */ `
 uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash, uLayer, uLayerBias;
 uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
 uniform vec2 uProf[64]; uniform int uProfN, uProfKind; uniform vec3 uAxisP, uAxisD, uPA, uPB; uniform vec2 uRange;
-uniform float uLiftFrom, uLift; uniform mat4 uInv; uniform vec3 uShift;
+uniform float uLiftFrom, uLift, uHi; uniform mat4 uInv; uniform vec3 uShift;
 uniform sampler2D tIds; uniform vec2 uRes;
 varying vec3 vW; varying vec3 vN;
 #ifdef DECAL
@@ -1263,6 +1287,8 @@ void main() {
 #endif
 #endif
   }
+  // a part named by its card (kit/info.mjs) is tinted toward the accent
+  if (uHi > 0.5 && role != 2) col = mix(col, uAccent, cap ? 0.3 : 0.5);
   gl_FragColor = vec4(col, alpha);
   gl_FragDepth = cap ? capZ : gl_FragCoord.z - (role == 2 ? uCapBias : 0.0);
 }`;
@@ -1602,6 +1628,7 @@ function create({ scene, title = "" } = {}) {
         uInv: { value: new THREE.Matrix4() },
         uShift: { value: new THREE.Vector3() },
         uLayer: { value: s.layer ?? 0 },
+        uHi: { value: 0 },
         uProf: { value: Array.from({ length: PROF_MAX }, (_, i) => new THREE.Vector2(...(prof?.loop[i] ?? [0, 0]))) },
         uProfN: { value: prof ? prof.loop.length : 0 },
         uProfKind: { value: prof ? prof.kind : 0 },
@@ -1652,6 +1679,7 @@ function create({ scene, title = "" } = {}) {
     rec.edges.add(edge);
     const geo = geometryOf(s);
     const mesh = new THREE.Mesh(geo, material(s, edge));
+    rec.mats.push(mesh.material);
     syncInv(mesh);
     inner.add(mesh);
     let lines = null;
@@ -1672,7 +1700,7 @@ function create({ scene, title = "" } = {}) {
     inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
     group.add(inner);
     root.add(group);
-    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
+    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), mats: [], live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
     const shared = ++edgeSeq;
     spec.solids.forEach((s, k) => addSolid(rec, s, k, shared));
     PARTS.set(spec.id, rec);
@@ -1744,6 +1772,12 @@ function create({ scene, title = "" } = {}) {
     redraw();
   }
   new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  // part cards (kit/info.mjs) name a part by its balloon number; tint it while the card shows
+  document.addEventListener("bp:part", (e) => {
+    const id = e.detail?.id;
+    for (const rec of PARTS.values()) for (const m of rec.mats) m.uniforms.uHi.value = id != null && String(rec.id) === String(id) ? 1 : 0;
+    redraw();
+  });
 
   // ---- view state
   const start = VIEWS[q.view] ?? VIEWS.iso;
@@ -3912,6 +3946,136 @@ V.test("spiders spin only when the wheels differ", () => {
 
 lv = V.run({ step, render, still: 6, idleAfter: 6 });
 
+</script>
+<script>
+"use strict";
+const BP_CARDS = (() => {
+// Part cards: hover, tap or focus a balloon and a small card names the part, gives its size and
+// material, and says in a sentence what it does. The part it points to lights up in the accent.
+//
+// Works on both pages: a 2D sheet's balloons are <g data-role="balloon" data-target="n">, a 3D page's
+// are <g data-part="n"> in its overlay (re-drawn every frame, so everything here is delegated and
+// keyed on the number, never on the element). The data comes from examples/<slug>/info.json, which
+// kit/page.mjs inlines as BP_INFO when it exists:
+//   { "4": { "name": "O-ring", "spec": "33 × 2", "material": "NBR 70", "note": "Seals the barrel..." } }
+// 2D: the part's [data-part] groups get the class bp-hl.  3D: a "bp:part" event (detail.id, or null)
+// that kit/solid3d.mjs answers by tinting the part.
+
+function attach({ info, root = document }) {
+  if (!info || !Object.keys(info).length) return null;
+  const card = document.createElement("div");
+  card.className = "bp-card";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-live", "polite");
+  card.hidden = true;
+  document.body.appendChild(card);
+
+  let shown = null;
+  let pinned = false;
+
+  const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  // the balloon under an element, and its part number
+  const balloonOf = (el) => el?.closest?.('[data-role="balloon"], #ov [data-part], .v3-stage [data-part]');
+  const numberOf = (b) => {
+    if (!b) return null;
+    const raw = String(b.dataset.target || b.dataset.part || b.querySelector("text")?.textContent || "").trim();
+    // a second copy of a part ("3u" in a 3D scene) shares its card with the item number it starts with
+    const n = info[raw] ? raw : raw.match(/^\d+/)?.[0];
+    return n && info[n] ? n : null;
+  };
+
+  function light(id) {
+    for (const el of document.querySelectorAll(".bp-hl")) el.classList.remove("bp-hl");
+    if (id != null) for (const el of document.querySelectorAll(`svg [data-part="${CSS.escape(id)}"]`)) if (!el.closest("#ov")) el.classList.add("bp-hl");
+    document.dispatchEvent(new CustomEvent("bp:part", { detail: { id } }));
+  }
+
+  function place(x, y) {
+    const pad = 12;
+    const w = card.offsetWidth;
+    const h = card.offsetHeight;
+    let left = x + 16;
+    let top = y + 16;
+    if (left + w > innerWidth - pad) left = x - w - 16;
+    if (left < pad) left = pad;
+    if (top + h > innerHeight - pad) top = y - h - 16;
+    if (top < pad) top = pad;
+    card.style.left = `${left + scrollX}px`;
+    card.style.top = `${top + scrollY}px`;
+  }
+
+  function show(id, x, y) {
+    const p = info[id];
+    if (!p) return hide();
+    if (shown !== id) {
+      const sub = [p.spec, p.material, p.qty && p.qty !== "1" ? `× ${p.qty}` : ""].filter(Boolean).map(esc).join(" · ");
+      card.innerHTML =
+        `<div class="bp-card-h"><span class="bp-card-n">${esc(id)}</span><b>${esc(p.name)}</b></div>` +
+        (sub ? `<div class="bp-card-s">${sub}</div>` : "") +
+        (p.note ? `<p>${esc(p.note)}</p>` : "") +
+        (pinned ? `<div class="bp-card-x">Esc or click elsewhere to close</div>` : "");
+      card.hidden = false;
+      shown = id;
+      light(id);
+    }
+    place(x, y);
+  }
+
+  function hide() {
+    card.hidden = true;
+    shown = null;
+    pinned = false;
+    light(null);
+  }
+
+  // hover (pointer): follow whatever balloon is under the pointer; the 3D overlay is re-drawn each
+  // frame, so ask the document what is under the pointer rather than trusting enter/leave events
+  addEventListener("pointermove", (e) => {
+    if (pinned || e.pointerType === "touch") return;
+    const id = numberOf(balloonOf(document.elementFromPoint(e.clientX, e.clientY)));
+    if (id) show(id, e.clientX, e.clientY);
+    else if (shown) hide();
+  }, { passive: true });
+
+  // click or tap pins the card; it must not start an orbit or a drag underneath
+  addEventListener("pointerdown", (e) => {
+    const b = balloonOf(document.elementFromPoint(e.clientX, e.clientY));
+    const id = numberOf(b);
+    if (id) {
+      e.stopPropagation();
+      e.preventDefault();
+      pinned = false;
+      shown = null;
+      pinned = true;
+      show(id, e.clientX, e.clientY);
+    } else if (pinned && !card.contains(e.target)) hide();
+  }, true);
+
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && shown) hide();
+  });
+
+  // keyboard: static (2D) balloons are focusable buttons; Enter or focus shows the card
+  for (const b of root.querySelectorAll('[data-role="balloon"]')) {
+    const id = numberOf(b);
+    if (!id) continue;
+    b.setAttribute("tabindex", "0");
+    b.setAttribute("role", "button");
+    b.setAttribute("aria-label", `Part ${id}: ${info[id].name}`);
+    const at = () => { const r = b.getBoundingClientRect(); return [r.right, r.top]; };
+    b.addEventListener("focus", () => show(id, ...at()));
+    b.addEventListener("blur", () => { if (!pinned) hide(); });
+    b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pinned = true; shown = null; show(id, ...at()); } });
+  }
+
+  addEventListener("scroll", () => { if (shown && !pinned) hide(); }, { passive: true });
+  return { show, hide };
+}
+
+return { attach };
+})();
+
+BP_CARDS.attach({ info: {"1":{"name":"Axle housing","spec":"Salisbury type","material":"EN-GJS-500-7 cast iron","qty":"1","note":"The cast banjo that holds the whole drive and the oil bath. Every bearing in the sheet sits in it, so it carries the gear loads to the car."},"2":{"name":"Rear cover","spec":"2.5","material":"DC04 steel","qty":"1","note":"Pressed steel lid that closes the back of the housing and keeps the oil in."},"3":{"name":"Hex screw","spec":"M8 × 20, ISO 4017","material":"Steel 8.8","qty":"10","note":"Clamps the rear cover to the housing flange."},"4":{"name":"Axle tube","spec":"Ø76 × 6, end flange","material":"E355 + S355J2 steel","qty":"2","note":"Steel tube pressed into each side of the housing. It encloses the half-shaft and carries the wheel bearing."},"5":{"name":"Drive pinion","spec":"10T, spiral bevel","material":"20MnCr5, case hardened","qty":"1","note":"Takes the propshaft's turning through a right angle by meshing with the crown wheel. It is the single input to the differential."},"6":{"name":"Pinion bearing, outer","spec":"32307, ISO 355","material":"100Cr6","qty":"1","note":"Taper roller bearing that carries the pinion's radial and axial thrust at the flange end."},"7":{"name":"Pinion bearing, inner","spec":"30306, ISO 355","material":"100Cr6","qty":"1","note":"The second taper roller bearing, spaced from the first so the pinion stays rigid under load."},"8":{"name":"Collapsible spacer","spec":"Ø37 × 2","material":"C15E steel","qty":"1","note":"A crushable sleeve between the two pinion bearings. Tightening the nut squeezes it, which sets the bearing preload."},"9":{"name":"Shaft seal","spec":"45 × 72 × 10, ISO 6194","material":"FKM / DC01","qty":"1","note":"Lip seal on the pinion shaft. It keeps the oil in and the dirt out."},"10":{"name":"Companion flange","spec":"Ø110","material":"C45 steel","qty":"1","note":"Splined to the pinion. The propshaft bolts to it, so all the engine's torque enters here."},"11":{"name":"Pinion nut","spec":"M24 × 1.5, collar","material":"Steel 10","qty":"1","note":"Holds the flange on the pinion and, by crushing the spacer, sets the bearing preload."},"12":{"name":"Crown wheel","spec":"39T, Ø224 PCD","material":"20MnCr5, case hardened","qty":"1","note":"The large bevel gear driven by the pinion. It turns the carrier, so it is where the single input splits into two outputs."},"13":{"name":"Hex bolt","spec":"M12 × 1.5 × 30, ISO 8765","material":"Steel 10.9","qty":"10","note":"Fixes the crown wheel to the carrier flange so they turn as one."},"14":{"name":"Differential carrier","spec":"","material":"EN-GJS-600-3 cast iron","qty":"1","note":"The cage that holds the cross pin, spiders and side gears. It always turns at the mean of the two wheel speeds."},"15":{"name":"Carrier bearing","spec":"32010 X, ISO 355","material":"100Cr6","qty":"2","note":"A taper roller bearing on each end of the carrier, letting it spin in the housing while taking the crown wheel's thrust."},"16":{"name":"Shim pack","spec":"Ø80 / Ø64","material":"C75S steel","qty":"2","note":"Thin shims behind each carrier bearing. They set the preload and the crown wheel's backlash against the pinion."},"17":{"name":"Side gear","spec":"16T, m4.2, 28T spline","material":"20MnCr5, case hardened","qty":"2","note":"One per half-shaft, splined to it. Each side gear is an output, and the spiders push equally on both, which splits the torque equally."},"18":{"name":"Thrust washer","spec":"Ø60 / Ø45 × 0.8","material":"CuSn8 bronze","qty":"2","note":"A bronze washer behind each side gear that takes its axial thrust against the carrier."},"19":{"name":"Spider gear","spec":"10T, m4.2","material":"20MnCr5, case hardened","qty":"2","note":"Bevel gear that links the two side gears. It stays still on its pin when the wheels match and spins when they differ, as in a turn."},"20":{"name":"Spherical washer","spec":"SR40 × 1.3","material":"CuSn8 bronze","qty":"2","note":"A domed bronze washer behind each spider gear that takes its outward thrust against the carrier."},"21":{"name":"Cross pin","spec":"Ø20 × 112","material":"16MnCr5, case hardened","qty":"1","note":"The axle the spider gears turn on. It rides round with the carrier."},"22":{"name":"Spring pin","spec":"Ø6 × 32, ISO 8752","material":"Spring steel","qty":"1","note":"Locks the cross pin in the carrier so it cannot slide out."},"23":{"name":"Half-shaft","spec":"Ø30, 28T spline","material":"41Cr4, induction hardened","qty":"2","note":"Carries each side gear's turning out to its wheel. These are the two outputs that may run at different speeds."},"24":{"name":"Ball bearing","spec":"6207-2RS, ISO 15","material":"100Cr6","qty":"2","note":"Sealed ball bearing at the outer end of each axle tube, supporting the half-shaft near the wheel."},"25":{"name":"Wheel stud","spec":"M12 × 1.5 × 45","material":"Steel 10.9","qty":"10","note":"Pressed into the half-shaft flange. The wheel is clamped on them with nuts."}} });
 </script>
 </body>
 </html>

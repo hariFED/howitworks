@@ -1,0 +1,19 @@
+{
+  "1": { "name": "Barrel tube", "spec": "Ø9.7 × 0.35", "material": "X5CrNi18-10 stainless steel", "qty": "1", "note": "The outer shell you hold. Everything else slides inside it." },
+  "2": { "name": "Thread bush", "spec": "M8 × 0.5", "material": "CuZn39Pb3 brass", "qty": "1", "note": "Threaded insert at the front of the barrel that the nose cone screws onto." },
+  "3": { "name": "Nose cone", "spec": "M8 × 0.5", "material": "CuZn39Pb3, chrome plated", "qty": "1", "note": "The tapered tip. It guides the point out and stops it, and it unscrews so you can change the refill." },
+  "4": { "name": "Return spring", "spec": "Ø0.4 × Ø4.3 × 19, 10 turns", "material": "EN 10270-3 1.4310", "qty": "1", "note": "Pushes the refill back up. Its force makes the cam turn when you release the button." },
+  "5": { "name": "Point", "spec": "5 ink grooves", "material": "CuNi18Zn20 nickel silver", "qty": "1", "note": "The socket that holds the ball. Its grooves feed ink to the ball as it rolls." },
+  "6": { "name": "Ball", "spec": "Ø1.0, ISO 12757-2", "material": "WC-Co tungsten carbide", "qty": "1", "note": "Rolls on the paper and carries ink onto it. It is the working end of the pen." },
+  "7": { "name": "Point holder", "spec": "", "material": "CuZn39Pb3 brass", "qty": "1", "note": "Joins the point to the refill tube." },
+  "8": { "name": "Refill tube", "spec": "Ø6 × 0.3", "material": "CuZn37 brass", "qty": "1", "note": "The ink reservoir. It moves up and down with the point and the rotator." },
+  "9": { "name": "Ink follower", "spec": "", "material": "Silicone grease", "qty": "1", "note": "A plug of grease behind the ink that follows it down and keeps the tube from leaking out of the back." },
+  "10": { "name": "End plug", "spec": "", "material": "PP", "qty": "1", "note": "Closes the top of the refill tube. The plunger pushes on it." },
+  "11": { "name": "Rotator", "spec": "3 lugs", "material": "POM-C", "qty": "1", "note": "The ratchet that turns. Its lugs ride on the cam, and the slot they land in is the state: long slot is retracted, short slot is extended." },
+  "12": { "name": "Cam guide", "spec": "3 long + 3 short slots", "material": "PA66", "qty": "1", "note": "A fixed sleeve in the barrel. Its alternating long and short slots are the two states of the toggle, and its ridge teeth turn the rotator." },
+  "13": { "name": "Plunger", "spec": "6 teeth", "material": "POM-H", "qty": "1", "note": "Moves with the button. Its teeth push the rotator's lugs below the ridges and turn them 30° on every press." },
+  "14": { "name": "Button cap", "spec": "", "material": "X5CrNi18-10 stainless steel", "qty": "1", "note": "The button you press. Each press is the toggle's one input." },
+  "15": { "name": "Top cap", "spec": "", "material": "CuZn39Pb3, chrome plated", "qty": "1", "note": "Closes the top of the barrel and guides the plunger as it slides." },
+  "16": { "name": "Clip", "spec": "0.5 strip", "material": "X10CrNi18-8 spring steel", "qty": "1", "note": "A springy strip that grips your pocket." },
+  "17": { "name": "Ink", "spec": "ISO 12757-2 G2", "material": "Oil-based paste", "qty": "0.6 g", "note": "The oil-based paste that the ball transfers to the paper." }
+}

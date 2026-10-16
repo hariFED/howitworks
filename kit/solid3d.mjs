@@ -177,7 +177,7 @@ const FRAG = /* glsl */ `
 uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash, uLayer, uLayerBias;
 uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
 uniform vec2 uProf[64]; uniform int uProfN, uProfKind; uniform vec3 uAxisP, uAxisD, uPA, uPB; uniform vec2 uRange;
-uniform float uLiftFrom, uLift; uniform mat4 uInv; uniform vec3 uShift;
+uniform float uLiftFrom, uLift, uHi; uniform mat4 uInv; uniform vec3 uShift;
 uniform sampler2D tIds; uniform vec2 uRes;
 varying vec3 vW; varying vec3 vN;
 #ifdef DECAL
@@ -306,6 +306,8 @@ void main() {
 #endif
 #endif
   }
+  // a part named by its card (kit/info.mjs) is tinted toward the accent
+  if (uHi > 0.5 && role != 2) col = mix(col, uAccent, cap ? 0.3 : 0.5);
   gl_FragColor = vec4(col, alpha);
   gl_FragDepth = cap ? capZ : gl_FragCoord.z - (role == 2 ? uCapBias : 0.0);
 }`;
@@ -645,6 +647,7 @@ export function create({ scene, title = "" } = {}) {
         uInv: { value: new THREE.Matrix4() },
         uShift: { value: new THREE.Vector3() },
         uLayer: { value: s.layer ?? 0 },
+        uHi: { value: 0 },
         uProf: { value: Array.from({ length: PROF_MAX }, (_, i) => new THREE.Vector2(...(prof?.loop[i] ?? [0, 0]))) },
         uProfN: { value: prof ? prof.loop.length : 0 },
         uProfKind: { value: prof ? prof.kind : 0 },
@@ -695,6 +698,7 @@ export function create({ scene, title = "" } = {}) {
     rec.edges.add(edge);
     const geo = geometryOf(s);
     const mesh = new THREE.Mesh(geo, material(s, edge));
+    rec.mats.push(mesh.material);
     syncInv(mesh);
     inner.add(mesh);
     let lines = null;
@@ -715,7 +719,7 @@ export function create({ scene, title = "" } = {}) {
     inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
     group.add(inner);
     root.add(group);
-    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
+    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), mats: [], live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
     const shared = ++edgeSeq;
     spec.solids.forEach((s, k) => addSolid(rec, s, k, shared));
     PARTS.set(spec.id, rec);
@@ -787,6 +791,12 @@ export function create({ scene, title = "" } = {}) {
     redraw();
   }
   new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  // part cards (kit/info.mjs) name a part by its balloon number; tint it while the card shows
+  document.addEventListener("bp:part", (e) => {
+    const id = e.detail?.id;
+    for (const rec of PARTS.values()) for (const m of rec.mats) m.uniforms.uHi.value = id != null && String(rec.id) === String(id) ? 1 : 0;
+    redraw();
+  });
 
   // ---- view state
   const start = VIEWS[q.view] ?? VIEWS.iso;

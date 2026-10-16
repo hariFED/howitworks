@@ -273,6 +273,30 @@ body.bp-zoom .bp-bar {
   touch-action: none;
 }
 
+/* ---- part cards (kit/info.mjs): hover, tap or focus a balloon */
+[data-role="balloon"][tabindex], #ov g[data-part] { cursor: pointer; }
+#ov g[data-part] { pointer-events: auto; }
+[data-role="balloon"]:hover .balloon, [data-role="balloon"]:focus .balloon, #ov g[data-part]:hover .balloon { stroke: var(--bp-accent); stroke-width: 1.6px; }
+[data-role="balloon"]:focus { outline: none; }
+.bp-hl .vis, .bp-hl .thin, .bp-hl path, .bp-hl circle, .bp-hl polygon, .bp-hl rect { stroke: var(--bp-accent) !important; }
+.bp-hl .vis { stroke-width: calc(var(--bp-thick) * 1.8) !important; }
+.bp-card {
+  position: absolute; z-index: 50; max-width: 280px; padding: 10px 12px 11px; box-sizing: border-box;
+  background: var(--bp-paper); color: var(--bp-ink); border: 1px solid var(--bp-ink); border-radius: 3px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .14); font: 12px/1.45 var(--bp-font); pointer-events: auto;
+}
+.bp-card[hidden] { display: none; }
+.bp-card-h { display: flex; gap: 8px; align-items: center; }
+.bp-card-h b { font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: 11.5px; }
+.bp-card-n { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--bp-ink); border-radius: 50%; font-size: 10.5px; }
+.bp-card-s { margin: 4px 0 0 28px; color: var(--bp-muted); font-size: 10.5px; letter-spacing: .02em; }
+.bp-card p { margin: 7px 0 0; font-size: 11.5px; line-height: 1.5; }
+.bp-card-x { margin-top: 7px; color: var(--bp-muted); font-size: 9.5px; letter-spacing: .03em; }
+
+/* ---- the sheet's link to its 3D view */
+.bp-3d { font: inherit; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 4px 10px; letter-spacing: .03em; white-space: nowrap; }
+.bp-3d:hover, .bp-3d:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }
+
 /* 3D mode page layout (writePage3d). Colours are the tokens of sheet.css, including --bp3-*. */
 html, body { height: 100%; overflow: hidden; }
 .v3 { display: flex; flex-direction: column; height: 100%; }
@@ -1134,7 +1158,7 @@ const FRAG = /* glsl */ `
 uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash, uLayer, uLayerBias;
 uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
 uniform vec2 uProf[64]; uniform int uProfN, uProfKind; uniform vec3 uAxisP, uAxisD, uPA, uPB; uniform vec2 uRange;
-uniform float uLiftFrom, uLift; uniform mat4 uInv; uniform vec3 uShift;
+uniform float uLiftFrom, uLift, uHi; uniform mat4 uInv; uniform vec3 uShift;
 uniform sampler2D tIds; uniform vec2 uRes;
 varying vec3 vW; varying vec3 vN;
 #ifdef DECAL
@@ -1263,6 +1287,8 @@ void main() {
 #endif
 #endif
   }
+  // a part named by its card (kit/info.mjs) is tinted toward the accent
+  if (uHi > 0.5 && role != 2) col = mix(col, uAccent, cap ? 0.3 : 0.5);
   gl_FragColor = vec4(col, alpha);
   gl_FragDepth = cap ? capZ : gl_FragCoord.z - (role == 2 ? uCapBias : 0.0);
 }`;
@@ -1602,6 +1628,7 @@ function create({ scene, title = "" } = {}) {
         uInv: { value: new THREE.Matrix4() },
         uShift: { value: new THREE.Vector3() },
         uLayer: { value: s.layer ?? 0 },
+        uHi: { value: 0 },
         uProf: { value: Array.from({ length: PROF_MAX }, (_, i) => new THREE.Vector2(...(prof?.loop[i] ?? [0, 0]))) },
         uProfN: { value: prof ? prof.loop.length : 0 },
         uProfKind: { value: prof ? prof.kind : 0 },
@@ -1652,6 +1679,7 @@ function create({ scene, title = "" } = {}) {
     rec.edges.add(edge);
     const geo = geometryOf(s);
     const mesh = new THREE.Mesh(geo, material(s, edge));
+    rec.mats.push(mesh.material);
     syncInv(mesh);
     inner.add(mesh);
     let lines = null;
@@ -1672,7 +1700,7 @@ function create({ scene, title = "" } = {}) {
     inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
     group.add(inner);
     root.add(group);
-    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
+    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), mats: [], live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
     const shared = ++edgeSeq;
     spec.solids.forEach((s, k) => addSolid(rec, s, k, shared));
     PARTS.set(spec.id, rec);
@@ -1744,6 +1772,12 @@ function create({ scene, title = "" } = {}) {
     redraw();
   }
   new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  // part cards (kit/info.mjs) name a part by its balloon number; tint it while the card shows
+  document.addEventListener("bp:part", (e) => {
+    const id = e.detail?.id;
+    for (const rec of PARTS.values()) for (const m of rec.mats) m.uniforms.uHi.value = id != null && String(rec.id) === String(id) ? 1 : 0;
+    redraw();
+  });
 
   // ---- view state
   const start = VIEWS[q.view] ?? VIEWS.iso;
@@ -3395,6 +3429,136 @@ V.test("R starts cold", ({ key }) => {
 
 V.run({ step, render, overlay, still: 14, idleAfter: 6 });
 
+</script>
+<script>
+"use strict";
+const BP_CARDS = (() => {
+// Part cards: hover, tap or focus a balloon and a small card names the part, gives its size and
+// material, and says in a sentence what it does. The part it points to lights up in the accent.
+//
+// Works on both pages: a 2D sheet's balloons are <g data-role="balloon" data-target="n">, a 3D page's
+// are <g data-part="n"> in its overlay (re-drawn every frame, so everything here is delegated and
+// keyed on the number, never on the element). The data comes from examples/<slug>/info.json, which
+// kit/page.mjs inlines as BP_INFO when it exists:
+//   { "4": { "name": "O-ring", "spec": "33 × 2", "material": "NBR 70", "note": "Seals the barrel..." } }
+// 2D: the part's [data-part] groups get the class bp-hl.  3D: a "bp:part" event (detail.id, or null)
+// that kit/solid3d.mjs answers by tinting the part.
+
+function attach({ info, root = document }) {
+  if (!info || !Object.keys(info).length) return null;
+  const card = document.createElement("div");
+  card.className = "bp-card";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-live", "polite");
+  card.hidden = true;
+  document.body.appendChild(card);
+
+  let shown = null;
+  let pinned = false;
+
+  const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  // the balloon under an element, and its part number
+  const balloonOf = (el) => el?.closest?.('[data-role="balloon"], #ov [data-part], .v3-stage [data-part]');
+  const numberOf = (b) => {
+    if (!b) return null;
+    const raw = String(b.dataset.target || b.dataset.part || b.querySelector("text")?.textContent || "").trim();
+    // a second copy of a part ("3u" in a 3D scene) shares its card with the item number it starts with
+    const n = info[raw] ? raw : raw.match(/^\d+/)?.[0];
+    return n && info[n] ? n : null;
+  };
+
+  function light(id) {
+    for (const el of document.querySelectorAll(".bp-hl")) el.classList.remove("bp-hl");
+    if (id != null) for (const el of document.querySelectorAll(`svg [data-part="${CSS.escape(id)}"]`)) if (!el.closest("#ov")) el.classList.add("bp-hl");
+    document.dispatchEvent(new CustomEvent("bp:part", { detail: { id } }));
+  }
+
+  function place(x, y) {
+    const pad = 12;
+    const w = card.offsetWidth;
+    const h = card.offsetHeight;
+    let left = x + 16;
+    let top = y + 16;
+    if (left + w > innerWidth - pad) left = x - w - 16;
+    if (left < pad) left = pad;
+    if (top + h > innerHeight - pad) top = y - h - 16;
+    if (top < pad) top = pad;
+    card.style.left = `${left + scrollX}px`;
+    card.style.top = `${top + scrollY}px`;
+  }
+
+  function show(id, x, y) {
+    const p = info[id];
+    if (!p) return hide();
+    if (shown !== id) {
+      const sub = [p.spec, p.material, p.qty && p.qty !== "1" ? `× ${p.qty}` : ""].filter(Boolean).map(esc).join(" · ");
+      card.innerHTML =
+        `<div class="bp-card-h"><span class="bp-card-n">${esc(id)}</span><b>${esc(p.name)}</b></div>` +
+        (sub ? `<div class="bp-card-s">${sub}</div>` : "") +
+        (p.note ? `<p>${esc(p.note)}</p>` : "") +
+        (pinned ? `<div class="bp-card-x">Esc or click elsewhere to close</div>` : "");
+      card.hidden = false;
+      shown = id;
+      light(id);
+    }
+    place(x, y);
+  }
+
+  function hide() {
+    card.hidden = true;
+    shown = null;
+    pinned = false;
+    light(null);
+  }
+
+  // hover (pointer): follow whatever balloon is under the pointer; the 3D overlay is re-drawn each
+  // frame, so ask the document what is under the pointer rather than trusting enter/leave events
+  addEventListener("pointermove", (e) => {
+    if (pinned || e.pointerType === "touch") return;
+    const id = numberOf(balloonOf(document.elementFromPoint(e.clientX, e.clientY)));
+    if (id) show(id, e.clientX, e.clientY);
+    else if (shown) hide();
+  }, { passive: true });
+
+  // click or tap pins the card; it must not start an orbit or a drag underneath
+  addEventListener("pointerdown", (e) => {
+    const b = balloonOf(document.elementFromPoint(e.clientX, e.clientY));
+    const id = numberOf(b);
+    if (id) {
+      e.stopPropagation();
+      e.preventDefault();
+      pinned = false;
+      shown = null;
+      pinned = true;
+      show(id, e.clientX, e.clientY);
+    } else if (pinned && !card.contains(e.target)) hide();
+  }, true);
+
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && shown) hide();
+  });
+
+  // keyboard: static (2D) balloons are focusable buttons; Enter or focus shows the card
+  for (const b of root.querySelectorAll('[data-role="balloon"]')) {
+    const id = numberOf(b);
+    if (!id) continue;
+    b.setAttribute("tabindex", "0");
+    b.setAttribute("role", "button");
+    b.setAttribute("aria-label", `Part ${id}: ${info[id].name}`);
+    const at = () => { const r = b.getBoundingClientRect(); return [r.right, r.top]; };
+    b.addEventListener("focus", () => show(id, ...at()));
+    b.addEventListener("blur", () => { if (!pinned) hide(); });
+    b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pinned = true; shown = null; show(id, ...at()); } });
+  }
+
+  addEventListener("scroll", () => { if (shown && !pinned) hide(); }, { passive: true });
+  return { show, hide };
+}
+
+return { attach };
+})();
+
+BP_CARDS.attach({ info: {"1":{"name":"Water outlet housing","spec":"","material":"EN AC-46000 (AlSi9Cu3)","qty":"1","note":"The cast housing the thermostat sits in. It guides coolant either to the radiator or round the bypass back to the pump."},"2":{"name":"Thermostat cover","spec":"Spigot Ø30","material":"PA66-GF35","qty":"1","note":"Closes the housing and carries the spigot for the radiator hose."},"3":{"name":"Flange seal","spec":"Ø58 × 3","material":"EPDM 70","qty":"1","note":"Seals the cover to the housing, so coolant reaches the radiator only through the valve."},"4":{"name":"Hex bolt","spec":"M6 × 25, ISO 4017","material":"Steel 8.8, zinc","qty":"3","note":"Clamps the cover and the thermostat flange to the housing."},"5":{"name":"Washer","spec":"6.4, ISO 7089","material":"Steel 200 HV","qty":"3","note":"Spreads the bolt load over the cover."},"6":{"name":"Flange and seat","spec":"Ø54 × 1.5","material":"DC04 + ZnNi","qty":"1","note":"The frame of the thermostat. It carries the bridge and gives the main valve disc its seat."},"7":{"name":"Bridge","spec":"8 × 1.5","material":"DC04 + ZnNi","qty":"1","note":"The fixed cross-piece the pin pushes against. It is the fixed end of the actuator, so the cup moves down instead."},"8":{"name":"Pin","spec":"Ø5 × 44","material":"X5CrNi18-10","qty":"1","note":"Pushed out of the sleeve by the expanding wax. Its stroke is the wax's volume gain divided by the pin's area."},"9":{"name":"Sleeve (sock diaphragm)","spec":"","material":"HNBR 70","qty":"1","note":"A rubber sock that transmits the wax's pressure to the pin and keeps the wax from leaking out."},"10":{"name":"Pellet cup","spec":"Ø17","material":"CuZn37","qty":"1","note":"The brass cup holding the wax. It conducts the coolant's heat in, and it is the part that moves down to open the valve."},"11":{"name":"Wax charge","spec":"Paraffin","material":"Paraffin + Cu powder","qty":"1","note":"The sensor and actuator in one. It melts across a range, swells by 12 %, and this is the setpoint; the copper powder improves heat flow."},"12":{"name":"Piston guide","spec":"","material":"CuZn39Pb3 brass","qty":"1","note":"Guides the pin and sleeve at the top of the cup, so the wax pushes the cup straight along the pin."},"13":{"name":"Valve disc","spec":"Ø37.6 × 1.5","material":"DC04 + ZnNi","qty":"1","note":"The main valve, carried on the pellet. As the cup moves down it leaves its seat and opens the route to the radiator."},"14":{"name":"Main spring","spec":"Ø2, 6 turns","material":"EN 10270-1 SH","qty":"1","note":"Pushes the cup back up and the valve shut. The wax must overcome its preload before the valve opens, and its rate adds the droop above the setpoint."},"15":{"name":"Spring stirrup","spec":"8 × 1.5","material":"DC04 + ZnNi","qty":"1","note":"The fixed legs of the frame. They reach down from the flange and seat the lower end of the main spring."},"16":{"name":"Bypass stem","spec":"Ø5","material":"CuZn39Pb3 brass","qty":"1","note":"Hangs below the cup and carries the bypass disc, so it moves with the valve."},"17":{"name":"Bypass disc","spec":"Ø25 × 1.5","material":"DC04 + ZnNi","qty":"1","note":"Shuts the bypass as the main valve opens, so the coolant is sent to the radiator rather than round the engine."},"18":{"name":"Bypass spring","spec":"Ø0.8, 4 turns","material":"EN 10270-1 SH","qty":"1","note":"Holds the bypass disc on its stem and returns it when the thermostat closes."},"19":{"name":"Jiggle pin","spec":"Ø2.4","material":"CuZn37","qty":"1","note":"A loose pin in a small hole in the flange. Even when closed it leaves a gap for air and a little coolant, so air can bleed out of the system."},"20":{"name":"Coolant temperature sensor","spec":"M12 × 1.5","material":"Bought out (NTC)","qty":"1","note":"Reads the coolant temperature for the engine controller. It is not part of the wax loop."},"21":{"name":"Sealing ring","spec":"A12 × 16, DIN 7603","material":"Cu","qty":"1","note":"Seals the sensor in the housing."},"22":{"name":"Radiator hose","spec":"30 × 4.5","material":"EPDM","qty":"1","note":"Carries the hot coolant on to the radiator once the thermostat has opened."},"23":{"name":"Hose clip","spec":"32–50, DIN 3017","material":"W4 stainless","qty":"1","note":"Clamps the radiator hose onto the cover spigot."},"24":{"name":"Back-up ring","spec":"5 × 7 × 1.5","material":"PTFE","qty":"1","note":"A PTFE ring round the pin below the guide, supporting the sleeve against the pressure of the wax."}} });
 </script>
 </body>
 </html>

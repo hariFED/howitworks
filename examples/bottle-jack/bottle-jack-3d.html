@@ -273,6 +273,30 @@ body.bp-zoom .bp-bar {
   touch-action: none;
 }
 
+/* ---- part cards (kit/info.mjs): hover, tap or focus a balloon */
+[data-role="balloon"][tabindex], #ov g[data-part] { cursor: pointer; }
+#ov g[data-part] { pointer-events: auto; }
+[data-role="balloon"]:hover .balloon, [data-role="balloon"]:focus .balloon, #ov g[data-part]:hover .balloon { stroke: var(--bp-accent); stroke-width: 1.6px; }
+[data-role="balloon"]:focus { outline: none; }
+.bp-hl .vis, .bp-hl .thin, .bp-hl path, .bp-hl circle, .bp-hl polygon, .bp-hl rect { stroke: var(--bp-accent) !important; }
+.bp-hl .vis { stroke-width: calc(var(--bp-thick) * 1.8) !important; }
+.bp-card {
+  position: absolute; z-index: 50; max-width: 280px; padding: 10px 12px 11px; box-sizing: border-box;
+  background: var(--bp-paper); color: var(--bp-ink); border: 1px solid var(--bp-ink); border-radius: 3px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .14); font: 12px/1.45 var(--bp-font); pointer-events: auto;
+}
+.bp-card[hidden] { display: none; }
+.bp-card-h { display: flex; gap: 8px; align-items: center; }
+.bp-card-h b { font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: 11.5px; }
+.bp-card-n { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--bp-ink); border-radius: 50%; font-size: 10.5px; }
+.bp-card-s { margin: 4px 0 0 28px; color: var(--bp-muted); font-size: 10.5px; letter-spacing: .02em; }
+.bp-card p { margin: 7px 0 0; font-size: 11.5px; line-height: 1.5; }
+.bp-card-x { margin-top: 7px; color: var(--bp-muted); font-size: 9.5px; letter-spacing: .03em; }
+
+/* ---- the sheet's link to its 3D view */
+.bp-3d { font: inherit; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 4px 10px; letter-spacing: .03em; white-space: nowrap; }
+.bp-3d:hover, .bp-3d:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }
+
 /* 3D mode page layout (writePage3d). Colours are the tokens of sheet.css, including --bp3-*. */
 html, body { height: 100%; overflow: hidden; }
 .v3 { display: flex; flex-direction: column; height: 100%; }
@@ -1134,7 +1158,7 @@ const FRAG = /* glsl */ `
 uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash, uLayer, uLayerBias;
 uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
 uniform vec2 uProf[64]; uniform int uProfN, uProfKind; uniform vec3 uAxisP, uAxisD, uPA, uPB; uniform vec2 uRange;
-uniform float uLiftFrom, uLift; uniform mat4 uInv; uniform vec3 uShift;
+uniform float uLiftFrom, uLift, uHi; uniform mat4 uInv; uniform vec3 uShift;
 uniform sampler2D tIds; uniform vec2 uRes;
 varying vec3 vW; varying vec3 vN;
 #ifdef DECAL
@@ -1263,6 +1287,8 @@ void main() {
 #endif
 #endif
   }
+  // a part named by its card (kit/info.mjs) is tinted toward the accent
+  if (uHi > 0.5 && role != 2) col = mix(col, uAccent, cap ? 0.3 : 0.5);
   gl_FragColor = vec4(col, alpha);
   gl_FragDepth = cap ? capZ : gl_FragCoord.z - (role == 2 ? uCapBias : 0.0);
 }`;
@@ -1602,6 +1628,7 @@ function create({ scene, title = "" } = {}) {
         uInv: { value: new THREE.Matrix4() },
         uShift: { value: new THREE.Vector3() },
         uLayer: { value: s.layer ?? 0 },
+        uHi: { value: 0 },
         uProf: { value: Array.from({ length: PROF_MAX }, (_, i) => new THREE.Vector2(...(prof?.loop[i] ?? [0, 0]))) },
         uProfN: { value: prof ? prof.loop.length : 0 },
         uProfKind: { value: prof ? prof.kind : 0 },
@@ -1652,6 +1679,7 @@ function create({ scene, title = "" } = {}) {
     rec.edges.add(edge);
     const geo = geometryOf(s);
     const mesh = new THREE.Mesh(geo, material(s, edge));
+    rec.mats.push(mesh.material);
     syncInv(mesh);
     inner.add(mesh);
     let lines = null;
@@ -1672,7 +1700,7 @@ function create({ scene, title = "" } = {}) {
     inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
     group.add(inner);
     root.add(group);
-    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
+    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), mats: [], live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
     const shared = ++edgeSeq;
     spec.solids.forEach((s, k) => addSolid(rec, s, k, shared));
     PARTS.set(spec.id, rec);
@@ -1744,6 +1772,12 @@ function create({ scene, title = "" } = {}) {
     redraw();
   }
   new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  // part cards (kit/info.mjs) name a part by its balloon number; tint it while the card shows
+  document.addEventListener("bp:part", (e) => {
+    const id = e.detail?.id;
+    for (const rec of PARTS.values()) for (const m of rec.mats) m.uniforms.uHi.value = id != null && String(rec.id) === String(id) ? 1 : 0;
+    redraw();
+  });
 
   // ---- view state
   const start = VIEWS[q.view] ?? VIEWS.iso;
@@ -3427,6 +3461,136 @@ V.test("O opens the release valve", ({ key }) => {
 
 V.run({ step, render, overlay, still: 9.45 });
 
+</script>
+<script>
+"use strict";
+const BP_CARDS = (() => {
+// Part cards: hover, tap or focus a balloon and a small card names the part, gives its size and
+// material, and says in a sentence what it does. The part it points to lights up in the accent.
+//
+// Works on both pages: a 2D sheet's balloons are <g data-role="balloon" data-target="n">, a 3D page's
+// are <g data-part="n"> in its overlay (re-drawn every frame, so everything here is delegated and
+// keyed on the number, never on the element). The data comes from examples/<slug>/info.json, which
+// kit/page.mjs inlines as BP_INFO when it exists:
+//   { "4": { "name": "O-ring", "spec": "33 × 2", "material": "NBR 70", "note": "Seals the barrel..." } }
+// 2D: the part's [data-part] groups get the class bp-hl.  3D: a "bp:part" event (detail.id, or null)
+// that kit/solid3d.mjs answers by tinting the part.
+
+function attach({ info, root = document }) {
+  if (!info || !Object.keys(info).length) return null;
+  const card = document.createElement("div");
+  card.className = "bp-card";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-live", "polite");
+  card.hidden = true;
+  document.body.appendChild(card);
+
+  let shown = null;
+  let pinned = false;
+
+  const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  // the balloon under an element, and its part number
+  const balloonOf = (el) => el?.closest?.('[data-role="balloon"], #ov [data-part], .v3-stage [data-part]');
+  const numberOf = (b) => {
+    if (!b) return null;
+    const raw = String(b.dataset.target || b.dataset.part || b.querySelector("text")?.textContent || "").trim();
+    // a second copy of a part ("3u" in a 3D scene) shares its card with the item number it starts with
+    const n = info[raw] ? raw : raw.match(/^\d+/)?.[0];
+    return n && info[n] ? n : null;
+  };
+
+  function light(id) {
+    for (const el of document.querySelectorAll(".bp-hl")) el.classList.remove("bp-hl");
+    if (id != null) for (const el of document.querySelectorAll(`svg [data-part="${CSS.escape(id)}"]`)) if (!el.closest("#ov")) el.classList.add("bp-hl");
+    document.dispatchEvent(new CustomEvent("bp:part", { detail: { id } }));
+  }
+
+  function place(x, y) {
+    const pad = 12;
+    const w = card.offsetWidth;
+    const h = card.offsetHeight;
+    let left = x + 16;
+    let top = y + 16;
+    if (left + w > innerWidth - pad) left = x - w - 16;
+    if (left < pad) left = pad;
+    if (top + h > innerHeight - pad) top = y - h - 16;
+    if (top < pad) top = pad;
+    card.style.left = `${left + scrollX}px`;
+    card.style.top = `${top + scrollY}px`;
+  }
+
+  function show(id, x, y) {
+    const p = info[id];
+    if (!p) return hide();
+    if (shown !== id) {
+      const sub = [p.spec, p.material, p.qty && p.qty !== "1" ? `× ${p.qty}` : ""].filter(Boolean).map(esc).join(" · ");
+      card.innerHTML =
+        `<div class="bp-card-h"><span class="bp-card-n">${esc(id)}</span><b>${esc(p.name)}</b></div>` +
+        (sub ? `<div class="bp-card-s">${sub}</div>` : "") +
+        (p.note ? `<p>${esc(p.note)}</p>` : "") +
+        (pinned ? `<div class="bp-card-x">Esc or click elsewhere to close</div>` : "");
+      card.hidden = false;
+      shown = id;
+      light(id);
+    }
+    place(x, y);
+  }
+
+  function hide() {
+    card.hidden = true;
+    shown = null;
+    pinned = false;
+    light(null);
+  }
+
+  // hover (pointer): follow whatever balloon is under the pointer; the 3D overlay is re-drawn each
+  // frame, so ask the document what is under the pointer rather than trusting enter/leave events
+  addEventListener("pointermove", (e) => {
+    if (pinned || e.pointerType === "touch") return;
+    const id = numberOf(balloonOf(document.elementFromPoint(e.clientX, e.clientY)));
+    if (id) show(id, e.clientX, e.clientY);
+    else if (shown) hide();
+  }, { passive: true });
+
+  // click or tap pins the card; it must not start an orbit or a drag underneath
+  addEventListener("pointerdown", (e) => {
+    const b = balloonOf(document.elementFromPoint(e.clientX, e.clientY));
+    const id = numberOf(b);
+    if (id) {
+      e.stopPropagation();
+      e.preventDefault();
+      pinned = false;
+      shown = null;
+      pinned = true;
+      show(id, e.clientX, e.clientY);
+    } else if (pinned && !card.contains(e.target)) hide();
+  }, true);
+
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && shown) hide();
+  });
+
+  // keyboard: static (2D) balloons are focusable buttons; Enter or focus shows the card
+  for (const b of root.querySelectorAll('[data-role="balloon"]')) {
+    const id = numberOf(b);
+    if (!id) continue;
+    b.setAttribute("tabindex", "0");
+    b.setAttribute("role", "button");
+    b.setAttribute("aria-label", `Part ${id}: ${info[id].name}`);
+    const at = () => { const r = b.getBoundingClientRect(); return [r.right, r.top]; };
+    b.addEventListener("focus", () => show(id, ...at()));
+    b.addEventListener("blur", () => { if (!pinned) hide(); });
+    b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pinned = true; shown = null; show(id, ...at()); } });
+  }
+
+  addEventListener("scroll", () => { if (shown && !pinned) hide(); }, { passive: true });
+  return { show, hide };
+}
+
+return { attach };
+})();
+
+BP_CARDS.attach({ info: {"1":{"name":"Base","spec":"","material":"EN-GJS-500-7","qty":"1","note":"The cast foot. Its drillings link the pump, the reservoir and the ram chamber, and its valve pockets hold the balls."},"2":{"name":"Ram cylinder","spec":"Ø40 × 4","material":"E355+SR EN 10305-1","qty":"1","note":"The honed tube the ram slides in. The oil pressure acts on the ram's Ø32 head inside it."},"3":{"name":"Reservoir tube","spec":"Ø70 × 2.5","material":"E235","qty":"1","note":"The outer tube. The space between it and the cylinder is the oil reservoir."},"4":{"name":"Top nut","spec":"M70 × 1.5","material":"C45","qty":"1","note":"Closes the top of the tubes and guides the ram. It is the end stop at full lift."},"5":{"name":"Ram","spec":"Ø32 / Ø30","material":"C45, hard chrome","qty":"1","note":"The large piston that lifts the load. Oil pushes on its Ø32 head, so the large area gives the force multiplication."},"6":{"name":"U-cup seal","spec":"32 × 25 × 8","material":"PU 93 ShA","qty":"1","note":"Seals the ram head to the cylinder. Pressure presses its lip tighter against the wall."},"7":{"name":"Wiper","spec":"30 × 37 × 5","material":"NBR 90","qty":"1","note":"Wipes the ram clean as it goes back down, so dirt stays out of the seal."},"8":{"name":"Extension screw","spec":"M24 × 2","material":"42CrMo4","qty":"1","note":"Screws out of the ram to adjust the starting height."},"9":{"name":"Saddle","spec":"Ø34, serrated","material":"C45, hardened","qty":"1","note":"The serrated cap that takes the load, so the load cannot slip sideways."},"10":{"name":"Filler plug","spec":"","material":"NBR 70","qty":"1","note":"A rubber plug in the reservoir. It is how oil is topped up."},"11":{"name":"O-ring","spec":"40 × 2.5","material":"NBR 90","qty":"1","note":"Seals the ram cylinder to the base, so pressure oil cannot leak into the reservoir."},"12":{"name":"Pump cylinder","spec":"M24 × 1.5","material":"C45","qty":"1","note":"The small bore the plunger works in, and the lug the handle's link hangs from."},"13":{"name":"Oil","spec":"ISO VG 15, 300 cm³","material":"Hydraulic oil HL","qty":"1","note":"The working fluid. It is practically incompressible, so every cubic centimetre pushed in by the plunger moves the ram."},"14":{"name":"Pump plunger","spec":"Ø12","material":"100Cr6, hardened","qty":"1","note":"The small piston. Each 25 mm stroke pushes a fixed volume of oil toward the ram, and its small area is the other half of the area ratio."},"15":{"name":"O-ring + back-up","spec":"12 × 2.5","material":"NBR 90 / PTFE","qty":"1","note":"Seals the plunger in the pump cylinder. The PTFE ring stops the rubber being pushed into the gap under pressure."},"16":{"name":"Link","spec":"","material":"S235 t4","qty":"2","note":"Hangs the handle socket from the pump cylinder. It lets the socket swing as a lever."},"17":{"name":"Handle socket","spec":"","material":"S235, pressed","qty":"1","note":"The lever's short arm. It drives the plunger, and the handle's long arm multiplies your force again."},"18":{"name":"Handle","spec":"Ø22 × 2","material":"E235","qty":"1","note":"The long lever arm you push on. It gives the first multiplication, ahead of the hydraulic one."},"19":{"name":"Clevis pin","spec":"Ø6, ISO 2341-B","material":"Steel","qty":"3","note":"The pivots of the link, the fulcrum and the plunger."},"20":{"name":"Suction ball","spec":"Ø6, ISO 3290 G10","material":"100Cr6","qty":"1","note":"The inlet valve. On the upstroke it lifts and lets oil be drawn in from the reservoir. On the downstroke it seats."},"21":{"name":"Delivery ball","spec":"Ø6, ISO 3290 G10","material":"100Cr6","qty":"1","note":"The outlet valve. It opens on the downstroke to pass oil to the ram and closes on the upstroke so the load stays up."},"22":{"name":"Delivery seat","spec":"Ø7","material":"CuZn39Pb3","qty":"1","note":"The brass seat the delivery ball seals on."},"23":{"name":"Delivery spring","spec":"Ø0.6 wire","material":"EN 10270-1","qty":"1","note":"Holds the delivery ball gently on its seat between strokes."},"24":{"name":"Relief ball","spec":"Ø4, ISO 3290 G10","material":"100Cr6","qty":"1","note":"Lifts when the pump pressure passes the set limit and lets oil back to the reservoir, so the jack cannot be over-pressurised."},"25":{"name":"Relief spring","spec":"Ø0.5 wire","material":"EN 10270-1","qty":"1","note":"Its force sets the pressure at which the relief ball lifts."},"26":{"name":"Set screw","spec":"M8 × 1 × 4, ISO 4026","material":"45H, drilled Ø2","qty":"1","note":"Retains the relief spring. The Ø2 hole lets the relieved oil pass."},"27":{"name":"Release screw","spec":"M12 × 1","material":"C45, tip hardened","qty":"1","note":"A needle valve back to the reservoir. Opening it lets the load drive oil out, so the ram sinks."},"28":{"name":"O-ring","spec":"4 × 1.3","material":"NBR 90","qty":"1","note":"Seals the release screw so oil does not leak past its thread when it is shut."},"29":{"name":"Expander plug","spec":"Ø7 / Ø5","material":"Steel","qty":"2","note":"Plugs the ends of drilled oil passages in the base."}} });
 </script>
 </body>
 </html>

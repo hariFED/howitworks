@@ -81,6 +81,8 @@ html.in-frame .bp-page{padding:8px 8px 10px}
 </style>
 <script>try{if(window.top!==window)document.documentElement.classList.add("in-frame")}catch(e){document.documentElement.classList.add("in-frame")}</script>`;
   html = html.replace("<body>", `<body>\n${bar}`);
+  // the sheet's "3D view" button points at its file name; on the site the 3D pages live in 3d/
+  html = html.split(`href="${m.slug}-3d.html"`).join(`href="../3d/${m.slug}.html"`);
   writeFileSync(join(out, "sheets", `${m.slug}.html`), html);
   const src3d = join(root, "examples", m.slug, `${m.slug}-3d.html`);
   m.has3d = Boolean(m.has3d && existsSync(src3d));

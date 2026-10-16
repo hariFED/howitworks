@@ -273,6 +273,30 @@ body.bp-zoom .bp-bar {
   touch-action: none;
 }
 
+/* ---- part cards (kit/info.mjs): hover, tap or focus a balloon */
+[data-role="balloon"][tabindex], #ov g[data-part] { cursor: pointer; }
+#ov g[data-part] { pointer-events: auto; }
+[data-role="balloon"]:hover .balloon, [data-role="balloon"]:focus .balloon, #ov g[data-part]:hover .balloon { stroke: var(--bp-accent); stroke-width: 1.6px; }
+[data-role="balloon"]:focus { outline: none; }
+.bp-hl .vis, .bp-hl .thin, .bp-hl path, .bp-hl circle, .bp-hl polygon, .bp-hl rect { stroke: var(--bp-accent) !important; }
+.bp-hl .vis { stroke-width: calc(var(--bp-thick) * 1.8) !important; }
+.bp-card {
+  position: absolute; z-index: 50; max-width: 280px; padding: 10px 12px 11px; box-sizing: border-box;
+  background: var(--bp-paper); color: var(--bp-ink); border: 1px solid var(--bp-ink); border-radius: 3px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .14); font: 12px/1.45 var(--bp-font); pointer-events: auto;
+}
+.bp-card[hidden] { display: none; }
+.bp-card-h { display: flex; gap: 8px; align-items: center; }
+.bp-card-h b { font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: 11.5px; }
+.bp-card-n { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--bp-ink); border-radius: 50%; font-size: 10.5px; }
+.bp-card-s { margin: 4px 0 0 28px; color: var(--bp-muted); font-size: 10.5px; letter-spacing: .02em; }
+.bp-card p { margin: 7px 0 0; font-size: 11.5px; line-height: 1.5; }
+.bp-card-x { margin-top: 7px; color: var(--bp-muted); font-size: 9.5px; letter-spacing: .03em; }
+
+/* ---- the sheet's link to its 3D view */
+.bp-3d { font: inherit; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 4px 10px; letter-spacing: .03em; white-space: nowrap; }
+.bp-3d:hover, .bp-3d:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }
+
 /* 3D mode page layout (writePage3d). Colours are the tokens of sheet.css, including --bp3-*. */
 html, body { height: 100%; overflow: hidden; }
 .v3 { display: flex; flex-direction: column; height: 100%; }
@@ -1134,7 +1158,7 @@ const FRAG = /* glsl */ `
 uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash, uLayer, uLayerBias;
 uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
 uniform vec2 uProf[64]; uniform int uProfN, uProfKind; uniform vec3 uAxisP, uAxisD, uPA, uPB; uniform vec2 uRange;
-uniform float uLiftFrom, uLift; uniform mat4 uInv; uniform vec3 uShift;
+uniform float uLiftFrom, uLift, uHi; uniform mat4 uInv; uniform vec3 uShift;
 uniform sampler2D tIds; uniform vec2 uRes;
 varying vec3 vW; varying vec3 vN;
 #ifdef DECAL
@@ -1263,6 +1287,8 @@ void main() {
 #endif
 #endif
   }
+  // a part named by its card (kit/info.mjs) is tinted toward the accent
+  if (uHi > 0.5 && role != 2) col = mix(col, uAccent, cap ? 0.3 : 0.5);
   gl_FragColor = vec4(col, alpha);
   gl_FragDepth = cap ? capZ : gl_FragCoord.z - (role == 2 ? uCapBias : 0.0);
 }`;
@@ -1602,6 +1628,7 @@ function create({ scene, title = "" } = {}) {
         uInv: { value: new THREE.Matrix4() },
         uShift: { value: new THREE.Vector3() },
         uLayer: { value: s.layer ?? 0 },
+        uHi: { value: 0 },
         uProf: { value: Array.from({ length: PROF_MAX }, (_, i) => new THREE.Vector2(...(prof?.loop[i] ?? [0, 0]))) },
         uProfN: { value: prof ? prof.loop.length : 0 },
         uProfKind: { value: prof ? prof.kind : 0 },
@@ -1652,6 +1679,7 @@ function create({ scene, title = "" } = {}) {
     rec.edges.add(edge);
     const geo = geometryOf(s);
     const mesh = new THREE.Mesh(geo, material(s, edge));
+    rec.mats.push(mesh.material);
     syncInv(mesh);
     inner.add(mesh);
     let lines = null;
@@ -1672,7 +1700,7 @@ function create({ scene, title = "" } = {}) {
     inner.position.set(-pivot[0], -pivot[1], -pivot[2]);
     group.add(inner);
     root.add(group);
-    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
+    const rec = { id: spec.id, name: spec.name, spec, group, inner, pivot, holders: [], centres: [], edges: new Set(), mats: [], live: {}, base: { pos: [0, 0, 0], rot: [0, 0, 0] } };
     const shared = ++edgeSeq;
     spec.solids.forEach((s, k) => addSolid(rec, s, k, shared));
     PARTS.set(spec.id, rec);
@@ -1744,6 +1772,12 @@ function create({ scene, title = "" } = {}) {
     redraw();
   }
   new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  // part cards (kit/info.mjs) name a part by its balloon number; tint it while the card shows
+  document.addEventListener("bp:part", (e) => {
+    const id = e.detail?.id;
+    for (const rec of PARTS.values()) for (const m of rec.mats) m.uniforms.uHi.value = id != null && String(rec.id) === String(id) ? 1 : 0;
+    redraw();
+  });
 
   // ---- view state
   const start = VIEWS[q.view] ?? VIEWS.iso;
@@ -3632,6 +3666,136 @@ V.test("X blocks the vent", ({ key }) => {
 
 V.run({ step, render, overlay, still: 11 });
 
+</script>
+<script>
+"use strict";
+const BP_CARDS = (() => {
+// Part cards: hover, tap or focus a balloon and a small card names the part, gives its size and
+// material, and says in a sentence what it does. The part it points to lights up in the accent.
+//
+// Works on both pages: a 2D sheet's balloons are <g data-role="balloon" data-target="n">, a 3D page's
+// are <g data-part="n"> in its overlay (re-drawn every frame, so everything here is delegated and
+// keyed on the number, never on the element). The data comes from examples/<slug>/info.json, which
+// kit/page.mjs inlines as BP_INFO when it exists:
+//   { "4": { "name": "O-ring", "spec": "33 × 2", "material": "NBR 70", "note": "Seals the barrel..." } }
+// 2D: the part's [data-part] groups get the class bp-hl.  3D: a "bp:part" event (detail.id, or null)
+// that kit/solid3d.mjs answers by tinting the part.
+
+function attach({ info, root = document }) {
+  if (!info || !Object.keys(info).length) return null;
+  const card = document.createElement("div");
+  card.className = "bp-card";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-live", "polite");
+  card.hidden = true;
+  document.body.appendChild(card);
+
+  let shown = null;
+  let pinned = false;
+
+  const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  // the balloon under an element, and its part number
+  const balloonOf = (el) => el?.closest?.('[data-role="balloon"], #ov [data-part], .v3-stage [data-part]');
+  const numberOf = (b) => {
+    if (!b) return null;
+    const raw = String(b.dataset.target || b.dataset.part || b.querySelector("text")?.textContent || "").trim();
+    // a second copy of a part ("3u" in a 3D scene) shares its card with the item number it starts with
+    const n = info[raw] ? raw : raw.match(/^\d+/)?.[0];
+    return n && info[n] ? n : null;
+  };
+
+  function light(id) {
+    for (const el of document.querySelectorAll(".bp-hl")) el.classList.remove("bp-hl");
+    if (id != null) for (const el of document.querySelectorAll(`svg [data-part="${CSS.escape(id)}"]`)) if (!el.closest("#ov")) el.classList.add("bp-hl");
+    document.dispatchEvent(new CustomEvent("bp:part", { detail: { id } }));
+  }
+
+  function place(x, y) {
+    const pad = 12;
+    const w = card.offsetWidth;
+    const h = card.offsetHeight;
+    let left = x + 16;
+    let top = y + 16;
+    if (left + w > innerWidth - pad) left = x - w - 16;
+    if (left < pad) left = pad;
+    if (top + h > innerHeight - pad) top = y - h - 16;
+    if (top < pad) top = pad;
+    card.style.left = `${left + scrollX}px`;
+    card.style.top = `${top + scrollY}px`;
+  }
+
+  function show(id, x, y) {
+    const p = info[id];
+    if (!p) return hide();
+    if (shown !== id) {
+      const sub = [p.spec, p.material, p.qty && p.qty !== "1" ? `× ${p.qty}` : ""].filter(Boolean).map(esc).join(" · ");
+      card.innerHTML =
+        `<div class="bp-card-h"><span class="bp-card-n">${esc(id)}</span><b>${esc(p.name)}</b></div>` +
+        (sub ? `<div class="bp-card-s">${sub}</div>` : "") +
+        (p.note ? `<p>${esc(p.note)}</p>` : "") +
+        (pinned ? `<div class="bp-card-x">Esc or click elsewhere to close</div>` : "");
+      card.hidden = false;
+      shown = id;
+      light(id);
+    }
+    place(x, y);
+  }
+
+  function hide() {
+    card.hidden = true;
+    shown = null;
+    pinned = false;
+    light(null);
+  }
+
+  // hover (pointer): follow whatever balloon is under the pointer; the 3D overlay is re-drawn each
+  // frame, so ask the document what is under the pointer rather than trusting enter/leave events
+  addEventListener("pointermove", (e) => {
+    if (pinned || e.pointerType === "touch") return;
+    const id = numberOf(balloonOf(document.elementFromPoint(e.clientX, e.clientY)));
+    if (id) show(id, e.clientX, e.clientY);
+    else if (shown) hide();
+  }, { passive: true });
+
+  // click or tap pins the card; it must not start an orbit or a drag underneath
+  addEventListener("pointerdown", (e) => {
+    const b = balloonOf(document.elementFromPoint(e.clientX, e.clientY));
+    const id = numberOf(b);
+    if (id) {
+      e.stopPropagation();
+      e.preventDefault();
+      pinned = false;
+      shown = null;
+      pinned = true;
+      show(id, e.clientX, e.clientY);
+    } else if (pinned && !card.contains(e.target)) hide();
+  }, true);
+
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && shown) hide();
+  });
+
+  // keyboard: static (2D) balloons are focusable buttons; Enter or focus shows the card
+  for (const b of root.querySelectorAll('[data-role="balloon"]')) {
+    const id = numberOf(b);
+    if (!id) continue;
+    b.setAttribute("tabindex", "0");
+    b.setAttribute("role", "button");
+    b.setAttribute("aria-label", `Part ${id}: ${info[id].name}`);
+    const at = () => { const r = b.getBoundingClientRect(); return [r.right, r.top]; };
+    b.addEventListener("focus", () => show(id, ...at()));
+    b.addEventListener("blur", () => { if (!pinned) hide(); });
+    b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pinned = true; shown = null; show(id, ...at()); } });
+  }
+
+  addEventListener("scroll", () => { if (shown && !pinned) hide(); }, { passive: true });
+  return { show, hide };
+}
+
+return { attach };
+})();
+
+BP_CARDS.attach({ info: {"1":{"name":"Pot body","spec":"Ø222 × 1, 6 L","material":"X5CrNi18-10 stainless","qty":"1","note":"The vessel that holds the water and food, and the pressure acting on the lid."},"2":{"name":"Base capsule","spec":"Ø186 × 0.6","material":"X6Cr17 stainless","qty":"1","note":"A magnetic steel skin on the underside, so the pot works on induction hobs. It also encloses the heat disc."},"3":{"name":"Heat disc","spec":"Ø185 × 5.4","material":"EN AW-1050A aluminium","qty":"1","note":"Spreads the hob's heat across the pot floor so the water boils evenly."},"4":{"name":"Lid","spec":"Ø244 × 1.2","material":"X5CrNi18-10 stainless","qty":"1","note":"Closes the pot with six bayonet lugs. The pressure under it pushes up on the whole Ø220 gasket circle."},"5":{"name":"Gasket","spec":"Ø220, L-section","material":"VMQ 60 ShA","qty":"1","note":"The seal between lid and pot. Steam pressure presses its lip harder against the wall, so it seals better as the pressure rises."},"6":{"name":"Main handle","spec":"","material":"PF31 phenolic","qty":"1","note":"The long handle on the pot. Phenolic stays cool to the touch."},"7":{"name":"Handle bracket","spec":"2 mm, welded","material":"X5CrNi18-10 stainless","qty":"2","note":"Welded to the pot wall to carry a handle."},"8":{"name":"Helper handle","spec":"","material":"PF31 phenolic","qty":"1","note":"The short handle on the opposite side, so you can lift the pot with two hands."},"9":{"name":"Lid handle","spec":"","material":"PF31 phenolic","qty":"1","note":"The handle you turn to engage or release the bayonet lugs. It also houses the lock slide and its spring."},"10":{"name":"Pan screw","spec":"M5 × 16, ISO 7045","material":"A2-70 stainless","qty":"2","note":"Fixes a handle to its bracket."},"11":{"name":"Valve stem","spec":"M8 × 1, bore Ø3","material":"CuZn39Pb3 brass","qty":"1","note":"The vent pipe through the lid. Its Ø3 bore is the orifice the operating weight sits on."},"12":{"name":"Thin nut","spec":"M8 × 1, ISO 8675","material":"A2-70 stainless","qty":"2","note":"Clamp the valve stem to the lid, one on each side."},"13":{"name":"Operating weight","spec":"62 g","material":"CuZn39Pb3 brass, nickel plated","qty":"1","note":"Sits on the stem and lifts to vent steam. Its weight over the Ø3 bore sets the pressure, 86 kPa gauge, and so the 118 °C boiling point."},"14":{"name":"Seal washer","spec":"Ø14 × Ø8 × 2","material":"VMQ 60 ShA","qty":"2","note":"Seals the valve stem against the lid, inside and out."},"15":{"name":"Lock pin","spec":"Ø5","material":"X8CrNiS18-9 stainless","qty":"1","note":"The interlock. Pressure lifts it at 3 kPa, so it blocks the lid slide and seals its own vent. It drops again below 1.5 kPa."},"16":{"name":"O-ring","spec":"5 × 1.6, ISO 3601","material":"VMQ 70 ShA","qty":"1","note":"Seals the lock pin in its bore. Its drag is part of what the pin must overcome to rise."},"17":{"name":"Lock slide","spec":"1.5 mm","material":"X6Cr17 stainless","qty":"1","note":"Slides under the lid handle to hold the lid turned shut. With the pin up it cannot move, so the lid cannot be turned."},"18":{"name":"Slide spring","spec":"Ø4 × 0.45","material":"EN 10270-3","qty":"1","note":"Pushes the lock slide back to its locked position."},"19":{"name":"Safety valve body","spec":"M8 × 1","material":"X8CrNiS18-9 stainless","qty":"1","note":"The housing of the back-up valve, for when the main vent is blocked."},"20":{"name":"Safety plunger","spec":"","material":"X8CrNiS18-9 stainless","qty":"1","note":"Held on its seat by the safety spring. If the pressure passes 160 kPa gauge it lifts and vents the pot."},"21":{"name":"Safety seal","spec":"Ø5.2 × 1","material":"VMQ 70 ShA","qty":"1","note":"The soft face on the safety plunger that seals the Ø3 seat until the valve opens."},"22":{"name":"Safety spring","spec":"Ø4.3 × 0.5","material":"EN 10270-3","qty":"1","note":"Sets the safety valve's opening pressure by holding the plunger down."},"23":{"name":"Button screw","spec":"M5 × 12, ISO 7380","material":"A2-70 stainless","qty":"1","note":"Fixes the lid handle to the lid from underneath."},"24":{"name":"Slide knob","spec":"","material":"PA66","qty":"1","note":"The grip on the lock slide, for sliding it by hand."}} });
 </script>
 </body>
 </html>

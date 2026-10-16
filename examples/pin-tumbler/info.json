@@ -1,0 +1,18 @@
+{
+  "1": { "name": "Body", "spec": "Euro profile DIN 18252, 30/10", "material": "CuZn39Pb3 brass", "qty": "1", "note": "The fixed housing. The upper halves of the pin chambers are drilled in it, and its join with the plug is the shear line." },
+  "2": { "name": "Plug", "spec": "Ø13, 5 chambers, pitch 4", "material": "CuZn39Pb3 brass", "qty": "1", "note": "The rotating core with the keyway. It turns only when every pin gap sits on the shear line: the AND of all five checks." },
+  "3": { "name": "Key pin 1", "spec": "Ø3 × 4.5, code 2", "material": "CuNi18Zn20", "qty": "1", "note": "Rests on the key. Its length is cut for one depth, so the right key lifts its top to the shear line." },
+  "4": { "name": "Key pin 2", "spec": "Ø3 × 5.5, code 4", "material": "CuNi18Zn20", "qty": "1", "note": "Rests on the key. Its length is cut for one depth, so the right key lifts its top to the shear line." },
+  "5": { "name": "Key pin 3", "spec": "Ø3 × 4, code 1", "material": "CuNi18Zn20", "qty": "1", "note": "Rests on the key. With a key one cut wrong this pin sits low, its driver straddles the line and the plug will not turn." },
+  "6": { "name": "Key pin 4", "spec": "Ø3 × 6.5, code 6", "material": "CuNi18Zn20", "qty": "1", "note": "Rests on the key. Its length is cut for one depth, so the right key lifts its top to the shear line." },
+  "7": { "name": "Key pin 5", "spec": "Ø3 × 5, code 3", "material": "CuNi18Zn20", "qty": "1", "note": "Rests on the key. Its length is cut for one depth, so the right key lifts its top to the shear line." },
+  "8": { "name": "Driver pin", "spec": "Ø3 × 5", "material": "X46Cr13, hardened", "qty": "5", "note": "Sits on each key pin and crosses the shear line when the pin is wrong. The plug is free only when the gap between the two lies on the line." },
+  "9": { "name": "Pin spring", "spec": "Ø2.55 × 0.25, 7 turns", "material": "EN 10270-3 1.4310", "qty": "5", "note": "Pushes each driver and key pin down onto the key, and back into the plug when the key is withdrawn." },
+  "10": { "name": "Chamber cap", "spec": "Ø3 × 2, pressed", "material": "CuZn39Pb3 brass", "qty": "5", "note": "Pressed into the top of each chamber to close it and give the pin spring something to push against." },
+  "11": { "name": "Cam", "spec": "30/10", "material": "SINT-D11", "qty": "1", "note": "Turns with the plug and carries the turn out to the lock bolt." },
+  "12": { "name": "Retaining washer", "spec": "DIN 6799-6", "material": "C75S spring steel", "qty": "1", "note": "Clips into a groove on the plug's tail to hold the cam and plug in place." },
+  "13": { "name": "Anti-drill pin", "spec": "Ø3 × 2.5", "material": "100Cr6, 60 HRC", "qty": "1", "note": "A hardened pin set in the plug face. It blunts a drill aimed at the pins, so the lock cannot simply be drilled open." },
+  "14": { "name": "Fixing screw", "spec": "M5 × 70", "material": "Steel 4.8, zinc", "qty": "1", "note": "Passes through the cylinder to fix it in the door lock." },
+  "15": { "name": "Key", "spec": "Bitting 2-4-1-6-3", "material": "CuNi12Zn24", "qty": "1", "note": "The secret. Each cut is one of seven depths in 0.5 mm steps and lifts its key pin by that amount." },
+  "16": { "name": "Thrust washer", "spec": "Ø8.4 × Ø12 × 0.5", "material": "1.4310", "qty": "1", "note": "Takes the axial load between the plug and the cam, so the plug turns freely." }
+}

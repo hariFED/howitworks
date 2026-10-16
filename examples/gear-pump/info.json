@@ -1,0 +1,17 @@
+{
+  "1": { "name": "Body", "spec": "2-bore", "material": "EN AW-6082 T6", "qty": "1", "note": "The block with the two overlapping bores. The gear tips run close to the bore wall, which seals each tooth space as a batch." },
+  "2": { "name": "Front flange", "spec": "Spigot Ø50", "material": "EN AC-46000", "qty": "1", "note": "Closes the shaft end of the body, carries the shaft seal and locates the pump on the motor or engine." },
+  "3": { "name": "Rear cover", "spec": "", "material": "EN-GJL-250 cast iron", "qty": "1", "note": "Closes the back of the body." },
+  "4": { "name": "Drive gear shaft", "spec": "z12, m3, x+0.3", "material": "16MnCr5, case hardened 58 HRC", "qty": "1", "note": "The input. It turns the driven gear and carries oil round the bore in its tooth spaces." },
+  "5": { "name": "Driven gear shaft", "spec": "z12, m3, x+0.3", "material": "16MnCr5, case hardened 58 HRC", "qty": "1", "note": "Turned by the drive gear. Where the two gears mesh, the teeth squeeze the oil out to the outlet." },
+  "6": { "name": "Front bushing", "spec": "D-form", "material": "CuSn12-C bronze", "qty": "2", "note": "Bronze pieces on the flange side. They hold the gear faces to keep the end leak small, and carry the shafts." },
+  "7": { "name": "Rear bushing", "spec": "D-form", "material": "CuSn12-C bronze", "qty": "2", "note": "The same on the cover side. Pressure behind them presses them against the gears, which closes the gap." },
+  "8": { "name": "Plain bearing", "spec": "16 × 18 × 14, ISO 3547", "material": "Steel / PTFE", "qty": "4", "note": "Journal bearings for the shaft ends." },
+  "9": { "name": "Shaft seal", "spec": "16 × 28 × 7, DIN 3760 A", "material": "FKM 75", "qty": "1", "note": "Lip seal on the drive shaft that keeps oil from leaking out of the flange." },
+  "10": { "name": "Circlip", "spec": "28 × 1.2, DIN 472", "material": "C75S steel", "qty": "1", "note": "Holds the shaft seal in the flange." },
+  "11": { "name": "Parallel key", "spec": "5 × 5 × 16, DIN 6885 A", "material": "C45+C steel", "qty": "1", "note": "Transmits the input torque from the coupling to the drive shaft." },
+  "12": { "name": "Screw", "spec": "M8 × 70, ISO 4762", "material": "Steel 10.9", "qty": "4", "note": "Clamps the flange, body and cover together against the oil pressure." },
+  "13": { "name": "Washer", "spec": "8, ISO 7089", "material": "Steel 300 HV", "qty": "4", "note": "Spreads each screw's clamping load." },
+  "14": { "name": "Body seal", "spec": "Figure-8, Ø2 cord", "material": "NBR 90", "qty": "2", "note": "Figure-8 seals between the body and each end plate, keeping oil in at both joints." },
+  "15": { "name": "Balance seal", "spec": "3-form", "material": "FKM 80", "qty": "1", "note": "Defines the pressurised area behind the bushings, so they press on the gears just enough to close the gap." }
+}

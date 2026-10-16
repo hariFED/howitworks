@@ -3,8 +3,8 @@
 // written as `import * as K from "../../kit/draft.mjs"` works unchanged once inlined, as long as
 // the page inlines its dependencies under the same names, in dependency order.
 
-import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -20,6 +20,28 @@ export function inlineModule(file, name) {
 }
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+
+// A sheet whose folder has a 3D view (build3d.mjs, writing <name>-3d.html) links to it from its bar;
+// the 3D page links back with its own "2D sheet" link.
+export function link3d(out) {
+  if (!existsSync(join(dirname(out), "build3d.mjs"))) return "";
+  const name = basename(out, ".html");
+  return `<a class="bp-3d" href="${esc(name)}-3d.html" title="Open the 3D view: turn it, cut it, take it apart">3D view →</a>`;
+}
+
+// Part cards: if the page's folder has an info.json ({ "n": { name, spec, material, qty, note } }),
+// inline it with kit/info.mjs so hovering, tapping or focusing a balloon names and explains the part.
+// writePage and writePage3d both add it; a page without info.json is unchanged.
+export function partCards(out) {
+  const file = join(dirname(out), "info.json");
+  if (!existsSync(file)) return "";
+  const data = JSON.stringify(JSON.parse(readFileSync(file, "utf8"))).replace(/</g, "\\u003c");
+  return `<script>
+"use strict";
+${inlineModule(kitPath("info.mjs"), "BP_CARDS")}
+BP_CARDS.attach({ info: ${data} });
+</script>`;
+}
 
 export function writePage(out, { title, description = "", svg, bar = "", css = "", modules = [], main = "", theme = "blueprint" }) {
   const sheetCss = readFileSync(kitPath("sheet.css"), "utf8");
@@ -40,7 +62,7 @@ ${css}
 <main class="bp-page">
 <figure class="bp-figure">
 ${svg}
-<figcaption class="bp-bar">${bar}</figcaption>
+<figcaption class="bp-bar">${bar}${link3d(out)}</figcaption>
 </figure>
 </main>
 <script>
@@ -48,6 +70,7 @@ ${svg}
 ${scripts}
 ${main}
 </script>
+${partCards(out)}
 </body>
 </html>
 `;
@@ -127,6 +150,7 @@ import * as THREE from "three";
 ${scripts}
 ${main}
 </script>
+${partCards(out)}
 </body>
 </html>
 `;
