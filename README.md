@@ -2,8 +2,6 @@
 
 # howitworks
 
-*Inspired by [Anatomy](https://skills.wheresryan.sh/anatomy), the Claude Code skill by Ryan ([@wheresryan22](https://x.com/wheresryan22)). Anatomy draws the machine; howitworks drafts the engineering drawing. Not affiliated with or endorsed by Anatomy.*
-
 **A skill for Claude Code.** Name a mechanism, or an idea, and Claude drafts the live engineering drawing that explains it: an A2 sheet with a section through the mechanism, ISO line types and material hatching, true dimensions, detail views, balloons, a parts list and a title block. The parts move, and every number on the sheet comes from one physical model.
 
 **Website and all example sheets, live:** https://harifed.github.io/howitworks/
@@ -61,7 +59,3 @@ npm run check     # layout check of every example at its tour times and phone wi
 npm run check3d   # render and self-test every 3D view (examples/*/<slug>-3d.html)
 npm run site      # build the website into docs/
 ```
-
-## Licence
-
-MIT. Inspired by Ryan's [Anatomy](https://skills.wheresryan.sh/anatomy); no code or drawings are taken from it.
