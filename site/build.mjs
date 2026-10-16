@@ -13,7 +13,7 @@ const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 for (const d of ["", "sheets", "thumbs", "3d"]) mkdirSync(join(out, d), { recursive: true });
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const CMD = "/blueprint-drawings";
+const CMD = "/howitworks";
 
 // ---- collect the sheets
 const sheets = readdirSync(join(root, "examples"))
@@ -67,8 +67,8 @@ sheets.forEach((m, i) => {
   const next = sheets[(i + 1) % sheets.length];
   const src = join(root, "examples", m.slug, `${m.slug}.html`);
   let html = readFileSync(src, "utf8");
-  const bar = `<nav class="site-bar" aria-label="Blueprint">
-<a href="../">← Blueprint</a><span>${esc(m.dwg)} · ${esc(m.title)}</span>
+  const bar = `<nav class="site-bar" aria-label="howitworks">
+<a href="../">← howitworks</a><span>${esc(m.dwg)} · ${esc(m.title)}</span>
 <span class="site-bar-pn"><a href="${prev.slug}.html" aria-label="Previous sheet: ${esc(prev.title)}">‹ ${esc(prev.dwg)}</a><a href="../collection.html">All sheets</a><a href="${next.slug}.html" aria-label="Next sheet: ${esc(next.title)}">${esc(next.dwg)} ›</a></span>
 </nav>
 <style>
@@ -316,9 +316,9 @@ const H = Object.fromEntries(TOC.map(([id, t], i) => [id, `<h2 id="${id}">${t}<s
 const sidebar = (home) => `<aside class="side">
 ${home ? PTR : ""}
 <div class="group">
-<a class="brand" href="${home ? "#" : "./"}">${MARK}Blueprint</a>
+<a class="brand" href="${home ? "#" : "./"}">${MARK}howitworks</a>
 <a href="collection.html"${home ? "" : ' class="on"'}>Collection</a>
-<a href="https://github.com/hariFED/blueprint">Source</a>
+<a href="https://github.com/hariFED/howitworks">Source</a>
 <a href="${home ? "" : "./"}#install">Install</a>
 </div>
 ${home ? `<div class="group toc">${TOC.map(([id, t]) => `<a href="#${id}" data-toc="${id}">${t}</a>`).join("")}</div>` : ""}
@@ -326,8 +326,8 @@ ${home ? `<div class="group toc">${TOC.map(([id, t]) => `<a href="#${id}" data-t
 
 const footer = `<footer>
 Made by hariFED with Claude Code. Set in Inter, EB Garamond and JetBrains Mono.<br>
-<a href="https://github.com/hariFED/blueprint">Source on GitHub</a> · <a href="https://www.npmjs.com/package/@harifed/blueprint">npm</a> · <a href="https://github.com/hariFED/blueprint/blob/main/LICENSE">MIT licence</a> · Version ${esc(pkg.version)}<br>
-Inspired by Ryan's <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a>, which draws the machine; Blueprint draws the drawing.
+<a href="https://github.com/hariFED/howitworks">Source on GitHub</a> · <a href="https://www.npmjs.com/package/howitworks">npm</a> · <a href="https://github.com/hariFED/howitworks/blob/main/LICENSE">MIT licence</a> · Version ${esc(pkg.version)}<br>
+Inspired by Ryan's <a href="https://skills.wheresryan.sh/anatomy">Anatomy</a>, which draws the machine; howitworks draws the drawing.
 </footer>`;
 
 const SCRIPT = `<script>
@@ -446,17 +446,17 @@ const faqs = [
   ["What licence?", "MIT, for the skill, the kit and every sheet."],
 ].map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join("\n");
 
-const index = `${head("Blueprint · a skill for Claude Code", `Name a mechanism, or an idea, and Claude drafts the live engineering drawing that explains it. ${total} sheets, all live.`)}
+const index = `${head("howitworks · a skill for Claude Code", `Name a mechanism, or an idea, and Claude drafts the live engineering drawing that explains it. ${total} sheets, all live.`)}
 <div class="layout">
 ${sidebar(true)}
 <main class="main">
-<div class="head"><div><b>Blueprint</b> <span>· a skill for Claude Code</span></div><div class="icons"><a href="https://github.com/hariFED/blueprint" aria-label="Source on GitHub">GitHub</a></div></div>
+<div class="head"><div><b>howitworks</b> <span>· a skill for Claude Code</span></div><div class="icons"><a href="https://github.com/hariFED/howitworks" aria-label="Source on GitHub">GitHub</a></div></div>
 <p class="tag">Name a mechanism, or an idea, and Claude drafts <em class="s">the drawing</em> that explains it.</p>
 <div class="minis">${mini}</div>
 <div class="meta"><span>${CMD}</span><i>·</i><a href="collection.html">${total} sheets, all live</a><i>·</i><span>${parts} drawn parts</span><i>·</i><span>by hariFED</span><i>·</i><span>15 October 2026</span><i>·</i><a href="#install">Install ↓</a></div>
 
 <p>Most explanations of how something works are boxes and arrows. A drafting office never drew boxes. It drew <em class="s">the thing itself</em>, cut open along the plane where the mechanism lives, with every part named, measured and made of something.</p>
-<p>Blueprint is a skill for Claude Code that does this. You name a mechanism or an idea, Claude picks the real object whose working <em class="s">is</em> the idea, and drafts it as a live A2 engineering sheet: a section through the mechanism, details at larger scale, dimensions, balloons, a parts list and a title block. Then the parts move, and every number on the sheet comes from <a href="#rules">one physical model</a>.</p>
+<p>howitworks is a skill for Claude Code that does this. You name a mechanism or an idea, Claude picks the real object whose working <em class="s">is</em> the idea, and drafts it as a live A2 engineering sheet: a section through the mechanism, details at larger scale, dimensions, balloons, a parts list and a title block. Then the parts move, and every number on the sheet comes from <a href="#rules">one physical model</a>.</p>
 
 <div class="wide side-by hero">
 ${solid("floor-pump", "Live 3D cutaway: the base of a bicycle floor pump", "cut=1&amp;zoom=5.6&amp;look=55,55,0&amp;balloons=0", "16/9")}
@@ -471,7 +471,7 @@ ${solid("floor-pump", "Live 3D cutaway: the base of a bicycle floor pump", "cut=
 
 <span class="sn"><b>1</b>The 3D view and the 2D sheet run the same model file, so their numbers can't disagree.</span>
 <p>This is the base of a bicycle floor pump, cut in half. Press <kbd>Space</kbd> to pump: the air, stippled orange, thickens as the piston comes down, and the steel ball lifts off its seat the moment the chamber passes tyre pressure, because it is <em class="s">the outlet valve</em>. Drag to turn it; press <kbd>E</kbd> to take it apart.<span class="sn-ref">1</span></p>
-<p>Behind it is a full engineering drawing: an A2 sheet with the section at 1:2.5, two details, a gauge view, a P–s diagram, 21 balloons, a parts list and a title block, all live. Blueprint draws <a href="#flat">both</a>.</p>
+<p>Behind it is a full engineering drawing: an A2 sheet with the section at 1:2.5, two details, a gauge view, a P–s diagram, 21 balloons, a parts list and a title block, all live. howitworks draws <a href="#flat">both</a>.</p>
 
 <section>${H.cut}
 <p>The skill rests on one rule, written at the top of its instructions above everything else:</p>
@@ -489,7 +489,7 @@ ${solid("floor-pump", "Live 3D cutaway: the base of a bicycle floor pump", "cut=
 <p>The prompt is <em class="s">the idea</em>, not the drawing. "Explain how a token bucket rate limiter works" is enough; deciding that it should be a WC cistern is the part Claude is asked to do.</p>
 <p>A few words change what you get:</p>
 <div class="rows">
-<div><code>paper</code> · <code>dark</code></div><div>Sets the default theme. Every sheet ships with blueprint, paper and dark; the reader can switch.</div>
+<div><code>paper</code> · <code>dark</code></div><div>Sets the default theme. Every sheet ships with blueprint, paper, white and dark; the reader can switch.</div>
 <div><code>set</code></div><div>Several sheets of one machine, one sub-assembly per A2. Claude proposes the first sheet before starting.</div>
 <div><code>still</code></div><div>A drawing without the live layer: no tour, no drag, just the sheet.</div>
 </div>
@@ -558,9 +558,9 @@ ${sheets.some((m) => m.has3d && m.slug !== "floor-pump") ? `<div class="grid g3d
 <p>A sheet is a single HTML file: inline SVG, inlined CSS and plain JavaScript. Embed one anywhere:</p>
 <pre>&lt;iframe src="floor-pump.html?theme=white" style="width:100%;aspect-ratio:1200/905;border:0"&gt;&lt;/iframe&gt;</pre>
 <p>The drafting kit is pure functions that return SVG strings, so it runs in Node and in the page:</p>
-<pre>npm install @harifed/blueprint
+<pre>npm install howitworks
 
-import * as K from "@harifed/blueprint/kit/draft";
+import * as K from "howitworks/kit/draft";
 
 const V = K.view({ x: 190, y: 780, scale: 1 / 2.5 });
 const barrel = K.revolve([[16, 34], [17.5, 34], [17.5, 384], [16, 384]]);
@@ -569,17 +569,17 @@ svg += K.dim(V, [-17.5, 384], [17.5, 384], { dir: "h", off: -24, prefix: "Ø" })
 <p>Every sheet understands the same addresses:</p>
 <div class="rows">
 <div><code>?t=6.5</code></div><div>Renders the tour at 6.5 s, the same every time. The screenshots and checks use it.</div>
-<div><code>?theme=white</code></div><div>Blueprint, paper, white or dark.</div>
+<div><code>?theme=white</code></div><div>blueprint, paper, white or dark.</div>
 <div><code>?zoom=x,y,w,h</code></div><div>One region of the sheet, filling the window, for close-ups.</div>
 <div><code>?check=1</code></div><div>Runs the in-page layout check and writes its findings as JSON.</div>
 </div>
 </section>
 
 <section>${H.install}
-<p>One command copies the skill into <code>~/.claude/skills/blueprint-drawings</code>:</p>
-<div class="install"><code id="cmd">npx @harifed/blueprint</code><button type="button" data-copy="cmd">Copy</button></div>
+<p>One command copies the skill into <code>~/.claude/skills/howitworks</code>:</p>
+<div class="install"><code id="cmd">npx howitworks</code><button type="button" data-copy="cmd">Copy</button></div>
 <p>Add <code>--project</code> to install into this project's <code>.claude/skills</code>, or <code>--no-examples</code> for a smaller install. Or clone it:</p>
-<pre>git clone https://github.com/hariFED/blueprint ~/.claude/skills/blueprint-drawings</pre>
+<pre>git clone https://github.com/hariFED/howitworks ~/.claude/skills/howitworks</pre>
 <p>It needs Node.js 20 or later, and Chrome, Chromium or Edge for the checks. Restart Claude Code, then try:</p>
 <pre>${CMD} explain how a mechanical watch keeps time
 ${CMD} draw a token bucket rate limiter as a machine
@@ -619,12 +619,12 @@ const cards = sheets.map((m) => `<article id="${m.slug}">
 ${m.has3d ? `<p class="facts"><a href="3d/${m.slug}.html">Open the 3D view →</a></p>` : ""}
 </article>`).join("\n");
 
-const collection = `${head("Collection · Blueprint", `All ${total} Blueprint sheets: live engineering drawings that explain mechanisms and ideas.`)}
+const collection = `${head("Collection · howitworks", `All ${total} howitworks sheets: live engineering drawings that explain mechanisms and ideas.`)}
 <div class="layout">
 ${sidebar(false)}
 <main class="coll">
 <div class="head"><div><b>Collection</b> <span>· ${total} sheets, all live</span></div></div>
-<p class="tag">Every sheet drafted by Claude with the Blueprint skill. Each one passes the layout check at a dozen moments of its tour and at phone width. Open one and drag the moving part.</p>
+<p class="tag">Every sheet drafted by Claude with the howitworks skill. Each one passes the layout check at a dozen moments of its tour and at phone width. Open one and drag the moving part.</p>
 <div class="cards">${cards}</div>
 </main>
 ${footer}

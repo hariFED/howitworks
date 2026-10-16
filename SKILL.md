@@ -1,11 +1,11 @@
 ---
-name: blueprint-drawings
+name: howitworks
 description: Build live engineering drawings that explain how something works, as a real drafted sheet - orthographic views, a section cut through the mechanism, ISO line types and material hatching, true dimensions, detail views at larger scale, part balloons with a parts list, notes and a title block - where the parts move, the dimensions re-measure themselves and a live readout and chart come from one physical model. Use it whenever someone wants a blueprint, a technical drawing, a cutaway or cross-section, an engineering-style or drafting-style diagram, an "exploded"/"how it works" sheet, or an interactive explainer of a mechanism, a machine, a device, a process or an abstract idea drawn as a mechanism, even if they never say "blueprint". Framework-free JS that writes SVG and one standalone HTML page, with blueprint, paper and dark themes.
 license: MIT
 compatibility: Needs Node.js 20+, and Chrome, Chromium or Edge for the checks.
 ---
 
-# Blueprint
+# howitworks
 
 This skill makes a drawing sheet the way a drafting office would: an A2 sheet with a frame and zone references, a main view cut through the mechanism, details enlarged to show the small parts that matter, a view in the direction that reads a dial, balloons on every part, a parts list, notes and a title block. Then it comes alive. The parts move, the cut air changes density with pressure, a dimension measures the stroke as it happens, a gauge needle follows, a chart traces the cycle, and the title block's readout states the numbers. All of it reads one small model, so nothing on the sheet can disagree with anything else.
 

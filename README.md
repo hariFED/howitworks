@@ -1,27 +1,27 @@
-# Blueprint
+# howitworks
 
 **A skill for Claude Code.** Name a mechanism, or an idea, and Claude drafts the live engineering drawing that explains it: an A2 sheet with a section through the mechanism, ISO line types and material hatching, true dimensions, detail views, balloons, a parts list and a title block. The parts move, and every number on the sheet comes from one physical model.
 
-**Website and all example sheets, live:** https://harifed.github.io/blueprint/
+**Website and all example sheets, live:** https://harifed.github.io/howitworks/
 
 ## Install
 
 ```
-npx @harifed/blueprint
+npx howitworks
 ```
 
-This copies the skill into `~/.claude/skills/blueprint-drawings`. Options: `--project` installs into `./.claude/skills` instead, `--no-examples` skips the example sheets, and `--force` replaces an existing install. You can also clone it:
+This copies the skill into `~/.claude/skills/howitworks`. Options: `--project` installs into `./.claude/skills` instead, `--no-examples` skips the example sheets, and `--force` replaces an existing install. You can also clone it:
 
 ```
-git clone https://github.com/hariFED/blueprint ~/.claude/skills/blueprint-drawings
+git clone https://github.com/hariFED/howitworks ~/.claude/skills/howitworks
 ```
 
 Requires Node.js 20+, plus Chrome, Chromium or Edge for the checks. Restart Claude Code, then:
 
 ```
-/blueprint-drawings explain how a pin tumbler lock opens
-/blueprint-drawings draw debounce as a real mechanism
-/blueprint-drawings explain a gear pump, in 3d
+/howitworks explain how a pin tumbler lock opens
+/howitworks draw debounce as a real mechanism
+/howitworks explain a gear pump, in 3d
 ```
 
 Add `3d` to get a companion 3D page (orbit, cut, explode, drive it) next to the sheet; the sheet stays the authority for dimensions.
@@ -42,7 +42,7 @@ Add `3d` to get a companion 3D page (orbit, cut, explode, drive it) next to the 
 ## Use the kit in your own code
 
 ```js
-import * as K from "@harifed/blueprint/kit/draft";
+import * as K from "howitworks/kit/draft";
 
 const V = K.view({ x: 190, y: 780, scale: 1 / 2.5 });
 const tube = K.revolve([[16, 34], [17.5, 34], [17.5, 384], [16, 384]]);

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// npx @harifed/blueprint [--project] [--dir <path>] [--force] [--no-examples]
-// Copies the Blueprint skill into ~/.claude/skills/blueprint-drawings (or ./.claude/skills/blueprint-drawings).
+// npx howitworks [--project] [--dir <path>] [--force] [--no-examples]
+// Copies the howitworks skill into ~/.claude/skills/howitworks (or ./.claude/skills/howitworks).
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve, relative } from "node:path";
@@ -12,17 +12,17 @@ const has = (f) => args.includes(f);
 const val = (f) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : undefined; };
 
 if (has("--help") || has("-h")) {
-  console.log(`Blueprint, a skill for Claude Code
+  console.log(`howitworks, a skill for Claude Code
 
-Usage: npx @harifed/blueprint [options]
+Usage: npx howitworks [options]
 
-  (no options)     install into ~/.claude/skills/blueprint-drawings
-  --project        install into ./.claude/skills/blueprint-drawings (this project only)
-  --dir <path>     install into <path>/blueprint-drawings
+  (no options)     install into ~/.claude/skills/howitworks
+  --project        install into ./.claude/skills/howitworks (this project only)
+  --dir <path>     install into <path>/howitworks
   --force          replace an existing install
   --no-examples    skip the example sheets (smaller install)
 
-Then, in Claude Code:  /blueprint-drawings explain how a bicycle floor pump works`);
+Then, in Claude Code:  /howitworks explain how a bicycle floor pump works`);
   process.exit(0);
 }
 
@@ -30,7 +30,7 @@ const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const base = val("--dir") ? resolve(val("--dir"))
   : has("--project") ? resolve(".claude", "skills")
   : join(homedir(), ".claude", "skills");
-const dest = join(base, "blueprint-drawings");
+const dest = join(base, "howitworks");
 
 if (existsSync(dest)) {
   if (!has("--force")) {
@@ -58,9 +58,9 @@ const count = (dir) => readdirSync(dir).reduce((n, f) => {
   return n + (statSync(p).isDirectory() ? count(p) : 1);
 }, 0);
 const examples = existsSync(join(dest, "examples")) ? readdirSync(join(dest, "examples")).length : 0;
-console.log(`Blueprint ${pkg.version} installed in ${dest}
+console.log(`howitworks ${pkg.version} installed in ${dest}
   ${count(dest)} files, ${examples} example sheet${examples === 1 ? "" : "s"}
 
 Restart Claude Code, then try:
-  /blueprint-drawings explain how a pin tumbler lock opens
-  /blueprint-drawings draw a rate limiter as a real mechanism`);
+  /howitworks explain how a pin tumbler lock opens
+  /howitworks draw a rate limiter as a real mechanism`);
