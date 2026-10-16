@@ -1,0 +1,2800 @@
+<!doctype html>
+<html lang="en" data-theme="blueprint">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Floor Pump 3D</title>
+<meta name="description" content="The BP-001 floor pump as a live isometric half-section: hatched cut faces, an exploded view with balloons, and the piston, cup seal and check ball driven by the 2D sheet's Boyle's-law model.">
+<style>
+/* Blueprint sheet styles. Every colour a drawing uses is one of these tokens. */
+
+:root,
+[data-theme="blueprint"] {
+  --bp-page: #0a2747;
+  --bp-paper: #123b69;
+  --bp-ink: #e9f1ff;
+  --bp-hatch: rgba(214, 230, 255, 0.72);
+  --bp-muted: #95b3da;
+  --bp-grid: rgba(190, 215, 255, 0.07);
+  --bp-accent: #ffc94d;
+  --bp-accent-ink: #ffd77a;
+  --bp-ui: rgba(233, 241, 255, 0.12);
+}
+[data-theme="paper"] {
+  --bp-page: #e4dfd1;
+  --bp-paper: #f7f3e8;
+  --bp-ink: #1c2633;
+  --bp-hatch: rgba(28, 38, 51, 0.78);
+  --bp-muted: #616b78;
+  --bp-grid: rgba(28, 38, 51, 0.045);
+  --bp-accent: #d4472c;
+  --bp-accent-ink: #b8361e;
+  --bp-ui: rgba(28, 38, 51, 0.08);
+}
+[data-theme="white"] {
+  --bp-page: #fafafa;
+  --bp-paper: #fafafa;
+  --bp-ink: #262626;
+  --bp-hatch: rgba(38, 38, 38, 0.42);
+  --bp-muted: #8f8f8f;
+  --bp-grid: rgba(0, 0, 0, 0);
+  --bp-accent: #e2552c;
+  --bp-accent-ink: #c8442b;
+  --bp-ui: rgba(0, 0, 0, 0.07);
+}
+[data-theme="dark"] {
+  --bp-page: #0d0f12;
+  --bp-paper: #15181c;
+  --bp-ink: #dde3ea;
+  --bp-hatch: rgba(221, 227, 234, 0.62);
+  --bp-muted: #86919d;
+  --bp-grid: rgba(221, 227, 234, 0.035);
+  --bp-accent: #f29f3d;
+  --bp-accent-ink: #f6b462;
+  --bp-ui: rgba(221, 227, 234, 0.08);
+}
+
+:root {
+  --bp-thick: 1.15px;
+  --bp-thin: 0.55px;
+  --bp-font: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bp-page);
+  color: var(--bp-ink);
+  font-family: var(--bp-font);
+}
+.bp-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  box-sizing: border-box;
+}
+.bp-figure {
+  margin: 0;
+}
+.bp-sheet {
+  display: block;
+  width: 100%;
+  height: auto;
+  outline: none;
+  border-radius: 2px;
+}
+.bp-sheet:focus-visible {
+  box-shadow: 0 0 0 2px var(--bp-accent);
+}
+.bp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--bp-muted);
+  letter-spacing: 0.03em;
+}
+.bp-bar kbd {
+  font: inherit;
+  color: var(--bp-ink);
+  border: 1px solid var(--bp-ui);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+.bp-themes {
+  display: flex;
+  gap: 4px;
+}
+.bp-themes button {
+  font: inherit;
+  color: var(--bp-muted);
+  background: transparent;
+  border: 1px solid var(--bp-ui);
+  border-radius: 3px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.bp-themes button[aria-pressed="true"] {
+  color: var(--bp-ink);
+  background: var(--bp-ui);
+}
+.bp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Zoom mode (?zoom=x,y,w,h): the region fills the window, for close-up checks. */
+body.bp-zoom .bp-page {
+  max-width: none;
+  padding: 0;
+}
+body.bp-zoom .bp-sheet {
+  width: 100vw;
+  height: 100vh;
+}
+body.bp-zoom .bp-bar {
+  display: none;
+}
+
+/* ---- the drawing */
+.bp-sheet .sheet-bg {
+  fill: var(--bp-paper);
+}
+.bp-sheet .grid {
+  fill: none;
+  stroke: var(--bp-grid);
+  stroke-width: 0.5px;
+}
+.bp-sheet .vis,
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  fill: none;
+  stroke: var(--bp-ink);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.bp-sheet .vis {
+  stroke-width: var(--bp-thick);
+}
+.bp-sheet .thin,
+.bp-sheet .hid,
+.bp-sheet .ctr,
+.bp-sheet .phan {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .hid {
+  stroke-dasharray: 4 2.2;
+  stroke-linecap: butt;
+}
+.bp-sheet .ctr {
+  stroke-dasharray: 15 2.6 2 2.6;
+  stroke-linecap: butt;
+}
+.bp-sheet .phan {
+  stroke-dasharray: 13 2.4 1.8 2.4 1.8 2.4;
+  stroke-linecap: butt;
+}
+.bp-sheet .vis.spring {
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .paper,
+.bp-sheet .balloon {
+  fill: var(--bp-paper);
+}
+.bp-sheet .balloon {
+  stroke: var(--bp-ink);
+  stroke-width: var(--bp-thin);
+}
+.bp-sheet .solid,
+.bp-sheet .head,
+.bp-sheet .dot {
+  fill: var(--bp-ink);
+}
+.bp-sheet .hl {
+  fill: none;
+  stroke: var(--bp-hatch);
+  stroke-width: 0.5px;
+}
+.bp-sheet .hl-dash {
+  stroke-dasharray: 1.3 1.3;
+}
+.bp-sheet .hd {
+  fill: var(--bp-hatch);
+}
+.bp-sheet .tint {
+  fill: var(--bp-accent);
+}
+.bp-sheet .accent {
+  stroke: var(--bp-accent);
+}
+.bp-sheet .accent-fill {
+  fill: var(--bp-accent);
+}
+.bp-sheet .t {
+  font-family: var(--bp-font);
+  font-size: 9.5px;
+  fill: var(--bp-ink);
+  letter-spacing: 0.02em;
+}
+.bp-sheet .t-sm {
+  font-size: 7.6px;
+}
+.bp-sheet .t-lg {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-xl {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.bp-sheet .t-cap {
+  font-size: 6.2px;
+  fill: var(--bp-muted);
+  letter-spacing: 0.08em;
+}
+.bp-sheet .t-head {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.bp-sheet .t-mute {
+  fill: var(--bp-muted);
+}
+.bp-sheet .t-accent {
+  fill: var(--bp-accent-ink);
+}
+.bp-sheet [data-drag] {
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+
+:root, [data-theme="blueprint"] { --bp3-lit: #2a5a93; --bp3-mid: #1d4a7e; --bp3-dark: #133864; }
+[data-theme="paper"] { --bp3-lit: #ece6d8; --bp3-mid: #d9d0bc; --bp3-dark: #bdb29b; }
+[data-theme="white"] { --bp3-lit: #ffffff; --bp3-mid: #ececec; --bp3-dark: #d4d4d4; }
+[data-theme="dark"] { --bp3-lit: #353b43; --bp3-mid: #272c32; --bp3-dark: #1b1e22; }
+html, body { height: 100%; overflow: hidden; }
+.v3 { display: flex; flex-direction: column; height: 100%; }
+.v3-bar { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 8px 16px; font-size: 12px; color: var(--bp-muted); letter-spacing: .03em; border-bottom: 1px solid var(--bp-ui); }
+.v3-bar b { color: var(--bp-ink); font-weight: 600; letter-spacing: .08em; }
+.v3-grp { display: flex; gap: 4px; align-items: center; }
+.v3-bar button { font: inherit; color: var(--bp-muted); background: transparent; border: 1px solid var(--bp-ui); border-radius: 3px; padding: 3px 9px; cursor: pointer; }
+.v3-bar button[aria-pressed="true"] { color: var(--bp-ink); background: var(--bp-ui); }
+.v3-bar input[type="range"] { width: 92px; accent-color: var(--bp-accent); }
+.v3-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; outline: none; background-color: var(--bp-paper);
+  background-image: linear-gradient(var(--bp-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bp-grid) 1px, transparent 1px); background-size: 20px 20px; }
+.v3-stage:focus-visible { box-shadow: inset 0 0 0 2px var(--bp-accent); }
+.v3-stage::after { content: ""; position: absolute; inset: 10px; border: 1.2px solid var(--bp-ink); pointer-events: none; opacity: .85; }
+.v3-stage canvas { position: absolute; inset: 0; display: block; touch-action: none; cursor: grab; }
+.v3-stage canvas.v3-grab { cursor: grabbing; }
+#ov { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+#ov .thin, #ov .hid { fill: none; stroke: var(--bp-ink); stroke-width: var(--bp-thin); }
+#ov .thin { stroke-width: .8px; }
+#ov .hid { stroke-width: .8px; stroke-dasharray: 4 2.6; }
+#ov .dot, #ov .head { fill: var(--bp-ink); }
+#ov .balloon { fill: var(--bp-paper); stroke: var(--bp-ink); stroke-width: .9px; }
+#ov .t { font-family: var(--bp-font); font-size: 10.5px; fill: var(--bp-ink); }
+.v3-title { position: absolute; right: 10px; bottom: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; width: min(420px, calc(100% - 20px)); border: 1.2px solid var(--bp-ink); border-right: 0; border-bottom: 0; background: var(--bp-paper); font-size: 10px; pointer-events: none; }
+.v3-title > div { border-right: .6px solid var(--bp-ink); border-bottom: .6px solid var(--bp-ink); padding: 3px 6px 4px; min-width: 0; }
+.v3-title i { display: block; font-style: normal; font-size: 7px; color: var(--bp-muted); letter-spacing: .08em; }
+.v3-title .w2 { grid-column: span 2; } .v3-title .w3 { grid-column: span 3; } .v3-title .w4 { grid-column: span 4; }
+.v3-title .lg { font-size: 12px; font-weight: 600; letter-spacing: .06em; }
+#readout { color: var(--bp-accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v3-hint { position: absolute; left: 22px; bottom: 18px; font-size: 10.5px; color: var(--bp-muted); letter-spacing: .04em; max-width: 46%; pointer-events: none; }
+.v3-fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--bp-muted); }
+.v3-bar, .v3-stage { min-width: 0; }
+.v3-grp { flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .v3-hint { display: none; }
+  .v3-bar { padding: 6px 10px; gap: 6px 10px; }
+  .v3-bar b { flex-basis: 100%; }
+  .v3-bar input[type="range"] { width: 70px; }
+  .v3-title { width: calc(100% - 20px); }
+  .v3-title > div:not(.w4) { display: none; }
+}
+
+</style>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }</script>
+</head>
+<body>
+
+<div class="v3">
+<div class="v3-bar" role="toolbar" aria-label="View controls">
+  <b>FLOOR PUMP · BP-001 · 3D</b>
+  <span class="v3-grp" role="group" aria-label="View"><button type="button" data-view="iso">ISO</button><button type="button" data-view="front">FRONT</button><button type="button" data-view="side">SIDE</button><button type="button" data-view="top">TOP</button></span>
+  <span class="v3-grp"><button type="button" id="cut" aria-pressed="true">CUT</button><label>plane <input id="offset" type="range" min="-30" max="30" step="0.5" value="0" aria-label="Cutting plane offset, mm"></label></span>
+  <span class="v3-grp"><label>explode <input id="explode" type="range" min="0" max="1" step="0.01" value="0" aria-label="Explode"></label></span>
+  <span class="v3-grp"><button type="button" id="balloons" aria-pressed="true">BALLOONS</button><button type="button" id="pump">PUMP</button></span>
+  <span class="bp-themes" role="group" aria-label="Theme"><button type="button" data-theme-pick="blueprint">blueprint</button><button type="button" data-theme-pick="paper">paper</button><button type="button" data-theme-pick="dark">dark</button></span>
+</div>
+<div id="stage" class="v3-stage" tabindex="0" role="img" aria-label="Isometric half-section of a bicycle floor pump. Drag to orbit, drag the handle or press Space to pump; the piston, cup seal, check ball and gauge follow the same Boyle's-law model as the 2D sheet.">
+  <canvas id="gl"></canvas>
+  <svg id="ov" aria-hidden="true"></svg>
+  <div class="v3-hint">DRAG TO ORBIT · DRAG THE HANDLE OR SPACE TO PUMP · WHEEL ZOOM · SHIFT-DRAG PAN · E EXPLODE · C CUT · 1–4 VIEWS · R LET DOWN</div>
+  <div class="v3-title">
+    <div class="w3 lg"><i>TITLE</i>FLOOR PUMP · ISOMETRIC HALF-SECTION</div><div class="lg"><i>DWG NO</i>BP-001-3D</div>
+    <div><i>SCALE</i>NTS</div><div><i>PROJECTION</i>ISOMETRIC</div><div><i>UNITS</i>mm · bar</div><div><i>PARTS</i>21</div>
+    <div class="w4"><i>LIVE · SAME MODEL AS BP-001 · DRAG THE HANDLE · SPACE PUMPS</i><span id="readout">&nbsp;</span></div>
+  </div>
+  <noscript><div class="v3-fail">This drawing needs JavaScript and WebGL.</div></noscript>
+</div>
+<span id="sr" class="bp-sr" aria-live="polite"></span>
+<pre id="bench" hidden></pre>
+</div>
+<script>
+window.addEventListener("error", (e) => { window.__v3err = String(e.message || e); });
+setTimeout(() => {
+  if (window.__v3ok) return;
+  const d = document.createElement("div");
+  d.className = "v3-fail";
+  d.id = "v3-fallback";
+  d.textContent = "The 3D view could not start (" + (window.__v3err || "three.js did not load: this page needs WebGL and a connection to cdn.jsdelivr.net") + "). The 2D sheet, floor-pump.html, needs neither.";
+  document.getElementById("stage").appendChild(d);
+}, 8000);</script>
+<script type="module">
+import * as THREE from "three";
+const K = (() => {
+// Blueprint drafting kit: orthographic views, sections, hatching, dimensions and sheet furniture.
+// Every function here is pure and returns SVG markup strings, so the same code runs in the build
+// and, inlined, in the page (live dimensions, moving springs, needles).
+//
+// Units. World geometry is in millimetres of the real object: u to the right, v up (a front view),
+// or u right, v away from the viewer (a plan view). The sheet is an A2 drawing, 594 mm wide, drawn
+// 1200 units wide; a view maps world mm to sheet units through its drawing scale.
+
+const SHEET = { w: 1200, h: 848 };
+const PX_PER_MM = SHEET.w / 594;
+
+// ISO 128 line widths and ISO 3098 lettering, in sheet units (A2: 0.5 / 0.25 mm lines, 3.5 mm text).
+const THICK = 1.15;
+const THIN = 0.55;
+const TEXT = 9.5;
+const ARROW = 7;
+const GAP = 2.2; // extension lines start this far from the object
+const OVER = 3.5; // and run this far past the dimension line
+
+const r2 = (n) => Math.round(n * 100) / 100;
+
+function fmt(n, digits = 1) {
+  const near = Math.round(n);
+  if (Math.abs(n - near) < 0.05) return String(near);
+  return n.toFixed(digits);
+}
+
+// ---------------------------------------------------------------- views
+
+// A view is a window from world mm onto the sheet. scale is the drawing scale (1/2.5 for "1:2.5").
+function view({ x, y, scale, name = "" }) {
+  const k = scale * PX_PER_MM;
+  return { x, y, scale, k, name, p: ([u, v]) => [r2(x + u * k), r2(y - v * k)] };
+}
+
+const scaleLabel = (scale) => (scale >= 1 ? `${fmt(scale)}:1` : `1:${fmt(1 / scale)}`);
+
+function d(V, pts, closed = true) {
+  let out = "";
+  for (let i = 0; i < pts.length; i++) {
+    const [x, y] = V.p(pts[i]);
+    out += `${i ? "L" : "M"}${x} ${y}`;
+  }
+  return closed ? out + "Z" : out;
+}
+
+// ---------------------------------------------------------------- world geometry (point lists)
+
+const rect = (u0, v0, u1, v1) => [[u0, v0], [u1, v0], [u1, v1], [u0, v1]];
+
+function arc(cu, cv, r, a0, a1, steps) {
+  const n = steps ?? Math.max(3, Math.ceil(Math.abs(a1 - a0) / 7.5));
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const a = ((a0 + ((a1 - a0) * i) / n) * Math.PI) / 180;
+    out.push([cu + r * Math.cos(a), cv + r * Math.sin(a)]);
+  }
+  return out;
+}
+
+const circle = (cu, cv, r, steps = 48) => arc(cu, cv, r, 0, 360 - 360 / steps, steps - 1);
+
+// A rectangle with filleted corners.
+function rrect(u0, v0, u1, v1, r, steps = 4) {
+  const q = Math.min(r, (u1 - u0) / 2, (v1 - v0) / 2);
+  return [
+    ...arc(u1 - q, v0 + q, q, -90, 0, steps),
+    ...arc(u1 - q, v1 - q, q, 0, 90, steps),
+    ...arc(u0 + q, v1 - q, q, 90, 180, steps),
+    ...arc(u0 + q, v0 + q, q, 180, 270, steps),
+  ];
+}
+
+const move = (pts, du, dv) => pts.map(([u, v]) => [u + du, v + dv]);
+const flipU = (pts, about = 0) => pts.map(([u, v]) => [2 * about - u, v]).reverse();
+const flipV = (pts, about = 0) => pts.map(([u, v]) => [u, 2 * about - v]).reverse();
+
+function inside([u, v], poly) {
+  let hit = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ui, vi] = poly[i];
+    const [uj, vj] = poly[j];
+    if (vi > v !== vj > v && u < ((uj - ui) * (v - vi)) / (vj - vi) + ui) hit = !hit;
+  }
+  return hit;
+}
+
+// A body of revolution cut through its axis.
+// loop is the half-profile as [r, s] pairs: r >= 0 measured from the axis, s along the axis.
+// axis "v" is a vertical axis at u = at; axis "u" a horizontal axis at v = at.
+// Returns the cut faces (hatched) and the edges seen through the bore behind the cutting plane:
+// every circle on an inner surface shows edge-on as a straight line across the bore.
+function revolve(loop, { axis = "v", at = 0 } = {}) {
+  const place = axis === "v" ? (r, s) => [at + r, s] : (r, s) => [s, at + r];
+  const n = loop.length;
+  const onAxis = loop.findIndex(([r], i) => r === 0 && loop[(i + 1) % n][0] === 0);
+  let cuts;
+  if (onAxis >= 0) {
+    const chain = Array.from({ length: n }, (_, j) => loop[(onAxis + 1 + j) % n]);
+    const right = chain.map(([r, s]) => place(r, s));
+    const left = chain.slice(1, -1).reverse().map(([r, s]) => place(-r, s));
+    cuts = [[...right, ...left]];
+  } else {
+    cuts = [loop.map(([r, s]) => place(r, s)), loop.map(([r, s]) => place(-r, s)).reverse()];
+  }
+  const eps = 1e-3;
+  const across = new Map();
+  const clear = (r, s) => [0.02, 0.25, 0.5, 0.75, 0.98].every((t) => !inside([t * r, s], loop));
+  for (const [r, s] of loop) {
+    if (r <= 0) continue;
+    if (clear(r, s + eps) && clear(r, s - eps)) across.set(s, Math.max(across.get(s) ?? 0, r));
+  }
+  const edges = [...across].map(([s, r]) => [place(-r, s), place(r, s)]);
+  return { cuts, edges };
+}
+
+// ---------------------------------------------------------------- hatching
+
+// ANSI/ISO-style material hatches. Spacing is in sheet units and never scales with the view,
+// so a detail at 2:1 shows the same density as the main view, as on a real drawing.
+const MATERIALS = {
+  steel: { kind: "lines", gap: 3.4 },
+  iron: { kind: "lines", gap: 5.6 },
+  alu: { kind: "pairs", gap: 5.2, pair: 1.5 },
+  brass: { kind: "dashed", gap: 4.6 },
+  bronze: { kind: "dashed", gap: 3.6 },
+  rubber: { kind: "cross", gap: 3.2 },
+  plastic: { kind: "lines", gap: 2.3 },
+  foam: { kind: "dots", gap: 2.6 },
+  wood: { kind: "grain", gap: 4 },
+};
+const ANGLES = [45, 135, 30, 60];
+
+function hatchDefs() {
+  let out = "";
+  for (const [name, m] of Object.entries(MATERIALS)) {
+    for (const angle of ANGLES) {
+      const g = m.gap;
+      let body = "";
+      if (m.kind === "lines") body = `<path class="hl" d="M0 -1V${g + 1}"/>`;
+      if (m.kind === "pairs") body = `<path class="hl" d="M0 -1V${g + 1}M${m.pair} -1V${g + 1}"/>`;
+      if (m.kind === "dashed") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl hl-dash" d="M${g / 2} -1V${g + 1}"/>`;
+      if (m.kind === "cross") body = `<path class="hl" d="M0 -1V${g + 1}M-1 0H${g + 1}"/>`;
+      if (m.kind === "dots") body = `<circle class="hd" cx="${g / 2}" cy="${g / 2}" r="0.42"/>`;
+      if (m.kind === "grain") body = `<path class="hl" d="M0 -1V${g + 1}"/><path class="hl" d="M${g * 0.55} -1C${g * 0.75} ${g * 0.3} ${g * 0.35} ${g * 0.7} ${g * 0.55} ${g + 1}"/>`;
+      out += `<pattern id="h-${name}-${angle}" patternUnits="userSpaceOnUse" width="${g}" height="${g}" patternTransform="rotate(${angle})">${body}</pattern>`;
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- drawing parts
+
+// A cut face: paper underneath (it hides what is behind), the material hatch, a thick outline.
+// mat "solid" blacks the section in, the ISO convention for sections too thin to hatch.
+function cut(V, pts, { mat = "steel", angle = 45 } = {}) {
+  const dd = d(V, pts);
+  if (mat === "solid") return `<path class="solid" d="${dd}"/>`;
+  return `<path class="paper" d="${dd}"/><path fill="url(#h-${mat}-${angle})" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+// A body of revolution in section, with the edges behind the cut.
+function section(V, rev, opts) {
+  return rev.cuts.map((c) => cut(V, c, opts)).join("") + rev.edges.map((e) => line(V, e)).join("");
+}
+
+// An unsectioned solid (shafts, rods, pins, balls, nuts and ribs are never hatched in a section).
+function body(V, pts) {
+  const dd = d(V, pts);
+  return `<path class="paper" d="${dd}"/><path class="vis" d="${dd}"/>`;
+}
+
+const line = (V, pts, cls = "vis", closed = false) => `<path class="${cls}" d="${d(V, pts, closed)}"/>`;
+const lines = (V, list, cls = "vis") => `<path class="${cls}" d="${list.map((pts) => d(V, pts, false)).join("")}"/>`;
+
+// A centre line, run a little past the outline at both ends.
+function centerline(V, a, b, over = 6) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  return `<path class="ctr" d="M${r2(ax - ux * over)} ${r2(ay - uy * over)}L${r2(bx + ux * over)} ${r2(by + uy * over)}"/>`;
+}
+
+// Centre mark for a circle in a view: two crossed centre lines.
+function centerMark(V, [cu, cv], r, over = 5) {
+  return centerline(V, [cu - r, cv], [cu + r, cv], over) + centerline(V, [cu, cv - r], [cu, cv + r], over);
+}
+
+// A compression spring cut along its axis: wire sections (blacked in) on both sides, half a pitch
+// apart, joined by the back half of each turn. from/to are positions along the axis.
+function springSection(V, { from, to, radius, wire, turns, axis = "u", at = 0 }) {
+  const place = axis === "u" ? (s, r) => [s, at + r] : (s, r) => [at + r, s];
+  const pitch = (to - from - wire) / turns;
+  const start = from + wire / 2;
+  const back = [];
+  let sections = "";
+  for (let i = 0; i <= turns; i++) {
+    const sTop = start + i * pitch;
+    sections += cut(V, circle(...place(sTop, radius), wire / 2, 12), { mat: "solid" });
+    if (i < turns) {
+      const sBot = sTop + pitch / 2;
+      sections += cut(V, circle(...place(sBot, -radius), wire / 2, 12), { mat: "solid" });
+      back.push([place(sTop, radius), place(sBot, -radius)]);
+    }
+  }
+  return lines(V, back, "vis spring") + sections;
+}
+
+// ---------------------------------------------------------------- annotation
+
+function arrowHead([x, y], [dx, dy]) {
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const bx = x - ux * ARROW;
+  const by = y - uy * ARROW;
+  const half = ARROW * 0.25;
+  return `M${r2(x)} ${r2(y)}L${r2(bx - uy * half)} ${r2(by + ux * half)}L${r2(bx + uy * half)} ${r2(by - ux * half)}Z`;
+}
+
+const textWidth = (s, size = TEXT) => String(s).length * size * 0.6;
+
+// A linear dimension between two world points, measured along dir ("h" or "v").
+// off is the sheet distance from point a to the dimension line (negative: up or left).
+// The value is measured from the geometry unless text is given, so a dimension cannot lie.
+function dim(V, a, b, { dir = "h", off = 18, text, prefix = "", suffix = "", id = "", cls = "" } = {}) {
+  const A = V.p(a);
+  const B = V.p(b);
+  const value = text ?? prefix + fmt(Math.abs(dir === "h" ? b[0] - a[0] : b[1] - a[1])) + suffix;
+  const h = dir === "h";
+  const main = h ? 0 : 1; // the axis the dimension measures along
+  const side = 1 - main;
+  const at = A[side] + off; // where the dimension line sits
+  const pt = (m, s) => (h ? [m, s] : [s, m]);
+  let ext = "";
+  for (const P of [A, B]) {
+    const gapTo = at - P[side];
+    if (Math.abs(gapTo) <= GAP) continue;
+    const sgn = Math.sign(gapTo);
+    const [x1, y1] = pt(P[main], P[side] + sgn * GAP);
+    const [x2, y2] = pt(P[main], at + sgn * OVER);
+    ext += `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+  }
+  const lo = Math.min(A[main], B[main]);
+  const hi = Math.max(A[main], B[main]);
+  const span = hi - lo;
+  const tw = textWidth(value);
+  const arrowsIn = span >= ARROW * 2 + 3;
+  const textIn = span >= tw + ARROW * 2 + 6;
+  let lineD;
+  let heads;
+  let tm; // text position along the measured axis
+  let anchor = "middle";
+  if (arrowsIn) {
+    const [x1, y1] = pt(lo, at);
+    const [x2, y2] = pt(hi, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(-1, 0)) + arrowHead(pt(hi, at), pt(1, 0));
+  } else {
+    const [x1, y1] = pt(lo - ARROW - 7, at);
+    const [x2, y2] = pt(hi + ARROW + 7, at);
+    lineD = `M${r2(x1)} ${r2(y1)}L${r2(x2)} ${r2(y2)}`;
+    heads = arrowHead(pt(lo, at), pt(1, 0)) + arrowHead(pt(hi, at), pt(-1, 0));
+  }
+  if (textIn) tm = (lo + hi) / 2;
+  else {
+    tm = hi + ARROW + 10 + tw / 2;
+    const [x2, y2] = pt(tm + tw / 2, at);
+    lineD += `L${r2(x2)} ${r2(y2)}`;
+  }
+  // ISO: text sits just above a horizontal line and reads from the right on a vertical one.
+  const [tx, ty] = pt(tm, at - 3);
+  const textEl = h
+    ? `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}">${value}</text>`
+    : `<text class="t" x="${r2(tx)}" y="${r2(ty)}" text-anchor="${anchor}" transform="rotate(-90 ${r2(tx)} ${r2(ty)})">${value}</text>`;
+  return `<g data-role="dim"${id ? ` id="${id}"` : ""}${cls ? ` class="${cls}"` : ""}><path class="thin" d="${ext}${lineD}"/><path class="head" d="${heads}"/>${textEl}</g>`;
+}
+
+// A part balloon: a dot on the part, a thin leader, a circled item number.
+function balloon(V, at, [bx, by], n, { target = "", r = 8.5 } = {}) {
+  const [ax, ay] = V.p(at);
+  const a = Math.atan2(ay - by, ax - bx);
+  const ex = r2(bx + r * Math.cos(a));
+  const ey = r2(by + r * Math.sin(a));
+  return (
+    `<g data-role="balloon" data-target="${target}" data-at="${ax} ${ay}">` +
+    `<path class="thin" d="M${ex} ${ey}L${ax} ${ay}"/><circle class="dot" cx="${ax}" cy="${ay}" r="1.5"/>` +
+    `<circle class="balloon" cx="${bx}" cy="${by}" r="${r}"/>` +
+    `<text class="t" x="${bx}" y="${r2(by + 3.3)}" text-anchor="middle">${n}</text></g>`
+  );
+}
+
+// A view title: SECTION A-A over its scale, centred under the view.
+function viewLabel(x, y, title, sub = "") {
+  return (
+    `<g data-role="label"><text class="t t-lg" x="${x}" y="${y}" text-anchor="middle">${title}</text>` +
+    (sub ? `<text class="t t-sm" x="${x}" y="${y + 12}" text-anchor="middle">${sub}</text>` : "") +
+    `</g>`
+  );
+}
+
+// The circle that marks a detail in its parent view, with its letter.
+function detailMark(V, [cu, cv], r, letter, angle = 45) {
+  const [x, y] = V.p([cu, cv]);
+  const R = r * V.k;
+  const a = (-angle * Math.PI) / 180;
+  const lx = r2(x + (R + 9) * Math.cos(a));
+  const ly = r2(y + (R + 9) * Math.sin(a) + 4);
+  return `<g data-role="label"><circle class="thin mark" cx="${x}" cy="${y}" r="${r2(R)}"/><text class="t t-lg" x="${lx}" y="${ly}" text-anchor="middle">${letter}</text></g>`;
+}
+
+// A viewing-direction arrow (VIEW C): a thick-tipped arrow pointing at the surface, with its letter.
+function viewArrow(V, at, [dx, dy], letter, len = 26) {
+  const [x, y] = V.p(at);
+  const n = Math.hypot(dx, dy) || 1;
+  const ux = dx / n;
+  const uy = dy / n;
+  const sx = r2(x - ux * len);
+  const sy = r2(y - uy * len);
+  return (
+    `<g data-role="label"><path class="vis" d="M${sx} ${sy}L${r2(x - ux * ARROW)} ${r2(y - uy * ARROW)}"/>` +
+    `<path class="head" d="${arrowHead([x, y], [ux, uy])}"/>` +
+    `<text class="t t-lg" x="${r2(sx - uy * 10)}" y="${r2(sy + ux * 10 + 4)}" text-anchor="middle">${letter}</text></g>`
+  );
+}
+
+// A long-break line across a part (thin, with one zigzag), for parts that run out of the view.
+function breakLine(V, a, b) {
+  const [ax, ay] = V.p(a);
+  const [bx, by] = V.p(b);
+  const mx = (ax + bx) / 2;
+  const my = (ay + by) / 2;
+  const len = Math.hypot(bx - ax, by - ay) || 1;
+  const ux = (bx - ax) / len;
+  const uy = (by - ay) / len;
+  const z = 3.5;
+  const p = (t, s) => `${r2(mx + ux * t - uy * s)} ${r2(my + uy * t + ux * s)}`;
+  return `<path class="thin" d="M${r2(ax - ux * 4)} ${r2(ay - uy * 4)}L${p(-z, 0)}L${p(-z / 2, z * 1.6)}L${p(z / 2, -z * 1.6)}L${p(z, 0)}L${r2(bx + ux * 4)} ${r2(by + uy * 4)}"/>`;
+}
+
+// ---------------------------------------------------------------- sheet furniture
+
+// The drawing frame: trimmed edge, a thick border, zone references and centring marks.
+function frame({ w = SHEET.w, h = SHEET.h, trim = 8, m = 24, cols = 8, rows = 6 } = {}) {
+  let out = `<g data-role="frame"><rect class="thin" x="${trim}" y="${trim}" width="${w - trim * 2}" height="${h - trim * 2}"/>`;
+  out += `<rect class="vis" x="${m}" y="${m}" width="${w - m * 2}" height="${h - m * 2}"/>`;
+  const cw = (w - m * 2) / cols;
+  const rh = (h - m * 2) / rows;
+  let ticks = "";
+  let labels = "";
+  for (let i = 0; i <= cols; i++) {
+    const x = r2(m + i * cw);
+    if (i > 0 && i < cols) ticks += `M${x} ${trim}V${m}M${x} ${h - m}V${h - trim}`;
+    if (i < cols) {
+      const cx = r2(m + (i + 0.5) * cw);
+      labels += `<text class="t t-sm" x="${cx}" y="${r2((trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+      labels += `<text class="t t-sm" x="${cx}" y="${r2(h - (trim + m) / 2 + 3)}" text-anchor="middle">${i + 1}</text>`;
+    }
+  }
+  for (let j = 0; j <= rows; j++) {
+    const y = r2(m + j * rh);
+    if (j > 0 && j < rows) ticks += `M${trim} ${y}H${m}M${w - m} ${y}H${w - trim}`;
+    if (j < rows) {
+      const cy = r2(m + (j + 0.5) * rh + 3);
+      const letter = String.fromCharCode(65 + j);
+      labels += `<text class="t t-sm" x="${r2((trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+      labels += `<text class="t t-sm" x="${r2(w - (trim + m) / 2)}" y="${cy}" text-anchor="middle">${letter}</text>`;
+    }
+  }
+  const cm = `M${w / 2} ${trim}V${m + 10}M${w / 2} ${h - trim}V${h - m - 10}M${trim} ${h / 2}H${m + 10}M${w - trim} ${h / 2}H${w - m - 10}`;
+  out += `<path class="thin" d="${ticks}"/><path class="vis" d="${cm}"/>${labels}</g>`;
+  return out;
+}
+
+// A ruled table (parts list). cols: [{ w, align, title }]. rows: arrays of cell strings.
+// Item numbers count up from the bottom, as a parts list sits on top of the title block.
+function table(x, y, cols, rows, { rowH = 16, role = "bom", headH = 18 } = {}) {
+  const w = cols.reduce((s, c) => s + c.w, 0);
+  const h = headH + rows.length * rowH;
+  let rules = "";
+  let text = "";
+  let cx = x;
+  for (const [i, c] of cols.entries()) {
+    if (i > 0) rules += `M${r2(cx)} ${y}V${y + h}`;
+    const tx = c.align === "center" ? cx + c.w / 2 : c.align === "right" ? cx + c.w - 4 : cx + 4;
+    const anchor = c.align === "center" ? "middle" : c.align === "right" ? "end" : "start";
+    text += `<text class="t t-sm t-head" x="${r2(tx)}" y="${y + h - 5.5}" text-anchor="${anchor}">${c.title}</text>`;
+    rows.forEach((row, j) => {
+      text += `<text class="t t-sm" x="${r2(tx)}" y="${r2(y + (rows.length - 1 - j) * rowH + rowH - 4.8)}" text-anchor="${anchor}">${row[i]}</text>`;
+    });
+    cx += c.w;
+  }
+  for (let j = 1; j <= rows.length; j++) rules += `M${x} ${r2(y + j * rowH)}H${x + w}`;
+  return `<g data-role="${role}"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/><path class="thin" d="${rules}"/><rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/>${text}</g>`;
+}
+
+// A title-block cell: a small caption over a value. size: "sm" | "md" | "lg".
+function cell({ x, y, w, h, label, value = "", size = "md", id = "" }) {
+  const cls = size === "lg" ? "t t-xl" : size === "sm" ? "t t-sm" : "t";
+  const vy = size === "lg" ? y + h - 7 : y + h - 5;
+  return (
+    `<rect class="thin" x="${x}" y="${y}" width="${w}" height="${h}"/>` +
+    `<text class="t t-cap" x="${x + 4}" y="${y + 9}">${label}</text>` +
+    `<text class="${cls}" x="${x + 4}" y="${vy}"${id ? ` id="${id}"` : ""}>${value}</text>`
+  );
+}
+
+function titleBlock(x, y, w, h, cells) {
+  return `<g data-role="title"><rect class="paper" x="${x}" y="${y}" width="${w}" height="${h}"/>${cells.map((c) => cell({ ...c, x: x + c.x, y: y + c.y })).join("")}<rect class="vis" x="${x}" y="${y}" width="${w}" height="${h}"/></g>`;
+}
+
+// A notes block: a heading and numbered lines.
+function notes(x, y, heading, items, lead = 13) {
+  let out = `<g data-role="notes"><text class="t t-head" x="${x}" y="${y}">${heading}</text>`;
+  items.forEach((s, i) => {
+    out += `<text class="t t-sm" x="${x}" y="${r2(y + lead * (i + 1) + 2)}">${i + 1}. ${s}</text>`;
+  });
+  return out + `</g>`;
+}
+
+return { SHEET, PX_PER_MM, THICK, THIN, TEXT, ARROW, GAP, OVER, r2, fmt, view, scaleLabel, d, rect, arc, circle, rrect, move, flipU, flipV, inside, revolve, MATERIALS, ANGLES, hatchDefs, cut, section, body, line, lines, centerline, centerMark, springSection, textWidth, dim, balloon, viewLabel, detailMark, viewArrow, breakLine, frame, table, cell, titleBlock, notes };
+})();
+
+const L = (() => {
+// Live runtime for a blueprint sheet: one time-based loop, an idle tour, input wake-ups,
+// offscreen and hidden-tab pauses, reduced motion, and deterministic frames for checks.
+//
+// URL parameters (all optional):
+//   ?t=6.5            render the tour at 6.5 s, deterministically, and stop (for screenshots)
+//   ?theme=paper      blueprint | paper | white | dark
+//   ?zoom=x,y,w,h     show only this sheet region, filling the window (for 4x close-ups)
+//   ?mask=x,y,w,h     blank everything outside this box, so one view stands alone
+//   ?check=1          run the layout self-check after the first frame (see selfcheck.mjs)
+
+function params() {
+  const q = new URLSearchParams(location.search);
+  return {
+    t: q.has("t") ? Number(q.get("t")) : null,
+    theme: q.get("theme"),
+    zoom: q.get("zoom"),
+    mask: q.get("mask"),
+    check: q.has("check"),
+  };
+}
+
+const THEMES = ["blueprint", "paper", "white", "dark"];
+
+function setupPage(svg) {
+  const q = params();
+  // the page's own default (writePage's `theme`), then a saved choice, then ?theme=, which wins but isn't saved
+  const fallback = document.documentElement.dataset.theme || "blueprint";
+  const pick = (name, save) => {
+    if (!THEMES.includes(name)) return;
+    document.documentElement.dataset.theme = name;
+    for (const b of document.querySelectorAll("[data-theme-pick]")) b.setAttribute("aria-pressed", String(b.dataset.themePick === name));
+    if (save) {
+      try {
+        localStorage.setItem("bp-theme", name);
+      } catch {}
+    }
+  };
+  let saved = null;
+  try {
+    saved = localStorage.getItem("bp-theme");
+  } catch {}
+  pick(q.theme ?? saved ?? fallback, false);
+  for (const b of document.querySelectorAll("[data-theme-pick]")) b.addEventListener("click", () => pick(b.dataset.themePick, true));
+  // ?mask=x,y,w,h paints the page colour over everything outside one box, so a view stands alone
+  if (q.mask) {
+    const [x, y, w, h] = q.mask.split(",").map(Number);
+    if ([x, y, w, h].every(Number.isFinite)) {
+      const m = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      m.setAttribute("d", `M-9999 -9999H9999V9999H-9999Z M${x} ${y}V${y + h}H${x + w}V${y}Z`);
+      m.setAttribute("fill-rule", "evenodd");
+      m.setAttribute("style", "fill:var(--bp-page);pointer-events:none");
+      m.dataset.role = "mask";
+      svg.appendChild(m);
+    }
+  }
+  if (q.zoom) {
+    const box = q.zoom.split(",").map(Number);
+    if (box.length === 4 && box.every(Number.isFinite)) {
+      svg.setAttribute("viewBox", box.join(" "));
+      document.body.classList.add("bp-zoom");
+    }
+  }
+  return q;
+}
+
+// Critically damped follow toward a target: calm, no overshoot, frame-rate independent.
+function follow(at, want, rate, dt) {
+  return want + (at - want) * Math.exp(-rate * dt);
+}
+
+const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, t)));
+
+// run({ root, step, render, idleAfter })
+//   step(dt, live) advances the model; live.touring says whether the idle tour drives it.
+//   It returns true while something is still settling, so a reduced-motion page can sleep.
+//   render(live) writes attributes; it never rebuilds static geometry.
+function run({ root, step, render, idleAfter = 4, onFrozen }) {
+  const q = params();
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const live = { clock: 0, slow: 1, lastInput: -Infinity, reduced, touring: !reduced, frozen: q.t != null };
+  live.input = () => {
+    live.lastInput = live.clock;
+    live.touring = false;
+    wake();
+  };
+
+  if (live.frozen) {
+    const dt = 1 / 240;
+    for (let t = 0; t < q.t; t += dt) {
+      live.clock = t;
+      live.touring = true;
+      step(dt, live);
+    }
+    render(live);
+    onFrozen?.(live);
+    return live;
+  }
+
+  let raf = 0;
+  let last = 0;
+  let visible = true;
+  function frame(now) {
+    raf = 0;
+    const real = last ? Math.min(0.05, (now - last) / 1000) : 0;
+    last = now;
+    live.clock += real;
+    live.touring = !reduced && live.clock - live.lastInput > idleAfter;
+    const busy = step(real * live.slow, live);
+    render(live);
+    if (visible && !document.hidden && (!reduced || busy)) raf = requestAnimationFrame(frame);
+    else last = 0;
+  }
+  function wake() {
+    if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame);
+  }
+  live.wake = wake;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) wake();
+    }).observe(root);
+  }
+  document.addEventListener("visibilitychange", wake);
+  render(live);
+  wake();
+  return live;
+}
+
+// Vertical drag on an element, reported as a sheet-unit delta since the press.
+function dragY(svg, el, { start, move, end }) {
+  let id = null;
+  let y0 = 0;
+  const toSheet = (e) => {
+    const m = svg.getScreenCTM();
+    return m ? (e.clientY - m.f) / m.d : e.clientY;
+  };
+  el.addEventListener("pointerdown", (e) => {
+    id = e.pointerId;
+    el.setPointerCapture(id);
+    y0 = toSheet(e);
+    start?.();
+    e.preventDefault();
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (e.pointerId === id) move(toSheet(e) - y0);
+  });
+  const stop = (e) => {
+    if (e.pointerId !== id) return;
+    id = null;
+    end?.();
+  };
+  el.addEventListener("pointerup", stop);
+  el.addEventListener("pointercancel", stop);
+}
+
+// Announce a readout to screen readers at most every `every` seconds.
+function announcer(el, every = 1.5) {
+  let lastAt = -Infinity;
+  let lastText = "";
+  return (text, clock) => {
+    if (text === lastText || clock - lastAt < every) return;
+    lastAt = clock;
+    lastText = text;
+    el.textContent = text;
+  };
+}
+
+return { params, THEMES, setupPage, follow, ease, run, dragY, announcer };
+})();
+
+const M = (() => {
+// Truth first: the floor pump's dimensions and its air. Pure, no imports, no DOM.
+// The geometry, the dimensions on the sheet, the readout, the gauge and the chart all read this.
+//
+// Air model: isothermal (a slow stroke), pV = n·R·T, so p·V is the amount of air in bar·cm³.
+// Pressures are absolute inside the model; the sheet shows gauge pressure (above atmosphere).
+// The cup seal is the inlet valve: on the upstroke it folds and lets air past once the chamber
+// falls below atmosphere. The ball check valve in the base is the outlet: it opens whenever the
+// chamber is above the hose, and the two then share one pressure.
+
+const P_ATM = 1.01325; // bar, absolute
+
+// Barrel and stroke (mm)
+const BORE = 32;
+const BARREL_OD = 35;
+const STROKE = 350;
+const FLOOR = 34; // chamber floor, the bottom of the barrel socket
+const PISTON_LOW = 36; // the nut's underside at the bottom of the stroke
+const SEAL = 10.5; // the cup seal's lip, measured up from the nut's underside
+const POCKET = 14.5; // the underside of the cup's web: air below it is chamber air too
+const ROD = 430; // rod length, from the nut's underside to the handle
+const AREA = Math.PI * (BORE / 2) ** 2; // mm²
+
+// Base passages (mm): a drilling down from the chamber floor, then across to the valve seat.
+const DRILL_U = 10;
+const PASSAGE_D = 6;
+const PASSAGE_V = 29; // centre height of the cross passage and the valve
+const SEAT_U = 40; // seat edge, where the Ø6 passage meets the Ø12 valve chamber
+const BALL_D = 8;
+const VALVE_D = 12;
+const BALL_LIFT = 1.6; // full lift off the seat, mm
+
+// Volumes (cm³)
+const mm3 = 1 / 1000;
+const NUT_AF = 17;
+const NUT_H = 8;
+const WASHER_R = 10;
+const WASHER_H = 2;
+const nutVolume = (Math.sqrt(3) / 2) * NUT_AF ** 2 * NUT_H * mm3; // nut with the rod end inside it
+const washerVolume = Math.PI * WASHER_R ** 2 * WASHER_H * mm3;
+const passageArea = Math.PI * (PASSAGE_D / 2) ** 2;
+const cupPocket = Math.PI * (13.8 ** 2 - 8 ** 2) * (POCKET - SEAL) * mm3; // under the web, inside the lip
+const passages = passageArea * ((FLOOR - (PASSAGE_V - PASSAGE_D / 2)) + (SEAT_U - DRILL_U)) * mm3;
+const SWEPT = AREA * STROKE * mm3;
+const V_DEAD = AREA * (PISTON_LOW + SEAL - FLOOR) * mm3 - nutVolume - washerVolume + cupPocket + passages;
+const V_TYRE = 800; // a 700×28C road tyre, approximately
+
+const START_GAUGE = 2.0; // bar, a soft tyre
+const RESET_GAUGE = 6.8; // the tour lets the tyre down again here
+
+const NUT = { af: NUT_AF, h: NUT_H };
+const WASHER = { r: WASHER_R, h: WASHER_H };
+
+// x is the stroke: 0 with the handle up, 1 at the bottom.
+const chamberVolume = (x) => V_DEAD + SWEPT * (1 - x);
+const pistonV = (x) => PISTON_LOW + STROKE * (1 - x);
+const gauge = (p) => p - P_ATM;
+// Force on the handle to hold the piston against the chamber: (p − p_atm)·A. bar·mm² × 0.1 = N.
+const force = (p) => Math.max(0, p - P_ATM) * AREA * 0.1;
+const ratio = (V_DEAD + SWEPT) / V_DEAD; // the highest pressure ratio one stroke can reach
+
+function pump(gaugeStart = START_GAUGE) {
+  const s = { x: 0, mc: 0, mt: 0, p: P_ATM, pt: 0, open: false, intake: false, strokes: 0 };
+  s.mc = P_ATM * chamberVolume(0);
+  s.mt = (gaugeStart + P_ATM) * V_TYRE;
+  s.pt = s.mt / V_TYRE;
+  return s;
+}
+
+// Move the piston to x and settle the air. Works for any path, dragged or toured.
+function advance(s, x) {
+  const V = chamberVolume(x);
+  const wasDown = s.x;
+  let p = s.mc / V;
+  const pt = s.mt / V_TYRE;
+  s.open = false;
+  s.intake = false;
+  if (p > pt) {
+    const pe = (s.mc + s.mt) / (V + V_TYRE);
+    s.mc = pe * V;
+    s.mt = pe * V_TYRE;
+    p = pe;
+    s.open = true;
+  } else if (p < P_ATM) {
+    s.mc = P_ATM * V;
+    p = P_ATM;
+    s.intake = true;
+  }
+  if (wasDown > 0.98 && x <= 0.98) s.strokes++;
+  s.x = x;
+  s.p = p;
+  s.pt = s.mt / V_TYRE;
+  return s;
+}
+
+function setTyre(s, gaugeBar) {
+  s.mt = (gaugeBar + P_ATM) * V_TYRE;
+  s.pt = s.mt / V_TYRE;
+}
+
+return { P_ATM, BORE, BARREL_OD, STROKE, FLOOR, PISTON_LOW, SEAL, POCKET, ROD, AREA, DRILL_U, PASSAGE_D, PASSAGE_V, SEAT_U, BALL_D, VALVE_D, BALL_LIFT, SWEPT, V_DEAD, V_TYRE, START_GAUGE, RESET_GAUGE, NUT, WASHER, chamberVolume, pistonV, gauge, force, ratio, pump, advance, setTyre };
+})();
+
+const P = (() => {
+// The floor pump's parts, in world mm (u right, v up, the pump's axis at u = 0).
+// Each function draws one part into a view and returns SVG, so the main view and every
+// detail view draw the same geometry at their own scale. Moving parts are drawn at the bottom
+// of the stroke (x = 1) and the page moves them with a transform.
+
+
+
+const part = (id, inner, extra = "") => `<g data-part="${id}"${extra}>${inner}</g>`;
+
+const PV = M.PASSAGE_V;
+const ballSeat = M.SEAT_U + Math.sqrt((M.BALL_D / 2) ** 2 - (M.PASSAGE_D / 2) ** 2);
+const ballU = (lift) => ballSeat + lift;
+const GAUGE_U = 62;
+
+// ---------------------------------------------------------------- base
+
+function treads(V) {
+  const pad = K.rrect(-116, 0, -72, 5, 1.5);
+  return part(2, K.cut(V, pad, { mat: "rubber" }) + K.cut(V, K.flipU(pad), { mat: "rubber" }));
+}
+
+// The die-cast base, cut through the pump's axis. The air path (socket, drilling, cross passage,
+// valve chamber, barb thread, gauge port) splits the section into four pieces.
+function casting(V) {
+  const low = [
+    ...K.arc(-115, 8, 3, 180, 270, 3),
+    ...K.arc(115, 8, 3, -90, 0, 3),
+    ...K.arc(115, 17, 3, 0, 90, 3),
+    [80, 20], [80, 23], [43, 23], [40, 26], [7, 26], [7, 34],
+    [-17.5, 34], [-17.5, 40], [-19.5, 40], [-19.5, 43], [-17.5, 43], [-17.5, 47],
+    [-40, 47], [-40, 20],
+    ...K.arc(-115, 17, 3, 90, 180, 3),
+  ];
+  const upper = [
+    [13, 32], [40, 32], [43, 35], [60, 35], [60, 58], [59, 58], [59, 66],
+    [19, 66], [17.5, 64.5], [17.5, 43], [19.5, 43], [19.5, 40], [17.5, 40], [17.5, 34], [13, 34],
+  ];
+  const right = [[64, 35], [80, 35], ...K.arc(77, 63, 3, 0, 90, 3), [65, 66], [65, 58], [64, 58]];
+  const left = [[-40, 53], [-17.5, 53], [-17.5, 64.5], [-19, 66], ...K.arc(-37, 63, 3, 90, 180, 3)];
+  const rib = [[-78, 20], [-40, 20], [-40, 44]];
+  return part(
+    1,
+    [low, upper, right, left].map((p) => K.cut(V, p, { mat: "alu", angle: 45 })).join("") +
+      K.body(V, rib) +
+      // the 118° drill point under the cross passage, seen through the cut
+      K.line(V, [[7, 26], [10, 24.2], [13, 26]], "thin")
+  );
+}
+
+function clampScrew(V) {
+  const head = [[-46, 45.5], [-45.5, 45], [-40, 45], [-40, 55], [-45.5, 55], [-46, 54.5]];
+  const shank = [[-40, 47], [-18, 47], [-17.5, 47.5], [-17.5, 52.5], [-18, 53], [-40, 53]];
+  return part(
+    5,
+    K.body(V, shank) +
+      K.body(V, head) +
+      K.lines(V, [[[-38, 47.6], [-18.5, 47.6]], [[-38, 52.4], [-18.5, 52.4]]], "thin") +
+      K.line(V, K.rect(-46, 47.6, -42.6, 52.4), "hid", true)
+  );
+}
+
+function barrel(V) {
+  return part(3, K.section(V, { ...K.revolve([[16, M.FLOOR], [17.5, M.FLOOR], [17.5, 430], [16, 430]]), edges: [] }, { mat: "solid" }));
+}
+
+function oring(V) {
+  const s = K.rrect(17.5, 40, 19.5, 43, 0.9);
+  return part(4, K.cut(V, s, { mat: "rubber" }) + K.cut(V, K.flipU(s), { mat: "rubber" }));
+}
+
+function cap(V) {
+  const rev = K.revolve([[8, 438], [18.5, 438], [20, 436.5], [20, 402], [17.5, 402], [17.5, 430], [8, 430]]);
+  return part(6, K.section(V, { ...rev, edges: [] }, { mat: "plastic", angle: 45 }));
+}
+
+function bushing(V) {
+  const rev = K.revolve([[5, 426], [8, 426], [8, 438], [10, 438], [10, 442], [5, 442]]);
+  return part(7, K.section(V, { ...rev, edges: [] }, { mat: "bronze", angle: 135 }));
+}
+
+// ---------------------------------------------------------------- outlet
+
+function barb(V) {
+  const loop = [
+    [3, 66], [6, 66], [6, 80], [9, 80], [9, 88], [5, 88], [5, 92],
+    [5.6, 92], [4.6, 97], [5.6, 97], [4.6, 102], [5.6, 102], [4.6, 107], [5.6, 107], [3.8, 113], [3, 113],
+  ];
+  const rev = K.revolve(loop, { axis: "u", at: PV });
+  const thread = [[[67, PV + 5.3], [79, PV + 5.3]], [[67, PV - 5.3], [79, PV - 5.3]]];
+  return part(19, K.section(V, rev, { mat: "brass", angle: 135 }) + K.lines(V, thread, "thin"));
+}
+
+function hose(V) {
+  const loop = [[5.6, 93], [8.6, 93], [8.6, 160], [7.6, 160.9], [6.6, 160.2], [5.6, 161]];
+  const rev = K.revolve(loop, { axis: "u", at: PV });
+  return part(20, K.section(V, { ...rev, edges: [] }, { mat: "rubber" }));
+}
+
+// ---------------------------------------------------------------- gauge, cut through its centre
+
+function gaugeBody(V) {
+  const g = GAUGE_U;
+  const stem = K.revolve([[1, 58], [3, 58], [3, 68], [5, 68], [5, 73], [3, 73], [3, 82], [1, 82]], { at: g });
+  const shell = [[27.6, 80], [59, 80], [59, 81.4], [29, 81.4], [29, 95], [27.6, 95]];
+  const bezel = K.rect(26.6, 95, 30.6, 99.6);
+  const tubes = [41, 83].map((u) => K.cut(V, K.circle(u, 84.5, 2.2, 16), { mat: "solid" }) + `<path class="paper" d="${K.d(V, K.circle(u, 84.5, 1.1, 12))}"/>`).join("");
+  return part(
+    21,
+    K.section(V, { ...stem, edges: [] }, { mat: "brass", angle: 135 }) +
+      K.cut(V, shell, { mat: "solid" }) +
+      K.cut(V, K.flipU(shell, g), { mat: "solid" }) +
+      K.cut(V, bezel, { mat: "solid" }) +
+      K.cut(V, K.flipU(bezel, g), { mat: "solid" }) +
+      K.cut(V, K.rect(30.6, 96.4, 93.4, 98.2), { mat: "plastic", angle: 135 }) +
+      K.cut(V, K.rect(29, 88, 95, 88.9), { mat: "solid" }) +
+      tubes +
+      K.body(V, K.rect(55, 82, 69, 87.6)) +
+      K.body(V, K.rect(61.4, 88.9, 62.6, 92.6))
+  );
+}
+
+// Dial angle for a gauge reading: 0 bar at lower left, 11 bar at lower right, clockwise.
+const needleAngle = (bar) => 225 - (270 * Math.min(11.5, Math.max(-0.3, bar))) / 11;
+
+// The needle seen edge-on in the section: its length along u is the cosine of its angle.
+function needleSection(V, bar) {
+  const c = Math.cos((needleAngle(bar) * Math.PI) / 180);
+  return K.line(V, [[GAUGE_U - 6 * c, 91.4], [GAUGE_U + 27 * c, 91.4]]) + K.body(V, K.rect(60.2, 90.6, 63.8, 92.2));
+}
+
+// ---------------------------------------------------------------- check valve
+
+function ball(V, lift) {
+  return part(17, K.body(V, K.circle(ballU(lift), PV, M.BALL_D / 2, 40)));
+}
+
+function spring(V, lift) {
+  return part(18, K.springSection(V, { from: ballU(lift) + M.BALL_D / 2, to: 66, radius: 4, wire: 0.9, turns: 5, axis: "u", at: PV }));
+}
+
+// ---------------------------------------------------------------- air
+
+// The air below the cup seal and in the passages up to the ball: chamber pressure.
+function chamberAir(x) {
+  const top = M.pistonV(x) + M.POCKET;
+  return [
+    K.rect(-16, M.FLOOR, 16, top),
+    K.rect(7, 26, 13, M.FLOOR + 0.01),
+    K.rect(7, 26, 40, 32),
+    [[40, 26], [43, 23], [43, 35], [40, 32]],
+  ];
+}
+
+// The air past the ball: valve chamber, barb, hose and gauge port, at tyre pressure.
+const tyreAir = [
+  K.rect(43, 23, 80, 35),
+  K.rect(66, 26, 113, 32),
+  K.rect(113, 23.4, 160, 34.6),
+  K.rect(60, 35, 64, 58.01),
+  K.rect(61, 58, 63, 82),
+];
+
+const airPath = (V, shapes) => shapes.map((s) => K.d(V, s)).join("");
+
+// ---------------------------------------------------------------- moving: rod, piston, handle
+
+const VP = M.PISTON_LOW; // moving parts are drawn here, at the bottom of the stroke
+
+function rod(V, vp = VP) {
+  return part(8, K.body(V, [[-4.5, vp], [4.5, vp], [5, vp + 0.5], [5, vp + M.ROD], [-5, vp + M.ROD], [-5, vp + 0.5]]));
+}
+
+function cupLoop(vp, fold) {
+  const c = vp + 10;
+  const tip = 16 - fold;
+  return [[5, c], [8, c], [8, c + 4.5], [13.8, c + 4.5], [tip - 1.4, c + 0.5], [tip, c + 0.5], [15.7, c + 9], [5, c + 9]];
+}
+
+function cup(V, fold, vp = VP) {
+  return part(10, K.section(V, { ...K.revolve(cupLoop(vp, fold)), edges: [] }, { mat: "rubber" }));
+}
+
+function piston(V, vp = VP) {
+  const nut = [[-8.8, vp], [8.8, vp], [9.8, vp + 1], [9.8, vp + 7], [8.8, vp + 8], [-8.8, vp + 8], [-9.8, vp + 7], [-9.8, vp + 1]];
+  const washer = K.revolve([[5, vp + 8], [10, vp + 8], [10, vp + 10], [5, vp + 10]]);
+  const c = vp + 10;
+  const hub = K.revolve([[5, c + 9], [13.5, c + 9], [13.5, c + 17], [12.5, c + 18], [5, c + 18]]);
+  return (
+    part(12, K.body(V, nut) + K.lines(V, [[[-4.9, vp + 0.6], [-4.9, vp + 7.4]], [[4.9, vp + 0.6], [4.9, vp + 7.4]]])) +
+    part(11, K.section(V, { ...washer, edges: [] }, { mat: "steel", angle: 135 })) +
+    part(9, K.section(V, { ...hub, edges: [] }, { mat: "alu", angle: 135 }))
+  );
+}
+
+const handleCentre = (vp = VP) => vp + M.ROD - 13 + 24;
+
+function handle(V, vp = VP) {
+  const h0 = vp + M.ROD - 13;
+  const hc = h0 + 24;
+  const lowLeft = [[-14, h0], [-5, h0], [-5, h0 + 13], [-16, h0 + 13], [-16, h0 + 2]];
+  const top = [[-16, h0 + 35], [16, h0 + 35], [16, h0 + 38], [14, h0 + 40], [-14, h0 + 40], [-16, h0 + 38]];
+  const tube = K.revolve([[9.5, -136], [11, -136], [11, 136], [9.5, 136]], { axis: "u", at: hc });
+  const grip = [[11, 18], [14, 18], [16, 21], [16, 123], [14, 126], [11, 126]];
+  const gripL = grip.map(([r, s]) => [r, -s]).reverse();
+  const plug = [[0, 131], [9.5, 131], [9.5, 136], [13, 136], [13, 140], [0, 140]];
+  const plugL = plug.map(([r, s]) => [r, -s]).reverse();
+  const onU = (loop) => K.revolve(loop, { axis: "u", at: hc });
+  return (
+    part(14, K.section(V, { ...tube, edges: [] }, { mat: "solid" })) +
+    part(13, [lowLeft, K.flipU(lowLeft), top].map((p) => K.cut(V, p, { mat: "plastic", angle: 45 })).join("")) +
+    part(15, K.section(V, { ...onU(grip), edges: [] }, { mat: "foam" }) + K.section(V, { ...onU(gripL), edges: [] }, { mat: "foam" })) +
+    part(16, K.section(V, onU(plug), { mat: "plastic", angle: 135 }) + K.section(V, onU(plugL), { mat: "plastic", angle: 135 }))
+  );
+}
+
+// The handle, rod and piston at the top of the stroke, as phantom lines (the alternate position).
+function phantomTop(V) {
+  const vp = M.pistonV(0);
+  const h0 = vp + M.ROD - 13;
+  const hc = h0 + 24;
+  const right = [
+    [0, hc + 16], [14, hc + 16], [16, hc + 14], [16, hc + 11], [18, hc + 11], [18, hc + 14], [21, hc + 16],
+    [123, hc + 16], [126, hc + 14], [126, hc + 11], [136, hc + 11], [136, hc + 13], [140, hc + 13],
+    [140, hc - 13], [136, hc - 13], [136, hc - 11], [126, hc - 11], [126, hc - 14], [123, hc - 16],
+    [21, hc - 16], [18, hc - 14], [18, hc - 11], [16, hc - 11], [16, h0 + 2], [14, h0], [5, h0], [5, 442],
+  ];
+  return K.line(V, [...right, ...K.flipU(right)], "phan", true) + K.line(V, K.rect(-16, vp, 16, vp + 28), "phan", true);
+}
+
+// ---------------------------------------------------------------- gauge face (VIEW C, from above)
+
+function gaugeFace(V) {
+  let out = K.body(V, K.circle(0, 0, 35.4, 72));
+  out += K.line(V, K.circle(0, 0, 31.4, 72), "vis", true);
+  out += K.line(V, K.circle(0, 0, 33.4, 72), "thin", true);
+  out += K.line(V, K.arc(0, 0, 29, -45, 225, 54), "thin");
+  const ticks = [];
+  for (let i = 0; i <= 55; i++) {
+    const bar = i / 5;
+    const a = (needleAngle(bar) * Math.PI) / 180;
+    const r0 = i % 5 === 0 ? 25.6 : 27.2;
+    ticks.push([[r0 * Math.cos(a), r0 * Math.sin(a)], [29 * Math.cos(a), 29 * Math.sin(a)]]);
+  }
+  out += K.lines(V, ticks, "thin");
+  let numbers = "";
+  for (let bar = 0; bar <= 11; bar++) {
+    const a = (needleAngle(bar) * Math.PI) / 180;
+    const [x, y] = V.p([21.4 * Math.cos(a), 21.4 * Math.sin(a)]);
+    numbers += `<text class="t t-sm" x="${x}" y="${K.r2(y + 2.7)}" text-anchor="middle">${bar}</text>`;
+  }
+  const [lx, ly] = V.p([0, -13]);
+  numbers += `<text class="t t-sm" x="${lx}" y="${ly}" text-anchor="middle">bar</text>`;
+  return part(21, out) + `<g data-role="engraved">${numbers}</g>`;
+}
+
+function needleFace(V, bar) {
+  const a = (needleAngle(bar) * Math.PI) / 180;
+  const ca = Math.cos(a);
+  const sa = Math.sin(a);
+  const at = (along, across) => [along * ca - across * sa, along * sa + across * ca];
+  const needle = [at(27, 0), at(0, 0.9), at(-7, 0.7), at(-7, -0.7), at(0, -0.9)];
+  return K.cut(V, needle, { mat: "solid" }) + K.body(V, K.circle(0, 0, 2.4, 20));
+}
+
+return { part, ballU, GAUGE_U, treads, casting, clampScrew, barrel, oring, cap, bushing, barb, hose, gaugeBody, needleAngle, needleSection, ball, spring, chamberAir, tyreAir, airPath, VP, rod, cupLoop, cup, piston, handleCentre, handle, phantomTop, gaugeFace, needleFace };
+})();
+
+const G = (() => {
+// The floor pump's solids for the 3D page, in the same world mm as ../floor-pump/parts.mjs:
+// u becomes x, v becomes y, and the cutting plane of the 2D sheet is z = 0. Pure data, no DOM, no three.js.
+//
+// Bodies of revolution are the 2D sheet's half-profiles [r, s] (the same numbers, and the same
+// functions where parts.mjs exports them), revolved by the page. Everything else is an extrusion of
+// an outline the section already gives. Each solid is closed: the page's section caps depend on it.
+//
+// Solid kinds the page knows:
+//   lathe   { loop: [[r, s]…], axis: "y" | "x", at }            axis "y" at x = at; axis "x" at y = at
+//   extrude { shape: [[a, b]…], holes, along: "y" | "z" | "x", from, to, conform }
+//   sphere  { c, r }   helix { from, to, at, radius, wire, turns }   torus { c, R, r, arc }   box { min, max }
+// Roles: solid (cut faces capped), void (a bore inside its parent: its far wall shows through the cut),
+// air (stippled in the accent by pressure), glass (seen through; capped only where truly cut),
+// dial (the printed dial face), mouth (a dark hole decal), ink (a black part: the needle).
+
+
+
+
+const PV = M.PASSAGE_V;
+const G = P.GAUGE_U;
+const VP = P.VP; // moving parts are built at the bottom of the stroke, as on the sheet
+const C = VP + 10; // the cup's seat on the washer
+const H0 = VP + M.ROD - 13; // underside of the handle hub
+const HC = P.handleCentre(VP); // handle tube axis
+const HOSE_END = 230;
+const REST = { VP, C, H0, HC };
+
+const mirrorS = (loop) => loop.map(([r, s]) => [r, -s]).reverse();
+
+// ---------------------------------------------------------------- parts and their solids
+// hatch: a kit material (MATERIALS) with an angle, "solid" (blacked in: thin sections), or "none"
+// (rods, nuts, screws, balls, ribs: never hatched when cut lengthwise).
+function parts(fold = 0) {
+  return [
+    {
+      id: 1, name: "BASE", group: "static",
+      solids: [
+        // footplate: a rounded plan, the section's r3 edge fillets as a bevel
+        { kind: "extrude", shape: rrectAt(0, 0, 118 - 2.5, 34 - 2.5, 20, 10), along: "y", from: 5, to: 20, bevel: 2.5, hatch: ["alu", 45] },
+        // central boss with the barrel socket and the O-ring groove (the 2D "left" and "low" pieces)
+        {
+          kind: "lathe", axis: "y", at: 0, hatch: ["alu", 45],
+          loop: [[0, 20], [40, 20], ...K.arc(37, 63, 3, 0, 90, 3), [19, 66], [17.5, 64.5], [17.5, 43], [19.5, 43], [19.5, 40], [17.5, 40], [17.5, M.FLOOR], [0, M.FLOOR]],
+        },
+        // side arm holding the check valve and the gauge port, its inner face on the boss cylinder
+        {
+          kind: "extrude", along: "z", from: -16, to: 16, conform: { x: 40, r: 40 }, hatch: ["alu", 45],
+          shape: [[40, 20], [80, 20], ...K.arc(77, 63, 3, 0, 90, 3), [40, 66]],
+        },
+        // web under the left side (ribs are not hatched when cut lengthwise)
+        { kind: "extrude", along: "z", from: -3, to: 3, conform: { x: -40, r: 40 }, hatch: "none", edge: "rib", shape: [[-78, 20], [-40, 20], [-40, 44]] },
+        // the air path, drilled and bored: these are holes in the parts above
+        { kind: "lathe", role: "void", axis: "y", at: M.DRILL_U, loop: [[0, 32], [3, 32], [3, M.FLOOR], [0, M.FLOOR]] },
+        { kind: "lathe", role: "void", axis: "x", at: PV, loop: [[0, 7], [3, 7], [3, M.SEAT_U], [0, M.SEAT_U]] },
+        { kind: "lathe", role: "void", axis: "x", at: PV, loop: [[0, M.SEAT_U], [3, M.SEAT_U], [6.02, 43], [6.02, 80], [0, 80]] },
+        { kind: "lathe", role: "void", axis: "y", at: G, loop: [[0, 34.6], [2, 34.6], [2, 58], [3.02, 58], [3.02, 66], [0, 66]] },
+        { kind: "lathe", role: "void", axis: "x", at: 50, loop: [[0, -40], [3.03, -40], [3.03, -17.45], [0, -17.45]] },
+        { kind: "disc", role: "mouth", c: [M.DRILL_U, M.FLOOR + 0.03, 0], r: 3 },
+      ],
+    },
+    {
+      id: 2, name: "TREAD PAD", group: "static",
+      solids: [-1, 1].map((sx) => ({ kind: "extrude", shape: rrectAt(sx * 94, 0, 21, 29, 5), along: "y", from: 0, to: 5, bevel: 1, hatch: ["rubber", 45] })),
+    },
+    { id: 3, name: "BARREL TUBE", group: "static", solids: [{ kind: "lathe", axis: "y", at: 0, hatch: "solid", loop: [[16, M.FLOOR], [17.5, M.FLOOR], [17.5, 430], [16, 430]] }] },
+    { id: 4, name: "O-RING", group: "static", solids: [{ kind: "lathe", axis: "y", at: 0, hatch: ["rubber", 45], loop: K.rrect(17.5, 40, 19.5, 43, 0.9) }] },
+    {
+      id: 5, name: "CLAMP SCREW", group: "static",
+      solids: [{ kind: "lathe", axis: "x", at: 50, hatch: "none", loop: [[0, -46], [4.5, -46], [5, -45.5], [5, -40], [3, -40], [3, -18], [2.5, -17.5], [0, -17.5]] }],
+    },
+    { id: 6, name: "TOP CAP", group: "static", solids: [{ kind: "lathe", axis: "y", at: 0, hatch: ["plastic", 45], loop: [[8, 438], [18.5, 438], [20, 436.5], [20, 402], [17.5, 402], [17.5, 430], [8, 430]] }] },
+    { id: 7, name: "ROD BUSHING", group: "static", solids: [{ kind: "lathe", axis: "y", at: 0, hatch: ["bronze", 135], loop: [[5, 426], [8, 426], [8, 438], [10, 438], [10, 442], [5, 442]] }] },
+    // ---- moving: rod, piston, handle (built at the bottom of the stroke)
+    { id: 8, name: "PISTON ROD", group: "piston", solids: [{ kind: "lathe", axis: "y", at: 0, hatch: "none", loop: [[0, VP], [4.5, VP], [5, VP + 0.5], [5, VP + M.ROD], [0, VP + M.ROD]] }] },
+    { id: 9, name: "PISTON HUB", group: "piston", solids: [{ kind: "lathe", axis: "y", at: 0, hatch: ["alu", 135], loop: [[5, C + 9], [13.5, C + 9], [13.5, C + 17], [12.5, C + 18], [5, C + 18]] }] },
+    { id: 10, name: "CUP SEAL", group: "piston", solids: [{ kind: "lathe", axis: "y", at: 0, hatch: ["rubber", 45], loop: P.cupLoop(VP, fold), live: "cup" }] },
+    { id: 11, name: "WASHER", group: "piston", solids: [{ kind: "lathe", axis: "y", at: 0, hatch: ["steel", 135], loop: [[5, VP + 8], [10, VP + 8], [10, VP + 10], [5, VP + 10]] }] },
+    { id: 12, name: "HEX NUT M10", group: "piston", solids: [{ kind: "extrude", shape: hexagon(M.NUT.af / 2), holes: [circle(0, 0, 5, 40)], along: "y", from: VP, to: VP + M.NUT.h, hatch: "none" }] },
+    {
+      id: 13, name: "HANDLE HUB", group: "piston",
+      solids: [
+        { kind: "extrude", shape: rrectAt(0, 0, 16, 16, 1.5), holes: [circle(0, 0, 5, 40)], along: "y", from: H0, to: H0 + 13, hatch: ["plastic", 45] },
+        { kind: "extrude", shape: saddle(H0 + 13, H0 + 40, HC, 11), along: "x", from: -16, to: 16, hatch: ["plastic", 45] },
+      ],
+    },
+    { id: 14, name: "HANDLE TUBE", group: "piston", solids: [{ kind: "lathe", axis: "x", at: HC, hatch: "solid", loop: [[9.5, -136], [11, -136], [11, 136], [9.5, 136]] }] },
+    {
+      id: 15, name: "GRIP", group: "piston",
+      solids: [1, -1].map((sx) => {
+        const g = [[11, 18], [14, 18], [16, 21], [16, 123], [14, 126], [11, 126]];
+        return { kind: "lathe", axis: "x", at: HC, hatch: ["foam", 45], loop: sx > 0 ? g : mirrorS(g), side: sx };
+      }),
+    },
+    {
+      id: 16, name: "END PLUG", group: "piston",
+      solids: [1, -1].map((sx) => {
+        const g = [[0, 131], [9.48, 131], [9.48, 136], [13, 136], [13, 140], [0, 140]];
+        return { kind: "lathe", axis: "x", at: HC, hatch: ["plastic", 135], loop: sx > 0 ? g : mirrorS(g), side: sx };
+      }),
+    },
+    // ---- check valve and outlet
+    { id: 17, name: "CHECK BALL", group: "ball", solids: [{ kind: "sphere", c: [P.ballU(0), PV, 0], r: M.BALL_D / 2, hatch: "none" }] },
+    { id: 18, name: "VALVE SPRING", group: "spring", solids: [{ kind: "helix", from: P.ballU(0) + M.BALL_D / 2, to: 66, at: PV, radius: 4, wire: 0.9, turns: 5, hatch: "solid" }] },
+    {
+      id: 19, name: "HOSE BARB", group: "static",
+      solids: [{
+        kind: "lathe", axis: "x", at: PV, hatch: ["brass", 135],
+        loop: [[3, 66], [6, 66], [6, 80], [9, 80], [9, 88], [5, 88], [5, 92], [5.6, 92], [4.6, 97], [5.6, 97], [4.6, 102], [5.6, 102], [4.6, 107], [5.6, 107], [3.8, 113], [3, 113]],
+      }],
+    },
+    { id: 20, name: "HOSE", group: "static", solids: [{ kind: "lathe", axis: "x", at: PV, hatch: ["rubber", 135], loop: [[5.6, 93], [8.6, 93], [8.6, HOSE_END], [5.6, HOSE_END]] }] },
+    {
+      id: 21, name: "GAUGE", group: "static",
+      solids: [
+        { kind: "lathe", axis: "y", at: G, hatch: ["brass", 135], loop: [[1, 58], [3, 58], [3, 68], [5, 68], [5, 73], [3, 73], [3, 82], [1, 82]] },
+        { kind: "lathe", axis: "y", at: G, hatch: "solid", loop: [[3, 80], [34.4, 80], [34.4, 95], [33, 95], [33, 81.4], [3, 81.4]] },
+        { kind: "lathe", axis: "y", at: G, hatch: "solid", loop: [[31.4, 95], [35.4, 95], [35.4, 99.6], [31.4, 99.6]] },
+        { kind: "lathe", axis: "y", at: G, hatch: "solid", loop: [[0, 88], [33, 88], [33, 88.9], [0, 88.9]] },
+        { kind: "lathe", axis: "y", at: G, role: "glass", hatch: ["plastic", 135], loop: [[0, 96.4], [31.4, 96.4], [31.4, 98.2], [0, 98.2]], glass: { y0: 96.4, y1: 98.2, r: 31.4 } },
+        { kind: "disc", role: "dial", c: [G, 88.93, 0], r: 31.4 },
+        { kind: "torus", c: [G, 84.5, 0], R: 21, r: 2.2, arc: [-45, 225], hatch: "solid" },
+        { kind: "box", min: [55, 82, -5], max: [69, 87.6, 5], hatch: "none" },
+        { kind: "lathe", axis: "y", at: G, hatch: "none", loop: [[0, 88.9], [0.6, 88.9], [0.6, 90.6], [0, 90.6]] },
+        { kind: "lathe", axis: "y", at: G, hatch: "none", loop: [[0, 90.6], [1.8, 90.6], [1.8, 92.2], [0, 92.2]] },
+        { kind: "needle", c: [G, 91.4, 0], role: "ink", live: "needle" },
+      ],
+    },
+  ];
+}
+
+// The air the model talks about, as volumes the page stipples by pressure. The chamber's top rides
+// with the piston: vertices above `liftFrom` move with the stroke.
+function air() {
+  const tip = 15.97;
+  return [
+    {
+      name: "chamber", pressure: "p", axis: "y", at: 0, liftFrom: M.FLOOR + 1,
+      loop: [[0, M.FLOOR], [15.97, M.FLOOR], [15.97, C + 0.5], [tip - 1.4, C + 0.5], [13.8, C + 4.47], [8.03, C + 4.47], [8.03, C + 0.03], [10.03, C + 0.03], [10.03, VP + 8], [9.85, VP + 8], [9.85, VP], [0, VP]],
+    },
+    { name: "drill", pressure: "p", axis: "y", at: M.DRILL_U, loop: [[0, 32], [2.97, 32], [2.97, M.FLOOR], [0, M.FLOOR]] },
+    { name: "cross", pressure: "p", axis: "x", at: PV, loop: [[0, 7.03], [2.97, 7.03], [2.97, M.SEAT_U], [0, M.SEAT_U]] },
+    { name: "valve", pressure: "pt", axis: "x", at: PV, loop: [[0, M.SEAT_U], [2.97, M.SEAT_U], [5.97, 43], [5.97, 66], [0, 66]] },
+    { name: "barb", pressure: "pt", axis: "x", at: PV, loop: [[0, 66], [2.97, 66], [2.97, 113], [0, 113]] },
+    { name: "hose", pressure: "pt", axis: "x", at: PV, loop: [[0, 113], [5.57, 113], [5.57, HOSE_END], [0, HOSE_END]] },
+    { name: "port", pressure: "pt", axis: "y", at: G, loop: [[0, 35], [1.97, 35], [1.97, 58], [0.97, 58], [0.97, 82], [0, 82]] },
+  ];
+}
+
+// ---------------------------------------------------------------- exploded view
+// Where each part goes at explode = 1: [dx, dy, dz] from where it sits assembled. Moving parts give
+// an absolute lift instead (`lift`, from the bottom of the stroke), since their assembled height
+// depends on the stroke. The base, barrel, cap and bushing explode up the pump's axis; the rod, its
+// piston stack and the handle explode up a parallel axis `dx` to the side (a jogged explosion line,
+// as drafting offices draw long assemblies), which halves the drawing's height.
+const JOG = 190;
+const EXPLODE = {
+  1: [0, 0, 0],
+  2: [0, -34, 0],
+  3: [0, 112, 0],
+  4: [0, 58, 0],
+  5: [-48, 0, 0],
+  6: [0, 186, 0],
+  7: [0, 236, 0],
+  12: { lift: 110, dx: JOG },
+  11: { lift: 128, dx: JOG },
+  10: { lift: 146, dx: JOG },
+  9: { lift: 166, dx: JOG },
+  8: { lift: 230, dx: JOG },
+  13: { lift: 262, dx: JOG },
+  14: { lift: 262, dx: JOG },
+  15: { lift: 262, dx: JOG, side: 46 },
+  16: { lift: 262, dx: JOG, side: 82 },
+  17: [15, 0, 0],
+  18: [31, 0, 0],
+  19: [58, 0, 0],
+  20: [96, 0, 0],
+  21: [0, 64, 0],
+};
+
+// ---------------------------------------------------------------- balloon anchors
+// `cut`: a point on the part's cut face (z = 0), used while the section is open.
+// `out`: a surface point used when it is closed: on an axis ("y" or "x") the page pushes `c` out by `r`
+// toward the camera; "box" pushes to a square of half-width r; "sphere" toward the camera in 3D.
+const ANCHORS = {
+  1: { cut: [-90, 12, 0], out: { c: [-90, 20, 18] } },
+  2: { cut: [-110, 2.5, 0], out: { c: [-104, 5, 22] } },
+  3: { cut: [-16.75, 250, 0], out: { c: [0, 250, 0], r: 17.5, axis: "y" } },
+  4: { cut: [18.5, 41.5, 0], out: { c: [0, 41.5, 0], r: 19.5, axis: "y" } },
+  5: { cut: [-43, 50, 0], out: { c: [-43, 50, 0], r: 5, axis: "x" } },
+  6: { cut: [-19, 420, 0], out: { c: [0, 420, 0], r: 20, axis: "y" } },
+  7: { cut: [-9, 440, 0], out: { c: [0, 440, 0], r: 10, axis: "y" } },
+  8: { cut: [-2.5, VP + 300, 0], out: { c: [0, VP + 300, 0], r: 5, axis: "y" } },
+  9: { cut: [11, C + 13, 0], out: { c: [0, C + 13, 0], r: 13.5, axis: "y" } },
+  10: { cut: [15.2, C + 5, 0], out: { c: [0, C + 5, 0], r: 15.8, axis: "y" } },
+  11: { cut: [-8, VP + 9, 0], out: { c: [0, VP + 9, 0], r: 10, axis: "y" } },
+  12: { cut: [-7, VP + 4, 0], out: { c: [0, VP + 4, 0], r: 8.5, axis: "box" } },
+  13: { cut: [-12, H0 + 6, 0], out: { c: [0, H0 + 6, 0], r: 16, axis: "box" } },
+  14: { cut: [128.5, HC - 10.25, 0], out: { c: [128.5, HC, 0], r: 11, axis: "x" } },
+  15: { cut: [80, HC - 13.5, 0], out: { c: [80, HC, 0], r: 16, axis: "x" } },
+  16: { cut: [138, HC, 0], out: { c: [138, HC, 0], r: 13, axis: "x" } },
+  17: { cut: [P.ballU(0) + 0.8, PV + 2, 0], out: { c: [P.ballU(0), PV, 0], r: 4, axis: "sphere" } },
+  18: { cut: [55, PV + 4, 0], out: { c: [55, PV, 0], r: 4.45, axis: "x" } },
+  19: { cut: [84, PV + 7, 0], out: { c: [84, PV, 0], r: 9, axis: "x" } },
+  20: { cut: [150, PV + 7, 0], out: { c: [150, PV, 0], r: 8.6, axis: "x" } },
+  21: { cut: [G - 33.4, 97.3, 0], out: { c: [G, 97.3, 0], r: 35.4, axis: "y" } },
+};
+
+// The parts list, as on the 2D sheet (BP-001).
+const BOM = {
+  1: "BASE · AlSi12", 2: "TREAD PAD · NBR", 3: "BARREL Ø35×1.5 · E235", 4: "O-RING 33×2 · NBR", 5: "SCREW M6×28 ISO 4762",
+  6: "TOP CAP · PA6", 7: "ROD BUSHING · CuSn8", 8: "PISTON ROD Ø10 · C45", 9: "PISTON HUB · 6082", 10: "CUP SEAL Ø32 · NBR",
+  11: "WASHER Ø20×2", 12: "HEX NUT M10 ISO 4032", 13: "HANDLE HUB · PA6-GF30", 14: "HANDLE TUBE Ø22×1.5", 15: "GRIP · EPDM FOAM",
+  16: "END PLUG · PE-LD", 17: "CHECK BALL Ø8 · 100Cr6", 18: "VALVE SPRING Ø0.9", 19: "HOSE BARB G1/8 · CuZn39", 20: "HOSE 12×6 · PVC", 21: "GAUGE Ø71 0–11 bar",
+};
+
+// ---------------------------------------------------------------- outline helpers
+function circle(cx, cy, r, n = 32) {
+  return Array.from({ length: n }, (_, i) => [cx + r * Math.cos((i / n) * 2 * Math.PI), cy + r * Math.sin((i / n) * 2 * Math.PI)]);
+}
+function hexagon(flat) {
+  const R = flat / Math.cos(Math.PI / 6);
+  return Array.from({ length: 6 }, (_, i) => [R * Math.cos((i * Math.PI) / 3), R * Math.sin((i * Math.PI) / 3)]);
+}
+// A rounded rectangle centred on (cx, cy), half sizes hx, hy. A bevelled extrusion grows by its bevel,
+// so bevelled outlines are given inset by it.
+function rrectAt(cx, cy, hx, hy, r, steps = 4) {
+  return K.rrect(cx - hx, cy - hy, cx + hx, cy + hy, r, steps);
+}
+// The handle hub above the collar: a block with the tube's cross bore, open in a slit at the bottom
+// where the bore touches the collar (so the outline stays one simple polygon).
+function saddle(y0, y1, yc, r) {
+  const e = 2;
+  const arc = K.arc(0, yc, r, -90 + e, 270 - e, 72);
+  return [[16, y0], [16, y1], [-16, y1], [-16, y0], ...arc.reverse()];
+}
+
+return { HOSE_END, REST, parts, air, JOG, EXPLODE, ANCHORS, BOM };
+})();
+
+// Page code for floor-pump-3d.html, an ES module. THREE comes from the import map; K (kit/draft.mjs),
+// L (kit/live.mjs), M (../floor-pump/model.mjs), P (../floor-pump/parts.mjs) and G (geom3d.mjs) are
+// inlined above this script as namespaces, so the physics is the 2D sheet's, unchanged.
+//
+// Rendering, three passes a frame:
+//   1. ids: a part id and a "cut face" flag per pixel, plus depth, into a target;
+//   2. colour: toon tones on every surface; while the section is open each closed solid is drawn
+//      double-sided and its back faces, which are only ever seen through the opening, are shaded as
+//      the cut face (paper and the part's hatch, computed where the view ray meets the plane).
+//      Creases come from EdgesGeometry (thin) and skip any pixel pass 1 marked as a cut face;
+//   3. outlines: thick lines wherever the id, the flag or the depth's second difference jumps.
+//
+// URL parameters: ?t=1.0 (deterministic frame of the tour), ?view=iso|front|side|top, ?cut=0|1,
+// ?offset=mm (cutting plane), ?explode=0..1, ?theme=blueprint|paper|dark, ?zoom=k, ?look=x,y,z (mm),
+// ?balloons=0, ?bench (time a frame), ?selftest (drive the controls), ?dbg (tint bores, air and outlines).
+
+const $ = (id) => document.getElementById(id);
+const host = $("stage");
+const canvas = $("gl");
+const overlay = $("ov");
+const Qs = new URLSearchParams(location.search);
+const num = (k, d) => (Qs.has(k) && Number.isFinite(Number(Qs.get(k))) ? Number(Qs.get(k)) : d);
+const q = {
+  view: Qs.get("view"),
+  cut: Qs.has("cut") ? Qs.get("cut") !== "0" : true,
+  explode: Math.min(1, Math.max(0, num("explode", 0))),
+  zoom: num("zoom", 1),
+  look: Qs.get("look") ? Qs.get("look").split(",").map(Number) : null,
+  balloons: Qs.has("balloons") ? Qs.get("balloons") !== "0" : true,
+  bench: Qs.has("bench"),
+  offset: num("offset", 0),
+};
+L.setupPage(host); // theme buttons, ?theme
+// the tokens are sRGB and the shaders write them as they are: no linear working space
+THREE.ColorManagement.enabled = false;
+
+// ---------------------------------------------------------------- renderer and shared uniforms
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: Qs.has("t") || q.bench });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.setClearColor(0x000000, 0);
+const NEAR = 1;
+const FAR = 9000;
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, NEAR, FAR);
+const scene = new THREE.Scene();
+
+const color = () => new THREE.Color();
+const U = {
+  uMode: { value: 0 },
+  uCutOn: { value: q.cut ? 1 : 0 },
+  uCut: { value: new THREE.Vector4(0, 0, 1, q.offset) },
+  uCamDir: { value: new THREE.Vector3(0, 0, -1) },
+  uPx: { value: 1 },
+  uDpr: { value: 1 },
+  uLight: { value: new THREE.Vector3(-0.42, 0.72, 0.55).normalize() },
+  uLit: { value: color() },
+  uMid: { value: color() },
+  uDark: { value: color() },
+  uPaper: { value: color() },
+  uInk: { value: color() },
+  uHatch: { value: new THREE.Vector4() },
+  uAccent: { value: color() },
+  uCapBias: { value: 0.25 / (FAR - NEAR) },
+  uLineBias: { value: (2 * 0.6) / (FAR - NEAR) },
+  tIds: { value: null },
+  uRes: { value: new THREE.Vector2(1, 1) },
+};
+
+const VERT = /* glsl */ `
+uniform float uLiftFrom; uniform float uLift;
+varying vec3 vW; varying vec3 vN;
+#ifdef DIAL
+varying vec2 vUv;
+#endif
+void main() {
+  vec3 p = position;
+  if (p.y > uLiftFrom) p.y += uLift;
+  vec4 w = modelMatrix * vec4(p, 1.0);
+  vW = w.xyz;
+  vN = normalize(mat3(modelMatrix) * normal);
+#ifdef DIAL
+  vUv = uv;
+#endif
+  gl_Position = projectionMatrix * viewMatrix * w;
+}`;
+
+const FRAG = /* glsl */ `
+uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash;
+uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
+uniform vec3 uGlass; uniform vec2 uGlassC;
+uniform vec2 uProf[24]; uniform int uProfN; uniform vec3 uAxisP, uAxisD; uniform float uLiftFrom, uLift;
+varying vec3 vW; varying vec3 vN;
+
+// Is the plane point h inside this body of revolution's half-profile? (even-odd rule in r, s)
+// Bores and air are volumes inside other solids, not holes in them, so their far walls may only show
+// where the view ray crosses the plane inside them; elsewhere the cut face of the solid is in front.
+bool inProfile(vec3 h) {
+  vec3 rel = h - uAxisP;
+  float s = dot(rel, uAxisD);
+  float r = length(rel - uAxisD * s);
+  if (s > uLiftFrom + uLift) s -= uLift; else if (s > uLiftFrom) s = uLiftFrom;
+  bool inside = false;
+  for (int i = 0; i < 24; i++) {
+    if (i >= uProfN) break;
+    vec2 a = uProf[i];
+    vec2 b = uProf[i + 1 < uProfN ? i + 1 : 0];
+    if ((a.y > s) != (b.y > s) && r < a.x + (s - a.y) / (b.y - a.y) * (b.x - a.x)) inside = !inside;
+  }
+  return inside;
+}
+#ifdef DIAL
+uniform sampler2D uTex; varying vec2 vUv;
+#endif
+
+// coverage of lines at the integers of f, widthPx wide, antialiased by the screen derivative
+float lines(float f, float widthPx) {
+  float d = abs(fract(f + 0.5) - 0.5);
+  return clamp(0.5 * widthPx - d / max(fwidth(f), 1e-5) + 0.5, 0.0, 1.0);
+}
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+void main() {
+  bool cutting = uCutOn > 0.5;
+  if (cutting && dot(uCut.xyz, vW) > uCut.w) discard;
+  // where the view ray through this fragment meets the cutting plane (the cut face, if this is one)
+  float side = dot(uCut.xyz, vW) - uCut.w;
+  float dn = dot(uCut.xyz, uCamDir);
+  vec3 h = abs(dn) < 1e-4 ? vW - uCut.xyz * side : vW - uCamDir * (side / dn);
+  vec3 e1 = normalize(cross(vec3(0.0, 1.0, 0.0), uCut.xyz));
+  vec3 e2 = cross(uCut.xyz, e1);
+  vec2 uv = vec2(dot(h, e1), dot(h, e2)) * uPx; // device px on the plane
+
+  // the material's hatch, in sheet units (x1.4 px), angle as on the 2D sheet
+  float a = radians(uAngle);
+  vec2 dir = vec2(sin(a), cos(a));
+  vec2 perp = vec2(cos(a), -sin(a));
+  float qx = dot(uv, perp), qy = dot(uv, dir);
+  float unit = 1.4 * uDpr;
+  float g = uGap * unit;
+  float lw = 0.8 * uDpr;
+  int kind = int(uKind + 0.5);
+  float hv = 0.0;
+  if (kind == 1) hv = lines(qx / g, lw);
+  else if (kind == 2) hv = max(lines(qx / g, lw), lines((qx - uPair * unit) / g, lw));
+  else if (kind == 3) hv = max(lines(qx / g, lw), step(0.5, fract(qy / (2.6 * unit))) * lines(qx / g - 0.5, lw));
+  else if (kind == 4) hv = max(lines(qx / g, lw), lines(qy / g, lw));
+  else if (kind == 5) { vec2 c = (fract(vec2(qx, qy) / g) - 0.5) * g; hv = clamp(0.62 * unit - length(c) + 0.5, 0.0, 1.0); }
+
+  // stipple for air: one dot per cell, kept with probability = density
+  vec2 cell = floor(uv / (3.2 * unit));
+  vec2 jit = vec2(hash(cell), hash(cell + 7.3)) * 0.5 + 0.25;
+  float dd = length((uv / (3.2 * unit) - cell - jit) * 3.2 * unit);
+  float stip = step(hash(cell + 3.1), uDensity) * clamp(0.8 * unit - dd + 0.5, 0.0, 1.0);
+
+  // toon tones, light locked to the camera
+  vec3 nv = normalize((viewMatrix * vec4(normalize(vN), 0.0)).xyz);
+  float k = dot(nv, uLight);
+  float aa = max(fwidth(k), 1e-4);
+
+  int role = int(uRole + 0.5);
+  bool front = gl_FrontFacing;
+  bool cap = false;
+  float alpha = 1.0;
+  vec3 col = uMid;
+  if (role == 0 || role == 6) {
+    if (!front) { if (!cutting) discard; cap = true; }
+  } else if (role == 1) {
+    // a bore: its far wall, seen through the cut, lit from inside
+    if (front || !cutting || !inProfile(h)) discard;
+    k = -k;
+  } else if (role == 2) {
+    if (front || !cutting || uMode > 0.5 || !inProfile(h)) discard;
+    alpha = max(stip, uWash);
+#ifdef DBG
+    alpha = 1.0;
+#endif
+    if (alpha < 0.01) discard;
+    col = uAccent;
+  } else if (role == 3) {
+    if (front || !cutting) discard;
+    if (h.y < uGlass.x || h.y > uGlass.y || length(h.xz - uGlassC) > uGlass.z) discard;
+    cap = true;
+  } else if (role == 5) {
+    if (!front) discard;
+  }
+
+  if (uMode > 0.5) {
+    gl_FragColor = vec4(uEdge / 255.0, cap ? 1.0 : 0.0, 0.0, 1.0);
+    gl_FragDepth = gl_FragCoord.z - (cap ? uCapBias : 0.0);
+    return;
+  }
+  if (cap) {
+    if (kind == 6) col = uInk;
+    else col = mix(uPaper, uHatch.rgb, hv * uHatch.a);
+  } else if (role == 2) {
+    // col and alpha set above
+  } else if (role == 5) {
+    col = mix(uDark, uInk, 0.25);
+  } else if (role == 6) {
+    col = uInk;
+  } else {
+#ifdef DIAL
+    col = texture2D(uTex, vUv).rgb;
+#else
+    float t1 = smoothstep(0.1 - aa, 0.1 + aa, k);
+    float t2 = smoothstep(0.58 - aa, 0.58 + aa, k);
+    col = mix(mix(uDark, uMid, t1), uLit, t2);
+    if (role == 1) col = mix(col, uDark, 0.45);
+#ifdef DBG
+    if (role == 1) col = vec3(1.0, 0.0, 0.0);
+#endif
+#endif
+  }
+  gl_FragColor = vec4(col, alpha);
+  gl_FragDepth = gl_FragCoord.z - ((cap || role == 2) ? uCapBias : 0.0);
+}`;
+
+const LINE_VERT = /* glsl */ `
+uniform float uLineBias;
+attribute float dist;
+varying vec3 vW; varying float vDist;
+void main() {
+  vec4 w = modelMatrix * vec4(position, 1.0);
+  vW = w.xyz; vDist = dist;
+  gl_Position = projectionMatrix * viewMatrix * w;
+  gl_Position.z -= uLineBias * gl_Position.w;
+}`;
+const LINE_FRAG = /* glsl */ `
+uniform float uCutOn, uPx, uDpr, uDash, uAlpha, uCull; uniform vec4 uCut; uniform vec3 uInk;
+uniform sampler2D tIds; uniform vec2 uRes;
+varying vec3 vW; varying float vDist;
+void main() {
+  if (uCutOn > 0.5 && dot(uCut.xyz, vW) > uCut.w + 0.01) discard;
+  // A cut face lies on the plane, in front of anything left in the model; a cap drawn at its back
+  // face's depth would let edges inside the solid show through it, so creases never draw on a cap.
+  if (uCull > 0.5 && texture2D(tIds, gl_FragCoord.xy / uRes).g > 0.5) discard;
+  if (uDash > 0.5) {
+    // ISO 128 long-dash dot, in sheet units like the 2D sheet's .ctr: 15 2.6 2 2.6
+    float u = mod(vDist * uPx / (1.4 * uDpr), 22.2);
+    if ((u > 15.0 && u < 17.6) || u > 19.6) discard;
+  }
+  gl_FragColor = vec4(uInk, uAlpha);
+}`;
+
+const MATKIND = { lines: 1, pairs: 2, dashed: 3, cross: 4, dots: 5, grain: 1 };
+const ROLES = { solid: 0, void: 1, air: 2, glass: 3, dial: 4, mouth: 5, ink: 6 };
+const allMats = [];
+function material({ role = "solid", hatch = "none", edge = 0, dial = null, glass = null, glassC = null, profile = null }) {
+  let kind = 0;
+  let gap = 3;
+  let pair = 0;
+  let angle = 45;
+  if (hatch === "solid") kind = 6;
+  else if (Array.isArray(hatch)) {
+    const m = K.MATERIALS[hatch[0]];
+    kind = MATKIND[m.kind];
+    gap = m.gap;
+    pair = m.pair ?? 0;
+    angle = hatch[1];
+  }
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      ...U,
+      uKind: { value: kind },
+      uGap: { value: gap },
+      uPair: { value: pair },
+      uAngle: { value: angle },
+      uRole: { value: ROLES[role] },
+      uEdge: { value: edge },
+      uDensity: { value: 0.2 },
+      uWash: { value: 0 },
+      uLiftFrom: { value: 1e9 },
+      uLift: { value: 0 },
+      uGlass: { value: new THREE.Vector3(...(glass ? [glass.y0, glass.y1, glass.r] : [0, 0, 0])) },
+      uGlassC: { value: new THREE.Vector2(...(glassC ?? [0, 0])) },
+      uTex: { value: dial },
+      uProf: { value: Array.from({ length: 24 }, (_, i) => new THREE.Vector2(...(profile?.loop[i] ?? [0, 0]))) },
+      uProfN: { value: profile ? profile.loop.length : 0 },
+      uAxisP: { value: new THREE.Vector3(...(profile?.axis === "x" ? [0, profile.at, 0] : [profile?.at ?? 0, 0, 0])) },
+      uAxisD: { value: new THREE.Vector3(...(profile?.axis === "x" ? [1, 0, 0] : [0, 1, 0])) },
+    },
+    vertexShader: VERT,
+    fragmentShader: FRAG,
+    defines: { ...(dial ? { DIAL: 1 } : {}), ...(Qs.has("dbg") ? { DBG: 1 } : {}) },
+    // not BackSide: three.js draws BackSide by flipping the GL front face, which also flips gl_FrontFacing
+    side: role === "void" || role === "air" || role === "glass" ? THREE.DoubleSide : THREE.FrontSide,
+    transparent: role === "air",
+    depthWrite: role !== "air",
+  });
+  mat.userData.role = role;
+  allMats.push(mat);
+  return mat;
+}
+const lineMat = (dash, alpha = 1) =>
+  new THREE.ShaderMaterial({
+    uniforms: { ...U, uDash: { value: dash ? 1 : 0 }, uAlpha: { value: alpha }, uCull: { value: dash ? 0 : 1 }, tIds: U.tIds, uRes: U.uRes },
+    vertexShader: LINE_VERT,
+    fragmentShader: LINE_FRAG,
+    transparent: alpha < 1,
+  });
+const CREASE = lineMat(false);
+
+// ---------------------------------------------------------------- geometry builders
+// A closed body of revolution from a half-profile [r, s], one strip per profile edge so every corner
+// is a crease, wound outward whatever the profile's direction.
+function lathe(loop, seg) {
+  const n = loop.length;
+  let area = 0;
+  for (let i = 0; i < n; i++) {
+    const [r0, s0] = loop[i];
+    const [r1, s1] = loop[(i + 1) % n];
+    area += r0 * s1 - r1 * s0;
+  }
+  const sign = area > 0 ? 1 : -1;
+  const pos = [];
+  const nor = [];
+  const idx = [];
+  const P3 = (i) => new THREE.Vector3(pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]);
+  for (let i = 0; i < n; i++) {
+    const [r0, s0] = loop[i];
+    const [r1, s1] = loop[(i + 1) % n];
+    if (r0 === 0 && r1 === 0) continue;
+    const dr = r1 - r0;
+    const ds = s1 - s0;
+    const len = Math.hypot(dr, ds);
+    if (len < 1e-9) continue;
+    const nr = (sign * ds) / len;
+    const ns = (-sign * dr) / len;
+    const base = pos.length / 3;
+    for (let j = 0; j <= seg; j++) {
+      const t = (j / seg) * Math.PI * 2;
+      const c = Math.cos(t);
+      const sn = Math.sin(t);
+      pos.push(r0 * c, s0, -r0 * sn, r1 * c, s1, -r1 * sn);
+      nor.push(nr * c, ns, -nr * sn, nr * c, ns, -nr * sn);
+    }
+    for (let j = 0; j < seg; j++) {
+      const a = base + 2 * j;
+      for (const [i0, i1, i2] of [[a, a + 1, a + 3], [a, a + 3, a + 2]]) {
+        const p0 = P3(i0);
+        const cr = P3(i1).sub(p0).cross(P3(i2).sub(p0));
+        if (cr.lengthSq() < 1e-12) continue;
+        const want = new THREE.Vector3(nor[3 * i0], nor[3 * i0 + 1], nor[3 * i0 + 2]);
+        if (cr.dot(want) >= 0) idx.push(i0, i1, i2);
+        else idx.push(i0, i2, i1);
+      }
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+  geo.setIndex(idx);
+  return geo;
+}
+
+function placeOnAxis(geo, axis, at) {
+  if (axis === "x") {
+    geo.applyMatrix4(new THREE.Matrix4().makeRotationZ(-Math.PI / 2));
+    geo.translate(0, at, 0);
+  } else geo.translate(at, 0, 0);
+  return geo;
+}
+
+function extrude({ shape, holes = [], along, from, to, bevel = 0, conform }) {
+  const sh = new THREE.Shape(shape.map(([a, b]) => new THREE.Vector2(a, b)));
+  for (const h of holes) sh.holes.push(new THREE.Path(h.map(([a, b]) => new THREE.Vector2(a, b))));
+  const geo = new THREE.ExtrudeGeometry(sh, {
+    depth: to - from - 2 * bevel,
+    bevelEnabled: bevel > 0,
+    bevelThickness: bevel,
+    bevelSize: bevel,
+    bevelSegments: 3,
+    steps: conform ? 24 : 1,
+    curveSegments: 24,
+  });
+  geo.translate(0, 0, from + bevel);
+  if (along === "y") geo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+  if (along === "x") geo.applyMatrix4(new THREE.Matrix4().makeRotationY(Math.PI / 2));
+  if (conform) {
+    // the face at x = conform.x lands on the cylinder of radius r round the pump's axis
+    const p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      if (Math.abs(p.getX(i) - conform.x) < 1e-3) p.setX(i, Math.sign(conform.x) * Math.sqrt(conform.r ** 2 - p.getZ(i) ** 2));
+    }
+    geo.computeVertexNormals();
+  }
+  return geo;
+}
+
+class Helix extends THREE.Curve {
+  constructor(s) {
+    super();
+    this.s = s;
+  }
+  getPoint(t, out = new THREE.Vector3()) {
+    const { from, to, at, radius, wire, turns } = this.s;
+    const a = 2 * Math.PI * turns * t;
+    return out.set(from + wire / 2 + t * (to - from - wire), at + radius * Math.cos(a), radius * Math.sin(a));
+  }
+}
+
+function solidGeometry(s) {
+  const seg = (r) => (r > 20 ? 144 : r > 6 ? 96 : 48);
+  if (s.kind === "lathe") return placeOnAxis(lathe(s.loop, seg(Math.max(...s.loop.map(([r]) => r)))), s.axis, s.at);
+  if (s.kind === "extrude") return extrude(s);
+  if (s.kind === "sphere") return new THREE.SphereGeometry(s.r, 48, 32).translate(...s.c);
+  if (s.kind === "helix") return new THREE.TubeGeometry(new Helix(s), 260, s.wire / 2, 10, false);
+  if (s.kind === "box") {
+    const size = s.max.map((v, i) => v - s.min[i]);
+    return new THREE.BoxGeometry(...size).translate(...s.min.map((v, i) => v + size[i] / 2));
+  }
+  if (s.kind === "torus") {
+    const [a0, a1] = s.arc;
+    const g = new THREE.TorusGeometry(s.R, s.r, 14, 120, ((a1 - a0) * Math.PI) / 180);
+    g.rotateZ((a0 * Math.PI) / 180);
+    g.rotateX(-Math.PI / 2);
+    return g.translate(...s.c);
+  }
+  if (s.kind === "disc") return new THREE.CircleGeometry(s.r, 96).rotateX(-Math.PI / 2).translate(...s.c);
+  if (s.kind === "needle") {
+    const a = (al, ac) => new THREE.Vector2(al, ac);
+    const sh = new THREE.Shape([a(27, 0), a(0, 0.9), a(-7, 0.7), a(-7, -0.7), a(0, -0.9)]);
+    return new THREE.ExtrudeGeometry(sh, { depth: 0.5, bevelEnabled: false }).rotateX(-Math.PI / 2);
+  }
+  throw new Error("unknown solid " + s.kind);
+}
+
+// ---------------------------------------------------------------- the dial face, drawn from the 2D sheet's dial
+const dialCanvas = document.createElement("canvas");
+dialCanvas.width = dialCanvas.height = 1024;
+const dialTex = new THREE.CanvasTexture(dialCanvas);
+dialTex.anisotropy = 4;
+function drawDial(paper, ink) {
+  const g = dialCanvas.getContext("2d");
+  const S = 512 / 31.4; // px per mm
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.fillStyle = paper;
+  g.fillRect(0, 0, 1024, 1024);
+  g.translate(512, 512);
+  g.strokeStyle = g.fillStyle = ink;
+  const pt = (r, deg) => [r * S * Math.cos((deg * Math.PI) / 180), -r * S * Math.sin((deg * Math.PI) / 180)];
+  g.lineWidth = 0.35 * S;
+  g.beginPath();
+  g.arc(0, 0, 29 * S, (45 * Math.PI) / 180, (-225 * Math.PI) / 180, true);
+  g.stroke();
+  for (let i = 0; i <= 55; i++) {
+    const deg = P.needleAngle(i / 5);
+    const [x0, y0] = pt(i % 5 === 0 ? 25.6 : 27.2, deg);
+    const [x1, y1] = pt(29, deg);
+    g.lineWidth = (i % 5 === 0 ? 0.5 : 0.3) * S;
+    g.beginPath();
+    g.moveTo(x0, y0);
+    g.lineTo(x1, y1);
+    g.stroke();
+  }
+  g.font = `600 ${3.6 * S}px ui-monospace, Consolas, monospace`;
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  for (let bar = 0; bar <= 11; bar++) g.fillText(String(bar), ...pt(21.4, P.needleAngle(bar)));
+  g.font = `${3 * S}px ui-monospace, Consolas, monospace`;
+  g.fillText("bar", 0, 13 * S);
+  dialTex.needsUpdate = true;
+}
+
+// ---------------------------------------------------------------- build the pump
+const root = new THREE.Group();
+scene.add(root);
+const PARTS = new Map(); // id -> { id, group, holders: [{ obj, solid }], edges: Set }
+let edgeSeq = 0;
+const edgeOwner = new Map(); // edge id -> part id
+const live = { cup: null, needle: null, spring: null };
+
+function addSolid(part, s, holder, edge) {
+  const role = s.role ?? "solid";
+  const geo = solidGeometry(s);
+  const mat = material({ role, hatch: s.hatch ?? (role === "ink" ? "solid" : "none"), edge, dial: role === "dial" ? dialTex : null, glass: s.glass, glassC: s.glass ? [G_GAUGE, 0] : null, profile: role === "void" ? s : null });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.userData.part = part.id;
+  holder.add(mesh);
+  let lines = null;
+  if (role === "solid" || role === "void" || role === "glass" || role === "ink") {
+    lines = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 35), CREASE);
+    lines.userData.crease = true;
+    holder.add(lines);
+  }
+  return { mesh, lines };
+}
+const G_GAUGE = P.GAUGE_U;
+
+for (const spec of G.parts(0)) {
+  const group = new THREE.Group();
+  group.userData.part = spec.id;
+  root.add(group);
+  const rec = { id: spec.id, spec, group, holders: [], edges: new Set() };
+  const shared = spec.id === 1 || spec.id === 13 ? ++edgeSeq : 0;
+  for (const s of spec.solids) {
+    const holder = new THREE.Group();
+    group.add(holder);
+    const edge = s.role === "mouth" || s.edge || !shared ? ++edgeSeq : shared;
+    edgeOwner.set(edge, spec.id);
+    rec.edges.add(edge);
+    const made = addSolid(spec, s, holder, edge);
+    rec.holders.push({ obj: holder, solid: s });
+    if (s.live === "cup") live.cup = { holder, made, s, edge, fold: 0 };
+    if (s.live === "needle") {
+      // pivot on the gauge's axis, just above the needle hub
+      holder.position.set(G_GAUGE, 92.2, 0);
+      live.needle = holder;
+    }
+  }
+  if (spec.id === 18) live.spring = rec;
+  PARTS.set(spec.id, rec);
+}
+
+// air, stippled in the accent by pressure
+const airGroup = new THREE.Group();
+root.add(airGroup);
+const airMats = { p: [], pt: [] };
+for (const a of G.air()) {
+  const mat = material({ role: "air", profile: a });
+  if (a.liftFrom) mat.uniforms.uLiftFrom.value = a.liftFrom;
+  airMats[a.pressure].push(mat);
+  const mesh = new THREE.Mesh(placeOnAxis(lathe(a.loop, 64), a.axis, a.at), mat);
+  mesh.renderOrder = 2;
+  // the vertex shader lifts the chamber's top with the stroke, past the rest-pose bounding sphere
+  mesh.frustumCulled = false;
+  airGroup.add(mesh);
+}
+
+// centre lines: the pump's axis, the valve's and the gauge's (the handle's rides with it)
+function centreLine(a, b, parent = root) {
+  const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a), new THREE.Vector3(...b)]);
+  geo.setAttribute("dist", new THREE.Float32BufferAttribute([0, new THREE.Vector3(...a).distanceTo(new THREE.Vector3(...b))], 1));
+  const l = new THREE.Line(geo, lineMat(true, 0.85));
+  l.userData.crease = true;
+  parent.add(l);
+  return l;
+}
+const axisLine = centreLine([0, -12, 0], [0, 860, 0]);
+centreLine([30, M.PASSAGE_V, 0], [G.HOSE_END + 10, M.PASSAGE_V, 0]);
+centreLine([G_GAUGE, 52, 0], [G_GAUGE, 106, 0]);
+const handleAxis = centreLine([-150, G.REST.HC, 0], [150, G.REST.HC, 0], PARTS.get(14).group);
+
+// ---------------------------------------------------------------- the outline pass
+const idTarget = new THREE.WebGLRenderTarget(4, 4, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthTexture: new THREE.DepthTexture(4, 4) });
+U.tIds.value = idTarget.texture;
+const edgeMat = new THREE.ShaderMaterial({
+  uniforms: { tId: { value: idTarget.texture }, tDepth: { value: idTarget.depthTexture }, uTexel: { value: new THREE.Vector2() }, uInk: U.uInk, uW: { value: 1 }, uRange: { value: FAR - NEAR }, uThr: { value: 2.0 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+  fragmentShader: /* glsl */ `
+uniform sampler2D tId, tDepth; uniform vec2 uTexel; uniform vec3 uInk; uniform float uW, uRange, uThr;
+varying vec2 vUv;
+vec4 at(vec2 d) { return texture2D(tId, vUv + d * uTexel * uW); }
+bool same(vec4 a, vec4 b) { return abs(a.r - b.r) < 0.5 / 255.0 && abs(a.g - b.g) < 0.5; }
+// a pixel unlike all four neighbours is a pinhole (a ray slipping through a crack between triangles)
+bool speck(vec2 d) {
+  vec4 c = at(d);
+  return !same(c, at(d + vec2(1.0, 0.0))) && !same(c, at(d - vec2(1.0, 0.0))) && !same(c, at(d + vec2(0.0, 1.0))) && !same(c, at(d - vec2(0.0, 1.0)));
+}
+void main() {
+  vec4 c = at(vec2(0.0));
+  if (speck(vec2(0.0))) discard;
+  float e = 0.0;
+  vec2 o[4];
+  o[0] = vec2(1.0, 0.0); o[1] = vec2(-1.0, 0.0); o[2] = vec2(0.0, 1.0); o[3] = vec2(0.0, -1.0);
+  for (int i = 0; i < 4; i++) {
+    if (!same(at(o[i]), c) && !speck(o[i])) e = 1.0;
+  }
+  if (e < 0.5 && c.a > 0.5 && c.g < 0.5) {
+    // a fold or an overlap within one part: depth is not linear across the pixel
+    float d0 = texture2D(tDepth, vUv).x;
+    for (int i = 0; i < 2; i++) {
+      vec2 st = o[2 * i] * uTexel * uW;
+      float dl = texture2D(tDepth, vUv - st).x, dr = texture2D(tDepth, vUv + st).x;
+      if (abs(dl + dr - 2.0 * d0) * uRange > uThr) e = 1.0;
+    }
+  }
+  if (e < 0.5) discard;
+  gl_FragColor = vec4(uInk, 1.0);
+#ifdef DBG
+  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
+}`,
+  transparent: true,
+  depthTest: false,
+  depthWrite: false,
+  defines: Qs.has("dbg") ? { DBG: 1 } : {},
+});
+const edgeScene = new THREE.Scene();
+edgeScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), edgeMat));
+const quadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+// ---------------------------------------------------------------- theme
+function cssColor(name) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const m = v.match(/rgba?\(([^)]+)\)/);
+  if (m) {
+    const [r, g, b, a = 1] = m[1].split(",").map(Number);
+    return { c: new THREE.Color(r / 255, g / 255, b / 255), a, css: v };
+  }
+  return { c: new THREE.Color(v), a: 1, css: v };
+}
+function applyTheme() {
+  for (const [u, name] of [["uLit", "--bp3-lit"], ["uMid", "--bp3-mid"], ["uDark", "--bp3-dark"], ["uPaper", "--bp-paper"], ["uInk", "--bp-ink"], ["uAccent", "--bp-accent"]]) U[u].value.copy(cssColor(name).c);
+  const h = cssColor("--bp-hatch");
+  U.uHatch.value.set(h.c.r, h.c.g, h.c.b, h.a);
+  drawDial(cssColor("--bp-paper").css, cssColor("--bp-ink").css);
+  wake();
+}
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+// ---------------------------------------------------------------- state: the 2D sheet's, from the same model
+const air = M.pump();
+let x = 0;
+let target = 0;
+let fold = 0;
+let lift = 0;
+let needle = M.START_GAUGE;
+let auto = false;
+let dragging = false;
+
+const PERIOD = 1.8;
+const DOWN = 0.56;
+const tour = { t: 0, cycle: 0, mode: "pump", modeT: 0, from: 0 };
+function tourTarget(h) {
+  tour.modeT += h;
+  if (tour.mode === "pump") {
+    tour.t += h;
+    const cycle = Math.floor(tour.t / PERIOD);
+    if (cycle !== tour.cycle) {
+      tour.cycle = cycle;
+      if (M.gauge(air.pt) >= M.RESET_GAUGE) {
+        tour.mode = "hold";
+        tour.modeT = 0;
+        return 0;
+      }
+    }
+    const phase = (tour.t % PERIOD) / PERIOD;
+    return phase < DOWN ? L.ease(phase / DOWN) : 1 - L.ease((phase - DOWN) / (1 - DOWN));
+  }
+  if (tour.mode === "hold" && tour.modeT > 1.4) {
+    tour.mode = "deflate";
+    tour.modeT = 0;
+    tour.from = M.gauge(air.pt);
+  }
+  if (tour.mode === "deflate") {
+    const k = Math.min(1, tour.modeT / 1.8);
+    M.setTyre(air, tour.from + (M.START_GAUGE - tour.from) * L.ease(k));
+    if (k >= 1) {
+      air.strokes = 0;
+      tour.mode = "pump";
+      tour.modeT = 0;
+      tour.t = 0;
+      tour.cycle = 0;
+    }
+  }
+  return 0;
+}
+
+// view state
+const VIEWS = { iso: [45, 35.264], front: [0, 0], side: [90, 0], top: [0, 90] };
+const start = VIEWS[q.view] ?? VIEWS.iso;
+const cam = { az: start[0], el: start[1], azT: start[0], elT: start[1], zoom: q.zoom, pan: new THREE.Vector3() };
+let explode = q.explode;
+let explodeT = q.explode;
+let showBalloons = q.balloons;
+
+function step(dt, lv) {
+  const n = Math.max(1, Math.ceil(dt * 480));
+  const h = dt / n;
+  const driven = (lv.touring || auto) && !dragging;
+  for (let i = 0; i < n; i++) {
+    if (driven) target = tourTarget(h);
+    x = lv.reduced && !driven ? target : L.follow(x, target, driven ? 30 : 18, h);
+    x = Math.min(1, Math.max(0, x));
+    M.advance(air, x);
+    lift = L.follow(lift, air.open ? M.BALL_LIFT : 0, air.open ? 60 : 22, h);
+    fold = L.follow(fold, air.intake ? 1.2 : 0, 26, h);
+    needle = L.follow(needle, M.gauge(air.pt), 10, h);
+  }
+  const snap = lv.reduced || lv.frozen;
+  cam.az = snap ? cam.azT : L.follow(cam.az, cam.azT, 9, dt);
+  cam.el = snap ? cam.elT : L.follow(cam.el, cam.elT, 9, dt);
+  explode = snap ? explodeT : L.follow(explode, explodeT, 5, dt);
+  return (
+    Math.abs(x - target) > 1e-4 || lift > 1e-3 || fold > 1e-3 || Math.abs(needle - M.gauge(air.pt)) > 1e-3 ||
+    Math.abs(cam.az - cam.azT) > 0.01 || Math.abs(cam.el - cam.elT) > 0.01 || Math.abs(explode - explodeT) > 1e-3
+  );
+}
+
+// ---------------------------------------------------------------- poses
+const smooth = (t) => t * t * (3 - 2 * t);
+function pose(xs, e) {
+  const L0 = M.STROKE * (1 - xs);
+  for (const rec of PARTS.values()) {
+    const ex = G.EXPLODE[rec.id];
+    const g = rec.group;
+    if (Array.isArray(ex)) g.position.set(ex[0] * e, ex[1] * e, ex[2] * e);
+    else g.position.set((ex.dx ?? 0) * e, L0 + (ex.lift - L0) * e, 0);
+    if (ex.side) for (const hd of rec.holders) hd.obj.position.x = hd.solid.side * ex.side * e;
+  }
+  // the check valve: the ball rides off its seat, the spring shortens against the barb
+  const du = P.ballU(lift) - P.ballU(0);
+  PARTS.get(17).group.position.x += du;
+  const s0 = 66 - (P.ballU(0) + M.BALL_D / 2);
+  const sNow = 66 - (P.ballU(lift) + M.BALL_D / 2);
+  const sp = PARTS.get(18).holders[0].obj;
+  sp.scale.x = sNow / s0;
+  sp.position.x = 66 * (1 - sNow / s0);
+}
+
+function rebuildCup() {
+  if (Math.abs(fold - live.cup.fold) < 0.01) return;
+  live.cup.fold = fold;
+  const { mesh, lines } = live.cup.made;
+  const geo = placeOnAxis(lathe(P.cupLoop(G.REST.VP, fold), 96), "y", 0);
+  mesh.geometry.dispose();
+  mesh.geometry = geo;
+  lines.geometry.dispose();
+  lines.geometry = new THREE.EdgesGeometry(geo, 35);
+}
+
+// bounds for framing: assembled with the handle up, and fully exploded
+function boundsAt(e) {
+  pose(0, e);
+  airGroup.visible = false;
+  root.updateMatrixWorld(true);
+  const b = new THREE.Box3();
+  for (const rec of PARTS.values()) b.expandByObject(rec.group);
+  return b;
+}
+const B0 = boundsAt(0);
+const B1 = boundsAt(1);
+
+// ---------------------------------------------------------------- camera
+let W = 1;
+let H = 1;
+let dpr = 1;
+function resize() {
+  const r = host.getBoundingClientRect();
+  W = Math.max(1, Math.round(r.width));
+  H = Math.max(1, Math.round(r.height));
+  dpr = renderer.getPixelRatio();
+  renderer.setSize(W, H, false);
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
+  idTarget.setSize(Math.round(W * dpr), Math.round(H * dpr));
+  edgeMat.uniforms.uTexel.value.set(1 / (W * dpr), 1 / (H * dpr));
+  U.uRes.value.set(Math.round(W * dpr), Math.round(H * dpr));
+  edgeMat.uniforms.uW.value = Math.max(1, Math.round(dpr * 0.75));
+  overlay.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  wake();
+}
+// room for the balloon columns either side, and the title block below on a phone
+const margin = () => {
+  const side = Math.min(150, Math.round(W * 0.16));
+  return { l: side, r: side, t: 34, b: W < 640 ? 64 : 34 };
+};
+function placeCamera() {
+  const az = (cam.az * Math.PI) / 180;
+  const el = (Math.min(89.9, cam.el) * Math.PI) / 180;
+  const dir = new THREE.Vector3(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az));
+  const k = smooth(Math.min(1, Math.max(0, explode)));
+  const box = new THREE.Box3(B0.min.clone().lerp(B1.min, k), B0.max.clone().lerp(B1.max, k));
+  const centre = q.look ? new THREE.Vector3(...q.look) : box.getCenter(new THREE.Vector3());
+  camera.position.copy(centre).addScaledVector(dir, FAR / 2);
+  camera.up.set(0, 1, 0);
+  camera.lookAt(centre);
+  camera.updateMatrixWorld(true);
+  // fit the box's eight corners, in camera space, inside the margins
+  const inv = camera.matrixWorldInverse;
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (let i = 0; i < 8; i++) {
+    const p = new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).applyMatrix4(inv);
+    x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
+  }
+  const MG = margin();
+  const fit = Math.min((W - MG.l - MG.r) / (x1 - x0), (H - MG.t - MG.b) / (y1 - y0));
+  const zoom = fit * cam.zoom;
+  // centre the fitted box (it is not symmetric about the look point) unless a point was asked for
+  const off = q.look ? new THREE.Vector3() : new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 0).applyMatrix3(new THREE.Matrix3().setFromMatrix4(camera.matrixWorld));
+  camera.position.add(off).add(cam.pan);
+  // keep the model centred between unequal top and bottom margins
+  camera.position.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1), -(MG.b - MG.t) / 2 / zoom);
+  camera.left = -W / 2 / zoom;
+  camera.right = W / 2 / zoom;
+  camera.top = H / 2 / zoom;
+  camera.bottom = -H / 2 / zoom;
+  camera.zoom = 1;
+  camera.updateProjectionMatrix();
+  camera.updateMatrixWorld(true);
+  U.uCamDir.value.copy(dir).negate();
+  U.uPx.value = zoom * dpr;
+  U.uDpr.value = dpr;
+  return zoom;
+}
+
+// ---------------------------------------------------------------- overlay: balloons, leaders, live dimension
+const NS = "http://www.w3.org/2000/svg";
+const project = (v) => {
+  const p = v.clone().project(camera);
+  return [((p.x + 1) / 2) * W, ((1 - p.y) / 2) * H];
+};
+const camDirWorld = () => U.uCamDir.value.clone().negate();
+function anchorWorld(id) {
+  const a = G.ANCHORS[id];
+  const rec = PARTS.get(id);
+  let p;
+  if (U.uCutOn.value > 0.5) p = new THREE.Vector3(...a.cut);
+  else {
+    const o = a.out;
+    p = new THREE.Vector3(...o.c);
+    const d = camDirWorld();
+    if (o.axis === "y") d.y = 0;
+    if (o.axis === "x") d.x = 0;
+    if (o.axis === "box") {
+      d.y = 0;
+      d.divideScalar(Math.max(Math.abs(d.x), Math.abs(d.z)) || 1);
+      p.addScaledVector(d, o.r);
+    } else if (o.r) p.addScaledVector(d.normalize(), o.r);
+  }
+  // in its part's frame (explode, stroke, the ball's lift); a grip or plug takes its own side
+  const holder = id === 15 || id === 16 ? rec.holders[0].obj : rec.group;
+  return p.applyMatrix4(holder.matrixWorld);
+}
+const pix = new Uint8Array(4);
+const visibleCache = new Map();
+let visFrame = 0;
+function visibleAt(id, sx, sy) {
+  if (sx < 0 || sy < 0 || sx >= W || sy >= H) return false;
+  renderer.readRenderTargetPixels(idTarget, Math.round(sx * dpr), Math.round((H - sy) * dpr), 1, 1, pix);
+  return PARTS.get(id).edges.has(pix[0]) || pix[0] === 0;
+}
+
+function drawOverlay(zoom) {
+  let out = "";
+  const ids = [...PARTS.keys()];
+  if (showBalloons) {
+    const items = ids.map((id) => {
+      const [ax, ay] = project(anchorWorld(id));
+      return { id, ax, ay };
+    });
+    // the model's screen box, for the two balloon columns
+    const pts = [];
+    for (let i = 0; i < 8; i++) {
+      const k = smooth(Math.min(1, Math.max(0, explode)));
+      const b0 = B0, b1 = B1;
+      const v = new THREE.Vector3(
+        i & 1 ? THREE.MathUtils.lerp(b0.max.x, b1.max.x, k) : THREE.MathUtils.lerp(b0.min.x, b1.min.x, k),
+        i & 2 ? THREE.MathUtils.lerp(b0.max.y, b1.max.y, k) : THREE.MathUtils.lerp(b0.min.y, b1.min.y, k),
+        i & 4 ? THREE.MathUtils.lerp(b0.max.z, b1.max.z, k) : THREE.MathUtils.lerp(b0.min.z, b1.min.z, k)
+      );
+      pts.push(project(v));
+    }
+    const minX = Math.min(...pts.map((p) => p[0]));
+    const maxX = Math.max(...pts.map((p) => p[0]));
+    // sides split at the pump's axis on screen, at the anchor's height
+    const axA = project(new THREE.Vector3(0, 0, 0));
+    const axB = project(new THREE.Vector3(0, 800, 0));
+    const axisX = (y) => axA[0] + ((y - axA[1]) / (axB[1] - axA[1] || 1)) * (axB[0] - axA[0]);
+    const R = W < 640 ? 8 : 10;
+    const cols = { l: Math.max(R + 14, minX - 46), r: Math.min(W - R - 14, maxX + 46) };
+    const refresh = visFrame++ % 3 === 0;
+    // each balloon goes to the column on its anchor's side of the pump's axis; then the fuller column
+    // gives its anchors nearest the axis to the other, so neither holds more than about half
+    for (const it of items) {
+      it.d = it.ax - axisX(it.ay);
+      it.side = it.d < -0.5 ? "l" : "r";
+    }
+    for (;;) {
+      const nl = items.filter((it) => it.side === "l").length;
+      const nr = items.length - nl;
+      if (Math.abs(nl - nr) <= 3) break;
+      const from = nl > nr ? "l" : "r";
+      const pick = items.filter((it) => it.side === from).sort((a, b) => Math.abs(a.d) - Math.abs(b.d))[0];
+      pick.side = from === "l" ? "r" : "l";
+    }
+    for (const side of ["l", "r"]) {
+      const col = items.filter((it) => it.side === side).sort((a, b) => a.ay - b.ay);
+      // a tidy column: in anchor order, at least `gap` apart, inside the frame
+      const top = R + 18;
+      const lim = H - R - 18;
+      const gap = Math.min(2 * R + 6, (lim - top) / Math.max(1, col.length - 1));
+      const ys = col.map((c) => Math.min(lim, Math.max(top, c.ay)));
+      for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i], ys[i - 1] + gap);
+      if (ys.length && ys[ys.length - 1] > lim) {
+        ys[ys.length - 1] = lim;
+        for (let i = ys.length - 2; i >= 0; i--) ys[i] = Math.min(ys[i], ys[i + 1] - gap);
+      }
+      col.forEach((c, i) => {
+        const bx = cols[side];
+        const by = ys[i];
+        if (refresh || !visibleCache.has(c.id)) visibleCache.set(c.id, visibleAt(c.id, c.ax, c.ay));
+        const seen = visibleCache.get(c.id);
+        const dx = c.ax - bx, dy = c.ay - by, d = Math.hypot(dx, dy) || 1;
+        const lx = bx + (dx / d) * R, ly = by + (dy / d) * R;
+        out += `<path class="${seen ? "thin" : "hid"}" d="M${lx.toFixed(1)} ${ly.toFixed(1)}L${c.ax.toFixed(1)} ${c.ay.toFixed(1)}"/>`;
+        out += seen ? `<circle class="dot" cx="${c.ax.toFixed(1)}" cy="${c.ay.toFixed(1)}" r="1.7"/>` : `<circle class="balloon" cx="${c.ax.toFixed(1)}" cy="${c.ay.toFixed(1)}" r="1.7"/>`;
+        out += `<g data-part="${c.id}"><title>${c.id} ${G.BOM[c.id]}</title><circle class="balloon" cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${R}"/><text class="t" x="${bx.toFixed(1)}" y="${(by + 3.4).toFixed(1)}" text-anchor="middle">${c.id}</text></g>`;
+      });
+    }
+  }
+  // live stroke dimension beside the handle's right end, while assembled
+  if (explode < 0.05) {
+    const hcTop = P.handleCentre(M.pistonV(0));
+    const travel = M.STROKE * x;
+    const A = project(new THREE.Vector3(140, hcTop, 0));
+    const B = project(new THREE.Vector3(140, hcTop - travel, 0));
+    const ax = [B[0] - A[0], B[1] - A[1]];
+    const len = Math.hypot(...ax);
+    // offset to the right of the axis on screen
+    const nrm = len > 0.5 ? [-ax[1] / len, ax[0] / len] : [1, 0];
+    const side = nrm[0] < 0 ? -1 : 1;
+    const o = 26 * side;
+    const a2 = [A[0] + nrm[0] * o, A[1] + nrm[1] * o];
+    const b2 = [B[0] + nrm[0] * o, B[1] + nrm[1] * o];
+    const f = (p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+    const ext = (p, p2) => `M${f([p[0] + nrm[0] * 4 * side, p[1] + nrm[1] * 4 * side])}L${f([p2[0] + nrm[0] * 5 * side, p2[1] + nrm[1] * 5 * side])}`;
+    let dim = `<path class="thin" d="${ext(A, a2)}${len > 1 ? ext(B, b2) : ""}M${f(a2)}L${f(b2)}"/>`;
+    if (len > 16) {
+      const u = [ax[0] / len, ax[1] / len];
+      const head = (p, s) => {
+        const t = [p[0] + u[0] * 7 * s, p[1] + u[1] * 7 * s];
+        return `M${f(p)}L${f([t[0] + nrm[0] * 1.6, t[1] + nrm[1] * 1.6])}L${f([t[0] - nrm[0] * 1.6, t[1] - nrm[1] * 1.6])}Z`;
+      };
+      dim += `<path class="head" d="${head(a2, 1)}${head(b2, -1)}"/>`;
+    }
+    const mx = (a2[0] + b2[0]) / 2 + nrm[0] * 9 * side;
+    const my = (a2[1] + b2[1]) / 2 + nrm[1] * 9 * side;
+    const ang = (Math.atan2(ax[1], ax[0]) * 180) / Math.PI + (len > 0.5 ? 0 : 90);
+    const rot = ((ang + 360 + 90) % 180) - 90;
+    dim += `<text class="t" x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)})">s=${Math.round(travel)}</text>`;
+    out += `<g data-role="dim">${dim}</g>`;
+  }
+  overlay.innerHTML = out;
+}
+
+// ---------------------------------------------------------------- render
+const say = L.announcer($("sr"), 2);
+const tint = (p) => 0.18 + 0.82 * Math.min(1, Math.max(0, M.gauge(p) / 7));
+function render(lv) {
+  rebuildCup();
+  pose(x, explode);
+  live.needle.rotation.y = (P.needleAngle(needle) * Math.PI) / 180;
+  airGroup.visible = explode < 0.01 && U.uCutOn.value > 0.5;
+  for (const m of airMats.p) {
+    m.uniforms.uDensity.value = tint(air.p);
+    m.uniforms.uWash.value = 0.05 + 0.1 * tint(air.p);
+    m.uniforms.uLift.value = M.STROKE * (1 - x);
+  }
+  for (const m of airMats.pt) {
+    m.uniforms.uDensity.value = tint(air.pt);
+    m.uniforms.uWash.value = 0.05 + 0.1 * tint(air.pt);
+  }
+  const cutting = U.uCutOn.value > 0.5;
+  for (const m of allMats) if (m.userData.role === "solid" || m.userData.role === "ink") m.side = cutting ? THREE.DoubleSide : THREE.FrontSide;
+  const zoom = placeCamera();
+  root.updateMatrixWorld(true);
+
+  // 1: ids and depth, without lines or air
+  U.uMode.value = 1;
+  scene.traverse((o) => o.userData.crease && (o.visible = false));
+  const airWas = airGroup.visible;
+  airGroup.visible = false;
+  renderer.setRenderTarget(idTarget);
+  renderer.setClearColor(0x000000, 0);
+  renderer.clear();
+  renderer.render(scene, camera);
+  scene.traverse((o) => o.userData.crease && (o.visible = true));
+  airGroup.visible = airWas;
+  // 2: colour (creases read the ids to stay off the cut faces)
+  U.uMode.value = 0;
+  renderer.setRenderTarget(null);
+  renderer.render(scene, camera);
+  // 3: outlines over the colour
+  renderer.autoClear = false;
+  renderer.render(edgeScene, quadCam);
+  renderer.autoClear = true;
+
+  drawOverlay(zoom);
+  const travel = M.STROKE * x;
+  const g = M.gauge(air.p);
+  $("readout").textContent = `s ${Math.round(travel)} mm · CHAMBER ${g.toFixed(2)} bar · TYRE ${M.gauge(air.pt).toFixed(2)} bar · F ${Math.round(M.force(air.p))} N · VALVE ${air.open ? "OPEN" : "SHUT"}`;
+  say(`Travel ${Math.round(travel)} millimetres, chamber ${g.toFixed(1)} bar, tyre ${M.gauge(air.pt).toFixed(1)} bar, handle force ${Math.round(M.force(air.p))} newtons.`, lv.clock);
+  syncControls();
+}
+
+// ---------------------------------------------------------------- controls
+const ui = {
+  cut: $("cut"),
+  offset: $("offset"),
+  explode: $("explode"),
+  balloons: $("balloons"),
+  views: [...document.querySelectorAll("[data-view]")],
+};
+function syncControls() {
+  ui.cut.setAttribute("aria-pressed", String(U.uCutOn.value > 0.5));
+  ui.balloons.setAttribute("aria-pressed", String(showBalloons));
+  if (document.activeElement !== ui.explode) ui.explode.value = String(explodeT);
+  for (const b of ui.views) {
+    const [az, el] = VIEWS[b.dataset.view];
+    b.setAttribute("aria-pressed", String(Math.abs(cam.azT - az) < 0.01 && Math.abs(cam.elT - el) < 0.01));
+  }
+}
+let lv = null;
+// A frozen frame (?t=) has no loop: anything that clears the canvas (a resize, a theme) redraws it here.
+function wake() {
+  if (!lv) return;
+  if (lv.frozen) render(lv);
+  else lv.wake?.();
+}
+function input() {
+  if (lv?.frozen) render(lv);
+  else lv?.input();
+}
+function setView(name) {
+  const [az, el] = VIEWS[name];
+  // take the short way round
+  cam.az = ((((cam.az - az) % 360) + 540) % 360) - 180 + az;
+  cam.azT = az;
+  cam.elT = el;
+  cam.pan.set(0, 0, 0);
+  input();
+}
+for (const b of ui.views) b.addEventListener("click", () => setView(b.dataset.view));
+ui.cut.addEventListener("click", () => {
+  U.uCutOn.value = U.uCutOn.value > 0.5 ? 0 : 1;
+  input();
+});
+ui.offset.value = String(q.offset);
+ui.offset.addEventListener("input", () => {
+  U.uCut.value.w = Number(ui.offset.value);
+  U.uCutOn.value = 1;
+  input();
+});
+ui.explode.addEventListener("input", () => {
+  explodeT = Number(ui.explode.value);
+  input();
+});
+ui.balloons.addEventListener("click", () => {
+  showBalloons = !showBalloons;
+  input();
+});
+$("pump").addEventListener("click", () => {
+  auto = !auto;
+  input();
+});
+
+// pointer: drag the handle to pump, drag elsewhere to orbit, shift or right drag to pan, wheel to zoom
+const ray = new THREE.Raycaster();
+const handleMeshes = [];
+for (const id of [13, 14, 15, 16]) PARTS.get(id).group.traverse((o) => o.isMesh && handleMeshes.push(o));
+let drag = null;
+canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+canvas.addEventListener("pointerdown", (e) => {
+  const r = canvas.getBoundingClientRect();
+  const px = e.clientX - r.left;
+  const py = e.clientY - r.top;
+  ray.setFromCamera(new THREE.Vector2((px / W) * 2 - 1, 1 - (py / H) * 2), camera);
+  const hit = explode < 0.05 && e.button === 0 && !e.shiftKey && ray.intersectObjects(handleMeshes, false).length > 0;
+  const a = project(new THREE.Vector3(0, 400, 0));
+  const b = project(new THREE.Vector3(0, 400 - M.STROKE, 0));
+  drag = { mode: hit ? "pump" : e.button === 2 || e.shiftKey ? "pan" : "orbit", px, py, x0: x, az: cam.azT, el: cam.elT, pan: cam.pan.clone(), axis: [b[0] - a[0], b[1] - a[1]] };
+  if (hit) {
+    dragging = true;
+    auto = false;
+    target = x;
+  }
+  try {
+    canvas.setPointerCapture(e.pointerId);
+  } catch {}
+  canvas.classList.add("v3-grab");
+  input();
+});
+canvas.addEventListener("pointermove", (e) => {
+  if (!drag) {
+    return;
+  }
+  const r = canvas.getBoundingClientRect();
+  const dx = e.clientX - r.left - drag.px;
+  const dy = e.clientY - r.top - drag.py;
+  if (drag.mode === "pump") {
+    const [ax, ay] = drag.axis;
+    const l2 = ax * ax + ay * ay;
+    target = Math.min(1, Math.max(0, drag.x0 + (l2 > 4 ? (dx * ax + dy * ay) / l2 : dy / (M.STROKE * 0.5))));
+  } else if (drag.mode === "orbit") {
+    cam.azT = cam.az = drag.az - dx * 0.4;
+    cam.elT = cam.el = Math.min(90, Math.max(-60, drag.el + dy * 0.4));
+  } else {
+    const zoom = U.uPx.value / dpr;
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+    cam.pan.copy(drag.pan).addScaledVector(right, -dx / zoom).addScaledVector(up, dy / zoom);
+  }
+  input();
+});
+const endDrag = () => {
+  if (!drag) return;
+  drag = null;
+  dragging = false;
+  canvas.classList.remove("v3-grab");
+  input();
+};
+canvas.addEventListener("pointerup", endDrag);
+canvas.addEventListener("pointercancel", endDrag);
+canvas.addEventListener(
+  "wheel",
+  (e) => {
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    const sx = e.clientX - r.left - W / 2;
+    const sy = H / 2 - (e.clientY - r.top);
+    const z0 = U.uPx.value / dpr;
+    const before = cam.zoom;
+    cam.zoom = Math.min(16, Math.max(0.3, cam.zoom * Math.exp(-e.deltaY * 0.0015)));
+    const z1 = (z0 * cam.zoom) / before;
+    // keep the point under the cursor where it is
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+    cam.pan.addScaledVector(right, sx / z0 - sx / z1).addScaledVector(up, sy / z0 - sy / z1);
+    input();
+  },
+  { passive: false }
+);
+canvas.addEventListener("dblclick", () => {
+  cam.zoom = 1;
+  cam.pan.set(0, 0, 0);
+  input();
+});
+
+host.addEventListener("keydown", (e) => {
+  const k = e.key;
+  if (k === "ArrowDown" || k === "ArrowUp") target = Math.min(1, Math.max(0, target + (k === "ArrowDown" ? 0.1 : -0.1)));
+  else if (k === "End") target = 1;
+  else if (k === "Home") target = 0;
+  else if (k === " ") auto = !auto;
+  else if (k === "e" || k === "E") explodeT = explodeT > 0.5 ? 0 : 1;
+  else if (k === "c" || k === "C") U.uCutOn.value = U.uCutOn.value > 0.5 ? 0 : 1;
+  else if (k === "b" || k === "B") showBalloons = !showBalloons;
+  else if (k === "r" || k === "R") {
+    M.setTyre(air, M.START_GAUGE);
+    air.strokes = 0;
+  } else if (k === "s" || k === "S") lv.slow = lv.slow === 1 ? 0.2 : lv.slow === 0.2 ? 0.05 : 1;
+  else if ("1234".includes(k)) setView(["iso", "front", "side", "top"][Number(k) - 1]);
+  else return;
+  e.preventDefault();
+  if (k.length > 1) auto = false;
+  input();
+});
+
+// ---------------------------------------------------------------- go
+resize();
+applyTheme();
+new ResizeObserver(resize).observe(host);
+lv = L.run({
+  root: host,
+  step,
+  render,
+  idleAfter: 5,
+  onFrozen: () => document.body.setAttribute("data-ready", "1"),
+});
+if (lv.reduced && !lv.frozen) {
+  // a still, true moment: the tour played to 9 s, drawn once
+  const fake = { touring: true, reduced: false, frozen: true, clock: 0 };
+  for (let t = 0; t < 9; t += 1 / 240) step(1 / 240, fake);
+  render(lv);
+}
+window.__v3ok = true;
+
+if (q.bench) {
+  // time a frame with the GPU drained (readPixels forces it): all three passes, then without balloons
+  const one = new Uint8Array(4);
+  const gl = renderer.getContext();
+  renderer.info.autoReset = false;
+  const run = (n) => {
+    const times = [];
+    for (let i = 0; i < n; i++) {
+      renderer.info.reset();
+      const t0 = performance.now();
+      x = (i % 30) / 30;
+      M.advance(air, x);
+      render(lv);
+      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, one);
+      times.push(performance.now() - t0);
+    }
+    times.sort((a, b) => a - b);
+    return { median: +times[n >> 1].toFixed(1), p90: +times[Math.floor(n * 0.9)].toFixed(1) };
+  };
+  run(10);
+  const all = run(60);
+  const info = { triangles: renderer.info.render.triangles, calls: renderer.info.render.calls };
+  showBalloons = false;
+  const bare = run(60);
+  const d = gl.getExtension("WEBGL_debug_renderer_info");
+  $("bench").textContent = JSON.stringify({ frame: all, noBalloons: bare, ...info, size: [W, H, dpr], gpu: d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : "?" });
+}
+
+if (Qs.has("selftest")) {
+  // Drive the real handlers with synthetic events and report what changed (headless can't drag).
+  const out = {};
+  const r = canvas.getBoundingClientRect();
+  const ptr = (type, x, y, extra = {}) => canvas.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 7, clientX: r.left + x, clientY: r.top + y, button: 0, ...extra }));
+  const key = (k) => host.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true }));
+  render(lv);
+  document.querySelector('[data-view="front"]').click();
+  out.front = [cam.azT, cam.elT];
+  key("1");
+  out.isoKey = [cam.azT, +cam.elT.toFixed(3)];
+  key("e");
+  out.explodeKey = explodeT;
+  key("e");
+  key("c");
+  out.cutOff = U.uCutOn.value;
+  key("c");
+  const z0 = cam.zoom;
+  canvas.dispatchEvent(new WheelEvent("wheel", { deltaY: -300, clientX: r.left + W / 2, clientY: r.top + H / 2, bubbles: true, cancelable: true }));
+  out.wheelZoom = [z0, +cam.zoom.toFixed(3)];
+  const az0 = cam.azT;
+  ptr("pointerdown", 40, 60);
+  ptr("pointermove", 140, 60);
+  ptr("pointerup", 140, 60);
+  out.orbit = [az0, cam.azT];
+  key("1");
+  cam.az = cam.azT;
+  cam.el = cam.elT;
+  render(lv);
+  // grab the right grip and pull it down the screen
+  const g = project(new THREE.Vector3(80, P.handleCentre(M.pistonV(x)), 0));
+  const t0 = target;
+  ptr("pointerdown", g[0], g[1]);
+  const grabbed = drag?.mode;
+  ptr("pointermove", g[0], g[1] + 120);
+  const t1 = target;
+  ptr("pointerup", g[0], g[1] + 120);
+  out.pumpDrag = { grabbed, target: [+t0.toFixed(3), +t1.toFixed(3)] };
+  key(" ");
+  out.spaceAuto = auto;
+  key(" ");
+  const el = document.createElement("pre");
+  el.id = "selftest";
+  el.textContent = JSON.stringify(out);
+  document.body.appendChild(el);
+}
+
+</script>
+</body>
+</html>

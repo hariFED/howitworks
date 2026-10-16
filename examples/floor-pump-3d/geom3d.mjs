@@ -149,8 +149,11 @@ export function air() {
 
 // ---------------------------------------------------------------- exploded view
 // Where each part goes at explode = 1: [dx, dy, dz] from where it sits assembled. Moving parts give
-// an absolute lift instead (`lift`), since their assembled height depends on the stroke.
-// Order along the axis: base, O-ring, barrel, cap, bushing, then the piston stack, rod and handle.
+// an absolute lift instead (`lift`, from the bottom of the stroke), since their assembled height
+// depends on the stroke. The base, barrel, cap and bushing explode up the pump's axis; the rod, its
+// piston stack and the handle explode up a parallel axis `dx` to the side (a jogged explosion line,
+// as drafting offices draw long assemblies), which halves the drawing's height.
+export const JOG = 190;
 export const EXPLODE = {
   1: [0, 0, 0],
   2: [0, -34, 0],
@@ -159,15 +162,15 @@ export const EXPLODE = {
   5: [-48, 0, 0],
   6: [0, 186, 0],
   7: [0, 236, 0],
-  8: { lift: 874 },
-  9: { lift: 786 },
-  10: { lift: 752 },
-  11: { lift: 722 },
-  12: { lift: 694 },
-  13: { lift: 904 },
-  14: { lift: 904 },
-  15: { lift: 904, side: 46 },
-  16: { lift: 904, side: 82 },
+  12: { lift: 110, dx: JOG },
+  11: { lift: 128, dx: JOG },
+  10: { lift: 146, dx: JOG },
+  9: { lift: 166, dx: JOG },
+  8: { lift: 230, dx: JOG },
+  13: { lift: 262, dx: JOG },
+  14: { lift: 262, dx: JOG },
+  15: { lift: 262, dx: JOG, side: 46 },
+  16: { lift: 262, dx: JOG, side: 82 },
   17: [15, 0, 0],
   18: [31, 0, 0],
   19: [58, 0, 0],
@@ -183,13 +186,13 @@ export const ANCHORS = {
   1: { cut: [-90, 12, 0], out: { c: [-90, 20, 18] } },
   2: { cut: [-110, 2.5, 0], out: { c: [-104, 5, 22] } },
   3: { cut: [-16.75, 250, 0], out: { c: [0, 250, 0], r: 17.5, axis: "y" } },
-  4: { cut: [-18.5, 41.5, 0], out: { c: [0, 41.5, 0], r: 19.5, axis: "y" } },
+  4: { cut: [18.5, 41.5, 0], out: { c: [0, 41.5, 0], r: 19.5, axis: "y" } },
   5: { cut: [-43, 50, 0], out: { c: [-43, 50, 0], r: 5, axis: "x" } },
   6: { cut: [-19, 420, 0], out: { c: [0, 420, 0], r: 20, axis: "y" } },
   7: { cut: [-9, 440, 0], out: { c: [0, 440, 0], r: 10, axis: "y" } },
   8: { cut: [-2.5, VP + 300, 0], out: { c: [0, VP + 300, 0], r: 5, axis: "y" } },
-  9: { cut: [-11, C + 13, 0], out: { c: [0, C + 13, 0], r: 13.5, axis: "y" } },
-  10: { cut: [-15.2, C + 5, 0], out: { c: [0, C + 5, 0], r: 15.8, axis: "y" } },
+  9: { cut: [11, C + 13, 0], out: { c: [0, C + 13, 0], r: 13.5, axis: "y" } },
+  10: { cut: [15.2, C + 5, 0], out: { c: [0, C + 5, 0], r: 15.8, axis: "y" } },
   11: { cut: [-8, VP + 9, 0], out: { c: [0, VP + 9, 0], r: 10, axis: "y" } },
   12: { cut: [-7, VP + 4, 0], out: { c: [0, VP + 4, 0], r: 8.5, axis: "box" } },
   13: { cut: [-12, H0 + 6, 0], out: { c: [0, H0 + 6, 0], r: 16, axis: "box" } },

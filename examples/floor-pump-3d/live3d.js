@@ -3,12 +3,16 @@
 // inlined above this script as namespaces, so the physics is the 2D sheet's, unchanged.
 //
 // Rendering, three passes a frame:
-//   1. colour: toon tones on every surface; while the section is open each closed solid is drawn
+//   1. ids: a part id and a "cut face" flag per pixel, plus depth, into a target;
+//   2. colour: toon tones on every surface; while the section is open each closed solid is drawn
 //      double-sided and its back faces, which are only ever seen through the opening, are shaded as
-//      the cut face (paper and the part's hatch, computed where the view ray meets the plane);
-//   2. ids: the same scene into a target, a part id and a "cut face" flag per pixel, plus depth;
-//   3. outlines: thick lines wherever the id, the flag or the depth's second difference jumps, laid
-//      over pass 1. Creases come from EdgesGeometry (thin), drawn in pass 1.
+//      the cut face (paper and the part's hatch, computed where the view ray meets the plane).
+//      Creases come from EdgesGeometry (thin) and skip any pixel pass 1 marked as a cut face;
+//   3. outlines: thick lines wherever the id, the flag or the depth's second difference jumps.
+//
+// URL parameters: ?t=1.0 (deterministic frame of the tour), ?view=iso|front|side|top, ?cut=0|1,
+// ?offset=mm (cutting plane), ?explode=0..1, ?theme=blueprint|paper|dark, ?zoom=k, ?look=x,y,z (mm),
+// ?balloons=0, ?bench (time a frame), ?selftest (drive the controls), ?dbg (tint bores, air and outlines).
 
 const $ = (id) => document.getElementById(id);
 const host = $("stage");
@@ -57,6 +61,8 @@ const U = {
   uAccent: { value: color() },
   uCapBias: { value: 0.25 / (FAR - NEAR) },
   uLineBias: { value: (2 * 0.6) / (FAR - NEAR) },
+  tIds: { value: null },
+  uRes: { value: new THREE.Vector2(1, 1) },
 };
 
 const VERT = /* glsl */ `
@@ -81,7 +87,26 @@ const FRAG = /* glsl */ `
 uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash;
 uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
 uniform vec3 uGlass; uniform vec2 uGlassC;
+uniform vec2 uProf[24]; uniform int uProfN; uniform vec3 uAxisP, uAxisD; uniform float uLiftFrom, uLift;
 varying vec3 vW; varying vec3 vN;
+
+// Is the plane point h inside this body of revolution's half-profile? (even-odd rule in r, s)
+// Bores and air are volumes inside other solids, not holes in them, so their far walls may only show
+// where the view ray crosses the plane inside them; elsewhere the cut face of the solid is in front.
+bool inProfile(vec3 h) {
+  vec3 rel = h - uAxisP;
+  float s = dot(rel, uAxisD);
+  float r = length(rel - uAxisD * s);
+  if (s > uLiftFrom + uLift) s -= uLift; else if (s > uLiftFrom) s = uLiftFrom;
+  bool inside = false;
+  for (int i = 0; i < 24; i++) {
+    if (i >= uProfN) break;
+    vec2 a = uProf[i];
+    vec2 b = uProf[i + 1 < uProfN ? i + 1 : 0];
+    if ((a.y > s) != (b.y > s) && r < a.x + (s - a.y) / (b.y - a.y) * (b.x - a.x)) inside = !inside;
+  }
+  return inside;
+}
 #ifdef DIAL
 uniform sampler2D uTex; varying vec2 vUv;
 #endif
@@ -140,11 +165,14 @@ void main() {
     if (!front) { if (!cutting) discard; cap = true; }
   } else if (role == 1) {
     // a bore: its far wall, seen through the cut, lit from inside
-    if (front || !cutting) discard;
+    if (front || !cutting || !inProfile(h)) discard;
     k = -k;
   } else if (role == 2) {
-    if (front || !cutting || uMode > 0.5) discard;
+    if (front || !cutting || uMode > 0.5 || !inProfile(h)) discard;
     alpha = max(stip, uWash);
+#ifdef DBG
+    alpha = 1.0;
+#endif
     if (alpha < 0.01) discard;
     col = uAccent;
   } else if (role == 3) {
@@ -197,10 +225,14 @@ void main() {
   gl_Position.z -= uLineBias * gl_Position.w;
 }`;
 const LINE_FRAG = /* glsl */ `
-uniform float uCutOn, uPx, uDpr, uDash, uAlpha; uniform vec4 uCut; uniform vec3 uInk;
+uniform float uCutOn, uPx, uDpr, uDash, uAlpha, uCull; uniform vec4 uCut; uniform vec3 uInk;
+uniform sampler2D tIds; uniform vec2 uRes;
 varying vec3 vW; varying float vDist;
 void main() {
   if (uCutOn > 0.5 && dot(uCut.xyz, vW) > uCut.w + 0.01) discard;
+  // A cut face lies on the plane, in front of anything left in the model; a cap drawn at its back
+  // face's depth would let edges inside the solid show through it, so creases never draw on a cap.
+  if (uCull > 0.5 && texture2D(tIds, gl_FragCoord.xy / uRes).g > 0.5) discard;
   if (uDash > 0.5) {
     // ISO 128 long-dash dot, in sheet units like the 2D sheet's .ctr: 15 2.6 2 2.6
     float u = mod(vDist * uPx / (1.4 * uDpr), 22.2);
@@ -212,7 +244,7 @@ void main() {
 const MATKIND = { lines: 1, pairs: 2, dashed: 3, cross: 4, dots: 5, grain: 1 };
 const ROLES = { solid: 0, void: 1, air: 2, glass: 3, dial: 4, mouth: 5, ink: 6 };
 const allMats = [];
-function material({ role = "solid", hatch = "none", edge = 0, dial = null, glass = null, glassC = null }) {
+function material({ role = "solid", hatch = "none", edge = 0, dial = null, glass = null, glassC = null, profile = null }) {
   let kind = 0;
   let gap = 3;
   let pair = 0;
@@ -241,6 +273,10 @@ function material({ role = "solid", hatch = "none", edge = 0, dial = null, glass
       uGlass: { value: new THREE.Vector3(...(glass ? [glass.y0, glass.y1, glass.r] : [0, 0, 0])) },
       uGlassC: { value: new THREE.Vector2(...(glassC ?? [0, 0])) },
       uTex: { value: dial },
+      uProf: { value: Array.from({ length: 24 }, (_, i) => new THREE.Vector2(...(profile?.loop[i] ?? [0, 0]))) },
+      uProfN: { value: profile ? profile.loop.length : 0 },
+      uAxisP: { value: new THREE.Vector3(...(profile?.axis === "x" ? [0, profile.at, 0] : [profile?.at ?? 0, 0, 0])) },
+      uAxisD: { value: new THREE.Vector3(...(profile?.axis === "x" ? [1, 0, 0] : [0, 1, 0])) },
     },
     vertexShader: VERT,
     fragmentShader: FRAG,
@@ -256,7 +292,7 @@ function material({ role = "solid", hatch = "none", edge = 0, dial = null, glass
 }
 const lineMat = (dash, alpha = 1) =>
   new THREE.ShaderMaterial({
-    uniforms: { ...U, uDash: { value: dash ? 1 : 0 }, uAlpha: { value: alpha } },
+    uniforms: { ...U, uDash: { value: dash ? 1 : 0 }, uAlpha: { value: alpha }, uCull: { value: dash ? 0 : 1 }, tIds: U.tIds, uRes: U.uRes },
     vertexShader: LINE_VERT,
     fragmentShader: LINE_FRAG,
     transparent: alpha < 1,
@@ -436,7 +472,7 @@ const live = { cup: null, needle: null, spring: null };
 function addSolid(part, s, holder, edge) {
   const role = s.role ?? "solid";
   const geo = solidGeometry(s);
-  const mat = material({ role, hatch: s.hatch ?? (role === "ink" ? "solid" : "none"), edge, dial: role === "dial" ? dialTex : null, glass: s.glass, glassC: s.glass ? [G_GAUGE, 0] : null });
+  const mat = material({ role, hatch: s.hatch ?? (role === "ink" ? "solid" : "none"), edge, dial: role === "dial" ? dialTex : null, glass: s.glass, glassC: s.glass ? [G_GAUGE, 0] : null, profile: role === "void" ? s : null });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.userData.part = part.id;
   holder.add(mesh);
@@ -480,11 +516,13 @@ const airGroup = new THREE.Group();
 root.add(airGroup);
 const airMats = { p: [], pt: [] };
 for (const a of G.air()) {
-  const mat = material({ role: "air" });
+  const mat = material({ role: "air", profile: a });
   if (a.liftFrom) mat.uniforms.uLiftFrom.value = a.liftFrom;
   airMats[a.pressure].push(mat);
   const mesh = new THREE.Mesh(placeOnAxis(lathe(a.loop, 64), a.axis, a.at), mat);
   mesh.renderOrder = 2;
+  // the vertex shader lifts the chamber's top with the stroke, past the rest-pose bounding sphere
+  mesh.frustumCulled = false;
   airGroup.add(mesh);
 }
 
@@ -504,20 +542,28 @@ const handleAxis = centreLine([-150, G.REST.HC, 0], [150, G.REST.HC, 0], PARTS.g
 
 // ---------------------------------------------------------------- the outline pass
 const idTarget = new THREE.WebGLRenderTarget(4, 4, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthTexture: new THREE.DepthTexture(4, 4) });
+U.tIds.value = idTarget.texture;
 const edgeMat = new THREE.ShaderMaterial({
   uniforms: { tId: { value: idTarget.texture }, tDepth: { value: idTarget.depthTexture }, uTexel: { value: new THREE.Vector2() }, uInk: U.uInk, uW: { value: 1 }, uRange: { value: FAR - NEAR }, uThr: { value: 2.0 } },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
   fragmentShader: /* glsl */ `
 uniform sampler2D tId, tDepth; uniform vec2 uTexel; uniform vec3 uInk; uniform float uW, uRange, uThr;
 varying vec2 vUv;
+vec4 at(vec2 d) { return texture2D(tId, vUv + d * uTexel * uW); }
+bool same(vec4 a, vec4 b) { return abs(a.r - b.r) < 0.5 / 255.0 && abs(a.g - b.g) < 0.5; }
+// a pixel unlike all four neighbours is a pinhole (a ray slipping through a crack between triangles)
+bool speck(vec2 d) {
+  vec4 c = at(d);
+  return !same(c, at(d + vec2(1.0, 0.0))) && !same(c, at(d - vec2(1.0, 0.0))) && !same(c, at(d + vec2(0.0, 1.0))) && !same(c, at(d - vec2(0.0, 1.0)));
+}
 void main() {
-  vec4 c = texture2D(tId, vUv);
+  vec4 c = at(vec2(0.0));
+  if (speck(vec2(0.0))) discard;
   float e = 0.0;
   vec2 o[4];
   o[0] = vec2(1.0, 0.0); o[1] = vec2(-1.0, 0.0); o[2] = vec2(0.0, 1.0); o[3] = vec2(0.0, -1.0);
   for (int i = 0; i < 4; i++) {
-    vec4 n = texture2D(tId, vUv + o[i] * uTexel * uW);
-    if (abs(n.r - c.r) > 0.5 / 255.0 || abs(n.g - c.g) > 0.5) e = 1.0;
+    if (!same(at(o[i]), c) && !speck(o[i])) e = 1.0;
   }
   if (e < 0.5 && c.a > 0.5 && c.g < 0.5) {
     // a fold or an overlap within one part: depth is not linear across the pixel
@@ -530,10 +576,14 @@ void main() {
   }
   if (e < 0.5) discard;
   gl_FragColor = vec4(uInk, 1.0);
+#ifdef DBG
+  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
 }`,
   transparent: true,
   depthTest: false,
   depthWrite: false,
+  defines: Qs.has("dbg") ? { DBG: 1 } : {},
 });
 const edgeScene = new THREE.Scene();
 edgeScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), edgeMat));
@@ -645,7 +695,7 @@ function pose(xs, e) {
     const ex = G.EXPLODE[rec.id];
     const g = rec.group;
     if (Array.isArray(ex)) g.position.set(ex[0] * e, ex[1] * e, ex[2] * e);
-    else g.position.set(0, L0 + (ex.lift - L0) * e, 0);
+    else g.position.set((ex.dx ?? 0) * e, L0 + (ex.lift - L0) * e, 0);
     if (ex.side) for (const hd of rec.holders) hd.obj.position.x = hd.solid.side * ex.side * e;
   }
   // the check valve: the ball rides off its seat, the spring shortens against the barb
@@ -695,11 +745,16 @@ function resize() {
   canvas.style.height = H + "px";
   idTarget.setSize(Math.round(W * dpr), Math.round(H * dpr));
   edgeMat.uniforms.uTexel.value.set(1 / (W * dpr), 1 / (H * dpr));
+  U.uRes.value.set(Math.round(W * dpr), Math.round(H * dpr));
   edgeMat.uniforms.uW.value = Math.max(1, Math.round(dpr * 0.75));
   overlay.setAttribute("viewBox", `0 0 ${W} ${H}`);
   wake();
 }
-const MARGIN = { l: 150, r: 150, t: 34, b: 34 };
+// room for the balloon columns either side, and the title block below on a phone
+const margin = () => {
+  const side = Math.min(150, Math.round(W * 0.16));
+  return { l: side, r: side, t: 34, b: W < 640 ? 64 : 34 };
+};
 function placeCamera() {
   const az = (cam.az * Math.PI) / 180;
   const el = (Math.min(89.9, cam.el) * Math.PI) / 180;
@@ -718,11 +773,14 @@ function placeCamera() {
     const p = new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).applyMatrix4(inv);
     x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
   }
-  const fit = Math.min((W - MARGIN.l - MARGIN.r) / (x1 - x0), (H - MARGIN.t - MARGIN.b) / (y1 - y0));
+  const MG = margin();
+  const fit = Math.min((W - MG.l - MG.r) / (x1 - x0), (H - MG.t - MG.b) / (y1 - y0));
   const zoom = fit * cam.zoom;
   // centre the fitted box (it is not symmetric about the look point) unless a point was asked for
   const off = q.look ? new THREE.Vector3() : new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 0).applyMatrix3(new THREE.Matrix3().setFromMatrix4(camera.matrixWorld));
   camera.position.add(off).add(cam.pan);
+  // keep the model centred between unequal top and bottom margins
+  camera.position.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1), -(MG.b - MG.t) / 2 / zoom);
   camera.left = -W / 2 / zoom;
   camera.right = W / 2 / zoom;
   camera.top = H / 2 / zoom;
@@ -747,7 +805,7 @@ function anchorWorld(id) {
   const a = G.ANCHORS[id];
   const rec = PARTS.get(id);
   let p;
-  if (U.uCutOn.value > 0.5 && explode < 0.5) p = new THREE.Vector3(...a.cut);
+  if (U.uCutOn.value > 0.5) p = new THREE.Vector3(...a.cut);
   else {
     const o = a.out;
     p = new THREE.Vector3(...o.c);
@@ -795,23 +853,42 @@ function drawOverlay(zoom) {
     }
     const minX = Math.min(...pts.map((p) => p[0]));
     const maxX = Math.max(...pts.map((p) => p[0]));
-    const mid = (minX + maxX) / 2;
-    const R = 10;
+    // sides split at the pump's axis on screen, at the anchor's height
+    const axA = project(new THREE.Vector3(0, 0, 0));
+    const axB = project(new THREE.Vector3(0, 800, 0));
+    const axisX = (y) => axA[0] + ((y - axA[1]) / (axB[1] - axA[1] || 1)) * (axB[0] - axA[0]);
+    const R = W < 640 ? 8 : 10;
     const cols = { l: Math.max(R + 14, minX - 46), r: Math.min(W - R - 14, maxX + 46) };
     const refresh = visFrame++ % 3 === 0;
+    // each balloon goes to the column on its anchor's side of the pump's axis; then the fuller column
+    // gives its anchors nearest the axis to the other, so neither holds more than about half
+    for (const it of items) {
+      it.d = it.ax - axisX(it.ay);
+      it.side = it.d < -0.5 ? "l" : "r";
+    }
+    for (;;) {
+      const nl = items.filter((it) => it.side === "l").length;
+      const nr = items.length - nl;
+      if (Math.abs(nl - nr) <= 3) break;
+      const from = nl > nr ? "l" : "r";
+      const pick = items.filter((it) => it.side === from).sort((a, b) => Math.abs(a.d) - Math.abs(b.d))[0];
+      pick.side = from === "l" ? "r" : "l";
+    }
     for (const side of ["l", "r"]) {
-      const col = items.filter((it) => (it.ax < mid ? "l" : "r") === side).sort((a, b) => a.ay - b.ay);
-      const gap = 2 * R + 6;
-      const ys = col.map((c) => c.ay);
+      const col = items.filter((it) => it.side === side).sort((a, b) => a.ay - b.ay);
+      // a tidy column: in anchor order, at least `gap` apart, inside the frame
+      const top = R + 18;
+      const lim = H - R - 18;
+      const gap = Math.min(2 * R + 6, (lim - top) / Math.max(1, col.length - 1));
+      const ys = col.map((c) => Math.min(lim, Math.max(top, c.ay)));
       for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i], ys[i - 1] + gap);
-      const lim = H - R - 8;
       if (ys.length && ys[ys.length - 1] > lim) {
         ys[ys.length - 1] = lim;
         for (let i = ys.length - 2; i >= 0; i--) ys[i] = Math.min(ys[i], ys[i + 1] - gap);
       }
       col.forEach((c, i) => {
         const bx = cols[side];
-        const by = Math.max(R + 8, ys[i]);
+        const by = ys[i];
         if (refresh || !visibleCache.has(c.id)) visibleCache.set(c.id, visibleAt(c.id, c.ax, c.ay));
         const seen = visibleCache.get(c.id);
         const dx = c.ax - bx, dy = c.ay - by, d = Math.hypot(dx, dy) || 1;
@@ -879,11 +956,7 @@ function render(lv) {
   const zoom = placeCamera();
   root.updateMatrixWorld(true);
 
-  // 1: colour
-  U.uMode.value = 0;
-  renderer.setRenderTarget(null);
-  renderer.render(scene, camera);
-  // 2: ids and depth, without lines or air
+  // 1: ids and depth, without lines or air
   U.uMode.value = 1;
   scene.traverse((o) => o.userData.crease && (o.visible = false));
   const airWas = airGroup.visible;
@@ -894,9 +967,11 @@ function render(lv) {
   renderer.render(scene, camera);
   scene.traverse((o) => o.userData.crease && (o.visible = true));
   airGroup.visible = airWas;
+  // 2: colour (creases read the ids to stay off the cut faces)
   U.uMode.value = 0;
-  // 3: outlines over the colour
   renderer.setRenderTarget(null);
+  renderer.render(scene, camera);
+  // 3: outlines over the colour
   renderer.autoClear = false;
   renderer.render(edgeScene, quadCam);
   renderer.autoClear = true;
@@ -990,7 +1065,9 @@ canvas.addEventListener("pointerdown", (e) => {
     auto = false;
     target = x;
   }
-  canvas.setPointerCapture(e.pointerId);
+  try {
+    canvas.setPointerCapture(e.pointerId);
+  } catch {}
   canvas.classList.add("v3-grab");
   input();
 });
@@ -1090,19 +1167,76 @@ if (lv.reduced && !lv.frozen) {
 window.__v3ok = true;
 
 if (q.bench) {
-  // time the three passes with the GPU drained each frame (readPixels forces it)
+  // time a frame with the GPU drained (readPixels forces it): all three passes, then without balloons
   const one = new Uint8Array(4);
   const gl = renderer.getContext();
-  const times = [];
-  for (let i = 0; i < 60; i++) {
-    const t0 = performance.now();
-    x = (i % 30) / 30;
-    M.advance(air, x);
-    render(lv);
-    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, one);
-    times.push(performance.now() - t0);
-  }
-  times.sort((a, b) => a - b);
-  const info = renderer.info.render;
-  $("bench").textContent = JSON.stringify({ median: times[30].toFixed(2), p90: times[54].toFixed(2), triangles: info.triangles, calls: info.calls, size: [W, H, dpr], gpu: (() => { const d = gl.getExtension("WEBGL_debug_renderer_info"); return d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : "?"; })() });
+  renderer.info.autoReset = false;
+  const run = (n) => {
+    const times = [];
+    for (let i = 0; i < n; i++) {
+      renderer.info.reset();
+      const t0 = performance.now();
+      x = (i % 30) / 30;
+      M.advance(air, x);
+      render(lv);
+      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, one);
+      times.push(performance.now() - t0);
+    }
+    times.sort((a, b) => a - b);
+    return { median: +times[n >> 1].toFixed(1), p90: +times[Math.floor(n * 0.9)].toFixed(1) };
+  };
+  run(10);
+  const all = run(60);
+  const info = { triangles: renderer.info.render.triangles, calls: renderer.info.render.calls };
+  showBalloons = false;
+  const bare = run(60);
+  const d = gl.getExtension("WEBGL_debug_renderer_info");
+  $("bench").textContent = JSON.stringify({ frame: all, noBalloons: bare, ...info, size: [W, H, dpr], gpu: d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : "?" });
+}
+
+if (Qs.has("selftest")) {
+  // Drive the real handlers with synthetic events and report what changed (headless can't drag).
+  const out = {};
+  const r = canvas.getBoundingClientRect();
+  const ptr = (type, x, y, extra = {}) => canvas.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 7, clientX: r.left + x, clientY: r.top + y, button: 0, ...extra }));
+  const key = (k) => host.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true }));
+  render(lv);
+  document.querySelector('[data-view="front"]').click();
+  out.front = [cam.azT, cam.elT];
+  key("1");
+  out.isoKey = [cam.azT, +cam.elT.toFixed(3)];
+  key("e");
+  out.explodeKey = explodeT;
+  key("e");
+  key("c");
+  out.cutOff = U.uCutOn.value;
+  key("c");
+  const z0 = cam.zoom;
+  canvas.dispatchEvent(new WheelEvent("wheel", { deltaY: -300, clientX: r.left + W / 2, clientY: r.top + H / 2, bubbles: true, cancelable: true }));
+  out.wheelZoom = [z0, +cam.zoom.toFixed(3)];
+  const az0 = cam.azT;
+  ptr("pointerdown", 40, 60);
+  ptr("pointermove", 140, 60);
+  ptr("pointerup", 140, 60);
+  out.orbit = [az0, cam.azT];
+  key("1");
+  cam.az = cam.azT;
+  cam.el = cam.elT;
+  render(lv);
+  // grab the right grip and pull it down the screen
+  const g = project(new THREE.Vector3(80, P.handleCentre(M.pistonV(x)), 0));
+  const t0 = target;
+  ptr("pointerdown", g[0], g[1]);
+  const grabbed = drag?.mode;
+  ptr("pointermove", g[0], g[1] + 120);
+  const t1 = target;
+  ptr("pointerup", g[0], g[1] + 120);
+  out.pumpDrag = { grabbed, target: [+t0.toFixed(3), +t1.toFixed(3)] };
+  key(" ");
+  out.spaceAuto = auto;
+  key(" ");
+  const el = document.createElement("pre");
+  el.id = "selftest";
+  el.textContent = JSON.stringify(out);
+  document.body.appendChild(el);
 }

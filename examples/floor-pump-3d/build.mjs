@@ -12,13 +12,14 @@ import * as M from "../floor-pump/model.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const pump = join(here, "..", "floor-pump");
-export const THREE_URL = "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js";
+export const THREE_URL = "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js";
 
 // Scene tones per theme, as tokens beside the kit's: lit, mid and shadow faces of uncut surfaces.
 // Cut faces use the kit's own --bp-paper and --bp-hatch, the air its --bp-accent.
 const css = `
 :root, [data-theme="blueprint"] { --bp3-lit: #2a5a93; --bp3-mid: #1d4a7e; --bp3-dark: #133864; }
 [data-theme="paper"] { --bp3-lit: #ece6d8; --bp3-mid: #d9d0bc; --bp3-dark: #bdb29b; }
+[data-theme="white"] { --bp3-lit: #ffffff; --bp3-mid: #ececec; --bp3-dark: #d4d4d4; }
 [data-theme="dark"] { --bp3-lit: #353b43; --bp3-mid: #272c32; --bp3-dark: #1b1e22; }
 html, body { height: 100%; overflow: hidden; }
 .v3 { display: flex; flex-direction: column; height: 100%; }
@@ -49,7 +50,16 @@ html, body { height: 100%; overflow: hidden; }
 #readout { color: var(--bp-accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v3-hint { position: absolute; left: 22px; bottom: 18px; font-size: 10.5px; color: var(--bp-muted); letter-spacing: .04em; max-width: 46%; pointer-events: none; }
 .v3-fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--bp-muted); }
-@media (max-width: 640px) { .v3-hint { display: none; } .v3-title { width: calc(100% - 20px); } .v3-bar { padding: 6px 10px; gap: 6px 10px; } }
+.v3-bar, .v3-stage { min-width: 0; }
+.v3-grp { flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .v3-hint { display: none; }
+  .v3-bar { padding: 6px 10px; gap: 6px 10px; }
+  .v3-bar b { flex-basis: 100%; }
+  .v3-bar input[type="range"] { width: 70px; }
+  .v3-title { width: calc(100% - 20px); }
+  .v3-title > div:not(.w4) { display: none; }
+}
 `;
 
 const body = `
@@ -125,4 +135,4 @@ ${readFileSync(join(here, "live3d.js"), "utf8")}
 `;
 const out = join(here, "floor-pump-3d.html");
 writeFileSync(out, html);
-console.log(`floor-pump-3d.html  ${(html.length / 1024).toFixed(0)} KB (+ three.module.js r170 from jsDelivr)  swept ${M.SWEPT.toFixed(1)} cm³`);
+console.log(`floor-pump-3d.html  ${(html.length / 1024).toFixed(0)} KB (+ three.module.min.js r170 from jsDelivr)  swept ${M.SWEPT.toFixed(1)} cm³`);
