@@ -797,6 +797,7 @@ writeFileSync(join(out, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
 ${urls.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod><priority>${u === "" ? "1.0" : u === "collection.html" ? "0.8" : "0.6"}</priority></url>`).join("\n")}
 </urlset>
 `);
+writeFileSync(join(out, "sitemap.txt"), urls.map((u) => SITE + u).join("\n") + "\n");
 writeFileSync(join(out, "robots.txt"), `User-agent: *
 Allow: /
 
