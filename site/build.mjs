@@ -15,6 +15,11 @@ for (const d of ["", "sheets", "thumbs", "3d"]) mkdirSync(join(out, d), { recurs
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const CMD = "/howitworks";
+const SITE = "https://harifed.github.io/howitworks/";
+const REPO = "https://github.com/hariFED/howitworks";
+// the one phrase every page, the README and the package use
+const PITCH = "An interactive engineering-drawing skill for Claude Code that explains mechanisms and software concepts through physical cutaways and live simulations.";
+const KEYWORDS = "Claude Code skill, engineering drawing, technical drawing, cutaway, cross-section, mechanism explainer, interactive simulation, engineering education, mechanical engineering students, 3D cutaway, exploded view, agent skill, how it works";
 
 // ---- collect the sheets
 const sheets = readdirSync(join(root, "examples"))
@@ -58,6 +63,22 @@ const pad = ([x, y, w, h], m, aspect) => {
   if (aspect) { if (w / h < aspect) w = h * aspect; else h = w / aspect; }
   return [cx - w / 2, cy - h / 2, w, h].map((v) => Math.round(v));
 };
+// per-page meta for the sheet and 3D pages (defined before use: function hoisting)
+function pageMeta(m, path, kind) {
+  const desc = `${m.title} (${m.dwg}): ${m.object}, as an interactive ${kind} by howitworks, the engineering-drawing skill for Claude Code. ${m.idea}. ${m.summary}`.slice(0, 300);
+  return [
+    `<meta name="description" content="${esc(desc)}">`,
+    `<link rel="canonical" href="${SITE}${path}">`,
+    `<meta property="og:type" content="article">`,
+    `<meta property="og:site_name" content="howitworks">`,
+    `<meta property="og:url" content="${SITE}${path}">`,
+    `<meta property="og:title" content="${esc(m.title)} · howitworks">`,
+    `<meta property="og:description" content="${esc(desc)}">`,
+    `<meta property="og:image" content="${SITE}thumbs/${m.slug}-3d.png">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+    `<link rel="icon" type="image/svg+xml" href="../logo.svg">`,
+  ].join("\n");
+}
 const shot = (page, png, args) => {
   execFileSync(process.execPath, [join(root, "scripts", "shot.mjs"), page, "--out", png, ...args], { stdio: "pipe" });
 };
@@ -82,6 +103,9 @@ html.in-frame .bp-page{padding:8px 8px 10px}
 </style>
 <script>try{if(window.top!==window)document.documentElement.classList.add("in-frame")}catch(e){document.documentElement.classList.add("in-frame")}</script>`;
   html = html.replace("<body>", `<body>\n${bar}`);
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(m.title)}: ${esc(m.idea)} · howitworks</title>`)
+    .replace(/<meta name="description" content="[^"]*">/, "")
+    .replace("</head>", pageMeta(m, `sheets/${m.slug}.html`, "engineering drawing") + "\n</head>");
   // the sheet's "3D view" button points at its file name; on the site the 3D pages live in 3d/
   html = html.split(`href="${m.slug}-3d.html"`).join(`href="../3d/${m.slug}.html"`);
   writeFileSync(join(out, "sheets", `${m.slug}.html`), html);
@@ -89,7 +113,10 @@ html.in-frame .bp-page{padding:8px 8px 10px}
   m.has3d = Boolean(m.has3d && existsSync(src3d));
   if (m.has3d) {
     // the 3D page links its 2D sheet by file name; point it at the site's copy
-    writeFileSync(join(out, "3d", `${m.slug}.html`), readFileSync(src3d, "utf8").split(`href="${m.slug}.html"`).join(`href="../sheets/${m.slug}.html"`));
+    writeFileSync(join(out, "3d", `${m.slug}.html`), readFileSync(src3d, "utf8").split(`href="${m.slug}.html"`).join(`href="../sheets/${m.slug}.html"`)
+      .replace(/<title>[^<]*<\/title>/, `<title>${esc(m.title)} in 3D: interactive cutaway · howitworks</title>`)
+      .replace(/<meta name="description" content="[^"]*">/, "")
+      .replace("</head>", pageMeta(m, `3d/${m.slug}.html`, "3D cutaway") + "\n</head>"));
     // a clean embed shot (no bar, title block or balloons) from the example's own hero settings
     const png3d = join(out, "thumbs", `${m.slug}-3d.png`);
     if (shots || !existsSync(png3d)) {
@@ -445,18 +472,30 @@ const SCRIPT = MOTION + `<script>
 })();
 </script>`;
 
-const head = (title, desc) => `<!doctype html>
+const head = (title, desc, path = "", ld = null) => `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="canonical" href="${SITE}${path}">
+<link rel="alternate" type="text/plain" title="llms.txt" href="${SITE}llms.txt">
 <meta name="description" content="${esc(desc)}">
+<meta name="keywords" content="${esc(KEYWORDS)}">
+<meta name="author" content="hariFED">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="howitworks">
+<meta property="og:url" content="${SITE}${path}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
-<meta property="og:image" content="og.png">
+<meta property="og:image" content="${SITE}og.png">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:description" content="${esc(desc)}">
+<meta name="twitter:image" content="${SITE}og.png">
+${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>` : ""}
 ${FONTS}
 <style>${CSS}</style>
 </head>
@@ -511,7 +550,49 @@ const faqs = [
   ["What licence?", "MIT, for the skill, the kit and every sheet."],
 ].map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join("\n");
 
-const index = `${head("howitworks · a skill for Claude Code", `Name a mechanism, or an idea, and Claude drafts the live engineering drawing that explains it. ${total} sheets, all live.`)}
+const LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "howitworks",
+      "alternateName": ["howitworks Claude Code skill", "how it works skill"],
+      "description": PITCH,
+      "applicationCategory": "DeveloperApplication",
+      "applicationSubCategory": "Claude Code skill",
+      "operatingSystem": "Windows, macOS, Linux (Node.js 20+)",
+      "url": SITE,
+      "downloadUrl": "https://www.npmjs.com/package/howitworks",
+      "installUrl": REPO,
+      "softwareVersion": pkg.version,
+      "license": REPO + "/blob/main/LICENSE",
+      "codeRepository": REPO,
+      "image": SITE + "og.png",
+      "screenshot": SITE + "thumbs/floor-pump-3d.png",
+      "author": { "@type": "Person", "name": "hariFED", "url": "https://github.com/hariFED" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "audience": [
+        { "@type": "EducationalAudience", "educationalRole": "student", "audienceType": "Engineering students" },
+        { "@type": "EducationalAudience", "educationalRole": "teacher", "audienceType": "Engineering educators" },
+        { "@type": "Audience", "audienceType": "Software developers" },
+        { "@type": "Audience", "audienceType": "Technical product teams" }
+      ],
+      "keywords": KEYWORDS
+    },
+    {
+      "@type": "WebSite",
+      "name": "howitworks",
+      "url": SITE,
+      "description": PITCH
+    },
+    {
+      "@type": "ItemList",
+      "name": "howitworks example sheets",
+      "itemListElement": sheets.map((m, i) => ({ "@type": "ListItem", "position": i + 1, "name": m.title + " — " + m.idea, "url": SITE + "sheets/" + m.slug + ".html" }))
+    }
+  ]
+};
+const index = `${head("howitworks · interactive engineering drawings for Claude Code", PITCH + ` ${total} live sheets, from engines and pumps to rate limiters and locks.`, "", LD)}
 <div class="layout">
 ${sidebar(true)}
 <main class="main">
@@ -643,8 +724,16 @@ svg += K.dim(V, [-17.5, 384], [17.5, 384], { dir: "h", off: -24, prefix: "Ø" })
 <section>${H.install}
 <p>One command copies the skill into <code>~/.claude/skills/howitworks</code>:</p>
 <div class="install"><code id="cmd">npx howitworks</code><button type="button" data-copy="cmd">Copy</button></div>
-<p>Add <code>--project</code> to install into this project's <code>.claude/skills</code>, or <code>--no-examples</code> for a smaller install. Or clone it:</p>
-<pre>git clone https://github.com/hariFED/howitworks ~/.claude/skills/howitworks</pre>
+<p>Add <code>--project</code> to install into this project's <code>.claude/skills</code>, or <code>--no-examples</code> for a smaller install. Other ways in:</p>
+<pre># the skills CLI (Claude Code, Cursor, Codex and other agents)
+npx skills add hariFED/howitworks
+
+# as a Claude Code plugin
+/plugin install howitworks --marketplace hariFED/howitworks
+
+# or clone it
+git clone https://github.com/hariFED/howitworks ~/.claude/skills/howitworks</pre>
+<p>Agents can read the whole project at a glance from <a href="llms.txt">llms.txt</a>.</p>
 <p>It needs Node.js 20 or later, and Chrome, Chromium or Edge for the checks. Restart Claude Code, then try:</p>
 <pre>${CMD} explain how a mechanical watch keeps time
 ${CMD} draw a token bucket rate limiter as a machine
@@ -684,7 +773,7 @@ const cards = sheets.map((m) => `<article id="${m.slug}">
 ${m.has3d ? `<p class="facts"><a href="3d/${m.slug}.html">Open the 3D view →</a></p>` : ""}
 </article>`).join("\n");
 
-const collection = `${head("Collection · howitworks", `All ${total} howitworks sheets: live engineering drawings that explain mechanisms and ideas.`)}
+const collection = `${head("All ${total} sheets · howitworks", `All ${total} howitworks sheets: live, interactive engineering drawings and 3D cutaways that explain mechanisms and software concepts. ${sheets.map((m) => m.title).join(", ")}.`, "collection.html")}
 <div class="layout">
 ${sidebar(false)}
 <main class="coll">
@@ -699,4 +788,46 @@ ${SCRIPT}
 </html>
 `;
 writeFileSync(join(out, "collection.html"), collection);
+const today = new Date().toISOString().slice(0, 10);
+const urls = ["", "collection.html", ...sheets.map((m) => "sheets/" + m.slug + ".html"), ...sheets.filter((m) => m.has3d).map((m) => "3d/" + m.slug + ".html")];
+writeFileSync(join(out, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod><priority>${u === "" ? "1.0" : u === "collection.html" ? "0.8" : "0.6"}</priority></url>`).join("\n")}
+</urlset>
+`);
+writeFileSync(join(out, "robots.txt"), `User-agent: *
+Allow: /
+
+Sitemap: ${SITE}sitemap.xml
+`);
+const LLMS = `# howitworks
+
+> ${PITCH}
+
+howitworks is an Agent Skill (SKILL.md) for Claude Code. Given one line, e.g. "/howitworks explain how a pin tumbler lock opens", Claude picks the real object whose mechanism *is* the idea, then drafts a live A2 engineering sheet: a section through the mechanism, details at larger scale, true dimensions, numbered balloons with part cards, a parts list and a title block, all driven by one physical model (pressure, flow, force, cycles). It can also build a 3D cutaway you can turn, cut open and explode. Rule: "The cut is the explanation."
+
+## Who it is for
+- Engineering students and educators: explore mechanisms, forces, pressure, motion and thermodynamic cycles interactively.
+- Developers: understand software concepts (rate limiting, back-pressure, authentication, state machines, load balancing, debounce, circuit breakers) as physical machines.
+- Technical product teams: explain how physical products and mechanisms work in documentation and training.
+
+## Install
+- npm: \`npx howitworks\` (copies the skill into ~/.claude/skills/howitworks; \`--project\` for this project only)
+- skills CLI: \`npx skills add hariFED/howitworks\`
+- git: \`git clone ${REPO} ~/.claude/skills/howitworks\`
+- Then in Claude Code: \`/howitworks explain how a four-stroke engine works\` (add "3d" for a 3D cutaway)
+
+## Links
+- [Website](${SITE}): overview, live demo, how it works
+- [All sheets](${SITE}collection.html)
+- [Source and SKILL.md](${REPO}): ${REPO}/blob/main/SKILL.md
+- [Drafting conventions](${REPO}/blob/main/references/conventions.md)
+- [Kit API](${REPO}/blob/main/references/kit.md)
+- [3D guide](${REPO}/blob/main/references/3d.md)
+
+## Example sheets (${total}, each a live 2D sheet and a 3D cutaway)
+${sheets.map((m) => `- [${m.title}](${SITE}sheets/${m.slug}.html) — ${m.object}. Explains: ${m.idea}.${m.has3d ? ` [3D](${SITE}3d/${m.slug}.html)` : ""}`).join("\n")}
+`;
+writeFileSync(join(out, "llms.txt"), LLMS);
+writeFileSync(join(root, "llms.txt"), LLMS);
 console.log(`site   docs/index.html + collection.html · ${total} sheets`);

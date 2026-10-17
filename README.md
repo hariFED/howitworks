@@ -5,7 +5,7 @@
 <h1 align="center">howitworks</h1>
 
 <p align="center">
-  <b>A skill for Claude Code.</b> Name a mechanism, or an idea, and Claude drafts the live engineering drawing that explains it.
+  <b>An interactive engineering-drawing skill for Claude Code</b> that explains mechanisms and software concepts through physical cutaways and live simulations.
 </p>
 
 <p align="center">
@@ -19,11 +19,21 @@
   <img src="https://raw.githubusercontent.com/hariFED/howitworks/main/assets/readme/banner.png" alt="Five live 3D cutaways drawn by howitworks: a four-stroke engine, a flyball governor, a gear pump, a centrifugal pump and a circuit breaker">
 </p>
 
+<p align="center"><code>npx howitworks</code> &nbsp;·&nbsp; <code>npx skills add hariFED/howitworks</code> &nbsp;·&nbsp; <code>/plugin install howitworks --marketplace hariFED/howitworks</code></p>
+
 ```
 /howitworks explain how a pin tumbler lock opens
 ```
 
 That one line becomes a real A2 engineering sheet: a section through the mechanism, details at a larger scale, true dimensions, numbered balloons, a parts list and a title block. Then **the parts move**, the dimensions re-measure themselves, and every number on the sheet comes from one physical model. Ask for `3d` and you also get a cutaway you can turn, cut open and take apart.
+
+## Who it's for
+
+| | |
+|---|---|
+| **Engineering students and educators** | Explore mechanisms, forces, pressure, motion and thermodynamic cycles interactively: real sections, real dimensions, physics you can push. Boyle's law, the Otto cycle, Pascal's principle, pump curves, feedback control. |
+| **Developers** | Understand abstract software concepts as machines: rate limiting is a cistern, back-pressure a relief valve, authentication a pin tumbler lock, debounce a door closer, a state machine a click pen. |
+| **Technical product teams** | Explain how a physical product works in documentation and training: a live, sectioned drawing of the seal, the valve, the spring, with a part card on every part. |
 
 ## See it work
 
@@ -92,11 +102,20 @@ Every one was drafted by Claude with this skill, passes the layout check at a do
 npx howitworks
 ```
 
-This copies the skill into `~/.claude/skills/howitworks`. Add `--project` to install into this project's `.claude/skills` instead, `--no-examples` for a smaller install, or `--force` to replace an existing one. Or clone it:
+This copies the skill into `~/.claude/skills/howitworks`. Add `--project` to install into this project's `.claude/skills` instead, `--no-examples` for a smaller install, or `--force` to replace an existing one. Other ways to install:
 
 ```
+# the skills CLI (Claude Code, Cursor, Codex and other agents)
+npx skills add hariFED/howitworks
+
+# as a Claude Code plugin
+/plugin install howitworks --marketplace hariFED/howitworks
+
+# or clone it
 git clone https://github.com/hariFED/howitworks ~/.claude/skills/howitworks
 ```
+
+Agents can read the whole project at a glance from [llms.txt](https://harifed.github.io/howitworks/llms.txt).
 
 Needs Node.js 20 or later, and Chrome, Chromium or Edge for the checks. Restart Claude Code, then:
 

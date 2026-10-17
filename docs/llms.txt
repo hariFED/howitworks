@@ -1,0 +1,47 @@
+# howitworks
+
+> An interactive engineering-drawing skill for Claude Code that explains mechanisms and software concepts through physical cutaways and live simulations.
+
+howitworks is an Agent Skill (SKILL.md) for Claude Code. Given one line, e.g. "/howitworks explain how a pin tumbler lock opens", Claude picks the real object whose mechanism *is* the idea, then drafts a live A2 engineering sheet: a section through the mechanism, details at larger scale, true dimensions, numbered balloons with part cards, a parts list and a title block, all driven by one physical model (pressure, flow, force, cycles). It can also build a 3D cutaway you can turn, cut open and explode. Rule: "The cut is the explanation."
+
+## Who it is for
+- Engineering students and educators: explore mechanisms, forces, pressure, motion and thermodynamic cycles interactively.
+- Developers: understand software concepts (rate limiting, back-pressure, authentication, state machines, load balancing, debounce, circuit breakers) as physical machines.
+- Technical product teams: explain how physical products and mechanisms work in documentation and training.
+
+## Install
+- npm: `npx howitworks` (copies the skill into ~/.claude/skills/howitworks; `--project` for this project only)
+- skills CLI: `npx skills add hariFED/howitworks`
+- git: `git clone https://github.com/hariFED/howitworks ~/.claude/skills/howitworks`
+- Then in Claude Code: `/howitworks explain how a four-stroke engine works` (add "3d" for a 3D cutaway)
+
+## Links
+- [Website](https://harifed.github.io/howitworks/): overview, live demo, how it works
+- [All sheets](https://harifed.github.io/howitworks/collection.html)
+- [Source and SKILL.md](https://github.com/hariFED/howitworks): https://github.com/hariFED/howitworks/blob/main/SKILL.md
+- [Drafting conventions](https://github.com/hariFED/howitworks/blob/main/references/conventions.md)
+- [Kit API](https://github.com/hariFED/howitworks/blob/main/references/kit.md)
+- [3D guide](https://github.com/hariFED/howitworks/blob/main/references/3d.md)
+
+## Example sheets (21, each a live 2D sheet and a 3D cutaway)
+- [Floor pump](https://harifed.github.io/howitworks/sheets/floor-pump.html) — Bicycle floor pump in axial section. Explains: Positive-displacement compression through two one-way valves. [3D](https://harifed.github.io/howitworks/3d/floor-pump.html)
+- [Four-stroke engine](https://harifed.github.io/howitworks/sheets/four-stroke.html) — 125 cc air-cooled DOHC single in section through the cylinder and valve axes. Explains: Turning heat into rotation through a four-phase cycle. [3D](https://harifed.github.io/howitworks/3d/four-stroke.html)
+- [Porter governor](https://harifed.github.io/howitworks/sheets/governor.html) — Porter flyball governor with bevel drive, bell crank and double-beat steam throttle valve, in axial section. Explains: Negative-feedback proportional control: the speed sets the opening, so more load is carried at a lower speed (droop). [3D](https://harifed.github.io/howitworks/3d/governor.html)
+- [Lever escapement](https://harifed.github.io/howitworks/sheets/escapement.html) — Swiss lever watch escapement in plan, with a section through the balance staff and its jewel bearings. Explains: Turning stored energy into equal ticks: a clock-driven scheduler, a rate-limited event loop. [3D](https://harifed.github.io/howitworks/3d/escapement.html)
+- [Bottle jack](https://harifed.github.io/howitworks/sheets/bottle-jack.html) — 2-tonne hydraulic bottle jack in axial section. Explains: Force multiplication by area ratio (Pascal's principle). [3D](https://harifed.github.io/howitworks/3d/bottle-jack.html)
+- [Cistern token bucket](https://harifed.github.io/howitworks/sheets/token-bucket.html) — Close-coupled WC cistern with a diaphragm float valve and a pull-knob drop valve, in section. Explains: Token bucket rate limiting (API rate limits). [3D](https://harifed.github.io/howitworks/3d/token-bucket.html)
+- [Door closer](https://harifed.github.io/howitworks/sheets/debounce.html) — Overhead hydraulic door closer, rack and pinion, EN 1154 size 3, in plan section. Explains: Debounce: act only once the input has stopped for long enough. [3D](https://harifed.github.io/howitworks/3d/debounce.html)
+- [Pin tumbler cylinder](https://harifed.github.io/howitworks/sheets/pin-tumbler.html) — Five-pin euro-profile half cylinder (DIN 18252, 30/10) and its key in longitudinal section. Explains: Authentication by matching a secret: every factor must match (AND). [3D](https://harifed.github.io/howitworks/3d/pin-tumbler.html)
+- [Circuit breaker](https://harifed.github.io/howitworks/sheets/circuit-breaker.html) — B16 miniature circuit breaker (EN 60898-1) cut on its centre plane. Explains: The circuit breaker pattern: closed, open, half-open. [3D](https://harifed.github.io/howitworks/3d/circuit-breaker.html)
+- [Wax thermostat](https://harifed.github.io/howitworks/sheets/thermostat.html) — Automotive wax-pellet coolant thermostat (opens at 88 °C) in section, in its housing between engine and radiator. Explains: A setpoint controller with no electronics: negative feedback through melting wax. [3D](https://harifed.github.io/howitworks/3d/thermostat.html)
+- [Relief valve](https://harifed.github.io/howitworks/sheets/relief-valve.html) — DN25 spring-loaded safety relief valve in axial section. Explains: A spring-set threshold with hysteresis: pop open, blow down, reseat. [3D](https://harifed.github.io/howitworks/3d/relief-valve.html)
+- [Open differential](https://harifed.github.io/howitworks/sheets/differential.html) — Rear-axle open bevel-gear differential in plan section, with the car in a turn. Explains: Splitting one input between two outputs that may run at different speeds: load balancing. [3D](https://harifed.github.io/howitworks/3d/differential.html)
+- [Shock absorber](https://harifed.github.io/howitworks/sheets/shock-absorber.html) — Monotube gas-charged automotive damper (de Carbon type) in axial section. Explains: Smoothing a noisy input: the suspension as a low-pass filter. [3D](https://harifed.github.io/howitworks/3d/shock-absorber.html)
+- [Click pen](https://harifed.github.io/howitworks/sheets/click-pen.html) — Retractable ballpoint pen in longitudinal section. Explains: A toggle (finite state machine) built from geometry. [3D](https://harifed.github.io/howitworks/3d/click-pen.html)
+- [Centrifugal pump](https://harifed.github.io/howitworks/sheets/centrifugal-pump.html) — ISO 2858 end-suction water pump 50-32-160 with its discharge globe valve, cut through the shaft and through the volute. Explains: Converting rotation into pressure, and the operating point where supply meets demand. [3D](https://harifed.github.io/howitworks/3d/centrifugal-pump.html)
+- [External gear pump](https://harifed.github.io/howitworks/sheets/gear-pump.html) — Group 2 external gear pump, 8 cm³/rev, cut across and along its shafts. Explains: Positive displacement: a conveyor of fixed-size batches. [3D](https://harifed.github.io/howitworks/3d/gear-pump.html)
+- [Carburettor](https://harifed.github.io/howitworks/sheets/carburettor.html) — Fixed-jet float-bowl carburettor, 26 mm bore, in axial section. Explains: Bernoulli's principle: one flow metering another. [3D](https://harifed.github.io/howitworks/3d/carburettor.html)
+- [Pressure cooker](https://harifed.github.io/howitworks/sheets/pressure-cooker.html) — 6 L stovetop pressure cooker (EN 12778) in axial section. Explains: Raising the boiling point with pressure; a safety interlock that cannot open while the resource is in use. [3D](https://harifed.github.io/howitworks/3d/pressure-cooker.html)
+- [Solenoid valve](https://harifed.github.io/howitworks/sheets/solenoid-valve.html) — 2/2-way normally closed pilot-operated solenoid valve, G1/2, in axial section. Explains: A small signal controlling a big flow: servo amplification through a pilot. [3D](https://harifed.github.io/howitworks/3d/solenoid-valve.html)
+- [Stirling engine](https://harifed.github.io/howitworks/sheets/stirling.html) — Beta-type Stirling demonstrator with a rhombic drive, in axial section. Explains: Heat flowing from hot to cold does work: the Stirling cycle. [3D](https://harifed.github.io/howitworks/3d/stirling.html)
+- [Hydraulic disc brake](https://harifed.github.io/howitworks/sheets/disc-brake.html) — Bicycle hydraulic disc brake: lever master cylinder and two-piston post-mount caliper in section. Explains: Hydraulic force transmission; a master–replica pair where one piston writes and the other follows. [3D](https://harifed.github.io/howitworks/3d/disc-brake.html)

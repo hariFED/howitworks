@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://harifed.github.io/howitworks/sitemap.xml

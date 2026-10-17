@@ -1,0 +1,9 @@
+{
+  "name": "howitworks",
+  "description": "An interactive engineering-drawing skill for Claude Code that explains mechanisms and software concepts through physical cutaways and live simulations.",
+  "author": { "name": "hariFED", "url": "https://github.com/hariFED" },
+  "homepage": "https://harifed.github.io/howitworks/",
+  "repository": "https://github.com/hariFED/howitworks",
+  "license": "MIT",
+  "keywords": ["engineering-drawing", "cutaway", "technical-drawing", "education", "simulation", "3d", "mechanisms", "claude-code-skill"]
+}

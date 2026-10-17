@@ -1,15 +1,32 @@
 {
   "name": "howitworks",
   "version": "0.1.0",
-  "description": "A Claude Code skill that draws live engineering blueprints: sectioned, dimensioned, ballooned A2 sheets whose parts move from one physical model.",
-  "keywords": ["howitworks", "claude-code", "claude", "skill", "agent-skill", "blueprint", "technical-drawing", "svg", "engineering", "explainer", "interactive"],
+  "description": "An interactive engineering-drawing skill for Claude Code that explains mechanisms and software concepts through physical cutaways and live simulations.",
+  "keywords": [
+    "howitworks",
+    "claude-code",
+    "claude",
+    "skill",
+    "agent-skill",
+    "blueprint",
+    "technical-drawing",
+    "svg",
+    "engineering",
+    "explainer",
+    "interactive"
+  ],
   "license": "MIT",
   "author": "hariFED",
   "type": "module",
   "homepage": "https://harifed.github.io/howitworks/",
-  "repository": { "type": "git", "url": "git+https://github.com/hariFED/howitworks.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hariFED/howitworks.git"
+  },
   "bugs": "https://github.com/hariFED/howitworks/issues",
-  "bin": { "howitworks": "bin/install.mjs" },
+  "bin": {
+    "howitworks": "bin/install.mjs"
+  },
   "exports": {
     "./kit/draft": "./kit/draft.mjs",
     "./kit/live": "./kit/live.mjs",
@@ -32,7 +49,9 @@
     "README.md",
     "LICENSE"
   ],
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "node scripts/build-all.mjs",
     "check": "node scripts/check-all.mjs",
