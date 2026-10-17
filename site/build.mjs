@@ -150,6 +150,8 @@ for (const theme of ["blueprint", "paper", "white", "dark"]) {
 }
 if (shots || !existsSync(join(out, "og.png"))) shot(join(root, "examples", "escapement", "escapement.html"), join(out, "og.png"), ["--zoom", pad(CROPS.escapement, 0.04, 1200 / 630).join(","), "--width", "1200", "--height", "630", "--t", "3", "--theme", "white"]);
 writeFileSync(join(out, ".nojekyll"), "");
+// Google Search Console ownership (HTML-file method)
+writeFileSync(join(out, "google1163d52cac798b83.html"), "google-site-verification: google1163d52cac798b83.html");
 // the logo, as a standalone file: the favicon here, and assets/logo.svg for the README
 const logoSvg = LOGO.mark({ size: 64, ink: "#171717", accent: "#e2552c", id: "hiw" });
 writeFileSync(join(out, "logo.svg"), logoSvg);
