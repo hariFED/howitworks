@@ -53,6 +53,19 @@ export function setupPage(svg) {
       svg.appendChild(m);
     }
   }
+  // The sheet's keys listen on the svg. Make them work without clicking the sheet first: a press on the
+  // sheet focuses it (drag handlers cancel pointerdown, which would otherwise skip focus), and a key typed
+  // while nothing is focused is passed on to the sheet.
+  svg.addEventListener("pointerdown", (e) => {
+    if (document.activeElement !== svg && !e.target.closest?.("[tabindex]:not(svg), a, button, input, select, textarea")) svg.focus({ preventScroll: true });
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || svg.contains(e.target)) return;
+    const a = document.activeElement;
+    if (a && a !== document.body && a !== document.documentElement) return;
+    const fwd = new KeyboardEvent("keydown", { key: e.key, code: e.code, shiftKey: e.shiftKey, repeat: e.repeat, bubbles: true, cancelable: true });
+    if (!svg.dispatchEvent(fwd)) e.preventDefault();
+  });
   if (q.zoom) {
     const box = q.zoom.split(",").map(Number);
     if (box.length === 4 && box.every(Number.isFinite)) {
@@ -105,7 +118,9 @@ export function run({ root, step, render, idleAfter = 4, onFrozen }) {
     last = now;
     live.clock += real;
     live.touring = !reduced && live.clock - live.lastInput > idleAfter;
-    const busy = step(real * live.slow, live);
+    // the first frame (and the first after a pause) has no elapsed time: models that divide by the step
+    // (a speed from two positions) would turn NaN and stay NaN, so a zero step is not taken
+    const busy = real > 0 ? step(real * live.slow, live) : true;
     render(live);
     if (visible && !document.hidden && (!reduced || busy)) raf = requestAnimationFrame(frame);
     else last = 0;

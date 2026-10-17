@@ -19,6 +19,11 @@
   <img src="https://raw.githubusercontent.com/hariFED/howitworks/main/assets/readme/banner.png" alt="Five live 3D cutaways drawn by howitworks: a four-stroke engine, a flyball governor, a gear pump, a centrifugal pump and a circuit breaker">
 </p>
 
+<p align="center">
+  <a href="https://harifed.github.io/howitworks/#watch"><img src="https://raw.githubusercontent.com/hariFED/howitworks/main/assets/readme/launch.gif" width="800" alt="From the launch film: a four-stroke engine in 3D, cut open and taken apart, then the numbers 21 sheets and 508 parts"></a><br>
+  <a href="https://harifed.github.io/howitworks/#watch"><b>▶ Watch the 1-minute film</b></a>
+</p>
+
 <p align="center"><code>npx howitworks</code> &nbsp;·&nbsp; <code>npx skills add hariFED/howitworks</code> &nbsp;·&nbsp; <code>/plugin install howitworks --marketplace hariFED/howitworks</code></p>
 
 ```

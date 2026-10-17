@@ -5,7 +5,10 @@
 // density from its pressure, and draws the oil's path through the open port.
 
 const $ = (id) => document.getElementById(id);
-const V = S.create({ scene: SC.scene() });
+// The damper is long and thin: standing up it fills a third of a landscape window. The default view
+// rolls the iso picture 60° so it lies along an iso axis across the window, a little closer in on the
+// working half (piston, oil, floating piston); explode (E) frees the camera to frame everything.
+const V = S.create({ scene: SC.scene(), start: { roll: 60, zoom: 1.15, look: [0, 250, 0] } });
 
 // ---------------------------------------------------------------- state: the sheet's, from the same model
 const car = M.car();

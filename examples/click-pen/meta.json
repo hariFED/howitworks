@@ -28,14 +28,7 @@
   "shot3d": {
     "view": "iso",
     "cut": 1,
-    "zoom": 5.5,
-    "look": [
-      107,
-      0,
-      0
-    ],
-    "t": 0.5,
-    "explode": 0.6
+    "t": 0.5
   },
-  "controls3d": "Drag to orbit · Drag the button in or Space to click · ← → press and release · E explode (the rotator slides out along the long slots) · C cut · 1–4 views · S slow motion"
+  "controls3d": "Drag to orbit · opens with the cam stack drawn apart: drag the button in, Space or ← → closes it up and clicks · E explode (the rotator slides out along the long slots) · C cut · 1–4 views · S slow motion"
 }

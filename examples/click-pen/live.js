@@ -255,8 +255,9 @@ svg.addEventListener("keydown", (e) => {
   const key = e.key;
   if (key === " " || key === "Enter") clickT = 0;
   else if (key === "ArrowLeft") {
+    // press 1 mm further from where the button is now (in EXTENDED it already sits 3.2 mm in)
     clickT = -1;
-    target = clamp(target + 1);
+    target = clamp(Math.max(target, M.buttonDepth(pen)) + 1);
   } else if (key === "ArrowRight") {
     clickT = -1;
     target = clamp(target - 1);

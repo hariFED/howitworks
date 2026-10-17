@@ -64,6 +64,15 @@ const pad = ([x, y, w, h], m, aspect) => {
   return [cx - w / 2, cy - h / 2, w, h].map((v) => Math.round(v));
 };
 // per-page meta for the sheet and 3D pages (defined before use: function hoisting)
+// a full-page version of the loader for the 3D pages (they're also iframed on the landing page;
+// there the frame's own loader covers it, so this one hides itself inside frames)
+function PAGE_LOADER(title) {
+  const mark = LOGO.mark({ size: 64, ink: "currentColor", accent: "#e2552c", id: "pldr", title: "loading" });
+  return `<div id="hiw-loader" role="status" aria-live="polite" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bp-page,#fafafa);color:var(--bp-ink,#171717);font:12px ui-monospace,Consolas,monospace;letter-spacing:.06em;transition:opacity .45s ease">
+<style>#hiw-loader svg{animation:hiwspin 2.4s cubic-bezier(.45,.05,.55,.95) infinite}@keyframes hiwspin{50%{transform:rotate(180deg) scale(.94)}100%{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){#hiw-loader svg{animation:none}}html.in-frame #hiw-loader,.v3-embed #hiw-loader{display:none!important}</style>
+${mark}<span style="opacity:.6">${esc(title)} · cutting it open…</span></div>
+<script>(function(){var t0=Date.now(),l=document.getElementById("hiw-loader");if(window.top!==window||/[?&]embed=1/.test(location.search)){l.remove();return}(function w(){if(window.__v3ok||Date.now()-t0>20000){l.style.opacity="0";setTimeout(function(){l.remove()},500)}else setTimeout(w,120)})()})();</script>`;
+}
 function pageMeta(m, path, kind) {
   const desc = `${m.title} (${m.dwg}): ${m.object}, as an interactive ${kind} by howitworks, the engineering-drawing skill for Claude Code. ${m.idea}. ${m.summary}`.slice(0, 300);
   return [
@@ -116,12 +125,13 @@ html.in-frame .bp-page{padding:8px 8px 10px}
     writeFileSync(join(out, "3d", `${m.slug}.html`), readFileSync(src3d, "utf8").split(`href="${m.slug}.html"`).join(`href="../sheets/${m.slug}.html"`)
       .replace(/<title>[^<]*<\/title>/, `<title>${esc(m.title)} in 3D: interactive cutaway · howitworks</title>`)
       .replace(/<meta name="description" content="[^"]*">/, "")
-      .replace("</head>", pageMeta(m, `3d/${m.slug}.html`, "3D cutaway") + "\n</head>"));
+      .replace("</head>", pageMeta(m, `3d/${m.slug}.html`, "3D cutaway") + "\n</head>")
+      .replace("<body>", `<body>\n${PAGE_LOADER(m.title)}`));
     // a clean embed shot (no bar, title block or balloons) from the example's own hero settings
     const png3d = join(out, "thumbs", `${m.slug}-3d.png`);
     if (shots || !existsSync(png3d)) {
       // overrides where the example's hero is a close-up that doesn't read as a thumbnail
-      const THUMB3D = { "click-pen": { view: "iso", cut: 1, zoom: 1.5, t: 0.5, explode: 0.6 }, "shock-absorber": { view: "iso", cut: 1, zoom: 1.6, look: [0, 230, 0], t: 0.66 } };
+      const THUMB3D = {};
       const h = THUMB3D[m.slug] || m.shot3d || {};
       const args = ["--embed", "--balloons", "0", "--gpu", "--theme", "white", "--width", "960", "--height", "720"];
       for (const k of ["view", "cut", "zoom", "t", "explode"]) if (h[k] != null) args.push("--" + k, String(h[k]));
@@ -166,10 +176,13 @@ const img = (slug, cls = "") =>
 const frame = (slug, title, cls = "") =>
   `<div class="frame ${cls}"><iframe data-src="sheets/${slug}.html?theme=white" title="${esc(title)}" loading="lazy"></iframe></div>`;
 // a live sheet zoomed to one view: no frame, no bar, just the object on the page
+// The loader: the logo's gear turns (the hatched cut face stays put on its centre line) until the
+// frame inside reports it is ready. One function, used in frames on the landing page and on 3D pages.
+const LOADER = (label) => `<div class="ldr" role="status" aria-live="polite">${LOGO.mark({ size: 56, ink: "currentColor", accent: "#e2552c", id: "ldr" + Math.random().toString(36).slice(2, 7), title: "loading" })}<span>${label}</span></div>`;
 const solid = (slug, title, q, aspect = "16/10") =>
-  `<div class="frame bare" style="aspect-ratio:${aspect}"><iframe data-src="3d/${slug}.html?embed=1&amp;theme=white${q ? "&amp;" + q : ""}" data-zoom="1" title="${esc(title)}"></iframe></div>`;
+  `<div class="frame bare is-loading" style="aspect-ratio:${aspect}">${LOADER("cutting it open…")}<iframe data-src="3d/${slug}.html?embed=1&amp;theme=white${q ? "&amp;" + q : ""}" data-zoom="1" title="${esc(title)}"></iframe></div>`;
 const live = (slug, title, box, mask) =>
-  `<div class="frame bare" style="aspect-ratio:${box[2]}/${box[3]}"><iframe data-src="sheets/${slug}.html?theme=white&amp;zoom=${box.join(",")}${mask ? "&amp;mask=" + mask.join(",") : ""}" data-zoom="1" title="${esc(title)}"></iframe></div>`;
+  `<div class="frame bare is-loading" style="aspect-ratio:${box[2]}/${box[3]}">${LOADER("drafting…")}<iframe data-src="sheets/${slug}.html?theme=white&amp;zoom=${box.join(",")}${mask ? "&amp;mask=" + mask.join(",") : ""}" data-zoom="1" title="${esc(title)}"></iframe></div>`;
 
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -230,9 +243,28 @@ p{margin:0 0 12px}
 .frame{position:relative;aspect-ratio:1200/890;border-radius:4px;overflow:hidden;background:var(--card);box-shadow:0 0 0 1px var(--rule)}
 .frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .frame.bare{background:none;box-shadow:none;border-radius:0}
+.ldr{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--ink);background:var(--page);transition:opacity .45s ease,visibility .45s;pointer-events:none}
+.ldr span{font:12px var(--mono);letter-spacing:.06em;color:var(--muted)}
+.ldr svg{animation:ldr-spin 2.4s cubic-bezier(.45,.05,.55,.95) infinite}
+.frame:not(.is-loading) .ldr{opacity:0;visibility:hidden}
+.frame.is-loading iframe{opacity:0}
+.frame iframe{transition:opacity .45s ease}
+@keyframes ldr-spin{0%{transform:rotate(0)}50%{transform:rotate(180deg) scale(.94)}100%{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.ldr svg{animation:none}}
 .wide.narrow{width:440px;margin-left:auto;margin-right:auto}
 .wide.hero{margin:30px 0 26px}
 .minis img,.grid img,.six img,.coll article img{background:var(--page)}
+.wide.film{margin:34px 0 8px;scroll-margin-top:24px}
+.film video{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:6px;background:#0b0b0b;box-shadow:0 0 0 1px var(--rule),0 1px 3px rgba(0,0,0,.06)}
+.film-cap{color:var(--muted);font-size:12.5px;margin:10px 0 26px}
+.film-cap a{color:var(--muted)}
+.film-cap span,.film-cap a{white-space:nowrap}
+.film-cap i{font-style:normal;color:var(--faint);margin:0 2px}
+.films{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:22px 0 10px}
+.films a{text-decoration:none;display:block}
+.films img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:4px;box-shadow:0 0 0 1px var(--rule);margin-bottom:6px;background:var(--page)}
+.films b{display:block;font-weight:500;font-size:12px;line-height:15px}
+.films span{display:block;color:var(--muted);font-size:11.5px;line-height:15px}
 
 .controls{font-size:12px;line-height:20px;color:var(--muted)}
 .controls div{display:flex;gap:8px;align-items:center;margin:4px 0}
@@ -335,9 +367,10 @@ footer a{color:var(--muted)}
   .minis{grid-template-columns:repeat(5,1fr);gap:4px}
   .grid{grid-template-columns:repeat(3,1fr)}
   .six,.rules,.themes{grid-template-columns:1fr}
+  .films{grid-template-columns:1fr 1fr}
   .rows{grid-template-columns:1fr}
   .rows>div:nth-child(odd){border-bottom:0;padding-bottom:0}
-  .wide{width:100%;left:0;transform:none}
+  .wide,.wide.narrow{width:100%;left:0;transform:none}
   .frame{aspect-ratio:auto;height:auto}
   .frame iframe{position:static;height:340px}
 }
@@ -406,7 +439,7 @@ addEventListener("DOMContentLoaded", function () {
   blocks.forEach(function (el) {
     gsap.to(el, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 88%", once: true } });
   });
-  document.querySelectorAll(".grid, .six").forEach(function (g) {
+  document.querySelectorAll(".grid, .six, .films").forEach(function (g) {
     var items = g.children;
     gsap.set(items, { opacity: 0, y: 14 });
     gsap.to(items, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.035, scrollTrigger: { trigger: g, start: "top 86%", once: true } });
@@ -432,7 +465,16 @@ const SCRIPT = MOTION + `<script>
   };
   var load = function (f) {
     if (f.src) return;
-    f.addEventListener("load", function () { fit(f); setTimeout(function () { fit(f); }, 400); });
+    var box = f.parentNode, t0 = Date.now();
+    var done = function () { box.classList.remove("is-loading"); };
+    f.addEventListener("load", function () {
+      fit(f); setTimeout(function () { fit(f); }, 400);
+      (function wait() {
+        var ok = true;
+        try { var w = f.contentWindow; if (f.src.indexOf("/3d/") > -1) ok = !!w.__v3ok; } catch (e) {}
+        if (ok || Date.now() - t0 > 20000) setTimeout(done, ok ? 250 : 0); else setTimeout(wait, 120);
+      })();
+    });
     f.src = f.dataset.src;
   };
   addEventListener("resize", function () { document.querySelectorAll("iframe[src]").forEach(function (f) { f.parentNode.style.height = ""; f.parentNode.style.aspectRatio = ""; fit(f); }); });
@@ -552,6 +594,12 @@ const faqs = [
   ["What licence?", "MIT, for the skill, the kit and every sheet."],
 ].map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join("\n");
 
+// ---- the launch film (docs/media is made by hand with ffmpeg; the other four cuts live on the release)
+const FILM = { mp4: "media/howitworks-launch.mp4", poster: "media/howitworks-launch.jpg", vtt: "media/howitworks-launch.vtt" };
+const RELEASE = REPO + "/releases/tag/v0.1.0";
+const films = [["mixed", "Mixed", "Terminal, sheet and 3D"], ["swiss", "Swiss", "Grid, numbers, one red"], ["isometric", "Isometric", "Blocks on a bench"], ["sketch", "Sketch", "A drafting notebook"]]
+  .map(([f, b, t]) => `<a href="${RELEASE}"><img src="media/film-${f}.jpg" alt="Still from the ${b.toLowerCase()} cut of the howitworks film" width="640" height="360" loading="lazy"><b>${b}</b><span>${t}</span></a>`).join("");
+
 const LD = {
   "@context": "https://schema.org",
   "@graph": [
@@ -591,6 +639,17 @@ const LD = {
       "@type": "ItemList",
       "name": "howitworks example sheets",
       "itemListElement": sheets.map((m, i) => ({ "@type": "ListItem", "position": i + 1, "name": m.title + " — " + m.idea, "url": SITE + "sheets/" + m.slug + ".html" }))
+    },
+    {
+      "@type": "VideoObject",
+      "name": "howitworks, the launch film",
+      "description": "A one-minute film about howitworks, a Claude Code skill that draws the real machine cut open as a live engineering drawing, then as a 3D cutaway you can turn and take apart. 21 sheets, 508 parts.",
+      "thumbnailUrl": SITE + FILM.poster,
+      "contentUrl": SITE + FILM.mp4,
+      "embedUrl": SITE + "#watch",
+      "uploadDate": "2026-10-17",
+      "duration": "PT1M7S",
+      "inLanguage": "en"
     }
   ]
 };
@@ -620,6 +679,14 @@ ${solid("floor-pump", "Live 3D cutaway: the base of a bicycle floor pump", "cut=
 <span class="sn"><b>1</b>The 3D view and the 2D sheet run the same model file, so their numbers can't disagree.</span>
 <p>This is the base of a bicycle floor pump, cut in half. Press <kbd>Space</kbd> to pump: the air, stippled orange, thickens as the piston comes down, and the steel ball lifts off its seat the moment the chamber passes tyre pressure, because it is <em class="s">the outlet valve</em>. Drag to turn it; press <kbd>E</kbd> to take it apart.<span class="sn-ref">1</span></p>
 <p>Behind it is a full engineering drawing: an A2 sheet with the section at 1:2.5, two details, a gauge view, a P–s diagram, 21 balloons, a parts list and a title block, all live. howitworks draws <a href="#flat">both</a>.</p>
+
+<div class="wide film" id="watch">
+<video controls preload="metadata" playsinline poster="${FILM.poster}" width="1280" height="720" aria-label="howitworks, the launch film">
+<source src="${FILM.mp4}" type="video/mp4">
+<track kind="subtitles" src="${FILM.vtt}" srclang="en" label="English">
+</video>
+</div>
+<p class="film-cap"><span>▶ <em class="s">The cut is the explanation</em>, the launch film</span> <i>·</i> <span>1 min, sound on</span> <i>·</i> <a href="#films">four other cuts ↓</a></p>
 
 <section>${H.cut}
 <p>The skill rests on one rule, written at the top of its instructions above everything else:</p>
@@ -700,6 +767,8 @@ ${sheets.some((m) => m.has3d && m.slug !== "floor-pump") ? `<div class="grid g3d
 <figure><img src="thumbs/theme-white.png" alt="Floor pump detail, white theme" width="840" height="594" loading="lazy"><figcaption>white</figcaption></figure>
 <figure><img src="thumbs/theme-dark.png" alt="Floor pump detail, dark theme" width="840" height="594" loading="lazy"><figcaption>dark</figcaption></figure>
 </div>
+<p id="films">The launch film was cut in other styles too. Each is about a minute, with a voice-over, and they're on <a href="${RELEASE}">the release page</a>.</p>
+<div class="films">${films}</div>
 </section>
 
 <section>${H.code}

@@ -226,23 +226,30 @@ export const CLIP_W = 1.5; // half width
 
 // Explode (see the header): the cam stays, the rest leaves along the axis; JOG is the refill's axis.
 export const JOG = -60;
+// The explode comes apart in two stages. Up to REST only the cam stack opens along the axis (rotator,
+// plunger, button, top cap: the toggle's three toothed members drawn apart, so the teeth read); the
+// rest of the pen follows after. The page opens at REST (live3d.js): a slightly exploded cam stack.
+export const REST = 0.3;
+const LATE = { stage: [REST, 1] };
+// a cam part that is drawn out by `mm` at REST and reaches its full explode `full` later
+const early = (mm, full) => ({ stage: [0, (REST * full) / mm] });
 const B = M.YPT_TOP + P.PL.button; // the button's skirt, button out
 
 export function parts() {
-  const refill = (id, name, solids, o, dx = 0) => S.part(id, name, solids, { ...o, explode: { to: [dx, JOG, 0] } });
+  const refill = (id, name, solids, o, dx = 0) => S.part(id, name, solids, { ...o, ...LATE, explode: { to: [dx, JOG, 0] } });
   return [
     S.part(1, "BARREL TUBE Ø9.7×0.35", [S.tube({ ...AX, r0: R.barrelI, r1: R.barrelO, from: 15, to: 121.5 })], {
       hatch: "solid", anchor: { cut: [86, R.barrelI + 0.175, 0], out: { c: [86, 0, 0], r: R.barrelO, axis: "x" } },
     }),
     S.part(2, "THREAD BUSH M8×0.5", [S.lathe([[4.0, 15], [4.5, 15], [4.5, 24], [3.3, 24], [3.3, 21.6], [4.0, 21]], AX)], {
-      mat: "brass", angle: 45, explode: [-26, 0, 0], anchor: { cut: [17.5, -4.25, 0], out: { c: [17.5, 0, 0], r: 4.5, axis: "x" } },
+      mat: "brass", angle: 45, ...LATE, explode: [-26, 0, 0], anchor: { cut: [17.5, -4.25, 0], out: { c: [17.5, 0, 0], r: 4.5, axis: "x" } },
     }),
     S.part(3, "NOSE CONE M8×0.5", [S.lathe([
       [1.3, 0], [2.0, 0], [4.85, 15], [4.0, 15], [4.0, 20.6], [3.75, 21], [3.2, 21],
       [3.2, 13], [2.5, 13], [2.5, M.SEAT_U], [1.7, M.SEAT_U], [1.7, 1], [1.3, 1],
-    ], AX)], { mat: "brass", angle: 135, explode: [-52, 0, 0], anchor: { cut: [10, -3.2, 0], out: { c: [8, 0, 0], r: 3.5, axis: "x" } } }),
+    ], AX)], { mat: "brass", angle: 135, ...LATE, explode: [-52, 0, 0], anchor: { cut: [10, -3.2, 0], out: { c: [8, 0, 0], r: 3.5, axis: "x" } } }),
     S.part(4, "RETURN SPRING Ø0.4×Ø4.3×19, 10 TURNS", [S.helix({ ...AX, ...SPRING, pivot: [SPRING.from, 0, 0], live: "spring" })], {
-      hatch: "solid", explode: { to: [-30, JOG, 0] }, anchor: { cut: coilPoint(9), out: { c: [10, 0, 0], r: 2.35, axis: "x" }, solid: 0 },
+      hatch: "solid", ...LATE, explode: { to: [-30, JOG, 0] }, anchor: { cut: coilPoint(9), out: { c: [10, 0, 0], r: 2.35, axis: "x" }, solid: 0 },
     }),
     refill(5, "POINT, 5 INK GROOVES", [S.lathe(atS([[0.62, 0.3], [1.15, 3.5], [1.15, 14], [0.6, 14], [0.6, 2.6], [0.2, 2.6], [0.2, 0.96], [0.354, 0.854], [0.51, 0.62], [0.51, 0.45], [0.462, 0.3]]), AX)], {
       mat: "bronze", angle: 135, anchor: { cut: [S0 + 8, 0.875, 0], out: { c: [S0 + 8, 0, 0], r: 1.15, axis: "x" } },
@@ -275,7 +282,7 @@ export function parts() {
       S.lathe([[0, M.U_R_EXT + 1], [R.hub, M.U_R_EXT + 1], [R.hub, M.U_R_EXT + 8], [0, M.U_R_EXT + 8]], { ...AX, live: "hub" }),
       ...[0, 120, 240].map((phi) => lug(phi)),
     ], {
-      explode: { to: [18, 0, 0] },
+      explode: { to: [18, 0, 0] }, ...early(12, 18),
       anchor: { cut: [M.U_R_EXT + 0.5, R.base * Math.SQRT1_2, R.base * Math.SQRT1_2], out: { c: [M.U_R_EXT + 0.5, 0, 0], r: R.base, axis: "x" } },
     }),
     S.part(13, "PLUNGER, 6 TEETH", [
@@ -285,7 +292,7 @@ export function parts() {
       S.cylinder({ ...AX, r: R.stem, from: YP + P.PL.collar, to: YP + P.PL.stem }),
       ...[0, 120, 240].map((c) => key(c)),
     ], {
-      explode: { to: [26, 0, 0] },
+      explode: { to: [26, 0, 0] }, ...early(20, 26),
       anchor: { cut: [YP + 10, R.plO * Math.SQRT1_2, R.plO * Math.SQRT1_2], out: { c: [YP + 10, 0, 0], r: R.plO, axis: "x" } },
     }),
     S.part(14, "BUTTON CAP", [S.lathe([
@@ -293,16 +300,16 @@ export function parts() {
       ...[0, 15, 30, 45, 60, 75, 90].map((a) => [3.5 * Math.cos(rad(a)), B + 3.3 + 1.2 * Math.sin(rad(a))]),
       [0, B + P.PL.buttonH], [0, B + 3.5], [2.5, B + 3.5],
     ].filter((p, i, a) => i === 0 || Math.hypot(p[0] - a[i - 1][0], p[1] - a[i - 1][1]) > 1e-6), AX)], {
-      mat: "steel", angle: 135, explode: { to: [50, 0, 0] }, anchor: { cut: [B + 1.75, 3.0, 0], out: { c: [B + 1.75, 0, 0], r: 3.5, axis: "x" } },
+      mat: "steel", angle: 135, explode: { to: [50, 0, 0] }, ...early(30, 50), anchor: { cut: [B + 1.75, 3.0, 0], out: { c: [B + 1.75, 0, 0], r: 3.5, axis: "x" } },
     }),
     S.part(15, "TOP CAP", [S.lathe([[2.6, P.CAP.spigot], [R.barrelI, P.CAP.spigot], [R.barrelI, P.CAP.flange], [R.barrelO, P.CAP.flange], [R.barrelO, P.CAP.top - 0.5], [R.barrelO - 0.5, P.CAP.top], [2.6, P.CAP.top]], AX)], {
-      mat: "brass", angle: 45, explode: [52, 0, 0], anchor: { cut: [123.6, 3.6, 0], out: { c: [123.6, 0, 0], r: R.barrelO, axis: "x" } },
+      mat: "brass", angle: 45, explode: [52, 0, 0], ...early(26, 52), anchor: { cut: [123.6, 3.6, 0], out: { c: [123.6, 0, 0], r: R.barrelO, axis: "x" } },
     }),
     S.part(16, "CLIP, 0.5 STRIP", [
       S.tube({ ...AX, r0: R.barrelI, r1: R.barrelO, from: 121.5, to: 122 }),
       S.extrude(strip(CLIP_PATH, 0.5), { along: "z", from: -CLIP_W, to: CLIP_W }),
       S.cylinder({ axis: "z", at: [81.6, 5.35], r: 0.5, from: -CLIP_W, to: CLIP_W }),
-    ], { hatch: "solid", explode: [0, 9, 0], anchor: { cut: [100, 6.05, 0], out: { c: [100, 6.05, CLIP_W] } } }),
+    ], { hatch: "solid", ...LATE, explode: [0, 9, 0], anchor: { cut: [100, 6.05, 0], out: { c: [100, 6.05, CLIP_W] } } }),
   ];
 }
 

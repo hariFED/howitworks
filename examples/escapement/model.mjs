@@ -297,7 +297,7 @@ export function step(s, dt = DT, hold = null) {
     s.th += s.om * dt;
   } else {
     const next = hold;
-    s.om = (next - s.th) / dt;
+    if (dt > 0) s.om = (next - s.th) / dt; // a zero step (the first frame) keeps the last rate
     s.th = next;
   }
   s.held = hold != null;

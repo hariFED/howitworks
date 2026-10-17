@@ -28,12 +28,6 @@
   "shot3d": {
     "view": "iso",
     "cut": 1,
-    "zoom": 4.2,
-    "look": [
-      0,
-      158,
-      0
-    ],
     "t": 0.66
   },
   "controls3d": "Drag to orbit · drag the rod or ↑ ↓ to stroke · Space drives over a hump · D damping on/off · E explode · C cut · 1–4 views · S slow motion"

@@ -29,7 +29,7 @@ for (let i = 0; i < args.length; i++) {
   else if (a === "--times") opt.times = next().split(",");
   else if (a === "--gpu") opt.gpu = true;
   else if (a === "--embed") pass.embed = 1;
-  else if (["--t", "--theme", "--view", "--cut", "--offset", "--explode", "--zoom", "--look", "--balloons"].includes(a)) pass[a.slice(2)] = next();
+  else if (["--t", "--theme", "--view", "--cut", "--offset", "--explode", "--zoom", "--look", "--roll", "--az", "--balloons"].includes(a)) pass[a.slice(2)] = next();
   else rest.push(a);
 }
 if (!rest[0]) {

@@ -5,7 +5,13 @@
 // refill and the spring from it, and adds the pen's own controls.
 
 const $ = (id) => document.getElementById(id);
-const V = S.create({ scene: SC.scene() });
+// The page opens with the cam stack drawn a little apart (SC.REST: rotator, plunger, button and cap out
+// along the axis, the rest of the pen assembled), seen from the nose side (az −45°) so the plunger's six
+// V teeth and the rotator's lugs face the reader. Any pen control closes it up and drives it.
+const V = S.create({ scene: SC.scene(), start: { explode: SC.REST, az: -45 } });
+const assemble = () => {
+  if (V.explode > 0.01 || V.explode < -0.01) V.explode = 0;
+};
 
 // ---------------------------------------------------------------- the wrapped cam solids (a kit gap)
 // The kit has no solid wrapped round an axis; scene3d.mjs builds those bodies as triangles and leaves
@@ -82,7 +88,7 @@ function step(dt, live) {
   const h = dt / n;
   for (let i = 0; i < n; i++) {
     let driven = false;
-    if (live.touring && !dragging) {
+    if (live.touring && !dragging && V.explode < 0.05) {
       tour.t += h;
       push = tourPush(tour.t);
       driven = true;
@@ -173,6 +179,7 @@ V.drag([14, 13], {
   axis: [-1, 0, 0],
   length: M.PUSH_MAX,
   start: () => {
+    assemble();
     dragging = true;
     clickT = -1;
     target = push;
@@ -184,19 +191,25 @@ V.drag([14, 13], {
     target = 0;
   },
 });
-const click = () => (clickT = 0);
+const click = () => {
+  assemble();
+  clickT = 0;
+};
 V.key(" ", click);
 V.key("Enter", click);
-V.key("ArrowLeft", () => ((clickT = -1), (target = clamp(target + 1))));
-V.key("ArrowRight", () => ((clickT = -1), (target = clamp(target - 1))));
-V.key("Home", () => ((clickT = -1), (target = 0)));
+// press 1 mm further from where the button is now (in EXTENDED it already sits 3.2 mm in)
+V.key("ArrowLeft", () => (assemble(), (clickT = -1), (target = clamp(Math.max(target, M.buttonDepth(pen)) + 1))));
+V.key("ArrowRight", () => (assemble(), (clickT = -1), (target = clamp(target - 1))));
+V.key("Home", () => (assemble(), (clickT = -1), (target = 0)));
 $("click")?.addEventListener("click", () => {
   click();
   V.input();
 });
 
 // the page's own self-tests (?selftest=1): push the button in by dragging it; Space clicks
+V.test("opens with the cam stack drawn apart", () => ({ pass: Math.abs(V.explode - SC.REST) < 1e-6, info: V.explode }));
 V.test("button drag pushes", ({ ptr, project }) => {
+  V.explode = 0; // a pen control closes the stack; the test drags the assembled button
   const g = project([M.YPT_TOP + P.PL.button + 3, 2.4, 2.4]);
   const t0 = target;
   ptr("pointerdown", g[0], g[1]);
@@ -214,10 +227,11 @@ V.test("space clicks", ({ key }) => {
 });
 V.test("arrows press and release", ({ key }) => {
   target = 0;
+  const want = clamp(M.buttonDepth(pen) + 1);
   key("ArrowLeft");
   const a = target;
   key("ArrowRight");
-  return { pass: a === 1 && target === 0, info: [a, target] };
+  return { pass: Math.abs(a - want) < 1e-9 && Math.abs(target - (a - 1)) < 1e-9, info: [want, a, target] };
 });
 
 V.run({ step, render, overlay, still: 2.6, idleAfter: 5 });

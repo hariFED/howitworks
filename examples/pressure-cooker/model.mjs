@@ -175,7 +175,7 @@ export function advance(s, dt) {
     s.p = pAir(s) + psat(s.T);
     if (s.p - P_ATM < P_DROP) s.sealed = false;
   }
-  s.vent = vented / dt; // kg/s
+  if (dt > 0) s.vent = vented / dt; // kg/s (a zero step, e.g. the first frame, keeps the last flow)
   return s;
 }
 

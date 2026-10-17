@@ -140,6 +140,7 @@ let dragging = false;
 let dragH = OFF;
 let auto = false; // Space: run the tour even while the reader is at the controls
 let pushUp = false;
+let pushDown = false; // the down key drives the handle to OFF (clearing held alone let it re-close at once)
 
 const f = () => M.deflection(s.dT);
 const current = () => (s.held && s.a < 0.5 ? s.load : 0);
@@ -219,10 +220,12 @@ function step(dt, live) {
       if (w != null) want = w;
     }
     if (pushUp) want = ON;
+    if (pushDown) want = OFF;
     if (dragging) want = dragH;
     const rate = want > s.h ? 16 : s.held ? 16 : 11;
     s.h = live.reduced && !driven ? want : L.follow(s.h, want, rate, h);
-    if (!s.held && s.h >= ON - 1) {
+    if (pushDown && s.h <= OFF + 1) pushDown = false;
+    if (!s.held && !pushDown && s.h >= ON - 1) {
       tryClose();
       pushUp = false;
     }
@@ -416,6 +419,7 @@ V.drag([17], {
   length: TRAVEL,
   start: () => {
     dragging = true;
+    pushDown = false;
     auto = false;
     dragH = s.h;
     return (ON - s.h) / (ON - OFF);
@@ -430,11 +434,11 @@ const nudgeLoad = (d) => () => {
   setLoad(LOADS[Math.min(LOADS.length - 1, Math.max(0, (i < 0 ? LOADS.length - 1 : i) + d))]);
   auto = false;
 };
-V.key("ArrowUp", () => ((pushUp = !s.held), (auto = false)));
+V.key("ArrowUp", () => ((pushUp = !s.held), (pushDown = false), (auto = false)));
 V.key("ArrowDown", () => {
   pushUp = false;
   auto = false;
-  if (s.held) s.held = false;
+  pushDown = s.held || s.h > OFF + 1;
 });
 V.key("ArrowRight", nudgeLoad(1));
 V.key("ArrowLeft", nudgeLoad(-1));

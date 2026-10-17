@@ -234,7 +234,7 @@ export function advance(s, h, want, rate = 260) {
   }
   s.theta = Math.min(THETA_MAX, s.theta);
   s.x = xOf(s.theta);
-  s.opening = (s.theta - before) / h; // deg/s, + opening
+  if (h > 0) s.opening = (s.theta - before) / h; // deg/s, + opening
   s.p = s.theta > 0 && s.opening <= 0 ? pressure(s.x) : 0;
   s.latched = s.theta <= 0;
   return s;

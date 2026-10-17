@@ -118,9 +118,11 @@ export function gear({ teeth, module: m, along = "z", at = [0, 0], from, to, bor
 // Each solid may override hatch, give role (bore, fluid, glass, decal, mouth, ink), own: true (its
 // own outline against the other solids of the part), explode (an extra offset of that solid),
 // pivot (to turn or scale that solid alone, see V.solid) and live (a name for V.solid).
-export function part(id, name, solids, { mat, angle = 45, hatch, explode = null, anchor = null, pivot = null, layer } = {}) {
+// stage: [a, b], the stretch of the explode slider over which this part travels (default [0, 1]), so an
+// assembly can come apart in steps (the cam stack first, the rest after).
+export function part(id, name, solids, { mat, angle = 45, hatch, explode = null, anchor = null, pivot = null, layer, stage = null } = {}) {
   const h = hatch ?? (mat ? [mat, angle] : "none");
-  return { id, name, explode, anchor, pivot, solids: solids.map((s) => ({ hatch: h, ...(layer ? { layer } : {}), ...s })) };
+  return { id, name, explode, anchor, pivot, ...(stage ? { stage } : {}), solids: solids.map((s) => ({ hatch: h, ...(layer ? { layer } : {}), ...s })) };
 }
 // A bore or passage inside a solid of the same part: its far wall shows through the cut, and only
 // where the view ray crosses the plane inside it. Lathe or extrude only (it is tested in shape).
@@ -541,8 +543,11 @@ function profileOf(s) {
 
 // ---------------------------------------------------------------- create
 
-// create({ scene: { parts, fluids, centres }, sheet2d, title }) → V. Call after the page's DOM (writePage3d).
-export function create({ scene, title = "" } = {}) {
+// create({ scene: { parts, fluids, centres }, sheet2d, title, start }) → V. Call after the page's DOM (writePage3d).
+// start: the page's own default view where the URL gives none: { view, explode, zoom, look, roll }.
+// roll (degrees) turns the ISO picture about the line of sight, so a long part lies along an iso axis
+// instead of standing up (60: a part on the y axis lies rising to the right at 30°); other views stay unrolled.
+export function create({ scene, title = "", start: dflt = {} } = {}) {
   const $ = (id) => document.getElementById(id);
   const host = $("stage");
   const canvas = $("gl");
@@ -551,11 +556,18 @@ export function create({ scene, title = "" } = {}) {
   const num = (k, d) => (Qs.has(k) && Number.isFinite(Number(Qs.get(k))) ? Number(Qs.get(k)) : d);
   const flag = (k, d) => (Qs.has(k) ? Qs.get(k) !== "0" : d);
   const q = {
-    view: Qs.get("view"),
+    view: Qs.get("view") ?? dflt.view ?? null,
     cut: flag("cut", true),
-    explode: clamp01(num("explode", 0)),
-    zoom: num("zoom", 1),
-    look: Qs.get("look") ? Qs.get("look").split(",").map(Number) : null,
+    explode: clamp01(num("explode", dflt.explode ?? 0)),
+    zoom: num("zoom", dflt.zoom ?? 1),
+    look: Qs.get("look") ? Qs.get("look").split(",").map(Number) : dflt.look ?? null,
+    lookOwn: !Qs.get("look") && !!dflt.look, // the page's default look gives way to the whole box as it explodes
+    roll: num("roll", dflt.roll ?? 0),
+    // the page's ISO may look from another octant (az -45: from the -x side), still a true isometric
+    iso: [num("az", dflt.az ?? VIEWS.iso[0]), VIEWS.iso[1]],
+    zoomOwn: !Qs.has("zoom") && dflt.zoom ? dflt.zoom : 0, // likewise the page's default zoom
+    // a page that opens slightly exploded (its rest): parts can still be dragged there
+    explodeOwn: !Qs.has("explode") && dflt.explode ? clamp01(dflt.explode) : 0,
     balloons: flag("balloons", true),
     offset: num("offset", 0),
     embed: flag("embed", false),
@@ -799,14 +811,19 @@ export function create({ scene, title = "" } = {}) {
   });
 
   // ---- view state
-  const start = VIEWS[q.view] ?? VIEWS.iso;
-  const cam = { az: start[0], el: start[1], azT: start[0], elT: start[1], zoom: q.zoom, pan: new THREE.Vector3() };
+  const views = { ...VIEWS, iso: q.iso };
+  const start = views[q.view] ?? views.iso;
+  const roll0 = start === views.iso ? q.roll : 0;
+  // own: 1 in the page's ISO, 0 in the other views; the page's default zoom, look and roll are ISO's only
+  const own0 = start === views.iso ? 1 : 0;
+  const cam = { az: start[0], el: start[1], azT: start[0], elT: start[1], roll: roll0, rollT: roll0, own: own0, ownT: own0, zoom: q.zoom, pan: new THREE.Vector3() };
   const st = { explode: q.explode, explodeT: q.explode, balloons: q.balloons };
 
   // ---- poses: the page sets base poses, explode adds on top
   function applyPoses() {
-    const e = st.explode;
     for (const rec of PARTS.values()) {
+      const sg = rec.spec.stage;
+      const e = sg ? clamp01((st.explode - sg[0]) / Math.max(1e-6, sg[1] - sg[0])) : st.explode;
       const ex = rec.spec.explode;
       const [bx, by, bz] = rec.base.pos;
       let off = [0, 0, 0];
@@ -823,12 +840,13 @@ export function create({ scene, title = "" } = {}) {
       }
       for (const l of rec.centres) l.material.uniforms.uShift.value.set(...off);
     }
-    fluidGroup.visible = e < 0.01 && U.uCutOn.value > 0.5;
+    fluidGroup.visible = st.explode < 0.01 && U.uCutOn.value > 0.5;
   }
 
   // ---- framing: the union of the page's envelope poses, assembled and exploded
   let B0 = null;
   let B1 = null;
+  let BK = null; // staged explodes: boxes at each stage boundary [[e, box], …]
   function measure(poses, e) {
     const keep = st.explode;
     st.explode = e;
@@ -847,6 +865,9 @@ export function create({ scene, title = "" } = {}) {
     envelope = poses?.length ? poses : [() => {}];
     B0 = measure(envelope, 0);
     B1 = measure(envelope, 1);
+    const ks = new Set([0, 1]);
+    for (const rec of PARTS.values()) for (const k of rec.spec.stage ?? []) if (k > 0 && k < 1) ks.add(k);
+    BK = ks.size > 2 ? [...ks].sort((a, b) => a - b).map((k) => [k, k === 0 ? B0 : k === 1 ? B1 : measure(envelope, k)]) : null;
   }
 
   let W = 1;
@@ -873,6 +894,16 @@ export function create({ scene, title = "" } = {}) {
     return { l: side, r: side, t: 34, b: W < 640 ? 64 : 34 };
   };
   const lerpBox = () => {
+    if (BK) {
+      // parts move linearly between stage boundaries, so the box between two is within their lerp
+      const e = clamp01(st.explode);
+      let i = 0;
+      while (i < BK.length - 2 && e > BK[i + 1][0]) i++;
+      const [ka, A] = BK[i];
+      const [kb, Bb] = BK[i + 1];
+      const t = (e - ka) / Math.max(1e-6, kb - ka);
+      return new THREE.Box3(A.min.clone().lerp(Bb.min, t), A.max.clone().lerp(Bb.max, t));
+    }
     const k = smooth(clamp01(st.explode));
     return new THREE.Box3(B0.min.clone().lerp(B1.min, k), B0.max.clone().lerp(B1.max, k));
   };
@@ -881,10 +912,13 @@ export function create({ scene, title = "" } = {}) {
     const el = (Math.min(89.9, cam.el) * Math.PI) / 180;
     const dir = new THREE.Vector3(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az));
     const box = lerpBox();
-    const centre = q.look ? new THREE.Vector3(...q.look) : box.getCenter(new THREE.Vector3());
+    const ex = smooth(clamp01((st.explode - q.explodeOwn) / (1 - q.explodeOwn)));
+    const free = q.lookOwn ? Math.max(ex, 1 - cam.own) : 0;
+    const centre = q.look ? new THREE.Vector3(...q.look).lerp(box.getCenter(new THREE.Vector3()), free) : box.getCenter(new THREE.Vector3());
     camera.position.copy(centre).addScaledVector(dir, FAR / 2);
     camera.up.set(0, 1, 0);
     camera.lookAt(centre);
+    if (cam.roll) camera.rotateZ((cam.roll * Math.PI) / 180);
     camera.updateMatrixWorld(true);
     const inv = camera.matrixWorldInverse;
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
@@ -894,8 +928,8 @@ export function create({ scene, title = "" } = {}) {
     }
     const MG = margin();
     const fit = Math.min((W - MG.l - MG.r) / Math.max(1, x1 - x0), (H - MG.t - MG.b) / Math.max(1, y1 - y0));
-    const zoom = fit * cam.zoom;
-    const off = q.look ? new THREE.Vector3() : new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 0).applyMatrix3(new THREE.Matrix3().setFromMatrix4(camera.matrixWorld));
+    const zoom = fit * cam.zoom * (q.zoomOwn ? 1 + (1 / q.zoomOwn - 1) * Math.max(ex, 1 - cam.own) : 1);
+    const off = new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 0).applyMatrix3(new THREE.Matrix3().setFromMatrix4(camera.matrixWorld)).multiplyScalar(q.look ? free : 1);
     camera.position.add(off).add(cam.pan);
     camera.position.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1), -(MG.b - MG.t) / 2 / zoom);
     camera.left = -W / 2 / zoom;
@@ -1087,7 +1121,7 @@ export function create({ scene, title = "" } = {}) {
     ui.balloons?.setAttribute("aria-pressed", String(st.balloons));
     if (ui.explode && document.activeElement !== ui.explode) ui.explode.value = String(st.explodeT);
     for (const b of ui.views) {
-      const [az, el] = VIEWS[b.dataset.view];
+      const [az, el] = views[b.dataset.view];
       b.setAttribute("aria-pressed", String(Math.abs(cam.azT - az) < 0.01 && Math.abs(cam.elT - el) < 0.01));
     }
   }
@@ -1103,10 +1137,12 @@ export function create({ scene, title = "" } = {}) {
     else lv.input();
   }
   function setView(name) {
-    const [az, el] = VIEWS[name];
+    const [az, el] = views[name];
     cam.az = ((((cam.az - az) % 360) + 540) % 360) - 180 + az; // the short way round
     cam.azT = az;
     cam.elT = el;
+    cam.rollT = name === "iso" ? q.roll : 0;
+    cam.ownT = name === "iso" ? 1 : 0;
     cam.pan.set(0, 0, 0);
     input();
   }
@@ -1144,7 +1180,7 @@ export function create({ scene, title = "" } = {}) {
     const py = e.clientY - r.top;
     ray.setFromCamera(new THREE.Vector2((px / W) * 2 - 1, 1 - (py / H) * 2), camera);
     let hit = null;
-    if (st.explode < 0.05 && e.button === 0 && !e.shiftKey) {
+    if ((st.explode < 0.05 || (q.explodeOwn && Math.abs(st.explode - q.explodeOwn) < 0.05)) && e.button === 0 && !e.shiftKey) {
       let best = Infinity;
       for (const d of drags) {
         const h = ray.intersectObjects(d.meshes, false)[0];
@@ -1180,8 +1216,12 @@ export function create({ scene, title = "" } = {}) {
       const l2 = ax * ax + ay * ay;
       drag.d.move(drag.v0 + (l2 > 4 ? (dx * ax + dy * ay) / l2 : dy / 200));
     } else if (drag.mode === "orbit") {
-      cam.azT = cam.az = drag.az - dx * 0.4;
-      cam.elT = cam.el = Math.min(90, Math.max(-60, drag.el + dy * 0.4));
+      // in a rolled picture, turn the pointer's motion back into the unrolled frame
+      const rr = (cam.roll * Math.PI) / 180;
+      const ux = dx * Math.cos(rr) + dy * Math.sin(rr);
+      const uy = -dx * Math.sin(rr) + dy * Math.cos(rr);
+      cam.azT = cam.az = drag.az - ux * 0.4;
+      cam.elT = cam.el = Math.min(90, Math.max(-60, drag.el + uy * 0.4));
     } else {
       const zoom = U.uPx.value / dpr;
       const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
@@ -1304,6 +1344,12 @@ export function create({ scene, title = "" } = {}) {
     get explode() {
       return st.explode;
     },
+    // set the explode target (0 assembled … 1 exploded); the view eases there
+    set explode(v) {
+      st.explodeT = clamp01(v);
+      if (!lv || lv.frozen || lv.reduced) st.explode = st.explodeT; // no easing in a frozen frame
+      input();
+    },
     get cut() {
       return U.uCutOn.value > 0.5;
     },
@@ -1325,8 +1371,10 @@ export function create({ scene, title = "" } = {}) {
           const snap = l.reduced || l.frozen;
           cam.az = snap ? cam.azT : L.follow(cam.az, cam.azT, 9, dt);
           cam.el = snap ? cam.elT : L.follow(cam.el, cam.elT, 9, dt);
+          cam.roll = snap ? cam.rollT : L.follow(cam.roll, cam.rollT, 9, dt);
+          cam.own = snap ? cam.ownT : L.follow(cam.own, cam.ownT, 9, dt);
           st.explode = snap ? st.explodeT : L.follow(st.explode, st.explodeT, 5, dt);
-          return busy || Math.abs(cam.az - cam.azT) > 0.01 || Math.abs(cam.el - cam.elT) > 0.01 || Math.abs(st.explode - st.explodeT) > 1e-3;
+          return busy || Math.abs(cam.az - cam.azT) > 0.01 || Math.abs(cam.el - cam.elT) > 0.01 || Math.abs(cam.roll - cam.rollT) > 0.01 || Math.abs(cam.own - cam.ownT) > 1e-3 || Math.abs(st.explode - st.explodeT) > 1e-3;
         },
         render,
         idleAfter,
@@ -1387,7 +1435,7 @@ export function create({ scene, title = "" } = {}) {
     document.querySelector('[data-view="front"]')?.click();
     ok("front button", cam.azT === 0 && cam.elT === 0, [cam.azT, cam.elT]);
     key("1");
-    ok("key 1 iso", cam.azT === 45, [cam.azT, cam.elT]);
+    ok("key 1 iso", cam.azT === views.iso[0], [cam.azT, cam.elT]);
     key("e");
     ok("key E explode", st.explodeT === 1, st.explodeT);
     key("e");
@@ -1408,6 +1456,8 @@ export function create({ scene, title = "" } = {}) {
     key("1");
     cam.az = cam.azT;
     cam.el = cam.elT;
+    cam.roll = cam.rollT;
+    cam.own = cam.ownT;
     draw();
     for (const [name, fn] of tests) {
       try {

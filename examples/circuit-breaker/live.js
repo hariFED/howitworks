@@ -52,6 +52,7 @@ let dragging = false;
 let dragH = OFF;
 let auto = true; // Space toggles the tour on and off when the user has taken over
 let pushUp = false; // the up key drives the handle to ON
+let pushDown = false; // the down key drives it to OFF (clearing held alone let it re-close at once)
 
 const f = () => M.deflection(s.dT);
 const current = () => (s.held && s.a < 0.5 ? s.load : 0);
@@ -137,10 +138,12 @@ function step(dt, live) {
       if (w != null) want = w;
     }
     if (pushUp) want = ON;
+    if (pushDown) want = OFF;
     if (dragging) want = dragH;
     const rate = want > s.h ? 16 : s.held ? 16 : 11;
     s.h = live.reduced && !driven ? want : L.follow(s.h, want, rate, h);
-    if (!s.held && s.h >= ON - 1) {
+    if (pushDown && s.h <= OFF + 1) pushDown = false;
+    if (!s.held && !pushDown && s.h >= ON - 1) {
       tryClose();
       pushUp = false;
     }
@@ -332,6 +335,7 @@ let h0 = 0;
 L.dragY(svg, hit, {
   start: () => {
     dragging = true;
+    pushDown = false;
     h0 = s.h;
     dragH = s.h;
     live.input();
@@ -350,10 +354,10 @@ const LOADS = [0, 6, 12, 16, 18, 20, 24, 30, 40, 50, 64, 100, 200, 480];
 svg.addEventListener("keydown", (e) => {
   const k = e.key;
   let used = true;
-  if (k === "ArrowUp") pushUp = !s.held;
+  if (k === "ArrowUp") (pushUp = !s.held), (pushDown = false);
   else if (k === "ArrowDown") {
     pushUp = false;
-    if (s.held) s.held = false;
+    pushDown = s.held || s.h > OFF + 1;
   } else if (k === "1") setLoad(M.LOAD_NORMAL);
   else if (k === "2") setLoad(M.LOAD_OVER);
   else if (k === "3") setLoad(M.LOAD_FAULT);

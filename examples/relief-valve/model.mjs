@@ -97,7 +97,7 @@ export function advance(s, dt, { hold = null, mIn = M_COMP } = {}) {
   const f = openingForce(s.p, s.h) - springForce(s.F0, s.h);
   let h = s.h + MU * f * dt;
   h = Math.min(H_MAX, Math.max(0, h));
-  s.v = (h - s.h) / dt;
+  if (dt > 0) s.v = (h - s.h) / dt; // a zero step (the first frame) keeps the last speed
   s.h = h;
   s.m = massFlow(s.p, h);
   if (hold == null) s.p = Math.max(0, s.p + dpdt(s.comp ? mIn : 0, s.m) * dt);

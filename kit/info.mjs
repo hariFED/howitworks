@@ -24,6 +24,16 @@ export function attach({ info, root = document }) {
   const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
   // the balloon under an element, and its part number
   const balloonOf = (el) => el?.closest?.('[data-role="balloon"], #ov [data-part], .v3-stage [data-part]');
+  // the balloon at a point: look through transparent drag targets (a sheet's hit rectangles lie over
+  // its balloons in places), never through real geometry
+  const balloonAt = (x, y) => {
+    for (const el of document.elementsFromPoint(x, y)) {
+      const b = balloonOf(el);
+      if (b) return b;
+      if (!el.matches?.("[data-drag], .hit")) return null;
+    }
+    return null;
+  };
   const numberOf = (b) => {
     if (!b) return null;
     const raw = String(b.dataset.target || b.dataset.part || b.querySelector("text")?.textContent || "").trim();
@@ -80,14 +90,14 @@ export function attach({ info, root = document }) {
   // frame, so ask the document what is under the pointer rather than trusting enter/leave events
   addEventListener("pointermove", (e) => {
     if (pinned || e.pointerType === "touch") return;
-    const id = numberOf(balloonOf(document.elementFromPoint(e.clientX, e.clientY)));
+    const id = numberOf(balloonAt(e.clientX, e.clientY));
     if (id) show(id, e.clientX, e.clientY);
     else if (shown) hide();
   }, { passive: true });
 
   // click or tap pins the card; it must not start an orbit or a drag underneath
   addEventListener("pointerdown", (e) => {
-    const b = balloonOf(document.elementFromPoint(e.clientX, e.clientY));
+    const b = balloonAt(e.clientX, e.clientY);
     const id = numberOf(b);
     if (id) {
       e.stopPropagation();

@@ -150,7 +150,7 @@ export function stepCar(s, h) {
   const zr0 = s.zr;
   s.X += SPEED * h;
   s.zr = road(s.X, s.humps);
-  const vr = (s.zr - zr0) / h;
+  const vr = h > 0 ? (s.zr - zr0) / h : 0;
   const c = C0 + (s.zu - s.zs) * 1000;
   const v = s.vs - s.vu; // rebound positive
   const F = damperForce(v, s.on);
