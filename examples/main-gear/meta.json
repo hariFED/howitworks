@@ -1,0 +1,36 @@
+{
+  "slug": "main-gear",
+  "dwg": "BP-103",
+  "title": "Main gear",
+  "object": "Fixed main landing gear of a four-seat high-wing light aircraft: a tapered spring-steel leg clamped in the fuselage's gear box, its axle, 6.00-6 wheel and single-disc hydraulic brake, in section on the leg's mid-plane, with the toe-brake master cylinder in section",
+  "idea": "A steel beam is the spring, and Pascal's principle is the brake: one leg bends to take the landing, one toe stops one wheel",
+  "summary": "The mains touch down at 1 m/s and each tapered leg bends as a cantilever on its two fittings: from beam theory, 59 mm at the axle under the static 4.48 kN, at about 320 MPa, which spreads the track by 62 mm and swings each wheel's camber from +6.4° in the air to 0° at rest. With no oil damper the steel gives the landing back as a bounce. Then the toes press: the pedal multiplies the toe force 2.5 times, the master cylinder turns it into line pressure p = F/A, the same pressure pushes the caliper's Ø44.45 piston, the disc is clamped from both sides and the torque slows the aeroplane; one toe alone drags one wheel and turns it.",
+  "usedFor": [
+    "Pilot and maintenance training: what spring gear does on landing, why the wheels lean and scrub, how toe brakes, master cylinders and calipers work and what a spongy pedal means",
+    "Engineering courses: cantilever beams with a taper, fully stressed design, two-support reactions, Pascal's principle, disc-brake torque",
+    "A software-concept explainer: one input fanned out to independent channels (each toe its own wheel), and a spring that stores and returns energy with no damping"
+  ],
+  "domain": "Aeronautics",
+  "parts": 29,
+  "views": [
+    "Section A-A on the leg's mid-plane, looking aft 1:5",
+    "Section E-E through the saddle 1:2.5",
+    "Section F-F halfway along the leg 1:2.5",
+    "Detail C the leg's attachment 1:2.5",
+    "Detail B wheel, bearings, disc and caliper 1:2.5",
+    "Section D-D toe brake and master cylinder 1:2",
+    "Diagram 1 leg load against deflection",
+    "Diagram 2 brake pressure and torque over the tour",
+    "Diagram 3 brake system schematic"
+  ],
+  "controls": "Drag the wheel · ↑ ↓ load · hold ← → toe brakes · B both · Space a landing · S slow motion",
+  "checkTimes": "0,0.9,1.25,1.32,1.4,1.6,1.8,2.0,2.6,3.4,4.4,6.0,9.6,11.6,13.2,14.8,16.6,17.9",
+  "shotT": 6.0,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1, "look": null, "t": 6.0 },
+  "controls3d": "Drag to orbit · drag the wheel or ↑ ↓ to load · hold ← → toe brakes · B both · Space a landing · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "15",
+  "level": 1,
+  "crumb": "Main gear"
+}

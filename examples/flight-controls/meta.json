@@ -1,0 +1,35 @@
+{
+  "slug": "flight-controls",
+  "dwg": "BP-106",
+  "title": "Flight controls",
+  "object": "Cable-and-pushrod primary flight controls of a four-seat high-wing light aircraft: control wheels on sliding columns, the aileron chain, cable loop, bellcranks, rods and differential horns, the elevator idler, cables and bellcrank with stops, the rudder pedals, cables and horn with nose-wheel steering bungees, and the elevator trim wheel, cables, jackscrew actuator and tab",
+  "idea": "Steel cables over pulleys carry the pilot's hands and feet to the surfaces, and a small tab lets the air hold the elevator so the pull goes to zero",
+  "summary": "Turn the wheel 80° and a 12-tooth sprocket pulls the aileron loop 25.8 mm; at each wing a bellcrank swings 20° and pushes a rod to a horn that leans 36.8° forward, so equal rod travel puts one aileron 20° up and the other only 15° down, which cuts adverse yaw. Pull the column 113 mm and an idler pulls the up cable to the elevator's bellcrank: 28° up. The pedals pull the rudder horn ±17° and steer the nose wheel through bungees. In flight the elevator's hinge moment, H = q·S·c·C_h, is the stick force: slow from 110 to 65 kt and the pilot pulls 22 N, until the trim wheel winds the jackscrew and the tab down 8° and the pull is gone.",
+  "usedFor": [
+    "Pilot and maintenance training: what a pre-flight control check moves, how cables, pulleys, guard pins, fairleads and turnbuckles are rigged, why ailerons are differential, what a trim tab does",
+    "Engineering courses: linkages and mechanical advantage, four-bar geometry, hinge moments and stick-force gradients, self-locking screws",
+    "A software-concept explainer: a closed loop under tension (one input, every node moves together, nothing slack), and trim as zeroing a persistent error so the operator holds nothing"
+  ],
+  "domain": "Aeronautics",
+  "parts": 29,
+  "views": [
+    "Pictorial view of every control run in the airframe (NTS)",
+    "Detail E the cockpit from behind, pictorial 1:10",
+    "Section A-A the right aileron at its horn 1:5",
+    "Detail B a pulley and its cable guard 1:2",
+    "Detail C a turnbuckle 1:1",
+    "Section D-D the port elevator at the trim actuator 1:2.5",
+    "Diagram 1 aileron angles against wheel angle",
+    "Diagram 2 stick force against airspeed"
+  ],
+  "controls": "← → wheel · ↑ ↓ column · Z X pedals · T G trim · drag the cockpit · Space tour · S slow motion",
+  "checkTimes": "0,1.2,2.2,3.0,4.0,5.0,6.8,8.5,10.5,12.0,13.5,16,19,20.5,22,24,26,28,30,31.9",
+  "shotT": 19,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1, "look": null, "t": 19 },
+  "controls3d": "Drag to orbit · drag an aileron or the elevator · ← → wheel · ↑ ↓ column · Z X pedals · T G trim · Space tour · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "10",
+  "level": 1,
+  "crumb": "Flight controls"
+}

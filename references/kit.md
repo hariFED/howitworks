@@ -100,6 +100,8 @@ writePage(out, { title, description, svg, bar, css, modules: [[kitPath("draft.mj
 ```
 Modules are inlined in order as `const NAME = (() => { ... })()`; write each with `import * as NAME from ...` and the same names, and they work unchanged in node and in the page.
 
+An example that is one level of a whole machine (a doorway part in `info.json`, `parent` in `meta.json`) gets its part-card links, fly-in and breadcrumb from `writePage`/`writePage3d` with no extra arguments: see `references/atlas.md`.
+
 ## 3D view (`kit/solid3d.mjs`, `writePage3d`)
 
 A companion 3D page per example, from the same model. The full guide is `references/3d.md`; in brief:

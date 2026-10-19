@@ -1,0 +1,33 @@
+{
+  "slug": "aero-engine",
+  "dwg": "BP-101",
+  "title": "Aero engine",
+  "object": "Flat-four, air-cooled, direct-drive aircraft piston engine in plan section through all four cylinders, with a section through one cylinder's valve train",
+  "idea": "Four opposed cylinders sharing one crank: smooth, balanced power with redundant ignition",
+  "summary": "A 5.24 L flat-four, the engine of a four-seat light aircraft. Opposed pistons move out and in together on throws 180° apart, so their forces cancel; the cylinders fire 1-3-2-4, one power stroke every half turn. A computed cycle at 2,700 rpm sets each cylinder's gas and its torque on the crank, and two magnetos fire two plugs in every cylinder.",
+  "usedFor": [
+    "Aviation maintenance and pilot training: how the engine in front of the panel works",
+    "Engineering courses: multi-cylinder balance, firing order, torque ripple, air cooling",
+    "A software-concept explainer: redundancy (two independent ignition systems) and staggered work (a firing order spreads load evenly)"
+  ],
+  "domain": "Thermodynamics",
+  "parts": 27,
+  "views": [
+    "Plan section 1:5",
+    "Section A-A through cylinder 1 and its valve train 1:5",
+    "Detail C chamber and the two plugs 1:2.5",
+    "Detail D crank nose and propeller flange 1:2.5",
+    "Detail E cam, hydraulic tappet and pushrod 1:1",
+    "Diagram 1 torque on the crank against crank angle",
+    "Diagram 2 power against rpm, with the propeller's demand"
+  ],
+  "controls": "Drag the crank in A-A · ← → turn · Space runs · S slow motion",
+  "checkTimes": "0,0.6,1.3,2,2.7,3.4,4.1,4.6,5.3,6,6.7,7.4,7.95,8.6",
+  "shotT": 4.1,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1.12, "look": null, "t": 1 },
+  "controls3d": "Drag the crank to turn it · ← → turn 10° · Space runs · E explodes (cylinders out along their axes, each valve train lifted out past its head, camshaft and accessories aft) · C cut (off: the underside, sump and carburettor) · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "5",
+  "level": 1
+}

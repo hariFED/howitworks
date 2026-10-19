@@ -28,6 +28,7 @@ html, body { height: 100%; overflow: hidden; }
 #readout { color: var(--bp-accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .v3-hint { position: absolute; left: 22px; bottom: 18px; font-size: 10.5px; color: var(--bp-muted); letter-spacing: .04em; max-width: 46%; pointer-events: none; }
 .v3-fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--bp-muted); background: var(--bp-paper); }
+.v3-fail p { margin: 0; max-width: 60ch; line-height: 1.6; }
 .v3-fail a { color: var(--bp-ink); }
 @media (max-width: 640px) {
   .v3-hint { display: none; }
@@ -41,3 +42,6 @@ html, body { height: 100%; overflow: hidden; }
 .v3-embed .v3-stage { background: var(--bp-page); }
 .v3-embed .v3-stage::after { display: none; }
 .v3-embed #ov .balloon { fill: var(--bp-page); }
+/* an atlas page's breadcrumb runs into the heading (kit/page.mjs crumbs) */
+.bp-crumbs-3d { display: flex; flex-wrap: wrap; gap: 4px 7px; align-items: center; }
+@media (max-width: 640px) { .bp-crumbs-3d { flex-basis: 100%; } .bp-crumbs-3d b { flex-basis: auto; } }

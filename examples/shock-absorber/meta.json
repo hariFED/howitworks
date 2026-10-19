@@ -30,5 +30,8 @@
     "cut": 1,
     "t": 0.66
   },
-  "controls3d": "Drag to orbit · drag the rod or ↑ ↓ to stroke · Space drives over a hump · D damping on/off · E explode · C cut · 1–4 views · S slow motion"
+  "controls3d": "Drag to orbit · drag the rod or ↑ ↓ to stroke · Space drives over a hump · D damping on/off · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "nose-gear",
+  "parentPart": "11",
+  "level": 2
 }

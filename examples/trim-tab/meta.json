@@ -1,0 +1,36 @@
+{
+  "slug": "trim-tab",
+  "dwg": "BP-112",
+  "title": "Elevator trim tab",
+  "object": "Elevator trim tab system of a four-seat high-wing light aircraft: the trim wheel, cockpit drum and position indicator in the pedestal, the trim cable loop and its pulleys, the jackscrew actuator in the port elevator (grooved cable drum on the screw, Acme screw, bronze nut, ball bearing, slotted housing, stops and bush), the push-pull rod, the tab's horn, the piano hinge and the tab",
+  "idea": "A small tab at the elevator's trailing edge has the longest lever about the hinge, so a few degrees of tab hold the whole elevator where the flight needs it, and a self-locking screw holds the tab",
+  "summary": "The air's moment about the elevator's hinge is what the pilot holds: slow from 110 to 65 kt and the elevator must come up 4.7°, so the air pushes it back down and the pilot pulls 22 N. Roll the trim wheel 2.2 turns nose up and the cable loop turns the actuator's drum and Tr10×2 screw; the bronze nut runs 6.6 mm forward, the rod pulls the tab's horn and the tab goes down from −3.9° to +7.9°. The air on the tab now pushes it up, and that moment, 3.1 % of the elevator's area at the end of its chord, cancels the elevator's own: let go and the elevator floats exactly where it is held, and the pull is gone. The screw's lead angle is 4.0° and its friction angle 8.5°, so the air load on the tab lies inside the friction cone and cannot turn the screw back: the tab stays set with no lock. Disconnect the rod and nothing holds it: the tab floats, then flutters from stop to stop.",
+  "usedFor": [
+    "Pilot training: what the trim wheel does and why trimmed means hands-off, why the pull builds as you slow, what the pre-flight trim check and the take-off mark are for",
+    "Engineering courses: hinge moments and stick-free float angle, stick-force gradients, self-locking power screws (lead angle against friction angle, efficiency), irreversible controls and tab flutter",
+    "A software-concept explainer: trim as zeroing a persistent error so the operator holds nothing, and a self-locking stage that lets a small actuator hold a big setting without power"
+  ],
+  "domain": "Aeronautics",
+  "parts": 18,
+  "views": [
+    "Section A-A the port elevator at the actuator, BL −485, 1:2.5",
+    "Detail B the actuator on its axis, 1:1",
+    "Detail C the piano hinge 5:1",
+    "View D the pedestal from port, side plate off, 1:5",
+    "View E the trim cable run from port 1:25",
+    "Diagram 1 hinge moment against elevator angle",
+    "Diagram 2 stick force against airspeed",
+    "Diagram 3 the screw's lead angle and friction cone",
+    "Diagram 4 wheel turns against tab angle"
+  ],
+  "controls": "T G trim · ← → airspeed · F rod off · Space tour · S slow motion",
+  "checkTimes": "0,2,4,6,8.5,10,11.5,13,15,17,19.5,22,23.5,24.5,25.5,27,28.5,29.8",
+  "shotT": 10.5,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": null, "look": null, "t": 10.5 },
+  "controls3d": "Drag to orbit · drag the tab · T G trim · ← → airspeed · F rod off · Space tour · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "flight-controls",
+  "parentPart": "27",
+  "level": 2,
+  "crumb": "Trim tab"
+}

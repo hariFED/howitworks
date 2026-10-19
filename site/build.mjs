@@ -28,6 +28,22 @@ const sheets = readdirSync(join(root, "examples"))
   .sort((a, b) => a.dwg.localeCompare(b.dwg));
 const bySlug = Object.fromEntries(sheets.map((m) => [m.slug, m]));
 
+// ---- atlas (references/atlas.md): examples that are levels of one machine you zoom into
+// kit/page.mjs writes doorway and breadcrumb links in the examples/ layout (../<slug>/<slug>.html,
+// ../<slug>/<slug>-3d.html); on the site the pages live in sheets/ and 3d/
+const atlasHrefs = (html) => html.replace(/\.\.\/([a-z0-9][a-z0-9-]*)\/\1-3d\.html/g, "../3d/$1.html").replace(/\.\.\/([a-z0-9][a-z0-9-]*)\/\1\.html/g, "../sheets/$1.html");
+const parentOf = (m) => (m.parent && bySlug[m.parent] && m.parent !== m.slug ? bySlug[m.parent] : null);
+const kidsOf = (m) => sheets.filter((c) => parentOf(c) === m);
+// a top's doorways, in its part order, drawn or not yet: [{ slug, part, name, m }]
+const doorsOf = (m) => {
+  const f = join(root, "examples", m.slug, "info.json");
+  if (!existsSync(f)) return [];
+  const info = JSON.parse(readFileSync(f, "utf8"));
+  const seen = new Set();
+  return Object.entries(info).filter(([, p]) => p.open && !seen.has(p.open) && seen.add(p.open)).map(([part, p]) => ({ slug: p.open, part, name: p.name, m: bySlug[p.open] || null }));
+};
+const ATLAS = sheets.filter((m) => m.atlas && !parentOf(m));
+
 // Short names for the grids: the object, and the idea it stands for.
 const SHORT = {
   "floor-pump": ["Floor pump", "Compression"],
@@ -117,12 +133,12 @@ html.in-frame .bp-page{padding:8px 8px 10px}
     .replace("</head>", pageMeta(m, `sheets/${m.slug}.html`, "engineering drawing") + "\n</head>");
   // the sheet's "3D view" button points at its file name; on the site the 3D pages live in 3d/
   html = html.split(`href="${m.slug}-3d.html"`).join(`href="../3d/${m.slug}.html"`);
-  writeFileSync(join(out, "sheets", `${m.slug}.html`), html);
+  writeFileSync(join(out, "sheets", `${m.slug}.html`), atlasHrefs(html));
   const src3d = join(root, "examples", m.slug, `${m.slug}-3d.html`);
   m.has3d = Boolean(m.has3d && existsSync(src3d));
   if (m.has3d) {
     // the 3D page links its 2D sheet by file name; point it at the site's copy
-    writeFileSync(join(out, "3d", `${m.slug}.html`), readFileSync(src3d, "utf8").split(`href="${m.slug}.html"`).join(`href="../sheets/${m.slug}.html"`)
+    writeFileSync(join(out, "3d", `${m.slug}.html`), atlasHrefs(readFileSync(src3d, "utf8")).split(`href="${m.slug}.html"`).join(`href="../sheets/${m.slug}.html"`)
       .replace(/<title>[^<]*<\/title>/, `<title>${esc(m.title)} in 3D: interactive cutaway · howitworks</title>`)
       .replace(/<meta name="description" content="[^"]*">/, "")
       .replace("</head>", pageMeta(m, `3d/${m.slug}.html`, "3D cutaway") + "\n</head>")
@@ -381,7 +397,7 @@ const PTR = LOGO.pointer();
 
 const TOC = [
   ["cut", "Sections, not diagrams"], ["prompt", "Writing a prompt"], ["does", "What Claude does"],
-  ["rules", "Anatomy of a sheet"], ["flat", "Flat and solid"], ["six", "Six sheets, up close"], ["two", "Two big sheets"],
+  ["rules", "Anatomy of a sheet"], ["flat", "Flat and solid"], ...(ATLAS.length ? [["atlas", "Inside a machine"]] : []), ["six", "Six sheets, up close"], ["two", "Two big sheets"],
   ["uses", "Where it's useful"], ["themes", "Four themes"], ["code", "In your code"],
   ["install", "Install"], ["limits", "Limits"], ["faq", "Questions"],
 ];
@@ -742,7 +758,28 @@ ${solid("floor-pump", "Live 3D cutaway: the base of a bicycle floor pump", "cut=
 ${sheets.some((m) => m.has3d && m.slug !== "floor-pump") ? `<div class="grid g3d">${sheets.filter((m) => m.has3d && m.slug !== "floor-pump" && existsSync(join(out, "thumbs", m.slug + "-3d.png"))).map((m) => `<a href="3d/${m.slug}.html"><img src="thumbs/${m.slug}-3d.png?v=${BUILD}" alt="${esc(m.object)} in 3D" loading="lazy"><b>${esc(short(m)[0])}</b><span>${esc(short(m)[1])}</span></a>`).join("")}</div>` : ""}
 </section>
 
-<section>${H.six}
+${ATLAS.map((m) => {
+  // the top as the hero (its 3D view where it has one), its systems as a grid; a system not drawn yet
+  // shows as a quiet tile
+  const hero = m.has3d && existsSync(join(out, "thumbs", m.slug + "-3d.png")) ? [`3d/${m.slug}.html`, `thumbs/${m.slug}-3d.png?v=${BUILD}`] : [`sheets/${m.slug}.html`, `thumbs/${m.slug}.png?v=${BUILD}`];
+  const doors = doorsOf(m);
+  const extra = kidsOf(m).filter((c) => !doors.some((d) => d.slug === c.slug)).map((c) => ({ slug: c.slug, part: c.parentPart, name: c.title, m: c }));
+  const tile = (d) => {
+    if (!d.m) return `<div class="wip"><b>${esc(d.name)}</b><span>Drawing in progress</span></div>`;
+    const k = d.m;
+    const pic = k.has3d && existsSync(join(out, "thumbs", k.slug + "-3d.png")) ? `thumbs/${k.slug}-3d.png?v=${BUILD}` : `thumbs/${k.slug}.png?v=${BUILD}`;
+    return `<a href="${k.has3d ? "3d" : "sheets"}/${k.slug}.html"><img src="${pic}" alt="${esc(k.object)}" loading="lazy"><b>${esc(short(k)[0])}</b><span>${esc(k.idea)}</span></a>`;
+  };
+  return `<section>${H.atlas}
+<style>.atlas-hero{display:block}.atlas-hero img{display:block;width:100%;height:auto}.grid .wip{display:flex;flex-direction:column;justify-content:flex-end;aspect-ratio:4/3;padding:10px;border:1px dashed var(--rule);color:var(--muted)}.grid .wip b{color:var(--soft)}</style>
+<p>${esc(m.title)}: the whole machine, cut open. Every system in it is a doorway: open its part card and choose <em class="s">Look inside</em>, and the camera flies in and hands over to that system's own drawing, whose parts open the mechanisms inside them. A breadcrumb in the bar leads back out.</p>
+<div class="wide"><a class="atlas-hero" href="${hero[0]}"><img src="${hero[1]}" alt="${esc(m.object)}" loading="lazy"></a></div>
+<p>${esc(m.summary || m.idea)}</p>
+${doors.length + extra.length ? `<div class="grid g3d">${[...doors, ...extra].map(tile).join("")}</div>` : ""}
+</section>
+
+`;
+}).join("")}<section>${H.six}
 <p>Six of the sheets that explain software ideas, each a real mechanism doing the same thing.</p>
 <div class="six">${six}</div>
 </section>
@@ -832,7 +869,7 @@ ${SCRIPT}
 writeFileSync(join(out, "index.html"), index);
 
 // ---- the collection page
-const cards = sheets.map((m) => `<article id="${m.slug}">
+const card = (m) => `<article id="${m.slug}">
 <a href="sheets/${m.slug}.html">${img(m.slug)}</a>
 <div class="dwg">${esc(m.dwg)} · ${esc(m.domain || "")}</div>
 <h3><a href="sheets/${m.slug}.html">${esc(m.title)}</a></h3>
@@ -842,7 +879,15 @@ const cards = sheets.map((m) => `<article id="${m.slug}">
 <ul class="used">${(m.usedFor || []).map((u) => `<li>${esc(u)}</li>`).join("")}</ul>
 <p class="facts">${m.parts} parts · ${m.views.length} views · ${esc(m.controls || "")}</p>
 ${m.has3d ? `<p class="facts"><a href="3d/${m.slug}.html">Open the 3D view →</a></p>` : ""}
-</article>`).join("\n");
+</article>`;
+// an example inside another (meta.json "parent") is listed under it, after the parent's card
+const family = (m, seen = new Set([m.slug])) => {
+  const kids = kidsOf(m).filter((c) => !seen.has(c.slug) && seen.add(c.slug));
+  return card(m) + (kids.length ? `\n<div class="kids"><p class="kids-h">Inside the ${esc(m.title.toLowerCase())}</p><div class="cards">${kids.map((c) => family(c, seen)).join("\n")}</div></div>` : "");
+};
+const cards = sheets.some(parentOf)
+  ? `<style>.coll .kids{grid-column:1/-1;border-left:2px solid var(--rule);padding-left:18px;margin-top:-6px}.coll .kids .cards{margin-top:10px}.coll .kids-h{margin:0;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}</style>\n` + sheets.filter((m) => !parentOf(m)).map((m) => family(m)).join("\n")
+  : sheets.map(card).join("\n");
 
 const collection = `${head("All ${total} sheets · howitworks", `All ${total} howitworks sheets: live, interactive engineering drawings and 3D cutaways that explain mechanisms and software concepts. ${sheets.map((m) => m.title).join(", ")}.`, "collection.html")}
 <div class="layout">
@@ -897,7 +942,10 @@ howitworks is an Agent Skill (SKILL.md) for Claude Code. Given one line, e.g. "/
 - [Kit API](${REPO}/blob/main/references/kit.md)
 - [3D guide](${REPO}/blob/main/references/3d.md)
 
-## Example sheets (${total}, each a live 2D sheet and a 3D cutaway)
+${ATLAS.length ? `## Atlas: machines you can zoom into
+${ATLAS.map((top) => { const line = (m, d) => [`${"  ".repeat(d)}- [${m.title}](${SITE}${m.has3d ? "3d" : "sheets"}/${m.slug}.html) — ${m.idea}.`, ...kidsOf(m).map((c) => line(c, d + 1))].join("\n"); return line(top, 0); }).join("\n")}
+
+` : ""}## Example sheets (${total}, each a live 2D sheet and a 3D cutaway)
 ${sheets.map((m) => `- [${m.title}](${SITE}sheets/${m.slug}.html) — ${m.object}. Explains: ${m.idea}.${m.has3d ? ` [3D](${SITE}3d/${m.slug}.html)` : ""}`).join("\n")}
 `;
 writeFileSync(join(out, "llms.txt"), LLMS);

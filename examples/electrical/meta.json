@@ -1,0 +1,37 @@
+{
+  "slug": "electrical",
+  "dwg": "BP-110",
+  "title": "Electrical system",
+  "object": "28 V DC electrical system of a four-seat high-wing light aircraft: the belt-driven alternator with its claw-pole rotor, field winding, slip rings, brushes, three-phase stator and six-diode rectifier, the switching voltage regulator, the 24 V lead-acid battery, the split BAT / ALT master switch, the battery and starter contactors, the starter with its Bendix pinion at the ring gear, the main and avionics buses, the centre-zero ammeter, the low-voltage annunciator and a push-pull thermal breaker for every circuit",
+  "idea": "Two sources share one bus: the alternator holds it at 28 V by switching its own field, the battery fills every gap the alternator leaves, and a breaker's heat decides when a circuit has drawn too much",
+  "summary": "The alternator's rotor is an electromagnet: a few amps through its field winding, by way of two slip rings and brushes, make fourteen claw poles that sweep past a three-phase stator, and six diodes turn the result into DC. Its EMF and its winding's reactance both grow with speed, so it cuts in near 600 engine rpm at full field and can never give much more than about 90 A however fast it turns. The regulator holds the bus at 28.0 V by switching the field on and off at whatever duty cycle the load needs. The 24 V, 13.6 Ah battery has an open-circuit voltage of 12 × (SG + 0.84) and about 22 mΩ inside: cranking draws 330 A for an instant and sags the bus to 16.6 V, then 110 to 150 A while the Bendix pinion turns the engine over at some 180 rpm. With the alternator on line the battery charges, fast at first and then slower as its plates fill; when the belt breaks, the bus falls to the battery's 24.2 V, the low-voltage light comes on, and at 20 A the battery has about 35 minutes left, nearer three hours once the loads are shed. A chafed nav light wire shorts at 15 A through its 5 A breaker, whose bimetal heats along an inverse-time curve and trips it in about two and a half seconds.",
+  "usedFor": [
+    "Pilot and maintenance training: what the split master, the ammeter's sign and the low-voltage light mean, why the bus sags when cranking, what to shed after an alternator failure and how long the battery lasts",
+    "Electrical engineering courses: the claw-pole alternator and its self-limiting output, rectification, field-switching regulation, lead-acid charge acceptance and Peukert's law, DC motor inrush, inverse-time thermal protection",
+    "A software-concept explainer: a primary and a backup supply on one bus, graceful degradation and load shedding, and a circuit breaker that trips on accumulated overload rather than one bad sample"
+  ],
+  "domain": "Aeronautics",
+  "parts": 25,
+  "views": [
+    "Section A-A alternator, axial 1:1",
+    "Section B-B stator and rotor across the stack 1:2",
+    "Section D-D starter and Bendix drive at the ring gear 1:2",
+    "Section E-E battery, one row of six cells 1:2.5",
+    "Detail G one push-pull thermal breaker, axial 2:1",
+    "View F the panel's electrical group 1:2",
+    "Schematic of the 28 V system, NTS",
+    "Diagram 1 alternator output against rpm",
+    "Diagram 2 breaker trip time against current",
+    "Diagram 3 bus voltage and ammeter over the tour"
+  ],
+  "controls": "B A masters · hold K or the key: start · V avionics · N L P nav, landing, pitot · F flaps · ↑ ↓ or drag Diagram 1: rpm · Z belt · X short · 1–9 0 − or click: breakers · Space tour · S slow motion",
+  "checkTimes": "0,1,2.9,3.02,3.3,4,4.8,5.5,7.1,8.4,10,11.2,12.5,14,16,19.9,20.3,21,23,25.9,26.3,28,31,32.2,33.4,33.8,36,39.9",
+  "shotT": 22,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": null, "look": null, "t": 4 },
+  "controls3d": "Drag to orbit · hold K: start · B A masters · Z belt · X short · Space tour · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "19",
+  "level": 1,
+  "crumb": "Electrical"
+}

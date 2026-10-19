@@ -1,0 +1,39 @@
+{
+  "slug": "fuel-system",
+  "dwg": "BP-105",
+  "title": "Fuel system",
+  "object": "Gravity-feed fuel system of a four-seat high-wing light aircraft with a carburetted engine: two vented wing tanks with filler caps, finger strainers, sumps and drains, the feed lines down the front door posts, the BOTH / LEFT / RIGHT / OFF selector valve, the shut-off, the strainer (gascolator) with its drain, the primer, the quantity senders and gauge, and the line to the updraft carburettor, as a schematic in the aircraft's plan and side outlines with its parts in section",
+  "idea": "Gravity is the pump: the height of the fuel above the carburettor pushes it through the lines, and a vent must let air in for every litre that leaves",
+  "summary": "Each wing tank's surface stands about 1.36 m above the carburettor's float valve, so ρgh puts 9.6 kPa behind the fuel with no pump at all. The lines lose only a fraction of a kilopascal at the 38 L/h cruise flow (Hagen–Poiseuille, turning turbulent at Re 2900), so the float valve could pass 86 L/h wide open, more than 1.5 times the take-off flow. On BOTH the two tanks feed in parallel like communicating vessels, and a slight sideslip makes one feed faster until their surfaces stand level in the tilted gravity. Select LEFT and the rotor's window leaves the right port. Block the left vent and Boyle's law takes over: every litre out lowers the ullage's pressure until the vacuum cancels the head, the flow falls below demand, the float bowl empties and the engine starves; the right tank brings it back. Water, 38 % heavier than the fuel, settles in the strainer's bowl, where the flow is slower than a drop falls, and is drained before flight; the primer pumps a few millilitres past two ball checks into the cylinders for a cold start.",
+  "usedFor": [
+    "Pilot and maintenance training: the selector's positions, why tanks feed unevenly on BOTH, sumping and strainer drains, priming, and why a blocked vent stops the engine",
+    "Engineering courses: hydrostatic head, Hagen–Poiseuille and Darcy–Weisbach losses, minor losses, orifice flow, Boyle's law in a sealed ullage, Stokes settling",
+    "A software-concept explainer: a supply that works only while its back-pressure is relieved (a vent is flow control's return path), and a selector that routes one consumer to either of two sources"
+  ],
+  "domain": "Aeronautics",
+  "parts": 28,
+  "views": [
+    "Plan, system schematic in the aircraft's outline 1:20",
+    "Side elevation from starboard 1:20",
+    "Section B-B port tank at FS 1150, looking forward 1:5",
+    "Detail J outlet, finger strainer and sump 1:1",
+    "Section C-C selector on its ports' plane 1:1",
+    "Section G-G selector, axial on the left port's axis 1:2",
+    "Section D-D strainer (gascolator), axial 1:1",
+    "Section E-E primer, axial 1:1",
+    "View F fuel gauge 1:1",
+    "View H selector handle and placard 1:2",
+    "Diagram 1 head along the line",
+    "Diagram 2 fuel in the tanks over the flight"
+  ],
+  "controls": "L B R O selector · drag the handle · ↑ ↓ power · V vent · F shut-off · P prime · drag the primer knob · hold D drain · W refuel · Space tour · S slow motion",
+  "checkTimes": "0,1.5,3.5,4.6,5.5,6.6,7.2,8,9.8,11.5,14,17,20.5,20.7,21,23,25.5,28,30,32,34.4,34.7,35,36,38,39.9",
+  "shotT": 29,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1, "look": null, "t": 21 },
+  "controls3d": "Drag to orbit · drag the handle or L B R O to turn the selector · V vent · hold D drain · W refuel · Space tour · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "9",
+  "level": 1,
+  "crumb": "Fuel system"
+}

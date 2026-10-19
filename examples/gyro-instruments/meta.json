@@ -1,0 +1,39 @@
+{
+  "slug": "gyro-instruments",
+  "dwg": "BP-109",
+  "title": "Gyro instruments",
+  "object": "Gyroscopic flight instruments of a four-seat high-wing light aircraft and their vacuum system: the engine-driven dry pump with carbon vanes, the regulator, the central air filter and the suction gauge; the air-driven attitude indicator cut across its gyro with its pendulous erection vanes, the air-driven heading indicator in plan on its spin axis with its card and setting knob, and the electric turn coordinator cut square to its canted gimbal, with its ball",
+  "idea": "A fast rotor holds its direction in space, H = Iω: a torque only turns it slowly, at τ/H, so it can carry a horizon and a heading; take away its air and it drifts and topples",
+  "summary": "A 52 cm³ carbon-vane pump on the engine's accessory pad draws about 53 L/min of cabin air through the central filter and the jets of the two vacuum gyros, and a spring-loaded regulator lets outside air in to hold the suction near 5 inHg (4.1 at idle). The jets spin the attitude gyro's 0.17 kg brass rotor to 21 000 rpm, H = 0.11 N·m·s, so its residual torque wanders it only 0.5°/min while its pendulous vanes unbalance the exhaust jets and erect it at 5.9°/min toward the apparent vertical, which in a turn is tilted (the turn error). The heading gyro, H = 0.065, drifts 2.5° in 15 minutes from its pivots and 11.5°/h more from the Earth's rotation at 50° N, so the pilot resets it against the magnetic compass with the knob. The electric turn coordinator's gimbal is canted 30°, so it feels roll as well as yaw; its rotor's H against a spring gives a deflection proportional to rate of turn, 20° at the standard 3°/s, which at the parent sheet's 110 kt cruise is a 16.8° bank. Its ball lies where gravity and the turn's centripetal pull balance: centred when coordinated, outside in a skid, inside in a slip. When the pump fails the vacuum rotors run down over minutes: as H falls the same small torques turn them faster, the horizon wanders and lies on its stops and the heading creeps, while the electric turn coordinator keeps showing the turn.",
+  "usedFor": [
+    "Pilot training: what each gyro instrument senses, why the heading indicator must be reset, the attitude indicator's turn error, partial-panel flying on the turn coordinator after a vacuum failure, and the ball in a skid and a slip",
+    "Physics and engineering courses: angular momentum and rigidity, precession Ω = τ/H, the apparent drift from the Earth's rotation, spring-restrained rate gyros, jet turbines, rotary-vane pumps and pressure regulation",
+    "A software-concept explainer: a reference that holds its state only while it is powered, slowly corrected toward a noisy measurement (erection toward the apparent vertical is a complementary filter), and a backup sensor on an independent supply"
+  ],
+  "domain": "Aeronautics",
+  "parts": 28,
+  "views": [
+    "Section A-A attitude indicator across its gyro, looking forward 1:1",
+    "Detail L pendulous vane on the aft face, in the housing's frame 5:1",
+    "Section B-B dry vacuum pump across the rotor 1:1",
+    "Section C-C heading indicator in plan on the spin axis 1:1",
+    "Section D-D turn coordinator square to its 30° gimbal axis 1:1",
+    "Section F-F vacuum regulator, axial 2:1",
+    "Section H-H central air filter 1:2",
+    "Detail K inclinometer, with the forces on the ball 2:1",
+    "View E the panel as the pilot sees it 1:2",
+    "View G the system in the forward fuselage from port 1:10",
+    "Diagram 1 rotor speeds and suction over the tour",
+    "Diagram 2 suction against engine speed, with and without the regulator"
+  ],
+  "controls": "← → bank · hold A D rudder · ↑ ↓ engine rpm · V vacuum pump fails or is repaired · H push the knob and set the heading · drag the knob to turn the card · drag across the attitude indicator to bank · W time warp ×1 ×10 ×60 · Space tour · S slow motion",
+  "checkTimes": "0,0.8,2,3.5,5,7,8.4,9.2,10.5,12,14,16,19.5,21.5,24,27,29,32,34,35.2,36,38,40,42,44,45.6,47,49,51,53,54.6,55.8",
+  "shotT": 16,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1, "look": null, "t": 16 },
+  "controls3d": "Drag to orbit · ← → bank · hold A D rudder · ↑ ↓ rpm · V pump · H set heading · W time warp · Space tour · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "18",
+  "level": 1,
+  "crumb": "Gyro instruments"
+}

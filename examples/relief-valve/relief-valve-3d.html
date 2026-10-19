@@ -297,6 +297,23 @@ body.bp-zoom .bp-bar {
 .bp-3d { font: inherit; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 4px 10px; letter-spacing: .03em; white-space: nowrap; }
 .bp-3d:hover, .bp-3d:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }
 
+/* ---- atlas (references/atlas.md): doorways, breadcrumb */
+.bp-card-i { font-family: var(--bp-font); font-style: italic; color: var(--bp-muted); }
+.bp-card-go { display: inline-block; margin-top: 8px; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 3px 9px; font-size: 11px; letter-spacing: .03em; }
+.bp-card-go:hover, .bp-card-go:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }
+.bp-card-wip { margin-top: 7px; color: var(--bp-muted); font-size: 10.5px; letter-spacing: .03em; }
+.bp-crumbs { display: flex; flex-wrap: wrap; gap: 4px 7px; align-items: center; letter-spacing: .04em; }
+.bp-crumbs a { color: var(--bp-ink); text-decoration: none; border-bottom: 1px solid var(--bp-ui); }
+.bp-crumbs a:hover, .bp-crumbs a:focus-visible { color: var(--bp-accent); border-color: currentColor; outline: none; }
+.bp-crumbs i { font-style: normal; color: var(--bp-muted); }
+.bp-crumbs [aria-current] { color: var(--bp-ink); }
+.bp-doors { position: fixed; left: 0; top: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); z-index: 40; }
+.bp-doors:focus-within { width: auto; height: auto; clip-path: none; left: 22px; top: 54px; display: flex; flex-direction: column; gap: 3px; padding: 6px; background: var(--bp-paper); border: 1px solid var(--bp-ink); border-radius: 3px; }
+.bp-doors button { font: 11px/1.3 var(--bp-font); text-align: left; color: var(--bp-ink); background: transparent; border: 1px solid var(--bp-ui); border-radius: 3px; padding: 3px 8px; cursor: pointer; }
+.bp-doors button:focus-visible { outline: none; border-color: var(--bp-accent); color: var(--bp-accent); }
+.bp-doors button[aria-disabled="true"] { color: var(--bp-muted); }
+.bp-flying { pointer-events: none; }
+
 /* 3D mode page layout (writePage3d). Colours are the tokens of sheet.css, including --bp3-*. */
 html, body { height: 100%; overflow: hidden; }
 .v3 { display: flex; flex-direction: column; height: 100%; }
@@ -327,6 +344,7 @@ html, body { height: 100%; overflow: hidden; }
 #readout { color: var(--bp-accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .v3-hint { position: absolute; left: 22px; bottom: 18px; font-size: 10.5px; color: var(--bp-muted); letter-spacing: .04em; max-width: 46%; pointer-events: none; }
 .v3-fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--bp-muted); background: var(--bp-paper); }
+.v3-fail p { margin: 0; max-width: 60ch; line-height: 1.6; }
 .v3-fail a { color: var(--bp-ink); }
 @media (max-width: 640px) {
   .v3-hint { display: none; }
@@ -340,6 +358,9 @@ html, body { height: 100%; overflow: hidden; }
 .v3-embed .v3-stage { background: var(--bp-page); }
 .v3-embed .v3-stage::after { display: none; }
 .v3-embed #ov .balloon { fill: var(--bp-page); }
+/* an atlas page's breadcrumb runs into the heading (kit/page.mjs crumbs) */
+.bp-crumbs-3d { display: flex; flex-wrap: wrap; gap: 4px 7px; align-items: center; }
+@media (max-width: 640px) { .bp-crumbs-3d { flex-basis: 100%; } .bp-crumbs-3d b { flex-basis: auto; } }
 
 
 </style>
@@ -362,10 +383,10 @@ html, body { height: 100%; overflow: hidden; }
   <div class="v3-hint">DRAG TO ORBIT · DRAG THE BODY OR ↑ ↓ FOR VESSEL PRESSURE · ← → ADJUSTING SCREW · SPACE COMPRESSOR · WHEEL ZOOM · E EXPLODE · C CUT · 1–4 VIEWS</div>
   <div class="v3-title">
     <div class="w3 lg"><i>TITLE</i>RELIEF VALVE · ISOMETRIC HALF-SECTION</div><div class="lg"><i>DWG NO</i>BP-011-3D</div>
-    <div><i>SCALE</i>NTS</div><div><i>PROJECTION</i>ISOMETRIC</div><div><i>UNITS</i>mm · bar (gauge)</div><div><i>PARTS</i>23</div>
+    <div><i>SCALE</i>NTS</div><div id="v3-proj" data-auto="1"><i>PROJECTION</i>ISOMETRIC</div><div><i>UNITS</i>mm · bar (gauge)</div><div><i>PARTS</i>23</div>
     <div class="w4"><i>LIVE · SAME MODEL AS BP-011 · DRAG THE BODY · SPACE COMPRESSOR</i><span id="readout">&nbsp;</span></div>
   </div>
-  <noscript><div class="v3-fail">This drawing needs JavaScript and WebGL. The 2D sheet, <a href="relief-valve.html">relief-valve.html</a>, needs neither.</div></noscript>
+  <noscript><div class="v3-fail"><p>This drawing needs JavaScript and WebGL. The 2D sheet, <a href="relief-valve.html">relief-valve.html</a>, needs neither.</p></div></noscript>
 </div>
 <span id="sr" class="bp-sr" aria-live="polite"></span>
 </div>
@@ -376,8 +397,11 @@ setTimeout(() => {
   const d = document.createElement("div");
   d.className = "v3-fail";
   d.id = "v3-fallback";
-  d.innerHTML = "The 3D view could not start (" + (window.__v3err || "three.js did not load: it needs WebGL and a connection to cdn.jsdelivr.net").replace(/</g, "&lt;") + "). The 2D sheet, <a href=\"relief-valve.html\">relief-valve.html</a>, needs neither.";
+  d.innerHTML = "<p>The 3D view could not start (" + (window.__v3err || "three.js did not load: it needs WebGL and a connection to cdn.jsdelivr.net").replace(/</g, "&lt;") + "). The 2D sheet, <a href=\"relief-valve.html\">relief-valve.html</a>, needs neither.</p>";
   document.getElementById("stage").appendChild(d);
+  // a slow connection or GPU may still bring the scene up: then the notice goes again
+  const late = setInterval(() => { if (window.__v3ok) { d.remove(); clearInterval(late); } }, 400);
+  setTimeout(() => clearInterval(late), 60000);
 }, 8000);
 </script>
 <script type="module">
@@ -1019,7 +1043,8 @@ const S = (() => {
 //
 // URL parameters every 3D page supports:
 //   ?t=1.0 deterministic frame of the tour   ?view=iso|front|side|top   ?cut=0|1   ?offset=mm
-//   ?explode=0..1   ?zoom=k   ?look=x,y,z (mm)   ?theme=blueprint|paper|white|dark   ?balloons=0
+//   ?explode=0..1   ?zoom=k   ?look=x,y,z (mm)   ?roll=deg   ?az=deg   ?el=deg (the ISO view's)
+//   ?theme=blueprint|paper|white|dark   ?balloons=0
 //   ?embed=1 (no page chrome)   ?check=1 (render stats)   ?selftest=1 (drive the controls)
 //   ?bench=1 (time a frame)   ?dbg=1 (tint bores, fluids and outlines)
 
@@ -1034,6 +1059,8 @@ const pair = (at) => (Array.isArray(at) ? [at[0] ?? 0, at[1] ?? 0] : [at ?? 0, 0
 // axis "y" (or "v"): vertical, through x = at[0], z = at[1]. axis "x" (or "u"): through y = at[0],
 // z = at[1]. axis "z": through x = at[0], y = at[1]. A number `at` means [at, 0].
 // A solid profile touches the axis along one edge (two consecutive points with r = 0).
+// segments: n overrides the kit's count round the axis (48 / 96 / 144 by the largest radius), to cut
+// triangles on a big but simple body or match a prism circle that meets the lathe face to face.
 function lathe(loop, { axis = "y", at = 0, ...o } = {}) {
   return { kind: "lathe", loop, axis: AXIS[axis], at: pair(at), ...o };
 }
@@ -1049,9 +1076,26 @@ function tube({ axis = "y", at = 0, r0, r1, from, to, ...o }) {
 // bevel rounds the edges and grows the outline by itself, so give a bevelled outline inset by it.
 // conform { x, r }: vertices on the face x = conform.x move onto the cylinder of radius r round
 // the y axis, so a boss of a casting meets a turned body exactly (castings without CSG).
+// steps: n slices the sweep into n (default 1, or 24 with conform), so a warp can bend it between its ends.
 function extrude(shape, { along = "z", from, to, holes = [], bevel = 0, conform = null, ...o }) {
   return { kind: "extrude", shape, holes, along: AXIS[along], from, to, bevel, conform, ...o };
 }
+
+// Any solid may also take
+//   warp: (x, y, z) => [x, y, z]  a pure function of a rest-frame point (world mm, before poses and
+//     explode), applied once at build time to the mesh's vertices and to its crease lines. The creases
+//     are found before the warp, so a prism bent or tapered smoothly keeps only the creases it was
+//     authored with. It is for outer skins and closed solids (a lofted fuselage, a tapered, dihedralled
+//     wing, a twisted blade, a lathe scaled about a point): the cut face is still exact, as it comes from
+//     the warped back faces. It is NOT applied to the profile test of a bore, fluid or glass (see
+//     inside() in FRAG): those are tested in pre-warp space, which is only right where the warp leaves
+//     the section through the cut plane unchanged; a fluid's stretch also runs on pre-warp s. Keep
+//     warps on role "solid" (and ink, decal, mouth); give an extrude `steps` (a lathe already has many
+//     rings round its axis but only one per profile edge along it) so the warp has vertices to move.
+//   smooth: angle (degrees)  average each vertex normal over the faces round it that turn less than
+//     this from its own face, so a lofted prism shades as a curved skin and creases stay sharp. Default
+//     35 for a warped solid, off otherwise; false turns it off. On a lathe (indexed, split at every
+//     profile corner already) any angle simply recomputes the normals from the warped faces.
 const box = (min, max, o = {}) => ({ kind: "box", min, max, ...o });
 const sphere = (c, r, o = {}) => ({ kind: "sphere", c, r, ...o });
 // A ring of tube radius r on a circle of radius R round an axis through c; arc [a0, a1] in degrees.
@@ -1175,7 +1219,7 @@ const FRAG = /* glsl */ `
 uniform float uMode, uCutOn, uKind, uGap, uPair, uAngle, uRole, uEdge, uDensity, uPx, uDpr, uCapBias, uWash, uLayer, uLayerBias;
 uniform vec4 uCut; uniform vec3 uCamDir, uLight, uLit, uMid, uDark, uPaper, uInk, uAccent; uniform vec4 uHatch;
 uniform vec2 uProf[64]; uniform int uProfN, uProfKind; uniform vec3 uAxisP, uAxisD, uPA, uPB; uniform vec2 uRange;
-uniform float uLiftFrom, uLift, uHi; uniform mat4 uInv; uniform vec3 uShift;
+uniform float uLiftFrom, uLift, uHi, uFade, uKeep; uniform mat4 uInv; uniform vec3 uShift;
 uniform sampler2D tIds; uniform vec2 uRes;
 varying vec3 vW; varying vec3 vN;
 #ifdef DECAL
@@ -1306,6 +1350,8 @@ void main() {
   }
   // a part named by its card (kit/info.mjs) is tinted toward the accent
   if (uHi > 0.5 && role != 2) col = mix(col, uAccent, cap ? 0.3 : 0.5);
+  // flying into a part (references/atlas.md): every other part fades toward the paper
+  if (uKeep < 0.5) { col = mix(col, uPaper, uFade); if (role == 2) alpha *= 1.0 - uFade; }
   gl_FragColor = vec4(col, alpha);
   gl_FragDepth = cap ? capZ : gl_FragCoord.z - (role == 2 ? uCapBias : 0.0);
 }`;
@@ -1321,7 +1367,7 @@ void main() {
   gl_Position.z -= uLineBias * gl_Position.w;
 }`;
 const LINE_FRAG = /* glsl */ `
-uniform float uCutOn, uPx, uDpr, uDash, uAlpha, uCull; uniform vec4 uCut; uniform vec3 uInk, uShift;
+uniform float uCutOn, uPx, uDpr, uDash, uAlpha, uCull, uFade, uKeep; uniform vec4 uCut; uniform vec3 uInk, uPaper, uShift;
 uniform sampler2D tIds; uniform vec2 uRes;
 varying vec3 vW; varying float vDist;
 void main() {
@@ -1332,11 +1378,11 @@ void main() {
     float u = mod(vDist * uPx / (1.4 * uDpr), 22.2); // ISO 128 long dash dot: 15 2.6 2 2.6
     if ((u > 15.0 && u < 17.6) || u > 19.6) discard;
   }
-  gl_FragColor = vec4(uInk, uAlpha);
+  gl_FragColor = vec4(mix(uInk, uPaper, uFade * (1.0 - uKeep)), uAlpha);
 }`;
 
 const EDGE_FRAG = /* glsl */ `
-uniform sampler2D tId, tDepth; uniform vec2 uTexel; uniform vec3 uInk; uniform float uW, uRange, uThr;
+uniform sampler2D tId, tDepth, tKeep; uniform vec2 uTexel; uniform vec3 uInk, uPaper; uniform float uW, uRange, uThr, uFade;
 varying vec2 vUv;
 vec4 at(vec2 d) { return texture2D(tId, vUv + d * uTexel * uW); }
 bool same(vec4 a, vec4 b) { return abs(a.r - b.r) < 0.5 / 255.0 && abs(a.g - b.g) < 0.5; }
@@ -1361,7 +1407,13 @@ void main() {
     }
   }
   if (e < 0.5) discard;
-  gl_FragColor = vec4(uInk, 1.0);
+  // an outline belongs to the parts on both sides of it: kept (not faded) if either is the kept part
+  float keep = 0.0;
+  if (uFade > 0.0) {
+    keep = texture2D(tKeep, vec2((c.r * 255.0 + 0.5) / 256.0, 0.5)).r;
+    for (int i = 0; i < 4; i++) keep = max(keep, texture2D(tKeep, vec2((at(o[i]).r * 255.0 + 0.5) / 256.0, 0.5)).r);
+  }
+  gl_FragColor = vec4(mix(uInk, uPaper, uFade * (1.0 - keep)), 1.0);
 #ifdef DBG
   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 #endif
@@ -1438,7 +1490,7 @@ const PRISM = {
   x: { A: [0, 0, 1], B: [0, 1, 0], D: [1, 0, 0] },
 };
 
-function extrudeGeometry({ shape, holes = [], along, from, to, bevel = 0, conform }) {
+function extrudeGeometry({ shape, holes = [], along, from, to, bevel = 0, conform, steps }) {
   // local (X, Y) is the outline, local Z the sweep; rotations below put them on (a, b, s)
   const flip = along === "y" ? ([a, b]) => [a, -b] : along === "x" ? ([a, b]) => [-a, b] : (p) => p;
   // three.js only fixes hole winding when it reverses the outline, so normalise both here, after the
@@ -1453,7 +1505,7 @@ function extrudeGeometry({ shape, holes = [], along, from, to, bevel = 0, confor
     bevelThickness: bevel,
     bevelSize: bevel,
     bevelSegments: 3,
-    steps: conform ? 24 : 1,
+    steps: Math.max(1, Math.round(steps ?? (conform ? 24 : 1))),
     curveSegments: 24,
   });
   geo.translate(0, 0, from + bevel);
@@ -1480,9 +1532,10 @@ function helixGeometry(s) {
   return new THREE.TubeGeometry(new Helix(), Math.max(80, Math.round(s.turns * 60)), s.wire / 2, 10, false).applyMatrix4(axisMatrix(s.axis, s.at));
 }
 
-function geometryOf(s) {
+// a solid's geometry as specified, before its warp
+function shapeGeometry(s) {
   const seg = (r) => (r > 20 ? 144 : r > 6 ? 96 : 48);
-  if (s.kind === "lathe") return latheGeometry(s.loop, seg(Math.max(...s.loop.map(([r]) => r)))).applyMatrix4(axisMatrix(s.axis, s.at));
+  if (s.kind === "lathe") return latheGeometry(s.loop, Math.max(3, Math.round(s.segments ?? seg(Math.max(...s.loop.map(([r]) => r)))))).applyMatrix4(axisMatrix(s.axis, s.at));
   if (s.kind === "extrude") return extrudeGeometry(s);
   if (s.kind === "sphere") return new THREE.SphereGeometry(s.r, 48, 32).translate(...s.c);
   if (s.kind === "helix") return helixGeometry(s);
@@ -1507,6 +1560,75 @@ function geometryOf(s) {
   }
   throw new Error("solid3d: unknown solid kind " + s.kind);
 }
+
+// move every vertex of a geometry through a warp (x, y, z) => [x, y, z]
+function warpPositions(geo, warp) {
+  const p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const [x, y, z] = warp(p.getX(i), p.getY(i), p.getZ(i));
+    p.setXYZ(i, x, y, z);
+  }
+  p.needsUpdate = true;
+  geo.computeBoundingBox();
+  geo.computeBoundingSphere();
+}
+// normals averaged over the faces round each vertex that turn less than `deg` from its own face
+// (a prism's normals are per face, which steps the toon shading along a loft); creases stay sharp
+function smoothNormals(geo, deg) {
+  if (geo.index) {
+    geo.computeVertexNormals(); // a lathe: every profile corner is already its own strip
+    return;
+  }
+  const p = geo.attributes.position;
+  const n = p.count;
+  const face = [];
+  const v = (i) => [p.getX(i), p.getY(i), p.getZ(i)];
+  for (let f = 0; f < n / 3; f++) {
+    const [a, b, c] = [v(3 * f), v(3 * f + 1), v(3 * f + 2)];
+    const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const w = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    face.push([u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]]);
+  }
+  const unit = (x) => {
+    const l = Math.hypot(...x) || 1;
+    return x.map((c) => c / l);
+  };
+  const fu = face.map(unit);
+  const key = (i) => `${p.getX(i).toFixed(3)},${p.getY(i).toFixed(3)},${p.getZ(i).toFixed(3)}`;
+  const at = new Map();
+  for (let i = 0; i < n; i++) {
+    const k = key(i);
+    if (!at.has(k)) at.set(k, []);
+    at.get(k).push(Math.floor(i / 3));
+  }
+  const cos = Math.cos((deg * Math.PI) / 180);
+  const out = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const f = Math.floor(i / 3);
+    const s = [0, 0, 0];
+    for (const g of at.get(key(i))) {
+      const d = fu[f][0] * fu[g][0] + fu[f][1] * fu[g][1] + fu[f][2] * fu[g][2];
+      if (d > cos) for (let j = 0; j < 3; j++) s[j] += face[g][j];
+    }
+    out.set(Math.hypot(...s) > 0 ? unit(s) : fu[f], 3 * i);
+  }
+  geo.setAttribute("normal", new THREE.BufferAttribute(out, 3));
+}
+// A solid as built: { geo, lines }. Creases (lines: true) come from the unwarped shape, then both go
+// through the warp; normals are smoothed under a warp (or `smooth`).
+function buildSolid(s, lines = false) {
+  const geo = shapeGeometry(s);
+  const edges = lines ? new THREE.EdgesGeometry(geo, 35) : null;
+  if (s.warp) {
+    warpPositions(geo, s.warp);
+    if (edges) warpPositions(edges, s.warp);
+  }
+  const sm = s.smooth ?? (s.warp ? 35 : 0);
+  if (sm) smoothNormals(geo, sm);
+  return { geo, lines: edges };
+}
+// A solid's mesh geometry (its warp applied), e.g. for page code that builds compound meshes.
+const geometryOf = (s) => buildSolid(s).geo;
 
 // the shape a bore, fluid or glass is tested against (see inside() in FRAG): at most 64 points, so a
 // longer outline (a fine circle) is resampled evenly round its perimeter
@@ -1540,7 +1662,9 @@ function profileOf(s) {
 // ---------------------------------------------------------------- create
 
 // create({ scene: { parts, fluids, centres }, sheet2d, title, start }) → V. Call after the page's DOM (writePage3d).
-// start: the page's own default view where the URL gives none: { view, explode, zoom, look, roll }.
+// start: the page's own default view where the URL gives none: { view, explode, zoom, look, roll, az, el }.
+// az, el (degrees) move the ISO view's camera: default 45 and 35.264, a true isometric; any other pair
+// is an axonometric, and the title block says so.
 // roll (degrees) turns the ISO picture about the line of sight, so a long part lies along an iso axis
 // instead of standing up (60: a part on the y axis lies rising to the right at 30°); other views stay unrolled.
 function create({ scene, title = "", start: dflt = {} } = {}) {
@@ -1559,8 +1683,9 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
     look: Qs.get("look") ? Qs.get("look").split(",").map(Number) : dflt.look ?? null,
     lookOwn: !Qs.get("look") && !!dflt.look, // the page's default look gives way to the whole box as it explodes
     roll: num("roll", dflt.roll ?? 0),
-    // the page's ISO may look from another octant (az -45: from the -x side), still a true isometric
-    iso: [num("az", dflt.az ?? VIEWS.iso[0]), VIEWS.iso[1]],
+    // the page's ISO may look from another octant (az -45: from the -x side), still a true isometric;
+    // another az or el (elevation, degrees above the horizon) makes it a general axonometric
+    iso: [num("az", dflt.az ?? VIEWS.iso[0]), Math.min(90, Math.max(-60, num("el", dflt.el ?? VIEWS.iso[1])))],
     zoomOwn: !Qs.has("zoom") && dflt.zoom ? dflt.zoom : 0, // likewise the page's default zoom
     // a page that opens slightly exploded (its rest): parts can still be dragged there
     explodeOwn: !Qs.has("explode") && dflt.explode ? clamp01(dflt.explode) : 0,
@@ -1573,6 +1698,14 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
     dbg: Qs.has("dbg"),
   };
   if (q.embed) document.documentElement.classList.add("v3-embed");
+  // the title block's projection (writePage3d leaves it to the kit unless the page names one): a true
+  // isometric only from an az of 45 + k·90 at el 35.26 (roll turns the picture, not the projection)
+  const proj = $("v3-proj");
+  if (proj?.dataset.auto) {
+    const [az, el] = q.iso;
+    const iso = Math.abs(el - VIEWS.iso[1]) < 0.01 && Math.abs(((((az - 45) % 90) + 135) % 90) - 45) < 0.01;
+    proj.lastChild.textContent = iso ? "ISOMETRIC" : "AXONOMETRIC";
+  }
   L.setupPage(host);
   THREE.ColorManagement.enabled = false; // the tokens are sRGB and the shaders write them unchanged
 
@@ -1600,6 +1733,7 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
     uInk: { value: C() },
     uHatch: { value: new THREE.Vector4() },
     uAccent: { value: C() },
+    uFade: { value: 0 }, // the fly-in's fade of every part but the one it flies to
     // depth bias of cut faces: must stay below the thinnest wall seen edge-on (0.25 mm)
     uCapBias: { value: 0.25 / (FAR - NEAR) },
     uLineBias: { value: (2 * 0.6) / (FAR - NEAR) },
@@ -1629,6 +1763,7 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
       angle = hatch[1] ?? 45;
     }
     const prof = role === "void" || role === "fluid" || role === "glass" ? profileOf(s) : null;
+    if (prof && s.warp) console.warn(`solid3d: a warped ${role} is tested against its pre-warp profile (references/3d.md)`);
     let tex = null;
     if (role === "decal") {
       const cv = document.createElement("canvas");
@@ -1656,6 +1791,7 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
         uShift: { value: new THREE.Vector3() },
         uLayer: { value: s.layer ?? 0 },
         uHi: { value: 0 },
+        uKeep: { value: 0 },
         uProf: { value: Array.from({ length: PROF_MAX }, (_, i) => new THREE.Vector2(...(prof?.loop[i] ?? [0, 0]))) },
         uProfN: { value: prof ? prof.loop.length : 0 },
         uProfKind: { value: prof ? prof.kind : 0 },
@@ -1679,7 +1815,7 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
   }
   const lineMat = (dash, alpha = 1) =>
     new THREE.ShaderMaterial({
-      uniforms: { ...U, uDash: { value: dash ? 1 : 0 }, uAlpha: { value: alpha }, uCull: { value: dash ? 0 : 1 }, uShift: { value: new THREE.Vector3() } },
+      uniforms: { ...U, uDash: { value: dash ? 1 : 0 }, uAlpha: { value: alpha }, uCull: { value: dash ? 0 : 1 }, uKeep: { value: 0 }, uShift: { value: new THREE.Vector3() } },
       vertexShader: LINE_VERT,
       fragmentShader: LINE_FRAG,
       transparent: alpha < 1,
@@ -1704,14 +1840,15 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
     const edge = role === "mouth" || s.own || !shared ? ++edgeSeq : shared;
     if (edge > 255) throw new Error("solid3d: more than 255 outlined solids");
     rec.edges.add(edge);
-    const geo = geometryOf(s);
-    const mesh = new THREE.Mesh(geo, material(s, edge));
+    const creased = role === "solid" || role === "void" || role === "glass" || role === "ink";
+    const built = buildSolid(s, creased);
+    const mesh = new THREE.Mesh(built.geo, material(s, edge));
     rec.mats.push(mesh.material);
     syncInv(mesh);
     inner.add(mesh);
     let lines = null;
-    if (role === "solid" || role === "void" || role === "glass" || role === "ink") {
-      lines = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 35), lineMat(false)); // own material: own uShift
+    if (creased) {
+      lines = new THREE.LineSegments(built.lines, lineMat(false)); // own material: own uShift
       lines.userData.crease = true;
       inner.add(lines);
     }
@@ -1760,8 +1897,12 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
   // ---- outline pass
   const idTarget = new THREE.WebGLRenderTarget(4, 4, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthTexture: new THREE.DepthTexture(4, 4) });
   U.tIds.value = idTarget.texture;
+  // which outline ids the fly-in keeps (one texel per id), see keepPart
+  const keepTex = new THREE.DataTexture(new Uint8Array(256 * 4), 256, 1, THREE.RGBAFormat);
+  keepTex.minFilter = keepTex.magFilter = THREE.NearestFilter;
+  keepTex.needsUpdate = true;
   const edgeMat = new THREE.ShaderMaterial({
-    uniforms: { tId: { value: idTarget.texture }, tDepth: { value: idTarget.depthTexture }, uTexel: { value: new THREE.Vector2() }, uInk: U.uInk, uW: { value: 1 }, uRange: { value: FAR - NEAR }, uThr: { value: 2.0 } },
+    uniforms: { tId: { value: idTarget.texture }, tDepth: { value: idTarget.depthTexture }, tKeep: { value: keepTex }, uTexel: { value: new THREE.Vector2() }, uInk: U.uInk, uPaper: U.uPaper, uFade: U.uFade, uW: { value: 1 }, uRange: { value: FAR - NEAR }, uThr: { value: 2.0 } },
     vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
     fragmentShader: EDGE_FRAG,
     transparent: true,
@@ -1924,10 +2065,11 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
     }
     const MG = margin();
     const fit = Math.min((W - MG.l - MG.r) / Math.max(1, x1 - x0), (H - MG.t - MG.b) / Math.max(1, y1 - y0));
-    const zoom = fit * cam.zoom * (q.zoomOwn ? 1 + (1 / q.zoomOwn - 1) * Math.max(ex, 1 - cam.own) : 1);
+    let zoom = fit * cam.zoom * (q.zoomOwn ? 1 + (1 / q.zoomOwn - 1) * Math.max(ex, 1 - cam.own) : 1);
     const off = new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 0).applyMatrix3(new THREE.Matrix3().setFromMatrix4(camera.matrixWorld)).multiplyScalar(q.look ? free : 1);
     camera.position.add(off).add(cam.pan);
     camera.position.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1), -(MG.b - MG.t) / 2 / zoom);
+    if (fly) zoom = flyCamera(zoom);
     camera.left = -W / 2 / zoom;
     camera.right = W / 2 / zoom;
     camera.top = H / 2 / zoom;
@@ -1942,6 +2084,107 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
     const p = (Array.isArray(v) ? new THREE.Vector3(...v) : v.clone()).project(camera);
     return [((p.x + 1) / 2) * W, ((1 - p.y) / 2) * H];
   };
+
+  // ---- the fly-in (references/atlas.md): zoom and look ease toward a part's anchor while every other
+  // part fades, then the page goes to the example inside it (kit/info.mjs's "bp:open"). The same flight
+  // run backwards is ?focus=<part> (start on the part, ease out) and, on no part, ?from= (a short zoom-out).
+  // fly: { rec, dir: 1 in | -1 out, t0, T ms, k 0..1, p (world point), Z (zoom factor at k = 1), done }
+  let fly = null;
+  const recOf = (id) => {
+    if (id == null) return null;
+    const s = String(id);
+    for (const rec of PARTS.values()) if (String(rec.id) === s) return rec;
+    for (const rec of PARTS.values()) if (String(rec.id).match(/^\d+/)?.[0] === s) return rec;
+    return null;
+  };
+  function keepPart(rec) {
+    const d = keepTex.image.data;
+    d.fill(0);
+    for (const r of PARTS.values()) {
+      const on = r === rec ? 1 : 0;
+      for (const m of r.mats) m.uniforms.uKeep.value = on;
+      for (const h of r.holders) if (h.lines) h.lines.material.uniforms.uKeep.value = on;
+      for (const l of r.centres) l.material.uniforms.uKeep.value = on;
+      if (on) for (const e of r.edges) d[e * 4] = 255;
+    }
+    keepTex.needsUpdate = true;
+  }
+  // called from placeCamera with the camera at its own framing: slide toward the point, zoom in by k
+  function flyCamera(zoom) {
+    const k = L.ease(fly.k);
+    camera.updateMatrixWorld(true);
+    if (!fly.p) {
+      root.updateMatrixWorld(true);
+      const rec = fly.rec;
+      if (rec) {
+        const box = new THREE.Box3().setFromObject(rec.group);
+        fly.p = rec.spec.anchor ? anchorWorld(rec) : box.getCenter(new THREE.Vector3());
+        const inv = camera.matrixWorldInverse;
+        let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+        for (let i = 0; i < 8; i++) {
+          const v = new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).applyMatrix4(inv);
+          x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y);
+        }
+        // the part about half the window, at least a clear step in
+        const fill = Math.min((W * 0.5) / Math.max(1e-3, x1 - x0), (H * 0.5) / Math.max(1e-3, y1 - y0));
+        fly.Z = Math.min(12, Math.max(1.6, fill / zoom));
+      } else {
+        fly.p = lerpBox().getCenter(new THREE.Vector3());
+        fly.Z = fly.Z ?? 1.4;
+      }
+    }
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+    const d = fly.p.clone().sub(camera.position);
+    camera.position.addScaledVector(right, d.dot(right) * k).addScaledVector(up, d.dot(up) * k);
+    U.uFade.value = fly.rec ? 0.82 * k : 0;
+    overlay.style.opacity = String(Math.max(0, 1 - 1.6 * k));
+    return zoom * (1 + (fly.Z - 1) * k);
+  }
+  function startFly(rec, { dir = 1, done = null, T = 900, Z = null, delay = 0 } = {}) {
+    fly = { rec, dir, t0: performance.now() + delay, T, k: dir > 0 ? 0 : 1, p: null, Z, done };
+    keepPart(rec);
+    if (done) setTimeout(() => fly?.done && endFly(true), T + delay + 700); // a stalled loop (hidden tab) still gets there
+    input();
+  }
+  function endFly(arrived) {
+    const done = fly?.done;
+    if (arrived && done) {
+      fly.done = null;
+      done();
+      return; // stay on the part while the next page loads
+    }
+    fly = null;
+    U.uFade.value = 0;
+    overlay.style.opacity = "";
+    keepPart(null);
+    redraw();
+  }
+  function stepFly() {
+    if (!fly) return false;
+    const t = Math.min(1, Math.max(0, (performance.now() - fly.t0) / fly.T));
+    fly.k = fly.dir > 0 ? t : 1 - t;
+    if (t < 1) return true;
+    if (fly.dir > 0) {
+      if (fly.done) endFly(true);
+      return false;
+    }
+    endFly(false);
+    return true;
+  }
+  document.addEventListener("bp:open", (e) => {
+    const rec = recOf(e.detail?.id);
+    if (!rec || !lv || lv.reduced || lv.frozen || fly) return;
+    e.preventDefault();
+    startFly(rec, { dir: 1, done: e.detail.go });
+  });
+  // back from the next page through the browser's cache: the whole object again, not the flight's end
+  addEventListener("pageshow", (e) => {
+    if (e.persisted && fly) {
+      fly.done = null;
+      endFly(false);
+    }
+  });
 
   // ---- balloons
   function anchorWorld(rec) {
@@ -2253,7 +2496,16 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
     },
     { passive: false }
   );
-  canvas.addEventListener("dblclick", () => {
+  canvas.addEventListener("dblclick", (e) => {
+    // a doorway part (kit/info.mjs) flies in instead; the id pass names the part under the pointer
+    const r = canvas.getBoundingClientRect();
+    const sx = e.clientX - r.left;
+    const sy = e.clientY - r.top;
+    if (sx >= 0 && sy >= 0 && sx < W && sy < H) {
+      renderer.readRenderTargetPixels(idTarget, Math.round(sx * dpr), Math.round((H - sy) * dpr), 1, 1, pix);
+      const rec = pix[0] ? [...PARTS.values()].find((p) => p.edges.has(pix[0])) : null;
+      if (rec && !document.dispatchEvent(new CustomEvent("bp:dblpart", { cancelable: true, detail: { id: rec.id } }))) return;
+    }
     cam.zoom = 1;
     cam.pan.set(0, 0, 0);
     input();
@@ -2305,12 +2557,12 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
     reshape(id, key, spec) {
       const rec = PARTS.get(id);
       const h = typeof key === "number" ? rec.holders[key] : rec.live[key];
-      const geo = geometryOf({ ...h.spec, ...spec });
+      const b = buildSolid({ ...h.spec, ...spec }, !!h.lines);
       h.mesh.geometry.dispose();
-      h.mesh.geometry = geo;
+      h.mesh.geometry = b.geo;
       if (h.lines) {
         h.lines.geometry.dispose();
-        h.lines.geometry = new THREE.EdgesGeometry(geo, 35);
+        h.lines.geometry = b.lines;
       }
     },
     // a fluid's look: density 0..1 (stipple), wash 0..1 (flat tint), stretch mm, offset [x, y, z]
@@ -2370,7 +2622,8 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
           cam.roll = snap ? cam.rollT : L.follow(cam.roll, cam.rollT, 9, dt);
           cam.own = snap ? cam.ownT : L.follow(cam.own, cam.ownT, 9, dt);
           st.explode = snap ? st.explodeT : L.follow(st.explode, st.explodeT, 5, dt);
-          return busy || Math.abs(cam.az - cam.azT) > 0.01 || Math.abs(cam.el - cam.elT) > 0.01 || Math.abs(cam.roll - cam.rollT) > 0.01 || Math.abs(cam.own - cam.ownT) > 1e-3 || Math.abs(st.explode - st.explodeT) > 1e-3;
+          const flying = stepFly();
+          return busy || flying || Math.abs(cam.az - cam.azT) > 0.01 || Math.abs(cam.el - cam.elT) > 0.01 || Math.abs(cam.roll - cam.rollT) > 0.01 || Math.abs(cam.own - cam.ownT) > 1e-3 || Math.abs(st.explode - st.explodeT) > 1e-3;
         },
         render,
         idleAfter,
@@ -2379,6 +2632,12 @@ function create({ scene, title = "", start: dflt = {} } = {}) {
           if (q.check) report();
         },
       });
+      // arriving: ?focus=<part> starts on that part and eases out; ?from=<slug> a short zoom-out
+      if (!lv.reduced && !lv.frozen) {
+        const f = recOf(Qs.get("focus"));
+        if (f) startFly(f, { dir: -1, delay: 250 });
+        else if (Qs.has("from")) startFly(null, { dir: -1, T: 650, Z: 1.4, delay: 150 });
+      }
       if (lv.reduced && !lv.frozen) {
         const fake = { touring: true, reduced: false, frozen: true, clock: 0 };
         for (let t = 0; t < still; t += 1 / 240) step(1 / 240, fake);
@@ -3316,9 +3575,152 @@ const BP_CARDS = (() => {
 //   { "4": { "name": "O-ring", "spec": "33 × 2", "material": "NBR 70", "note": "Seals the barrel..." } }
 // 2D: the part's [data-part] groups get the class bp-hl.  3D: a "bp:part" event (detail.id, or null)
 // that kit/solid3d.mjs answers by tinting the part.
+//
+// Atlas (references/atlas.md): a part with "open": "<slug>" is a doorway into another example. Its card
+// adds the child's idea and a "Look inside →" link (or "drawing in progress" while the child is not
+// drawn). Activating it (the link, Enter on the focused balloon, double-click on the part in 3D) flies
+// in and then navigates: a "bp:open" event (detail { id, href, go }) that kit/solid3d.mjs takes over
+// by calling preventDefault (it flies the camera, then calls go); on a 2D sheet the viewBox eases in on
+// the part here. links: page.mjs's BP_LINKS; atlas: BP_ATLAS, the page's own slug and place.
+// The page also answers ?focus=<part> (start zoomed on that part, ease out) and ?from=<slug> (a short
+// zoom-out on arrival); on a 3D page kit/solid3d.mjs does both.
 
-function attach({ info, root = document }) {
-  if (!info || !Object.keys(info).length) return null;
+function attach({ info = {}, links = null, atlas = null, root = document }) {
+  info = info || {};
+  const has = Object.keys(info).length > 0;
+  const Q = new URLSearchParams(location.search);
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const is3d = !!document.getElementById("gl");
+  // no flights in a deterministic frame, a sheet's ?zoom= close-up or a check run
+  const still = reduced || Q.has("t") || Q.has("check") || (!is3d && Q.has("zoom"));
+  const sheet = is3d ? null : root.querySelector("svg.bp-sheet");
+  if (!has && !atlas) return null;
+
+  const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+
+  function light(id) {
+    for (const el of document.querySelectorAll(".bp-hl")) el.classList.remove("bp-hl");
+    if (id != null) for (const el of document.querySelectorAll(`svg [data-part="${CSS.escape(id)}"]`)) if (!el.closest("#ov")) el.classList.add("bp-hl");
+    document.dispatchEvent(new CustomEvent("bp:part", { detail: { id } }));
+  }
+
+  // ---- atlas: where a doorway leads, and the flight there
+  // { slug, href } for a doorway whose child is drawn, { slug, wip: true } while it is not, else null
+  const doorway = (id) => {
+    const slug = info[id]?.open;
+    if (!slug) return null;
+    const l = links?.[slug];
+    const href = l ? (is3d ? l.href3d || l.href2d : l.href2d) || l.href : null;
+    if (!href) return { slug, wip: true };
+    const from = atlas?.slug ? `${href.includes("?") ? "&" : "?"}from=${encodeURIComponent(atlas.slug)}` : "";
+    return { slug, href: href + from, title: l.title, idea: l.idea };
+  };
+  let going = false;
+  function go(id) {
+    const d = doorway(id);
+    if (!d?.href || going) return;
+    going = true;
+    // inside a frame (a landing-page hero) the whole window goes, not the little frame
+    const nav = () => {
+      const abs = new URL(d.href, location.href).href;
+      try { if (window.top !== window) return window.top.location.assign(abs); } catch {}
+      location.assign(abs);
+    };
+    if (still) return nav();
+    hide();
+    // a 3D page flies its camera and calls go; otherwise a sheet zooms its viewBox; else straight there
+    const ev = new CustomEvent("bp:open", { cancelable: true, detail: { id, href: d.href, go: nav } });
+    if (!document.dispatchEvent(ev)) return;
+    if (sheet) flySheet(id, nav);
+    else nav();
+  }
+
+  // 2D: the sheet's viewBox, eased between two boxes [x, y, w, h]
+  const full = sheet ? (sheet.getAttribute("viewBox") || "0 0 1200 848").split(/[\s,]+/).map(Number) : null;
+  let anim = 0;
+  function tween(a, b, ms, done) {
+    cancelAnimationFrame(anim);
+    const t0 = performance.now();
+    const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, t)));
+    const step = (now) => {
+      const k = ease((now - t0) / ms);
+      sheet.setAttribute("viewBox", a.map((v, i) => +(v + (b[i] - v) * k).toFixed(2)).join(" "));
+      if (now - t0 < ms) anim = requestAnimationFrame(step);
+      else done?.();
+    };
+    anim = requestAnimationFrame(step);
+  }
+  // the part's box in sheet units: of the view (data-geom) nearest its balloon's leader end, padded
+  // and grown to the sheet's aspect
+  function partBox(id) {
+    if (!sheet) return null;
+    const inv = sheet.getScreenCTM()?.inverse();
+    if (!inv) return null;
+    const pt = (x, y) => new DOMPoint(x, y).matrixTransform(inv);
+    const groups = new Map();
+    for (const el of sheet.querySelectorAll(`[data-part="${CSS.escape(id)}"]`)) {
+      if (el.closest('[data-role="balloon"]')) continue;
+      const r = el.getBoundingClientRect();
+      if (!r.width && !r.height) continue;
+      const a = pt(r.left, r.top);
+      const b = pt(r.right, r.bottom);
+      const key = el.closest("[data-geom]") ?? sheet;
+      const g = groups.get(key) ?? [Infinity, Infinity, -Infinity, -Infinity];
+      groups.set(key, [Math.min(g[0], a.x), Math.min(g[1], a.y), Math.max(g[2], b.x), Math.max(g[3], b.y)]);
+    }
+    if (!groups.size) return null;
+    const at = sheet.querySelector(`[data-role="balloon"][data-target="${CSS.escape(id)}"]`)?.dataset.at?.split(/\s+/).map(Number);
+    let best = null;
+    let score = Infinity;
+    for (const g of groups.values()) {
+      const s = at ? Math.hypot((g[0] + g[2]) / 2 - at[0], (g[1] + g[3]) / 2 - at[1]) : -(g[2] - g[0]) * (g[3] - g[1]);
+      if (s < score) [score, best] = [s, g];
+    }
+    const [x0, y0, x1, y1] = best;
+    let w = Math.max(24, (x1 - x0) * 1.5);
+    let h = Math.max(24, (y1 - y0) * 1.5);
+    const aspect = full[2] / full[3];
+    if (w / h < aspect) w = h * aspect;
+    else h = w / aspect;
+    w = Math.min(w, full[2]);
+    h = Math.min(h, full[3]);
+    return [(x0 + x1) / 2 - w / 2, (y0 + y1) / 2 - h / 2, w, h];
+  }
+  function flySheet(id, nav) {
+    const box = partBox(id);
+    if (!box) return nav();
+    light(id);
+    sheet.classList.add("bp-flying");
+    tween(full, box, 900, nav);
+  }
+  // back to this page from the browser's cache: the whole sheet, not the end of the flight
+  addEventListener("pageshow", (e) => {
+    if (!e.persisted) return;
+    going = false;
+    if (sheet) {
+      cancelAnimationFrame(anim);
+      sheet.setAttribute("viewBox", full.join(" "));
+      sheet.classList.remove("bp-flying");
+      light(null);
+    }
+  });
+  // arriving: ?focus=<part> starts on that part and eases out to the whole sheet; ?from= a short zoom-out
+  if (sheet && !still) {
+    const focus = Q.get("focus");
+    const box = focus ? partBox(focus) : null;
+    if (box) {
+      sheet.setAttribute("viewBox", box.join(" "));
+      if (info[focus]) light(focus);
+      tween(box, full, 900, () => setTimeout(() => light(null), 600));
+    } else if (Q.has("from")) {
+      const z = 1 / 1.35;
+      const a = [full[0] + (full[2] * (1 - z)) / 2, full[1] + (full[3] * (1 - z)) / 2, full[2] * z, full[3] * z];
+      sheet.setAttribute("viewBox", a.join(" "));
+      tween(a, full, 650);
+    }
+  }
+  if (!has) return null;
+
   const card = document.createElement("div");
   card.className = "bp-card";
   card.setAttribute("role", "dialog");
@@ -3329,7 +3731,6 @@ function attach({ info, root = document }) {
   let shown = null;
   let pinned = false;
 
-  const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
   // the balloon under an element, and its part number
   const balloonOf = (el) => el?.closest?.('[data-role="balloon"], #ov [data-part], .v3-stage [data-part]');
   // the balloon at a point: look through transparent drag targets (a sheet's hit rectangles lie over
@@ -3344,17 +3745,14 @@ function attach({ info, root = document }) {
   };
   const numberOf = (b) => {
     if (!b) return null;
-    const raw = String(b.dataset.target || b.dataset.part || b.querySelector("text")?.textContent || "").trim();
-    // a second copy of a part ("3u" in a 3D scene) shares its card with the item number it starts with
+    return partNo(b.dataset.target || b.dataset.part || b.querySelector("text")?.textContent);
+  };
+  // a second copy of a part ("3u" in a 3D scene) shares its card with the item number it starts with
+  const partNo = (v) => {
+    const raw = String(v ?? "").trim();
     const n = info[raw] ? raw : raw.match(/^\d+/)?.[0];
     return n && info[n] ? n : null;
   };
-
-  function light(id) {
-    for (const el of document.querySelectorAll(".bp-hl")) el.classList.remove("bp-hl");
-    if (id != null) for (const el of document.querySelectorAll(`svg [data-part="${CSS.escape(id)}"]`)) if (!el.closest("#ov")) el.classList.add("bp-hl");
-    document.dispatchEvent(new CustomEvent("bp:part", { detail: { id } }));
-  }
 
   function place(x, y) {
     const pad = 12;
@@ -3375,10 +3773,17 @@ function attach({ info, root = document }) {
     if (!p) return hide();
     if (shown !== id) {
       const sub = [p.spec, p.material, p.qty && p.qty !== "1" ? `× ${p.qty}` : ""].filter(Boolean).map(esc).join(" · ");
+      const d = doorway(id);
+      const door = !d
+        ? ""
+        : d.href
+          ? (d.idea ? `<p class="bp-card-i">${esc(d.idea)}</p>` : "") + `<a class="bp-card-go" href="${esc(d.href)}" data-open="${esc(id)}">${esc(info[id].openLabel || "Look inside")} →</a>`
+          : `<div class="bp-card-wip">Inside: drawing in progress</div>`;
       card.innerHTML =
         `<div class="bp-card-h"><span class="bp-card-n">${esc(id)}</span><b>${esc(p.name)}</b></div>` +
         (sub ? `<div class="bp-card-s">${sub}</div>` : "") +
         (p.note ? `<p>${esc(p.note)}</p>` : "") +
+        door +
         (pinned ? `<div class="bp-card-x">Esc or click elsewhere to close</div>` : "");
       card.hidden = false;
       shown = id;
@@ -3393,6 +3798,13 @@ function attach({ info, root = document }) {
     pinned = false;
     light(null);
   }
+
+  card.addEventListener("click", (e) => {
+    const a = e.target.closest?.("[data-open]");
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return; // a new tab: let the link be a link
+    e.preventDefault();
+    go(a.dataset.open);
+  });
 
   // hover (pointer): follow whatever balloon is under the pointer; the 3D overlay is re-drawn each
   // frame, so ask the document what is under the pointer rather than trusting enter/leave events
@@ -3416,26 +3828,69 @@ function attach({ info, root = document }) {
       show(id, e.clientX, e.clientY);
     } else if (pinned && !card.contains(e.target)) hide();
   }, true);
+  // double-click a doorway's balloon: straight in
+  addEventListener("dblclick", (e) => {
+    const id = numberOf(balloonAt(e.clientX, e.clientY));
+    if (id && doorway(id)?.href) {
+      e.preventDefault();
+      go(id);
+    }
+  });
+  // double-click on a doorway part in 3D: kit/solid3d.mjs names the part under the pointer
+  document.addEventListener("bp:dblpart", (e) => {
+    const id = partNo(e.detail?.id);
+    if (id && doorway(id)?.href) {
+      e.preventDefault();
+      go(id);
+    }
+  });
 
   addEventListener("keydown", (e) => {
     if (e.key === "Escape" && shown) hide();
   });
 
-  // keyboard: static (2D) balloons are focusable buttons; Enter or focus shows the card
+  // keyboard: static (2D) balloons are focusable buttons; focus shows the card, Enter or Space pins
+  // it, and Enter on a doorway's balloon looks inside
   for (const b of root.querySelectorAll('[data-role="balloon"]')) {
     const id = numberOf(b);
     if (!id) continue;
+    const d = doorway(id);
     b.setAttribute("tabindex", "0");
     b.setAttribute("role", "button");
-    b.setAttribute("aria-label", `Part ${id}: ${info[id].name}`);
+    b.setAttribute("aria-label", `Part ${id}: ${info[id].name}${d?.href ? `. Enter to look inside: ${d.title}` : d ? ". Inside: drawing in progress" : ""}`);
     const at = () => { const r = b.getBoundingClientRect(); return [r.right, r.top]; };
     b.addEventListener("focus", () => show(id, ...at()));
     b.addEventListener("blur", () => { if (!pinned) hide(); });
-    b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pinned = true; shown = null; show(id, ...at()); } });
+    b.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && d?.href) { e.preventDefault(); go(id); return; }
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pinned = true; shown = null; show(id, ...at()); }
+    });
+  }
+
+  // keyboard on a 3D page: its balloons are drawn afresh every frame and can't hold focus, so the
+  // doorways get a short list of real buttons, out of sight until focused; each shows its card at
+  // its balloon, Enter looks inside
+  const doors = Object.keys(info).filter((id) => doorway(id));
+  const stage = document.getElementById("stage");
+  if (is3d && stage && doors.length) {
+    const nav = document.createElement("nav");
+    nav.className = "bp-doors";
+    nav.setAttribute("aria-label", "Look inside a part");
+    nav.innerHTML = doors.map((id) => { const d = doorway(id); return `<button type="button" data-door="${esc(id)}"${d.href ? "" : " aria-disabled=\"true\""}>${esc(id)} ${esc(info[id].name)}${d.href ? " →" : " · in progress"}</button>`; }).join("");
+    stage.before(nav); // not inside the stage: it is role="img", whose children are presentational
+    const where = (id, btn) => {
+      const g = document.querySelector(`#ov [data-part="${CSS.escape(id)}"]`);
+      const r = (g ?? btn).getBoundingClientRect();
+      return [r.right, r.top];
+    };
+    nav.addEventListener("focusin", (e) => { const id = e.target.dataset?.door; if (id) { shown = null; show(id, ...where(id, e.target)); } });
+    nav.addEventListener("focusout", () => { if (!pinned) hide(); });
+    nav.addEventListener("click", (e) => { const id = e.target.closest?.("[data-door]")?.dataset.door; if (id) go(id); });
+    nav.addEventListener("keydown", (e) => e.stopPropagation()); // its keys are its own, not the stage's
   }
 
   addEventListener("scroll", () => { if (shown && !pinned) hide(); }, { passive: true });
-  return { show, hide };
+  return { show, hide, go };
 }
 
 return { attach };

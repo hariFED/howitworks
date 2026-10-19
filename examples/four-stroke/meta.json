@@ -34,5 +34,8 @@
     ],
     "t": 1
   },
-  "controls3d": "Drag the crank to turn it · ← → turn 10° · Space runs · E explodes (head up, barrel and piston up, crank down) · C cut · S slow motion"
+  "controls3d": "Drag the crank to turn it · ← → turn 10° · Space runs · E explodes (head up, barrel and piston up, crank down) · C cut · S slow motion",
+  "parent": "aero-engine",
+  "parentPart": "6",
+  "level": 2
 }

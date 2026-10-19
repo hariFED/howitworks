@@ -1,0 +1,35 @@
+{
+  "slug": "airframe",
+  "dwg": "BP-111",
+  "title": "Airframe",
+  "object": "Airframe structure of a four-seat high-wing strut-braced light aircraft: the wing's spars, ribs and skin, the strut and its fittings, the semi-monocoque fuselage's frames, longerons, stringers, firewall and door frame, and the tailplane and fin",
+  "idea": "A strut turns a long cantilever into a short propped beam: the wing's bending moment, and the spar it needs, fall to a fifth",
+  "summary": "The lift, n·W shared by two wings, is spread along the span (Schrenk). Each wing is a beam pinned at the cabin roof and propped by the strut at WS 3000; statics gives the strut's reaction, and since the strut is a two-force member its tension follows from its 25.6° angle: 9.8 kN at 1 g, 37 kN at the 3.8 g limit. The spar's bending moment peaks over the strut at 8.4 kN·m at 3.8 g, against 39 kN·m at the root of the same wing without a strut. In the front spar's caps σ = M/(h·A) reaches 200 MPa at limit with the strut's push, below 2024-T3's yield, and 1.5 times that stays below its ultimate (reserve factor 1.42); unbraced it would be 713 MPa. A 50 ft/s gust at V_C gives 3.75 g, just inside the manoeuvre limit.",
+  "usedFor": [
+    "Aircraft structures courses: lift distribution, shear and bending-moment diagrams, a statically determinate braced beam, spar-cap stress and reserve factors",
+    "Pilot and engineer training: what the load factor does to the wing, why there is a limit load and an ultimate factor, gust loads at V_C",
+    "Reading an airframe drawing: semi-monocoque frames, longerons and stringers, spar sections, fittings in double shear"
+  ],
+  "domain": "Aeronautics",
+  "parts": 17,
+  "views": [
+    "Isometric cutaway of the structure, skin removed, NTS",
+    "Front view of the port wing with its lift and the front spar's stress 1:25",
+    "Diagram 1 shear along the span, with and without the strut",
+    "Diagram 2 bending moment along the span, with and without the strut",
+    "Section C-C the wing at the strut station, WS 3000 1:10",
+    "Detail D the front spar's section 1:2.5",
+    "Section E-E the cabin at FS 1590 1:20",
+    "Detail F the strut to wing fitting 1:2.5"
+  ],
+  "controls": "↑ ↓ load factor · Space tour · S slow motion",
+  "checkTimes": "0,2,4,6,9,11,12.5,14,16,18.6,19.3,20,22.5",
+  "shotT": 13,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": null, "look": null, "t": 13 },
+  "controls3d": "Drag to orbit · ↑ ↓ load factor · Space tour · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "2",
+  "level": 1,
+  "crumb": "Airframe"
+}

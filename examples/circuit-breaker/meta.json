@@ -36,5 +36,8 @@
     ],
     "t": 23.27
   },
-  "controls3d": "Drag to orbit · Drag the handle or ↑ ↓ on/off · ← → current · N O X normal, overload, short (or the 12 A, 40 A, SHORT buttons) · Space tour · E explode (case halves apart along z, mechanism lifted out) · C cut · 1–4 views · S slow motion"
+  "controls3d": "Drag to orbit · Drag the handle or ↑ ↓ on/off · ← → current · N O X normal, overload, short (or the 12 A, 40 A, SHORT buttons) · Space tour · E explode (case halves apart along z, mechanism lifted out) · C cut · 1–4 views · S slow motion",
+  "parent": "electrical",
+  "level": 2,
+  "parentPart": "25"
 }

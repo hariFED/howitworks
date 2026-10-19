@@ -1,0 +1,34 @@
+{
+  "slug": "propeller",
+  "dwg": "BP-104",
+  "title": "Propeller",
+  "object": "Fixed-pitch, two-blade, forged-aluminium propeller of a four-seat light aircraft, Ø1905 mm, with its spinner and its bolting to the crankshaft flange: the blade from ahead, four blade sections and the hub in section",
+  "idea": "A propeller is a rotating wing: each blade element meets a relative wind of forward speed and its own speed, and its lift, tipped forward, is the thrust",
+  "summary": "At every station the blade meets a relative wind made of the forward speed plus the inflow it draws (axial) and its own speed ωr (tangential): the velocity triangle. The angle of attack is the blade angle less the helix angle, α = β − φ. Standing still at full throttle the triangles are flat, α is large and the root is stalled; climbing at 74 kt α is moderate; cruising at 110 kt it is small and the propeller is 85 % efficient; gliding with the throttle closed φ passes β − α₀ and the blades push back on the air: the propeller windmills. Thrust, power and efficiency against advance ratio J = V/nD come from blade-element momentum theory with a thin-aerofoil lift slope and a stall cap.",
+  "usedFor": [
+    "Pilot training: why a fixed-pitch propeller's rpm rises with airspeed, why static rpm is a health check, what windmilling is",
+    "Aeronautical courses: blade-element momentum theory, velocity triangles, advance ratio, C_T, C_P and propeller efficiency",
+    "Maintenance: how a propeller is bolted to the flange (drive bushings carry the torque, bolts clamp, wired in pairs) and how the spinner is held"
+  ],
+  "domain": "Aeronautics",
+  "parts": 15,
+  "views": [
+    "View from ahead 1:5, blade projected, stations B to E",
+    "Section A-A through the hub on both blades' pitch axes 1:2.5",
+    "Sections B-B, C-C, D-D, E-E at 30, 50, 75 and 90 % radius 1:2.5, with live velocity triangles",
+    "Blade data table",
+    "Diagram 1 C_T, C_P and efficiency against advance ratio",
+    "Diagram 2 blade angle and helix angle along the blade",
+    "Diagram 3 shaft speed and thrust over the tour"
+  ],
+  "controls": "↑ ↓ airspeed · ← → throttle · drag the sections · Space tour · S slow motion",
+  "checkTimes": "0,1.5,2.5,4.6,6.5,8,10,12,13.5,14.5,16,17,19.5,20.3,21,22.5,24,24.8,25.5,25.9",
+  "shotT": 4.6,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": null, "look": null, "t": 17 },
+  "controls3d": "Drag to orbit · drag a blade or ↑ ↓ for airspeed · ← → throttle · T stop or turn · Space tour · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "6",
+  "level": 1,
+  "crumb": "Propeller"
+}

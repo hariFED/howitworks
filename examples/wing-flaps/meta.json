@@ -1,0 +1,42 @@
+{
+  "slug": "wing-flaps",
+  "dwg": "BP-107",
+  "title": "Wing flaps",
+  "object": "Electrically driven single-slotted flaps of a four-seat high-wing light aircraft: the wing cut through the inboard flap track, the 28 V jackscrew actuator in section, the bellcranks, push-pull rods and crossed cables in plan, and the cockpit selector with its follow-up switches",
+  "idea": "A curved track turns one push into two motions: first the flap slides aft and the wing grows, then it turns down and opens a slot that keeps the air on the flap",
+  "summary": "Each flap rides on two rollers in one curved slot. While both rollers are on the slot's straight part the flap only slides aft (Fowler motion: the chord grows up to 5 %); when the slot curves, the aft roller drops ahead of the forward one and the flap turns down, opening a gap of 2 % of the chord between its nose and the shroud. Air from under the wing jets through that gap over the flap, starting a fresh boundary layer that stays attached at 30°, so the lift curve moves up (C_L,max 1.46 to 1.78) and the wing stalls at a lower angle and a lower speed (53 to 48 kt). A 28 V motor turns a self-locking Tr16×4 jackscrew through 25:1 spur gears; the nut swings a bellcrank whose rod drives the starboard flap and whose crossed cables drive the port bellcrank. A follow-up cable turns the selector's switch carrier, so the motor stops when the flaps reach the selected angle; limit switches stop it at 0° and 30°; full travel takes 9 s.",
+  "usedFor": [
+    "Pilot training: what each flap setting does to lift, drag, attitude and stall speed, why the flaps take 9 seconds, why there is a flap limit speed",
+    "Aeronautical courses: Fowler and slotted flaps, the slot effect on the boundary layer, C_L against α, the stall speed from C_L,max",
+    "Machine design: a two-roller track as a cam, a self-locking jackscrew, a mechanical follow-up servo and limit switches, a crossed-cable interconnect"
+  ],
+  "domain": "Aeronautics",
+  "parts": 26,
+  "views": [
+    "Section A-A on the starboard wing at the inboard track, looking inboard 1:5",
+    "Section B-B between the tracks, WS 860: the slot 1:2.5",
+    "Actuator axial section on the screw, idler and motor axes 1:2.5",
+    "Plan of the drive, upper skin removed 1:10",
+    "View D the flap selector, cover off 1:2.5",
+    "Diagram 1 C_L against α by flap",
+    "Diagram 2 stall speed by flap",
+    "Diagram 3 flap angle, slot gap and chord gain against the nut's travel",
+    "Diagram 4 the circuit"
+  ],
+  "controls": "↑ ↓ or drag the knob: selector · 0–3 stops · ← → airspeed · Space tour · S slow motion",
+  "checkTimes": "0,0.6,1.4,2.6,4,5.4,6.6,8,9,10.4,12,13,14.5,16.5,18.5,20,22,24,25.5,26.8",
+  "shotT": 12.6,
+  "has3d": true,
+  "shot3d": {
+    "view": "iso",
+    "cut": 1,
+    "zoom": null,
+    "look": null,
+    "t": 12.6
+  },
+  "controls3d": "Drag to orbit · ↑ ↓ or the 0–30° buttons: selector · drag the flap · ← → airspeed · Space tour · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "14",
+  "level": 1,
+  "crumb": "Flaps"
+}

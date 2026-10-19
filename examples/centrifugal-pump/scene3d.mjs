@@ -59,9 +59,11 @@ const a128 = Math.atan2(Math.sqrt(128 ** 2 - 26 ** 2), 26) / rad;
 const aPed = -Math.acos(44 / 128) / rad;
 export const REAR = [[-26, NOZ], ...top, ...arcPts(128, T0 - 3, aPed, 3), [44, -122], [-44, -122], ...arcPts(128, 180 - aPed, 180 - a128, 3)];
 
-// live3d.js turns every lathe with half the kit's segments (LATHE_N = 72 above r 20), to keep the
-// triangle budget; a prism's circle that meets a lathe face to face uses the same count
+// every lathe (solids and water) is turned with half the kit's segments (LATHE_N = 72 above r 20, 48
+// above r 6, else 24: the kit's `segments`), to keep the triangle budget; some 50 turned solids would
+// otherwise draw about twice it. A prism's circle that meets a lathe face to face uses the same count.
 export const LATHE_N = 72;
+const halfSeg = (s) => (s.kind !== "lathe" || s.segments != null ? s : { ...s, segments: ((r) => (r > 20 ? LATHE_N : r > 6 ? 48 : 24))(Math.max(...s.loop.map(([r]) => r))) });
 
 // the casing bolts on Ø228, none at the top where the nozzle is (A-A cuts the one at 270°)
 export const BOLT_R = -P.BOLT_V;
@@ -307,7 +309,7 @@ export function parts() {
       explode: ex(22), anchor: { cut: [289, 11.5, 0], out: { c: [289, 15, 0] } },
     }),
   );
-  return out;
+  return out.map((p) => ({ ...p, solids: p.solids.map(halfSeg) }));
 }
 
 // ---------------------------------------------------------------- the water, by pressure zone (as the sheet)
@@ -333,7 +335,7 @@ export function fluids() {
     S.fluid("d-up", S.extrude(up, { along: "x", from: -13.97, to: 10.97 })),
     S.fluid("d-low", S.extrude(low, { along: "x", from: -13.97, to: 10.97 })),
     S.fluid("d-flange", S.lathe([[0, NOZ], [15.97, NOZ], [15.97, 162], [0, 162]], { axis: "y", at: [0, 0] })),
-  ];
+  ].map(halfSeg);
 }
 
 // the shaft's axis and the discharge nozzle's

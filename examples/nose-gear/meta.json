@@ -1,0 +1,34 @@
+{
+  "slug": "nose-gear",
+  "dwg": "BP-102",
+  "title": "Nose gear",
+  "object": "Steerable oleo-pneumatic nose landing gear of a four-seat high-wing light aircraft, in section on the aircraft's centre line, with its steering in plan and its wheel in front section",
+  "idea": "An air spring with an oil damper: a strut that carries the nose, soaks up the landing and steers",
+  "summary": "The nose wheel touches down at 0.9 m/s: the piston tube slides into the cylinder, squeezing the air charge (p·V^1.1) and forcing oil up through an orifice that a tapered metering pin closes down as the stroke deepens, so the force grows with the stroke and the speed squared. A snubber ring slows the rebound and the strut settles at 95 mm under 17 % of the aircraft's weight. The pedals steer the wheel through bungee springs against a shimmy damper; on lift-off the strut extends and the centering cams straighten the wheel.",
+  "usedFor": [
+    "Pilot and maintenance training: what the nose strut's 45 psi does, why it is serviced extended, what the cams and shimmy damper are for",
+    "Engineering courses: oleo-pneumatic struts, polytropic air springs, orifice damping, metering pins",
+    "A software-concept explainer: a fail-safe default (the cams centre the wheel whenever the strut is unloaded) and compliant coupling (bungees that give instead of fighting)"
+  ],
+  "domain": "Hydraulics",
+  "parts": 30,
+  "views": [
+    "Section A-A on the centre line 1:5",
+    "Detail C orifice and metering pin 1:1",
+    "View D centering cams developed 1:2",
+    "Section E-E steering 1:5",
+    "Section B-B wheel and axle 1:2.5",
+    "Diagram 1 strut force against stroke",
+    "Diagram 2 stroke and wheel angle over the tour"
+  ],
+  "controls": "Drag the wheel · ↑ ↓ stroke · ← → pedals · Space a landing · B a bump · S slow motion",
+  "checkTimes": "0,0.6,1.25,1.3,1.4,1.6,2.2,3.0,4.8,7.1,7.2,7.5,9.6,12.5,12.8,13.5,15.9",
+  "shotT": 4.8,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1, "look": null, "t": 9.6 },
+  "controls3d": "Drag to orbit · drag the wheel or ↑ ↓ to stroke · ← → pedals · Space a landing · B a bump · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "light-aircraft",
+  "parentPart": "16",
+  "level": 1,
+  "crumb": "Nose gear"
+}

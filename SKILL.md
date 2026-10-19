@@ -120,3 +120,4 @@ A sheet can have a companion 3D page: the same object as a live orthographic iso
 - `references/kit.md`: the kit API with the patterns the example uses.
 - `references/layout.md`: planning a sheet and making moving parts and annotations coexist.
 - `references/3d.md`: the 3D view: `kit/solid3d.mjs`, its rules, checks and a worked example.
+- `references/atlas.md`: a whole machine you zoom into: doorway parts (`"open"` in info.json), `parent`/`level` in meta.json, the fly-in and the breadcrumb.

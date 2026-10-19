@@ -36,5 +36,8 @@
     ],
     "t": 3.2
   },
-  "controls3d": "Drag to orbit · drag the lever or Space to squeeze · ↑ ↓ pull and release · E explode · C cut · 1–4 views · S slow motion"
+  "controls3d": "Drag to orbit · drag the lever or Space to squeeze · ↑ ↓ pull and release · E explode · C cut · 1–4 views · S slow motion",
+  "parent": "main-gear",
+  "parentPart": "19",
+  "level": 2
 }

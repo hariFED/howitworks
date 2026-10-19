@@ -287,3 +287,20 @@ body.bp-zoom .bp-bar {
 /* ---- the sheet's link to its 3D view */
 .bp-3d { font: inherit; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 4px 10px; letter-spacing: .03em; white-space: nowrap; }
 .bp-3d:hover, .bp-3d:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }
+
+/* ---- atlas (references/atlas.md): doorways, breadcrumb */
+.bp-card-i { font-family: var(--bp-font); font-style: italic; color: var(--bp-muted); }
+.bp-card-go { display: inline-block; margin-top: 8px; color: var(--bp-paper); background: var(--bp-ink); text-decoration: none; border-radius: 3px; padding: 3px 9px; font-size: 11px; letter-spacing: .03em; }
+.bp-card-go:hover, .bp-card-go:focus-visible { background: var(--bp-accent); color: #fff; outline: none; }
+.bp-card-wip { margin-top: 7px; color: var(--bp-muted); font-size: 10.5px; letter-spacing: .03em; }
+.bp-crumbs { display: flex; flex-wrap: wrap; gap: 4px 7px; align-items: center; letter-spacing: .04em; }
+.bp-crumbs a { color: var(--bp-ink); text-decoration: none; border-bottom: 1px solid var(--bp-ui); }
+.bp-crumbs a:hover, .bp-crumbs a:focus-visible { color: var(--bp-accent); border-color: currentColor; outline: none; }
+.bp-crumbs i { font-style: normal; color: var(--bp-muted); }
+.bp-crumbs [aria-current] { color: var(--bp-ink); }
+.bp-doors { position: fixed; left: 0; top: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); z-index: 40; }
+.bp-doors:focus-within { width: auto; height: auto; clip-path: none; left: 22px; top: 54px; display: flex; flex-direction: column; gap: 3px; padding: 6px; background: var(--bp-paper); border: 1px solid var(--bp-ink); border-radius: 3px; }
+.bp-doors button { font: 11px/1.3 var(--bp-font); text-align: left; color: var(--bp-ink); background: transparent; border: 1px solid var(--bp-ui); border-radius: 3px; padding: 3px 8px; cursor: pointer; }
+.bp-doors button:focus-visible { outline: none; border-color: var(--bp-accent); color: var(--bp-accent); }
+.bp-doors button[aria-disabled="true"] { color: var(--bp-muted); }
+.bp-flying { pointer-events: none; }

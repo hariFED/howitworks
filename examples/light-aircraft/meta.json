@@ -1,0 +1,31 @@
+{
+  "slug": "light-aircraft",
+  "dwg": "BP-022",
+  "title": "Light aircraft",
+  "object": "Four-seat, high-wing, single-engine light aircraft in general arrangement, forward fuselage in section",
+  "idea": "How an aeroplane holds itself up: lift must equal weight, and the wing stalls when it cannot",
+  "summary": "Lift is ½ρV²S·C_L and in steady flight it must equal n·W. Slow down and the wing needs more C_L, so the elevator raises the angle of attack until C_L,max, taken from the class's published stall speeds, runs out: the stall. Flaps raise C_L,max and lower the stall speed; a 60° bank doubles the lift needed and raises it by √2.",
+  "usedFor": [
+    "Flight training and physics teaching: the lift equation, angle of attack, stall speed, flaps and load factor in a turn",
+    "An atlas entry point: every system of the aeroplane opens its own drawing",
+    "Reading a general-arrangement drawing: stations, datum, CG range, third-angle projection"
+  ],
+  "domain": "Aeronautics",
+  "parts": 21,
+  "views": [
+    "Side elevation 1:50, forward fuselage in section on the centreline",
+    "Plan 1:50, port wing skin broken away over the tank",
+    "Front view 1:50",
+    "Section A-A wing at WS 1500 1:10",
+    "Airspeed indicator 1:1",
+    "Diagram 1 lift against airspeed by flap"
+  ],
+  "controls": "↑ ↓ airspeed · F flaps · ← → bank · drag the diagram · Space tour · S slow motion",
+  "checkTimes": "0,1,3,5,7,8.5,10,11.5,13,14.5,15.5,16.5,17.5,19,20.5,22,24.2,24.6,25,27,29.8,30.2,31,33,33.9",
+  "shotT": 13,
+  "has3d": true,
+  "shot3d": { "view": "iso", "cut": 1, "zoom": 1.4, "look": null, "t": 13 },
+  "controls3d": "Drag to orbit · drag the elevator for airspeed · drag a flap down · ↑ ↓ airspeed · ← → bank · F flaps · Space tour · E explode · C cut · 1–4 views · S slow motion",
+  "atlas": true,
+  "level": 0
+}
