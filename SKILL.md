@@ -97,6 +97,7 @@ Copy the example folder, rename it, and replace `model.mjs`, `parts.mjs`, `build
 Words in the request that change the output:
 
 - `paper` or `dark`: make that the sheet's default theme (`writePage(..., { theme: "paper" })`). The reader can still switch.
+- `atlas`: a whole machine as linked levels (the object cut open, each system a doorway to its own sheet); read `references/atlas.md`, fix the slugs first and propose the level-0 sheet before starting.
 - `set`: a Set, several sheets of one machine; propose the first sheet before starting.
 - `still`: no live layer. Draw the sheet at its most telling moment, with no tour, drag or keys; the model still sets every number.
 - `3d`: add the 3D view after the sheet passes its check (below).

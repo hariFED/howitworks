@@ -1,6 +1,6 @@
 {
   "name": "howitworks",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An interactive engineering-drawing skill for Claude Code that explains mechanisms and software concepts through physical cutaways and live simulations.",
   "keywords": [
     "howitworks",

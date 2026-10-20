@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://harifed.github.io/howitworks/"><b>Website</b></a> ·
-  <a href="https://harifed.github.io/howitworks/collection.html">All 21 sheets, live</a> ·
+  <a href="https://harifed.github.io/howitworks/collection.html">All 34 sheets, live</a> ·
   <a href="#install">Install</a> ·
   <a href="#the-kit">The kit</a>
 </p>
@@ -72,6 +72,38 @@ So Claude first chooses the **real object whose working _is_ the idea**, then th
 | Load balancing | a car's differential | one input split between two outputs |
 | Back-pressure | a safety relief valve | it opens, sheds, and reseats |
 
+## Inside a machine: the atlas
+
+One sheet holds 15 to 30 parts. A whole machine has hundreds. So a big machine becomes an **atlas**: the whole object cut open, every system in it a doorway. Click the engine, choose *Look inside*, and the camera flies in and hands over to the engine's own sheet; click its cylinder and you're inside a four-stroke. A breadcrumb leads back out.
+
+<p align="center">
+  <a href="https://harifed.github.io/howitworks/3d/light-aircraft.html"><img src="https://raw.githubusercontent.com/hariFED/howitworks/main/docs/thumbs/light-aircraft-3d.png" width="720" alt="A four-seat light aircraft in 3D cutaway, every system a doorway to its own drawing"></a><br>
+  <a href="https://harifed.github.io/howitworks/3d/light-aircraft.html"><b>Fly into the light aircraft →</b></a>
+</p>
+
+The first atlas is a four-seat, high-wing light aircraft, made for students: 13 linked sheets, each with its own 3D view and live physics, all reading one shared model so the numbers agree from level to level.
+
+| System | What you learn |
+|---|---|
+| [Aero engine](https://harifed.github.io/howitworks/3d/aero-engine.html) | a flat-four, dual ignition; opens the [four-stroke cylinder](https://harifed.github.io/howitworks/3d/four-stroke.html), [carburettor](https://harifed.github.io/howitworks/3d/carburettor.html) and [oil pump](https://harifed.github.io/howitworks/3d/gear-pump.html) |
+| [Propeller](https://harifed.github.io/howitworks/3d/propeller.html) | a rotating wing: blade twist, thrust and the fixed-pitch compromise |
+| [Fuel system](https://harifed.github.io/howitworks/3d/fuel-system.html) | gravity feed, the selector, water in the strainer, why a blocked vent starves the engine |
+| [Flight controls](https://harifed.github.io/howitworks/3d/flight-controls.html) | cables, pulleys, bellcranks, aileron differential; opens the [trim tab](https://harifed.github.io/howitworks/3d/trim-tab.html) |
+| [Wing flaps](https://harifed.github.io/howitworks/3d/wing-flaps.html) | a flap that slides aft, then turns down and opens a slot; stall speed against flap |
+| [Main gear](https://harifed.github.io/howitworks/3d/main-gear.html) · [Nose gear](https://harifed.github.io/howitworks/3d/nose-gear.html) | a spring-steel leg, an oleo strut, steering; open the [disc brake](https://harifed.github.io/howitworks/3d/disc-brake.html) and [damper](https://harifed.github.io/howitworks/3d/shock-absorber.html) |
+| [Pitot-static](https://harifed.github.io/howitworks/3d/pitot-static.html) | airspeed, altimeter and climb from two pressures; what a blocked pitot or static port does |
+| [Gyro instruments](https://harifed.github.io/howitworks/3d/gyro-instruments.html) | rigidity and precession; the horizon toppling when the vacuum pump fails |
+| [Electrical](https://harifed.github.io/howitworks/3d/electrical.html) | alternator, battery, bus and breakers; an alternator failure and load shedding |
+| [Airframe](https://harifed.github.io/howitworks/3d/airframe.html) | lift along the span, why the strut cuts the spar's bending moment to a fifth, the 3.8 g limit |
+
+Ask for one with a whole machine and the word `atlas`:
+
+```
+/howitworks an atlas of a light aircraft
+```
+
+The doorways are two small fields in each example's JSON; [references/atlas.md](references/atlas.md) shows how.
+
 ## Examples
 
 Every one was drafted by Claude with this skill, passes the layout check at a dozen moments of its tour, and runs live. Click a picture for the 3D view, or the name for the full sheet.
@@ -99,7 +131,7 @@ Every one was drafted by Claude with this skill, passes the layout check at a do
   </tr>
 </table>
 
-<p align="center"><a href="https://harifed.github.io/howitworks/collection.html"><b>See all 21 sheets →</b></a></p>
+<p align="center"><a href="https://harifed.github.io/howitworks/collection.html"><b>See all 34 sheets →</b></a></p>
 
 ## Install
 
@@ -136,6 +168,7 @@ Needs Node.js 20 or later, and Chrome, Chromium or Edge for the checks. Restart 
 | `3d` | a companion 3D page: turn it, cut it, explode it, drive it |
 | `paper`, `white`, `dark` | that theme as the default (every sheet has blueprint, paper, white and dark) |
 | `set` | several sheets of one machine, one sub-assembly per sheet |
+| `atlas` | a whole machine you zoom into: the object cut open, each system a doorway to its own sheet |
 | `still` | the drawing without the live layer |
 
 ## What every sheet has
@@ -182,4 +215,4 @@ npm run check3d   # render and self-test every 3D view
 npm run site      # build the website into docs/
 ```
 
-`SKILL.md` is what Claude reads: the one idea, the 11-step workflow and the rules. The details live in `references/` (drafting conventions, the kit API, sheet planning, the 3D guide) and the 21 worked examples in `examples/`.
+`SKILL.md` is what Claude reads: the one idea, the 11-step workflow and the rules. The details live in `references/` (drafting conventions, the kit API, sheet planning, the 3D guide) and the 34 worked examples in `examples/`.
